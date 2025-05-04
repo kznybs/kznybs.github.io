@@ -3,30 +3,56 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Gabriel | Portfólio</title>
+  <title>Gabriel | Desenvolvedor</title>
   <link rel="stylesheet" href="style.css"/>
 </head>
 <body>
   <header>
-    <h1>Gabriel</h1>
-    <p>Estudante de Ciência da Computação</p>
+    <nav>
+      <h1>Gabriel</h1>
+      <ul>
+        <li><a href="#inicio">Início</a></li>
+        <li><a href="#sobre">Sobre</a></li>
+        <li><a href="#projetos">Projetos</a></li>
+        <li><a href="#contato">Contato</a></li>
+      </ul>
+    </nav>
   </header>
 
-  <section>
-    <h2>Sobre mim</h2>
-    <p>Sou apaixonado por tecnologia, inovação e soluções eficientes. Atualmente estudo Ciência da Computação na UNEMAT e participo de projetos voltados à realidade virtual aplicada ao campo.</p>
+  <section id="inicio" class="hero">
+    <h2>Bem-vindo!</h2>
+    <p>Sou Gabriel, estudante de Ciência da Computação e apaixonado por inovação.</p>
   </section>
 
-  <section>
+  <section id="sobre">
+    <h2>Sobre mim</h2>
+    <p>Tenho experiência com VR, desenvolvimento web e projetos acadêmicos. Estudo na UNEMAT e estou sempre explorando novas tecnologias.</p>
+  </section>
+
+  <section id="projetos">
     <h2>Projetos</h2>
-    <ul>
-      <li><strong>Dashboard de Faturas</strong> – PHP, MySQL, JS</li>
-      <li><strong>Capacitação VR em Máquinas Agrícolas</strong> – Realidade Virtual</li>
-    </ul>
+    <div class="cards">
+      <div class="card">
+        <h3>Dashboard de Faturas</h3>
+        <p>Sistema completo com PHP, JS e MySQL.</p>
+      </div>
+      <div class="card">
+        <h3>Capacitação em VR</h3>
+        <p>Projeto de treinamento com realidade virtual para o campo.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="contato">
+    <h2>Contato</h2>
+    <p>Email: gabriel@email.com</p>
+    <p>GitHub: <a href="https://github.com/SEUUSUARIO" target="_blank">github.com/SEUUSUARIO</a></p>
   </section>
 
   <footer>
     <p>© 2025 Gabriel</p>
   </footer>
+
+  <script src="script.js"></script>
 </body>
 </html>
