@@ -1,36 +1,103 @@
 <!DOCTYPE html>
-<html lang="pt-br">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Kznybs Floresta</title>
-  <style>
-    body {
-      margin: 0;
-      height: 100vh;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      background-image: url('https://images.unsplash.com/photo-1508780709619-79562169bc64');
-      background-size: cover;
-      background-position: center;
-      font-family: Arial, sans-serif;
-    }
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AgroTech | Inovação no Campo</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ['Lexend', 'sans-serif']
+            },
+            colors: {
+              primary: '#1b5e20',
+              accent: '#c8e6c9'
+            }
+          }
+        }
+      };
+    </script>
+  </head>
+  <body class="bg-[#0a0a0a] font-sans">
+    <header class="relative min-h-screen bg-cover bg-center flex items-center justify-center text-white" style="background-image: url('https://images.unsplash.com/photo-1560807707-8cc77767d783');">
+      <div class="bg-black/60 absolute inset-0"></div>
+      <div class="relative z-10 text-center max-w-3xl px-4">
+        <h1 class="text-5xl md:text-6xl font-bold leading-tight">
+          AgroTech
+        </h1>
+        <p class="mt-6 text-xl md:text-2xl text-gray-200">
+          Transformando o campo com capacitação e tecnologia de ponta
+        </p>
+        <a
+          href="#sobre"
+          class="mt-8 inline-block bg-primary text-white py-3 px-8 rounded-full text-lg hover:bg-green-700 transition"
+        >Saiba Mais</a>
+      </div>
+    </header>
 
-    .center-text {
-      font-size: 5rem;
-      color: white;
-      text-shadow: 2px 2px 4px rgba(0,0,0,0.4);
-      transition: text-shadow 0.3s ease;
-      cursor: default;
-    }
+    <section id="sobre" class="bg-white text-gray-800 py-20 px-6 md:px-16">
+      <div class="max-w-6xl mx-auto grid md:grid-cols-2 gap-12 items-center">
+        <div>
+          <h2 class="text-4xl font-bold mb-6 text-primary">Sobre a AgroTech</h2>
+          <p class="text-lg leading-relaxed">
+            A AgroTech é uma startup que une tecnologia e campo, oferecendo soluções de treinamento para operadores de máquinas agrícolas, com foco em produtividade, segurança e inovação.
+          </p>
+        </div>
+        <div>
+          <img src="https://images.unsplash.com/photo-1600180758890-bf3e8a39ba56" alt="Máquina Agrícola" class="rounded-2xl shadow-xl" />
+        </div>
+      </div>
+    </section>
 
-    .center-text:hover {
-      text-shadow: 4px 4px 12px rgba(0,0,0,0.8);
-    }
-  </style>
-</head>
-<body>
-  <div class="center-text">kznybs</div>
-</body>
+    <section class="bg-gray-50 py-20 px-6 md:px-16">
+      <div class="max-w-6xl mx-auto text-center">
+        <h2 class="text-4xl font-bold text-primary mb-12">Soluções</h2>
+        <div class="grid md:grid-cols-3 gap-8">
+          <div class="bg-white p-8 rounded-2xl shadow-md hover:shadow-xl transition">
+            <h3 class="text-xl font-semibold text-primary mb-4">Treinamento VR</h3>
+            <p>
+              Simulações imersivas em realidade virtual para operar máquinas agrícolas com segurança e realismo.
+            </p>
+          </div>
+          <div class="bg-white p-8 rounded-2xl shadow-md hover:shadow-xl transition">
+            <h3 class="text-xl font-semibold text-primary mb-4">Plataforma Online</h3>
+            <p>
+              Cursos modulares, certificados e interativos para operadores, disponível 24/7.
+            </p>
+          </div>
+          <div class="bg-white p-8 rounded-2xl shadow-md hover:shadow-xl transition">
+            <h3 class="text-xl font-semibold text-primary mb-4">Dashboard Inteligente</h3>
+            <p>
+              Acompanhamento em tempo real da evolução dos treinamentos com relatórios detalhados.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="bg-primary text-white py-20 px-6 md:px-16">
+      <div class="max-w-4xl mx-auto text-center">
+        <h2 class="text-3xl md:text-4xl font-bold mb-6">Pronto para levar sua equipe ao próximo nível?</h2>
+        <p class="mb-8 text-lg">
+          Fale com nosso time de especialistas e descubra como a AgroTech pode revolucionar o seu campo.
+        </p>
+        <a href="mailto:contato@agrotech.com" class="bg-white text-primary font-semibold py-3 px-8 rounded-full text-lg hover:bg-gray-200 transition">
+          contato@agrotech.com
+        </a>
+      </div>
+    </section>
+
+    <footer class="bg-black text-gray-400 text-sm py-6 text-center">
+      &copy; 2025 AgroTech. Todos os direitos reservados.
+    </footer>
+  </body>
 </html>
