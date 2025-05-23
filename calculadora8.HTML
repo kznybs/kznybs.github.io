@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<title>Calculadora de Carga ARM - Avançada</title>
+<style>
+  body {font-family: Arial; background: #b3a809; padding: 30px;}
+  .container {background: white; padding: 20px; border-radius: 10px; max-width: 1200px; margin: auto;}
+  h1 {text-align: center;}
+  label {font-weight: bold;}
+  .top-row {display: flex; flex-wrap: wrap; gap: 20px; margin-bottom: 20px;}
+  .top-row div {flex: 1; min-width: 180px;}
+  input, select {width: 100%; padding: 8px; border: 1px solid #000; border-radius: 5px;}
+  table {width: 100%; border-collapse: collapse; margin-top: 20px;}
+  th, td {border: 1px solid #ccc; padding: 8px; text-align: center;}
+  th {background: #ecf0f1;}
+  button {padding: 8px 15px; border: none; border-radius: 5px; background: #2980b9; color: white; cursor: pointer;}
+  button:hover {background: #2471a3;}
+  .remove-btn {background: #e74c3c;}
+  .remove-btn:hover {background: #c0392b;}
+  .result {margin-top: 20px; background: #f4f4f4; padding: 15px; border-left: 5px solid green; white-space: pre-wrap; border-radius: 5px;}
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>Calculadora de Carga ARM</h1>
+
+  <div class="top-row">
+    <div><label>Tipo de Carreta:</label><input type="text" id="tipoCarreta"></div>
+    <div><label>Código do Produto:</label>
+      <select id="codigoProduto">
+        <option value="143352">143352</option>
+        <option value="221045">221045</option>
+        <option value="987001">987001</option>
+      </select>
+    </div>
+    <div><label>Nome do Produto:</label><input type="text" id="nomeProduto" readonly></div>
+    <div><label>UN:</label>
+      <select id="unidade">
+        <option value="FD">FD</option>
+        <option value="PALLET">PALLET</option>
+      </select>
+    </div>
+    <div><label>Quantidade Total:</label><input type="number" id="qtdeCarga"></div>
+    <div><label>Altura Mínima:</label><input type="number" id="alturaMin" value="5"></div>
+    <div><label>Altura Máxima:</label><input type="number" id="alturaMax" value="10"></div>
+  </div>
+
+  <table id="blocosTable">
+    <thead>
+      <tr><th>Bloco</th><th>Altura (opcional)</th><th>Ajuste Sobra (opcional)</th><th>Ações</th></tr>
+    </thead>
+    <tbody id="blocosBody"></tbody>
+  </table>
+
+  <button onclick="addBloco()">Adicionar Bloco</button>
+  <button onclick="calcular()">Calcular</button>
+  <div class="result" id="resultado"></div>
+</div>
+
+<script>
+const produtoMap = {"143352": "Açúcar Cristal 30x1 30kg", "221045": "Farinha de Trigo 25kg", "987001": "Arroz Branco 5kg"};
+document.getElementById('codigoProduto').addEventListener('change', function() {
+  document.getElementById('nomeProduto').value = produtoMap[this.value] || '';
+});
+
+function addBloco() {
+  const table = document.getElementById('blocosBody');
+  const row = table.insertRow();
+  row.innerHTML = `<td><input type="number" class="bloco"></td>
+                    <td><input type="number" class="altura"></td>
+                    <td><input type="number" class="ajuste"></td>
+                    <td><button class="remove-btn" onclick="removeRow(this)">Remover</button></td>`;
+}
+
+function removeRow(btn) {btn.parentNode.parentNode.remove();}
+
+function calcular() {
+  const qtdeTotal = parseFloat(document.getElementById("qtdeCarga").value);
+  const alturaMin = parseInt(document.getElementById("alturaMin").value) || 5;
+  const alturaMax = parseInt(document.getElementById("alturaMax").value) || 10;
+
+  if (!qtdeTotal || qtdeTotal <= 0) {alert("Informe uma quantidade válida."); return;}
+
+  const tipoCarreta = document.getElementById("tipoCarreta").value || "(não informado)";
+  const codigoProduto = document.getElementById("codigoProduto").value;
+  const nomeProduto = produtoMap[codigoProduto] || "(não informado)";
+  const unidade = document.getElementById("unidade").value;
+
+  const blocos = document.getElementsByClassName('bloco');
+  const alturas = document.getElementsByClassName('altura');
+  const ajustes = document.getElementsByClassName('ajuste');
+
+  let blocosData = [];
+
+  for (let i = 0; i < blocos.length; i++) {
+    const qtd = parseInt(blocos[i].value);
+    const altura = alturas[i].value ? parseInt(alturas[i].value) : null;
+    const ajuste = ajustes[i].value !== "" ? parseInt(ajustes[i].value) : null;
+    if (!qtd || qtd <= 0) {alert("Preencha corretamente os blocos."); return;}
+    blocosData.push({qtd, altura, ajuste, index: i});
+  }
+
+  let resultado = `📦 Informações do Carregamento:\nCarreta: ${tipoCarreta}\nProduto: ${nomeProduto}\nCódigo: ${codigoProduto}\nQuantidade: ${qtdeTotal} ${unidade}\n\n🔁 Alternativas de Carregamento:\n`;
+
+  for (let h = alturaMin; h <= alturaMax; h++) {
+    let totalBase = 0;
+    let variaveis = [], fixos = [];
+
+    blocosData.forEach(b => {
+      if (b.altura !== null || b.ajuste !== null) {
+        const total = b.qtd * (b.altura ?? h) + (b.ajuste ?? 0);
+        fixos.push({ ...b, total, alturaUsada: b.altura ?? h, ajusteUsado: b.ajuste ?? 0 });
+        totalBase += total;
+      } else {
+        variaveis.push(b);
+      }
+    });
+
+    const totalVariavelBase = variaveis.reduce((s, b) => s + b.qtd * h, 0);
+    totalBase += totalVariavelBase;
+    let sobra = qtdeTotal - totalBase;
+
+    let ajustePorBloco = variaveis.length > 0 ? Math.floor(sobra / variaveis.length) : 0;
+    let resto = sobra - ajustePorBloco * variaveis.length;
+
+    resultado += `\n🧠 Opção com altura ${h}:\n`;
+    variaveis.forEach((b, idx) => {
+      const ajusteExtra = resto !== 0 ? (resto > 0 ? 1 : -1) : 0;
+      resto -= ajusteExtra;
+      const ajusteTotal = ajustePorBloco + ajusteExtra;
+      const total = b.qtd * h + ajusteTotal;
+      resultado += `🔹 ${b.qtd}x${h}${ajusteTotal !== 0 ? (ajusteTotal > 0 ? "+"+ajusteTotal : ajusteTotal) : ""} = ${total} ${unidade}\n`;
+    });
+
+    fixos.forEach(b => {
+      resultado += `🔹 ${b.qtd}x${b.alturaUsada}${b.ajusteUsado !== 0 ? (b.ajusteUsado > 0 ? "+"+b.ajusteUsado : b.ajusteUsado) : ""} = ${b.total} ${unidade}\n`;
+    });
+
+    const totalFinal = qtdeTotal - (resto);
+    resultado += `✅ Total Final: ${totalFinal} ${unidade}\n`;
+  }
+
+  document.getElementById("resultado").innerText = resultado;
+}
+</script>
+</body>
+</html>
