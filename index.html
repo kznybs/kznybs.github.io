@@ -109,15 +109,14 @@
 <div class="container">
   <h1>Calculadora de Carga por Bloco</h1>
 
-  <label>Total da Carga (kg):</label>
-  <input type="number" id="totalCarga" placeholder="Digite a carga total em kg">
+  <label>Total da Carga (FD):</label>
+  <input type="number" id="totalCarga" placeholder="Digite a carga total em FD">
 
   <table id="blocosTable">
     <thead>
       <tr>
         <th>Bloco</th>
-        <th>Altura</th>
-        <th>Ajuste (+ ou -)</th>
+        <th>Altura (opcional)</th>
         <th>Ações</th>
       </tr>
     </thead>
@@ -134,11 +133,9 @@
   function addBloco() {
     const table = document.getElementById('blocosBody');
     const row = table.insertRow();
-
     row.innerHTML = `
-      <td><input type="number" class="bloco" placeholder="Ex: 49"></td>
-      <td><input type="number" class="altura" placeholder="Altura"></td>
-      <td><input type="number" class="positivo" placeholder="+2 ou -1"></td>
+      <td><input type="number" class="bloco" placeholder="Qtd Blocos"></td>
+      <td><input type="number" class="altura" placeholder="Altura (opcional)"></td>
       <td><button class="remove-btn" onclick="removeRow(this)">Remover</button></td>
     `;
   }
@@ -157,45 +154,66 @@
 
     const blocos = document.getElementsByClassName('bloco');
     const alturas = document.getElementsByClassName('altura');
-    const positivos = document.getElementsByClassName('positivo');
 
-    let somaTotal = 0;
-    let somaBlocos = 0;
-    let blocosUtilizados = new Set();
-    let resultadoHTML = `🔎 Resultado Detalhado:\n\n`;
+    let blocosInfo = [];
+    let cargaManual = 0;
+    let blocosAutoTotal = 0;
+    let blocosAutoGrupos = [];
 
     for (let i = 0; i < blocos.length; i++) {
-      const bloco = parseFloat(blocos[i].value);
-      const altura = parseFloat(alturas[i].value);
-      const positivo = positivos[i].value ? parseFloat(positivos[i].value) : 0;
+      const qtd = parseInt(blocos[i].value);
+      const alt = alturas[i].value ? parseInt(alturas[i].value) : null;
 
-      if (isNaN(bloco) || isNaN(altura)) {
-        alert("Preencha corretamente todos os campos de bloco e altura.");
+      if (isNaN(qtd) || qtd <= 0) {
+        alert("Preencha todos os blocos corretamente com valores positivos.");
         return;
       }
 
-      const peso = (bloco * altura) + positivo;
-      somaTotal += peso;
-      somaBlocos += bloco;
-      blocosUtilizados.add(bloco);
+      blocosInfo.push({ qtd, altura: alt });
 
-      const ajusteStr = positivo > 0 ? `+ ${positivo}` : positivo < 0 ? `- ${Math.abs(positivo)}` : '';
-      resultadoHTML += `🔹 Bloco ${bloco} x Altura ${altura} ${ajusteStr} = ${peso.toFixed(2)}\n`;
+      if (alt !== null) {
+        cargaManual += qtd * alt;
+      } else {
+        blocosAutoTotal += qtd;
+        blocosAutoGrupos.push({ index: i, qtd, ajuste: 0 });
+      }
     }
 
-    const diferenca = (totalCarga - somaTotal).toFixed(2);
-    const mediaBloco = (totalCarga / somaBlocos).toFixed(2);
-    const balanceado = Math.abs(diferenca) < 0.01;
+    const cargaRestante = totalCarga - cargaManual;
+    const alturaAuto = blocosAutoTotal > 0 ? Math.floor(cargaRestante / blocosAutoTotal) : 0;
+    const cargaAutoBase = alturaAuto * blocosAutoTotal;
+    let sobra = totalCarga - (cargaManual + cargaAutoBase);
 
-    resultadoHTML += `\n📊 Etapas Matemáticas:\n`;
-    resultadoHTML += `🔸 Blocos utilizados: ${Array.from(blocosUtilizados).sort((a,b)=>a-b).join(', ')}\n`;
-    resultadoHTML += `🔸 Soma total dos blocos: ${somaBlocos}\n`;
-    resultadoHTML += `🔸 Média por bloco: ${mediaBloco} kg\n`;
-    resultadoHTML += `🔸 Total calculado: ${somaTotal.toFixed(2)} kg\n`;
-    resultadoHTML += `🔸 Diferença para a carga total: ${diferenca} kg\n`;
-    resultadoHTML += balanceado
-      ? `✅ Balanceamento: OK`
-      : `⚠️ Atenção: A carga precisa ser ajustada para balanceamento.`;
+    // Distribuir sobra (positiva ou negativa) 1 FD por grupo até zerar
+    let i = 0;
+    while (sobra !== 0 && blocosAutoGrupos.length > 0) {
+      const grupo = blocosAutoGrupos[i % blocosAutoGrupos.length];
+      grupo.ajuste += sobra > 0 ? 1 : -1;
+      sobra += sobra > 0 ? -1 : 1;
+      i++;
+    }
+
+    // Mostrar resultado
+    let resultadoHTML = `🔎 Resultado:\n`;
+    resultadoHTML += `Carga Total: ${totalCarga} FD\n`;
+    resultadoHTML += `Altura padrão (auto): ${alturaAuto}\n\n`;
+    resultadoHTML += `📋 Cálculo Final por Bloco:\n`;
+
+    let cargaFinal = 0;
+
+    for (let i = 0; i < blocosInfo.length; i++) {
+      const { qtd, altura } = blocosInfo[i];
+      const alturaFinal = altura !== null ? altura : alturaAuto;
+      const grupoAuto = blocosAutoGrupos.find(g => g.index === i);
+      const ajusteGrupo = grupoAuto ? grupoAuto.ajuste : 0;
+
+      const total = (qtd * alturaFinal) + ajusteGrupo;
+      cargaFinal += total;
+
+      resultadoHTML += `🔹 ${qtd}x${alturaFinal}${ajusteGrupo ? (ajusteGrupo > 0 ? "+" + ajusteGrupo : ajusteGrupo) : ""} = ${total} FD\n`;
+    }
+
+    resultadoHTML += `\n✅ Carga Final Distribuída: ${cargaFinal} FD`;
 
     document.getElementById("resultado").innerText = resultadoHTML;
   }
