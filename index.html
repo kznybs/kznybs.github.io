@@ -93,15 +93,6 @@
       line-height: 1.6;
       white-space: pre-wrap;
     }
-
-    @media (max-width: 600px) {
-      table, thead, tbody, th, td, tr {
-        display: block;
-      }
-      td {
-        margin-bottom: 10px;
-      }
-    }
   </style>
 </head>
 <body>
@@ -117,6 +108,7 @@
       <tr>
         <th>Bloco</th>
         <th>Altura (opcional)</th>
+        <th>Ajuste (opcional)</th>
         <th>Ações</th>
       </tr>
     </thead>
@@ -136,6 +128,7 @@
     row.innerHTML = `
       <td><input type="number" class="bloco" placeholder="Qtd Blocos"></td>
       <td><input type="number" class="altura" placeholder="Altura (opcional)"></td>
+      <td><input type="number" class="ajuste" placeholder="Ajuste (opcional)"></td>
       <td><button class="remove-btn" onclick="removeRow(this)">Remover</button></td>
     `;
   }
@@ -154,6 +147,7 @@
 
     const blocos = document.getElementsByClassName('bloco');
     const alturas = document.getElementsByClassName('altura');
+    const ajustes = document.getElementsByClassName('ajuste');
 
     let blocosInfo = [];
     let cargaManual = 0;
@@ -163,17 +157,21 @@
     for (let i = 0; i < blocos.length; i++) {
       const qtd = parseInt(blocos[i].value);
       const alt = alturas[i].value ? parseInt(alturas[i].value) : null;
+      const ajt = ajustes[i].value !== "" ? parseInt(ajustes[i].value) : null;
 
       if (isNaN(qtd) || qtd <= 0) {
         alert("Preencha todos os blocos corretamente com valores positivos.");
         return;
       }
 
-      blocosInfo.push({ qtd, altura: alt });
+      blocosInfo.push({ qtd, altura: alt, ajuste: ajt });
 
-      if (alt !== null) {
-        cargaManual += qtd * alt;
-      } else {
+      const alturaUsada = alt !== null ? alt : 0;
+      const ajusteUsado = ajt !== null ? ajt : 0;
+
+      cargaManual += (alt !== null ? qtd * alturaUsada : 0) + (ajt !== null ? ajusteUsado : 0);
+
+      if (alt === null && ajt === null) {
         blocosAutoTotal += qtd;
         blocosAutoGrupos.push({ index: i, qtd, ajuste: 0 });
       }
@@ -184,7 +182,6 @@
     const cargaAutoBase = alturaAuto * blocosAutoTotal;
     let sobra = totalCarga - (cargaManual + cargaAutoBase);
 
-    // Distribuir sobra (positiva ou negativa) 1 FD por grupo até zerar
     let i = 0;
     while (sobra !== 0 && blocosAutoGrupos.length > 0) {
       const grupo = blocosAutoGrupos[i % blocosAutoGrupos.length];
@@ -193,26 +190,29 @@
       i++;
     }
 
-    // Mostrar resultado
-    let resultadoHTML = `🔎 Resultado:\n`;
+    let resultadoHTML = `🔎 Resultado Detalhado:\n\n`;
     resultadoHTML += `Carga Total: ${totalCarga} FD\n`;
-    resultadoHTML += `Altura padrão (auto): ${alturaAuto}\n\n`;
-    resultadoHTML += `📋 Cálculo Final por Bloco:\n`;
+    resultadoHTML += `Altura padrão (auto): ${alturaAuto}\n`;
+    resultadoHTML += `Blocos com ajuste automático: ${blocosAutoGrupos.length}\n\n`;
 
     let cargaFinal = 0;
+    let resumoTabela = `📋 Fórmulas:\n`;
 
     for (let i = 0; i < blocosInfo.length; i++) {
-      const { qtd, altura } = blocosInfo[i];
+      const { qtd, altura, ajuste } = blocosInfo[i];
       const alturaFinal = altura !== null ? altura : alturaAuto;
       const grupoAuto = blocosAutoGrupos.find(g => g.index === i);
-      const ajusteGrupo = grupoAuto ? grupoAuto.ajuste : 0;
+      const ajusteFinal = ajuste !== null ? ajuste : (grupoAuto ? grupoAuto.ajuste : 0);
 
-      const total = (qtd * alturaFinal) + ajusteGrupo;
+      const total = (qtd * alturaFinal) + ajusteFinal;
       cargaFinal += total;
 
-      resultadoHTML += `🔹 ${qtd}x${alturaFinal}${ajusteGrupo ? (ajusteGrupo > 0 ? "+" + ajusteGrupo : ajusteGrupo) : ""} = ${total} FD\n`;
+      const ajusteStr = ajusteFinal ? (ajusteFinal > 0 ? `+${ajusteFinal}` : ajusteFinal) : "";
+      resultadoHTML += `🔹 ${qtd} blocos x altura ${alturaFinal} ${ajusteStr} = ${total} FD\n`;
+      resumoTabela += `${qtd}x${alturaFinal}${ajusteStr} = ${total} FD\n`;
     }
 
+    resultadoHTML += `\n${resumoTabela}`;
     resultadoHTML += `\n✅ Carga Final Distribuída: ${cargaFinal} FD`;
 
     document.getElementById("resultado").innerText = resultadoHTML;
