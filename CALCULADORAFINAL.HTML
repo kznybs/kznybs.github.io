@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <title>Calculadora de Carga Visual</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #f4f6f9;
+      padding: 30px;
+    }
+
+    .container {
+      max-width: 1000px;
+      margin: auto;
+      background-color: #fff;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 0 20px rgba(0,0,0,0.1);
+    }
+
+    h1 {
+      text-align: center;
+      color: #2c3e50;
+      margin-bottom: 25px;
+    }
+
+    label {
+      font-weight: bold;
+      display: block;
+      margin-bottom: 5px;
+      color: #34495e;
+    }
+
+    input[type="number"] {
+      padding: 8px;
+      width: 100%;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      margin-bottom: 10px;
+      box-sizing: border-box;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+
+    th, td {
+      border: 1px solid #e1e1e1;
+      padding: 10px;
+      text-align: center;
+    }
+
+    th {
+      background-color: #ecf0f1;
+      font-weight: 600;
+      color: #2c3e50;
+    }
+
+    button {
+      padding: 10px 18px;
+      margin: 10px 5px 0 0;
+      border: none;
+      border-radius: 6px;
+      background-color: #2980b9;
+      color: #fff;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background-color 0.2s ease;
+    }
+
+    button:hover {
+      background-color: #2471a3;
+    }
+
+    .remove-btn {
+      background-color: #e74c3c;
+    }
+
+    .remove-btn:hover {
+      background-color: #c0392b;
+    }
+
+    .result {
+      margin-top: 30px;
+      background-color: #f8f9fa;
+      padding: 20px;
+      border-left: 6px solid #2ecc71;
+      border-radius: 8px;
+      color: #2c3e50;
+      line-height: 1.6;
+      white-space: pre-wrap;
+    }
+
+    @media (max-width: 600px) {
+      table, thead, tbody, th, td, tr {
+        display: block;
+      }
+      td {
+        margin-bottom: 10px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <h1>Calculadora de Carga por Bloco</h1>
+
+  <label>Total da Carga (kg):</label>
+  <input type="number" id="totalCarga" placeholder="Digite a carga total em kg">
+
+  <table id="blocosTable">
+    <thead>
+      <tr>
+        <th>Bloco</th>
+        <th>Altura</th>
+        <th>Ajuste (+ ou -)</th>
+        <th>Ações</th>
+      </tr>
+    </thead>
+    <tbody id="blocosBody"></tbody>
+  </table>
+
+  <button onclick="addBloco()">Adicionar Bloco</button>
+  <button onclick="calcular()">Calcular</button>
+
+  <div class="result" id="resultado"></div>
+</div>
+
+<script>
+  function addBloco() {
+    const table = document.getElementById('blocosBody');
+    const row = table.insertRow();
+
+    row.innerHTML = `
+      <td><input type="number" class="bloco" placeholder="Ex: 49"></td>
+      <td><input type="number" class="altura" placeholder="Altura"></td>
+      <td><input type="number" class="positivo" placeholder="+2 ou -1"></td>
+      <td><button class="remove-btn" onclick="removeRow(this)">Remover</button></td>
+    `;
+  }
+
+  function removeRow(btn) {
+    const row = btn.parentNode.parentNode;
+    row.parentNode.removeChild(row);
+  }
+
+  function calcular() {
+    const totalCarga = parseFloat(document.getElementById("totalCarga").value);
+    if (isNaN(totalCarga) || totalCarga <= 0) {
+      alert("Informe um valor válido para a carga total.");
+      return;
+    }
+
+    const blocos = document.getElementsByClassName('bloco');
+    const alturas = document.getElementsByClassName('altura');
+    const positivos = document.getElementsByClassName('positivo');
+
+    let somaTotal = 0;
+    let somaBlocos = 0;
+    let blocosUtilizados = new Set();
+    let resultadoHTML = `🔎 Resultado Detalhado:\n\n`;
+
+    for (let i = 0; i < blocos.length; i++) {
+      const bloco = parseFloat(blocos[i].value);
+      const altura = parseFloat(alturas[i].value);
+      const positivo = positivos[i].value ? parseFloat(positivos[i].value) : 0;
+
+      if (isNaN(bloco) || isNaN(altura)) {
+        alert("Preencha corretamente todos os campos de bloco e altura.");
+        return;
+      }
+
+      const peso = (bloco * altura) + positivo;
+      somaTotal += peso;
+      somaBlocos += bloco;
+      blocosUtilizados.add(bloco);
+
+      const ajusteStr = positivo > 0 ? `+ ${positivo}` : positivo < 0 ? `- ${Math.abs(positivo)}` : '';
+      resultadoHTML += `🔹 Bloco ${bloco} x Altura ${altura} ${ajusteStr} = ${peso.toFixed(2)}\n`;
+    }
+
+    const diferenca = (totalCarga - somaTotal).toFixed(2);
+    const mediaBloco = (totalCarga / somaBlocos).toFixed(2);
+    const balanceado = Math.abs(diferenca) < 0.01;
+
+    resultadoHTML += `\n📊 Etapas Matemáticas:\n`;
+    resultadoHTML += `🔸 Blocos utilizados: ${Array.from(blocosUtilizados).sort((a,b)=>a-b).join(', ')}\n`;
+    resultadoHTML += `🔸 Soma total dos blocos: ${somaBlocos}\n`;
+    resultadoHTML += `🔸 Média por bloco: ${mediaBloco} kg\n`;
+    resultadoHTML += `🔸 Total calculado: ${somaTotal.toFixed(2)} kg\n`;
+    resultadoHTML += `🔸 Diferença para a carga total: ${diferenca} kg\n`;
+    resultadoHTML += balanceado
+      ? `✅ Balanceamento: OK`
+      : `⚠️ Atenção: A carga precisa ser ajustada para balanceamento.`;
+
+    document.getElementById("resultado").innerText = resultadoHTML;
+  }
+</script>
+
+</body>
+</html>
