@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<title>Calculadora de Carga ARM</title>
+<style>
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+  
+  body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    padding: 20px;
+  }
+  
+  .container {
+    background: white;
+    padding: 40px;
+    border-radius: 16px;
+    max-width: 1200px;
+    margin: 0 auto;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+  }
+  
+  .header {
+    text-align: center;
+    margin-bottom: 40px;
+    border-bottom: 2px solid #f1f3f4;
+    padding-bottom: 20px;
+  }
+  
+  h1 {
+    color: #2c3e50;
+    font-size: 32px;
+    font-weight: 600;
+    margin-bottom: 8px;
+  }
+  
+  .subtitle {
+    color: #7f8c8d;
+    font-size: 16px;
+  }
+  
+  .form-section {
+    background: #f8f9fa;
+    padding: 30px;
+    border-radius: 12px;
+    margin-bottom: 30px;
+    border: 1px solid #e9ecef;
+  }
+  
+  .section-title {
+    color: #495057;
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  
+  .top-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+    margin-bottom: 20px;
+  }
+  
+  .input-group {
+    position: relative;
+  }
+  
+  label {
+    display: block;
+    color: #495057;
+    font-weight: 500;
+    margin-bottom: 8px;
+    font-size: 14px;
+  }
+  
+  input, select {
+    width: 100%;
+    padding: 12px 16px;
+    border: 2px solid #e9ecef;
+    border-radius: 8px;
+    font-size: 15px;
+    transition: all 0.3s ease;
+    background: white;
+  }
+  
+  input:focus, select:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+  }
+  
+  .table-container {
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+    border: 1px solid #e9ecef;
+  }
+  
+  table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  
+  th {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    padding: 16px 12px;
+    text-align: center;
+    font-weight: 600;
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  
+  td {
+    padding: 16px 12px;
+    text-align: center;
+    border-bottom: 1px solid #f1f3f4;
+  }
+  
+  tr:hover {
+    background: #f8f9fa;
+  }
+  
+  .table-input {
+    border: 1px solid #dee2e6;
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: 14px;
+    width: 100%;
+    max-width: 120px;
+  }
+  
+  .button-group {
+    display: flex;
+    gap: 12px;
+    margin: 30px 0;
+    flex-wrap: wrap;
+  }
+  
+  button {
+    padding: 12px 24px;
+    border: none;
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  
+  .btn-primary {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+  }
+  
+  .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+  }
+  
+  .btn-secondary {
+    background: #6c757d;
+    color: white;
+  }
+  
+  .btn-secondary:hover {
+    background: #5a6268;
+    transform: translateY(-2px);
+  }
+  
+  .btn-danger {
+    background: #dc3545;
+    color: white;
+    padding: 6px 12px;
+    font-size: 12px;
+  }
+  
+  .btn-danger:hover {
+    background: #c82333;
+  }
+  
+  .result {
+    background: white;
+    border: 1px solid #e9ecef;
+    border-radius: 12px;
+    padding: 30px;
+    margin-top: 30px;
+    font-family: 'Courier New', monospace;
+    font-size: 14px;
+    line-height: 1.6;
+    white-space: pre-wrap;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+  }
+  
+  .result:empty {
+    display: none;
+  }
+  
+  .icon {
+    width: 20px;
+    height: 20px;
+    display: inline-block;
+  }
+  
+  .empty-state {
+    text-align: center;
+    padding: 40px 20px;
+    color: #6c757d;
+    font-style: italic;
+  }
+  
+  @media (max-width: 768px) {
+    .container {
+      padding: 20px;
+      margin: 10px;
+    }
+    
+    .top-row {
+      grid-template-columns: 1fr;
+    }
+    
+    .button-group {
+      flex-direction: column;
+    }
+    
+    button {
+      justify-content: center;
+    }
+    
+    table {
+      font-size: 12px;
+    }
+    
+    th, td {
+      padding: 12px 8px;
+    }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <h1>Calculadora de Carga ARM</h1>
+    <p class="subtitle">Sistema de cálculo otimizado para distribuição de carga</p>
+  </div>
+
+  <div class="form-section">
+    <h2 class="section-title">
+      <span class="icon">⚙️</span>
+      Configurações Gerais
+    </h2>
+    
+    <div class="top-row">
+      <div class="input-group">
+        <label for="qtdeCarga">Quantidade Total de Unidades</label>
+        <input type="number" id="qtdeCarga" placeholder="Ex: 1000">
+      </div>
+      <div class="input-group">
+        <label for="alturaMin">Altura Mínima</label>
+        <input type="number" id="alturaMin" value="5" placeholder="5">
+      </div>
+      <div class="input-group">
+        <label for="alturaMax">Altura Máxima</label>
+        <input type="number" id="alturaMax" value="10" placeholder="10">
+      </div>
+    </div>
+  </div>
+
+  <div class="form-section">
+    <h2 class="section-title">
+      <span class="icon">📦</span>
+      Configuração de Blocos
+    </h2>
+    
+    <div class="table-container">
+      <table id="blocosTable">
+        <thead>
+          <tr>
+            <th>Quantidade do Bloco</th>
+            <th>Altura Específica</th>
+            <th>Ajuste de Sobra</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+        <tbody id="blocosBody">
+          <tr class="empty-state">
+            <td colspan="4">Nenhum bloco adicionado. Clique em "Adicionar Bloco" para começar.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="button-group">
+      <button class="btn-secondary" onclick="addBloco()">
+        <span>➕</span>
+        Adicionar Bloco
+      </button>
+      <button class="btn-primary" onclick="calcular()">
+        <span>🧮</span>
+        Calcular Distribuição
+      </button>
+    </div>
+  </div>
+
+  <div id="resultado" class="result"></div>
+</div>
+
+<script>
+let blocoCounter = 0;
+
+function addBloco() {
+  const table = document.getElementById('blocosBody');
+  
+  // Remove empty state if exists
+  const emptyState = table.querySelector('.empty-state');
+  if (emptyState) {
+    emptyState.remove();
+  }
+  
+  blocoCounter++;
+  const row = table.insertRow();
+  row.innerHTML = `
+    <td><input type="number" class="table-input bloco" placeholder="Ex: 100"></td>
+    <td><input type="number" class="table-input altura" placeholder="Opcional"></td>
+    <td><input type="number" class="table-input ajuste" placeholder="Opcional"></td>
+    <td><button class="btn-danger" onclick="removeRow(this)">🗑️ Remover</button></td>
+  `;
+}
+
+function removeRow(btn) {
+  btn.parentNode.parentNode.remove();
+  
+  // Add empty state if no rows left
+  const table = document.getElementById('blocosBody');
+  if (table.children.length === 0) {
+    const row = table.insertRow();
+    row.className = 'empty-state';
+    row.innerHTML = '<td colspan="4">Nenhum bloco adicionado. Clique em "Adicionar Bloco" para começar.</td>';
+  }
+}
+
+function calcular() {
+  const qtdeTotal = parseFloat(document.getElementById("qtdeCarga").value);
+  const alturaMin = parseInt(document.getElementById("alturaMin").value) || 5;
+  const alturaMax = parseInt(document.getElementById("alturaMax").value) || 10;
+
+  if (!qtdeTotal || qtdeTotal <= 0) {
+    alert("⚠️ Por favor, informe uma quantidade total válida.");
+    return;
+  }
+
+  const blocos = document.getElementsByClassName('bloco');
+  const alturas = document.getElementsByClassName('altura');
+  const ajustes = document.getElementsByClassName('ajuste');
+
+  if (blocos.length === 0) {
+    alert("⚠️ Adicione pelo menos um bloco para calcular.");
+    return;
+  }
+
+  let blocosData = [];
+
+  for (let i = 0; i < blocos.length; i++) {
+    const qtd = parseInt(blocos[i].value);
+    const altura = alturas[i].value ? parseInt(alturas[i].value) : null;
+    const ajuste = ajustes[i].value !== "" ? parseInt(ajustes[i].value) : null;
+    
+    if (!qtd || qtd <= 0) {
+      alert("⚠️ Preencha corretamente a quantidade de todos os blocos.");
+      return;
+    }
+    blocosData.push({ qtd, altura, ajuste, index: i });
+  }
+
+  let resultado = `═══════════════════════════════════════════════════════════════
+📊 RELATÓRIO DE DISTRIBUIÇÃO DE CARGA ARM
+═══════════════════════════════════════════════════════════════
+
+📦 Quantidade Total: ${qtdeTotal.toLocaleString()} unidades
+📏 Altura: ${alturaMin} a ${alturaMax}
+🔧 Blocos Configurados: ${blocosData.length}
+
+🔄 ALTERNATIVAS DE CARREGAMENTO:
+═══════════════════════════════════════════════════════════════\n`;
+
+  for (let h = alturaMin; h <= alturaMax; h++) {
+    let totalBase = 0;
+    let variaveis = [], fixos = [];
+
+    blocosData.forEach(b => {
+      if (b.altura !== null || b.ajuste !== null) {
+        const total = b.qtd * (b.altura ?? h) + (b.ajuste ?? 0);
+        fixos.push({ ...b, total, alturaUsada: b.altura ?? h, ajusteUsado: b.ajuste ?? 0 });
+        totalBase += total;
+      } else {
+        variaveis.push(b);
+      }
+    });
+
+    const totalVariavelBase = variaveis.reduce((s, b) => s + b.qtd * h, 0);
+    totalBase += totalVariavelBase;
+    let sobra = qtdeTotal - totalBase;
+
+    let ajustePorBloco = variaveis.length > 0 ? Math.floor(sobra / variaveis.length) : 0;
+    let resto = sobra - ajustePorBloco * variaveis.length;
+
+    resultado += `\n┌─ OPÇÃO ${h} (Altura ${h}) ─────────────────────────────────────┐\n`;
+    
+    variaveis.forEach((b, idx) => {
+      const ajusteExtra = resto !== 0 ? (resto > 0 ? 1 : -1) : 0;
+      resto -= ajusteExtra;
+      const ajusteTotal = ajustePorBloco + ajusteExtra;
+      const total = b.qtd * h + ajusteTotal;
+      const ajusteStr = ajusteTotal !== 0 ? (ajusteTotal > 0 ? "+" + ajusteTotal : ajusteTotal) : "";
+      resultado += `│ 🔹 Bloco ${idx + 1}: ${b.qtd} × ${h}${ajusteStr} = ${total.toLocaleString()}\n`;
+    });
+
+    fixos.forEach((b, idx) => {
+      const ajusteStr = b.ajusteUsado !== 0 ? (b.ajusteUsado > 0 ? "+" + b.ajusteUsado : b.ajusteUsado) : "";
+      resultado += `│ 🔸 Bloco Fixo ${idx + 1}: ${b.qtd} × ${b.alturaUsada}${ajusteStr} = ${b.total.toLocaleString()}\n`;
+    });
+
+    const totalFinal = qtdeTotal - resto;
+    resultado += `│ ✅ TOTAL FINAL: ${totalFinal.toLocaleString()} unidades\n`;
+    resultado += `└─────────────────────────────────────────────────────────────┘\n`;
+  }
+
+  resultado += `\n═══════════════════════════════════════════════════════════════
+📈 Cálculo finalizado com sucesso!
+═══════════════════════════════════════════════════════════════`;
+
+  document.getElementById("resultado").innerText = resultado;
+}
+
+// Add first block by default
+document.addEventListener('DOMContentLoaded', function() {
+  // addBloco();
+});
+</script>
+</body>
+</html>
