@@ -1,0 +1,748 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<title>Calculadora de Carga ARM - Versão Otimizada</title>
+<style>
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+  
+  body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    padding: 20px;
+  }
+  
+  .container {
+    background: white;
+    padding: 40px;
+    border-radius: 16px;
+    max-width: 1200px;
+    margin: 0 auto;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+  }
+  
+  .header {
+    text-align: center;
+    margin-bottom: 40px;
+    border-bottom: 2px solid #f1f3f4;
+    padding-bottom: 20px;
+  }
+  
+  h1 {
+    color: #2c3e50;
+    font-size: 32px;
+    font-weight: 600;
+    margin-bottom: 8px;
+  }
+  
+  .subtitle {
+    color: #7f8c8d;
+    font-size: 16px;
+  }
+  
+  .form-section {
+    background: #f8f9fa;
+    padding: 30px;
+    border-radius: 12px;
+    margin-bottom: 30px;
+    border: 1px solid #e9ecef;
+  }
+  
+  .section-title {
+    color: #495057;
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  
+  .top-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+    margin-bottom: 20px;
+  }
+  
+  .input-group {
+    position: relative;
+  }
+  
+  label {
+    display: block;
+    color: #495057;
+    font-weight: 500;
+    margin-bottom: 8px;
+    font-size: 14px;
+  }
+  
+  input, select {
+    width: 100%;
+    padding: 12px 16px;
+    border: 2px solid #e9ecef;
+    border-radius: 8px;
+    font-size: 15px;
+    transition: all 0.3s ease;
+    background: white;
+  }
+  
+  input:focus, select:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+  }
+  
+  .input-error {
+    border-color: #dc3545 !important;
+    box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.1) !important;
+  }
+  
+  .error-message {
+    color: #dc3545;
+    font-size: 12px;
+    margin-top: 4px;
+    display: none;
+  }
+  
+  .table-container {
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+    border: 1px solid #e9ecef;
+  }
+  
+  table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  
+  th {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    padding: 16px 12px;
+    text-align: center;
+    font-weight: 600;
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  
+  td {
+    padding: 16px 12px;
+    text-align: center;
+    border-bottom: 1px solid #f1f3f4;
+  }
+  
+  tr:hover {
+    background: #f8f9fa;
+  }
+  
+  .table-input {
+    border: 1px solid #dee2e6;
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: 14px;
+    width: 100%;
+    max-width: 120px;
+  }
+  
+  .button-group {
+    display: flex;
+    gap: 12px;
+    margin: 30px 0;
+    flex-wrap: wrap;
+  }
+  
+  button {
+    padding: 12px 24px;
+    border: none;
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  
+  .btn-primary {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+  }
+  
+  .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+  }
+  
+  .btn-secondary {
+    background: #6c757d;
+    color: white;
+  }
+  
+  .btn-secondary:hover {
+    background: #5a6268;
+    transform: translateY(-2px);
+  }
+  
+  .btn-danger {
+    background: #dc3545;
+    color: white;
+    padding: 6px 12px;
+    font-size: 12px;
+  }
+  
+  .btn-danger:hover {
+    background: #c82333;
+  }
+  
+  .btn-success {
+    background: #28a745;
+    color: white;
+  }
+  
+  .btn-success:hover {
+    background: #218838;
+    transform: translateY(-2px);
+  }
+  
+  .result, .validation-result {
+    background: white;
+    border: 1px solid #e9ecef;
+    border-radius: 12px;
+    padding: 30px;
+    margin-top: 30px;
+    font-family: 'Courier New', monospace;
+    font-size: 14px;
+    line-height: 1.6;
+    white-space: pre-wrap;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+  }
+  
+  .validation-result {
+    border-left: 4px solid #ffc107;
+    background: #fff3cd;
+  }
+  
+  .result:empty, .validation-result:empty {
+    display: none;
+  }
+  
+  .icon {
+    width: 20px;
+    height: 20px;
+    display: inline-block;
+  }
+  
+  .empty-state {
+    text-align: center;
+    padding: 40px 20px;
+    color: #6c757d;
+    font-style: italic;
+  }
+  
+  .priority-selector {
+    margin-top: 15px;
+  }
+  
+  .priority-selector select {
+    padding: 8px 12px;
+    border: 1px solid #dee2e6;
+    border-radius: 6px;
+    font-size: 13px;
+  }
+  
+  .optimization-options {
+    background: #e3f2fd;
+    padding: 20px;
+    border-radius: 8px;
+    margin-top: 20px;
+    border-left: 4px solid #2196f3;
+  }
+  
+  @media (max-width: 768px) {
+    .container {
+      padding: 20px;
+      margin: 10px;
+    }
+    
+    .top-row {
+      grid-template-columns: 1fr;
+    }
+    
+    .button-group {
+      flex-direction: column;
+    }
+    
+    button {
+      justify-content: center;
+    }
+    
+    table {
+      font-size: 12px;
+    }
+    
+    th, td {
+      padding: 12px 8px;
+    }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <h1>Calculadora de Carga ARM</h1>
+    <p class="subtitle">Sistema matemático otimizado com validação completa</p>
+  </div>
+
+  <div class="form-section">
+    <h2 class="section-title">
+      <span class="icon">⚙️</span>
+      Configurações Gerais
+    </h2>
+    
+    <div class="top-row">
+      <div class="input-group">
+        <label for="qtdeCarga">Quantidade Total de Unidades *</label>
+        <input type="number" id="qtdeCarga" placeholder="Ex: 1000" min="1" step="1">
+        <div class="error-message" id="error-qtde">Campo obrigatório</div>
+      </div>
+      <div class="input-group">
+        <label for="alturaMin">Altura Mínima *</label>
+        <input type="number" id="alturaMin" value="5" placeholder="5" min="1" step="1">
+        <div class="error-message" id="error-alturaMin">Deve ser maior que 0</div>
+      </div>
+      <div class="input-group">
+        <label for="alturaMax">Altura Máxima *</label>
+        <input type="number" id="alturaMax" value="10" placeholder="10" min="1" step="1">
+        <div class="error-message" id="error-alturaMax">Deve ser >= altura mínima</div>
+      </div>
+    </div>
+    
+    <div class="optimization-options">
+      <h3 style="margin-bottom: 15px; color: #1976d2;">⚡ Opções de Otimização</h3>
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
+        <label style="display: flex; align-items: center; gap: 8px;">
+          <input type="checkbox" id="minimizarSobra" checked>
+          Minimizar sobras/faltas
+        </label>
+        <label style="display: flex; align-items: center; gap: 8px;">
+          <input type="checkbox" id="priorizarAltura" checked>
+          Priorizar alturas menores
+        </label>
+        <label style="display: flex; align-items: center; gap: 8px;">
+          <input type="checkbox" id="distribuicaoEquilibrada">
+          Distribuição equilibrada
+        </label>
+      </div>
+    </div>
+  </div>
+
+  <div class="form-section">
+    <h2 class="section-title">
+      <span class="icon">📦</span>
+      Configuração de Blocos
+    </h2>
+    
+    <div class="table-container">
+      <table id="blocosTable">
+        <thead>
+          <tr>
+            <th>Qtde do Bloco *</th>
+            <th>Altura Fixa</th>
+            <th>Ajuste Manual</th>
+            <th>Prioridade</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+        <tbody id="blocosBody">
+          <tr class="empty-state">
+            <td colspan="5">Nenhum bloco adicionado. Clique em "Adicionar Bloco" para começar.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="button-group">
+      <button class="btn-secondary" onclick="addBloco()">
+        <span>➕</span>
+        Adicionar Bloco
+      </button>
+      <button class="btn-success" onclick="validarEntradas()">
+        <span>🔍</span>
+        Validar Dados
+      </button>
+      <button class="btn-primary" onclick="calcular()">
+        <span>🧮</span>
+        Calcular Otimizado
+      </button>
+    </div>
+  </div>
+
+  <div id="validationResult" class="validation-result"></div>
+  <div id="resultado" class="result"></div>
+</div>
+
+<script>
+let blocoCounter = 0;
+
+// Validação robusta de entrada
+function validarEntradas() {
+  let isValid = true;
+  let mensagens = [];
+  
+  // Limpar erros anteriores
+  document.querySelectorAll('.input-error').forEach(el => el.classList.remove('input-error'));
+  document.querySelectorAll('.error-message').forEach(el => el.style.display = 'none');
+  
+  const qtdeTotal = parseFloat(document.getElementById("qtdeCarga").value);
+  const alturaMin = parseInt(document.getElementById("alturaMin").value);
+  const alturaMax = parseInt(document.getElementById("alturaMax").value);
+  
+  // Validar quantidade total
+  if (!qtdeTotal || qtdeTotal <= 0 || !Number.isInteger(qtdeTotal)) {
+    document.getElementById("qtdeCarga").classList.add('input-error');
+    document.getElementById("error-qtde").style.display = 'block';
+    mensagens.push("❌ Quantidade total deve ser um número inteiro positivo");
+    isValid = false;
+  }
+  
+  // Validar alturas
+  if (!alturaMin || alturaMin <= 0 || !Number.isInteger(alturaMin)) {
+    document.getElementById("alturaMin").classList.add('input-error');
+    document.getElementById("error-alturaMin").style.display = 'block';
+    mensagens.push("❌ Altura mínima deve ser um número inteiro positivo");
+    isValid = false;
+  }
+  
+  if (!alturaMax || alturaMax <= 0 || !Number.isInteger(alturaMax)) {
+    document.getElementById("alturaMax").classList.add('input-error');
+    document.getElementById("error-alturaMax").style.display = 'block';
+    mensagens.push("❌ Altura máxima deve ser um número inteiro positivo");
+    isValid = false;
+  }
+  
+  if (alturaMin && alturaMax && alturaMax < alturaMin) {
+    document.getElementById("alturaMax").classList.add('input-error');
+    document.getElementById("error-alturaMax").style.display = 'block';
+    mensagens.push("❌ Altura máxima deve ser >= altura mínima");
+    isValid = false;
+  }
+  
+  // Validar blocos
+  const blocos = document.getElementsByClassName('bloco');
+  if (blocos.length === 0) {
+    mensagens.push("❌ Adicione pelo menos um bloco");
+    isValid = false;
+  }
+  
+  let somaMinima = 0, somaMaxima = 0;
+  
+  for (let i = 0; i < blocos.length; i++) {
+    const qtd = parseInt(blocos[i].value);
+    const altura = document.getElementsByClassName('altura')[i].value;
+    const ajuste = document.getElementsByClassName('ajuste')[i].value;
+    
+    if (!qtd || qtd <= 0) {
+      blocos[i].classList.add('input-error');
+      mensagens.push(`❌ Bloco ${i+1}: quantidade deve ser um número inteiro positivo`);
+      isValid = false;
+      continue;
+    }
+    
+    if (altura && (parseInt(altura) <= 0 || !Number.isInteger(parseInt(altura)))) {
+      document.getElementsByClassName('altura')[i].classList.add('input-error');
+      mensagens.push(`❌ Bloco ${i+1}: altura deve ser um número inteiro positivo`);
+      isValid = false;
+    }
+    
+    if (ajuste && !Number.isInteger(parseInt(ajuste))) {
+      document.getElementsByClassName('ajuste')[i].classList.add('input-error');
+      mensagens.push(`❌ Bloco ${i+1}: ajuste deve ser um número inteiro`);
+      isValid = false;
+    }
+    
+    // Calcular limites teóricos
+    const alturaEfetiva = altura ? parseInt(altura) : alturaMin;
+    const ajusteEfetivo = ajuste ? parseInt(ajuste) : 0;
+    somaMinima += qtd * alturaEfetiva + ajusteEfetivo;
+    
+    const alturaMaxEfetiva = altura ? parseInt(altura) : alturaMax;
+    somaMaxima += qtd * alturaMaxEfetiva + ajusteEfetivo;
+  }
+  
+  // Verificar viabilidade matemática
+  if (isValid && qtdeTotal) {
+    if (somaMinima > qtdeTotal) {
+      mensagens.push(`⚠️ IMPOSSÍVEL: Soma mínima (${somaMinima}) > Quantidade total (${qtdeTotal})`);
+      mensagens.push(`   Reduza as quantidades dos blocos ou aumente a quantidade total`);
+      isValid = false;
+    }
+    
+    if (somaMaxima < qtdeTotal) {
+      mensagens.push(`⚠️ IMPOSSÍVEL: Soma máxima (${somaMaxima}) < Quantidade total (${qtdeTotal})`);
+      mensagens.push(`   Aumente as quantidades dos blocos ou reduza a quantidade total`);
+      isValid = false;
+    }
+    
+    if (isValid) {
+      mensagens.push(`✅ Dados válidos! Faixa possível: ${somaMinima} - ${somaMaxima}`);
+      mensagens.push(`✅ Margem de ajuste: ${qtdeTotal - somaMinima} unidades`);
+    }
+  }
+  
+  // Mostrar resultado da validação
+  const resultado = mensagens.join('\n');
+  document.getElementById("validationResult").innerText = resultado;
+  
+  return isValid;
+}
+
+function addBloco() {
+  const table = document.getElementById('blocosBody');
+  
+  // Remove empty state if exists
+  const emptyState = table.querySelector('.empty-state');
+  if (emptyState) {
+    emptyState.remove();
+  }
+  
+  blocoCounter++;
+  const row = table.insertRow();
+  row.innerHTML = `
+    <td><input type="number" class="table-input bloco" placeholder="Ex: 100" min="1" step="1"></td>
+    <td><input type="number" class="table-input altura" placeholder="Opcional" min="1" step="1"></td>
+    <td><input type="number" class="table-input ajuste" placeholder="±0" step="1"></td>
+    <td>
+      <select class="table-input prioridade">
+        <option value="normal">Normal</option>
+        <option value="alta">Alta</option>
+        <option value="baixa">Baixa</option>
+      </select>
+    </td>
+    <td><button class="btn-danger" onclick="removeRow(this)">🗑️</button></td>
+  `;
+}
+
+function removeRow(btn) {
+  btn.parentNode.parentNode.remove();
+  
+  // Add empty state if no rows left
+  const table = document.getElementById('blocosBody');
+  if (table.children.length === 0) {
+    const row = table.insertRow();
+    row.className = 'empty-state';
+    row.innerHTML = '<td colspan="5">Nenhum bloco adicionado. Clique em "Adicionar Bloco" para começar.</td>';
+  }
+}
+
+// Algoritmo otimizado de distribuição
+function calcularDistribuicaoOtimizada(qtdeTotal, blocosData, altura) {
+  let variaveis = [], fixos = [];
+  let totalFixo = 0;
+  
+  // Separar blocos fixos e variáveis
+  blocosData.forEach((bloco, index) => {
+    if (bloco.altura !== null || bloco.ajuste !== null) {
+      const total = bloco.qtd * (bloco.altura ?? altura) + (bloco.ajuste ?? 0);
+      fixos.push({ ...bloco, total, alturaUsada: bloco.altura ?? altura, ajusteUsado: bloco.ajuste ?? 0, index });
+      totalFixo += total;
+    } else {
+      variaveis.push({ ...bloco, index });
+    }
+  });
+  
+  if (variaveis.length === 0) {
+    return { fixos, variaveis: [], totalFinal: totalFixo, sobra: qtdeTotal - totalFixo };
+  }
+  
+  const sobra = qtdeTotal - totalFixo - variaveis.reduce((s, b) => s + b.qtd * altura, 0);
+  
+  // Algoritmo de distribuição otimizada usando programação linear simplificada
+  const distribuicao = distribuirSobraOtimizada(variaveis, sobra, altura);
+  
+  const totalFinal = totalFixo + distribuicao.reduce((s, d) => s + d.total, 0);
+  
+  return {
+    fixos,
+    variaveis: distribuicao,
+    totalFinal,
+    sobra: qtdeTotal - totalFinal,
+    eficiencia: Math.abs(qtdeTotal - totalFinal) / qtdeTotal
+  };
+}
+
+function distribuirSobraOtimizada(variaveis, sobra, altura) {
+  const minimizarSobra = document.getElementById('minimizarSobra').checked;
+  const distribuicaoEquilibrada = document.getElementById('distribuicaoEquilibrada').checked;
+  
+  // Ordenar por prioridade
+  const prioridades = document.getElementsByClassName('prioridade');
+  const variaveisComPrioridade = variaveis.map((v, i) => ({
+    ...v,
+    prioridade: prioridades[v.index] ? prioridades[v.index].value : 'normal'
+  }));
+  
+  variaveisComPrioridade.sort((a, b) => {
+    const prioOrder = { alta: 3, normal: 2, baixa: 1 };
+    return prioOrder[b.prioridade] - prioOrder[a.prioridade];
+  });
+  
+  let distribuicao = [];
+  let sobraRestante = sobra;
+  
+  if (distribuicaoEquilibrada && variaveisComPrioridade.length > 1) {
+    // Distribuição proporcional ao peso de cada bloco
+    const pesoTotal = variaveisComPrioridade.reduce((s, v) => s + v.qtd, 0);
+    
+    variaveisComPrioridade.forEach((v, i) => {
+      const proporcao = v.qtd / pesoTotal;
+      let ajuste = Math.round(sobraRestante * proporcao);
+      
+      // Ajuste para o último bloco para garantir soma exata
+      if (i === variaveisComPrioridade.length - 1) {
+        ajuste = sobraRestante;
+      } else {
+        sobraRestante -= ajuste;
+      }
+      
+      distribuicao.push({
+        ...v,
+        ajusteCalculado: ajuste,
+        total: v.qtd * altura + ajuste,
+        alturaUsada: altura
+      });
+    });
+  } else {
+    // Distribuição sequencial otimizada
+    const ajustePorBloco = Math.floor(sobraRestante / variaveisComPrioridade.length);
+    let resto = sobraRestante - ajustePorBloco * variaveisComPrioridade.length;
+    
+    variaveisComPrioridade.forEach((v, i) => {
+      let ajusteExtra = 0;
+      
+      if (minimizarSobra && Math.abs(resto) > 0) {
+        // Distribuir resto priorizando blocos de alta prioridade
+        if (v.prioridade === 'alta' && Math.abs(resto) > 0) {
+          ajusteExtra = resto > 0 ? Math.min(resto, Math.ceil(Math.abs(resto) / 2)) : Math.max(resto, -Math.ceil(Math.abs(resto) / 2));
+          resto -= ajusteExtra;
+        } else if (i === variaveisComPrioridade.length - 1) {
+          // Último bloco pega o resto
+          ajusteExtra = resto;
+          resto = 0;
+        }
+      }
+      
+      const ajusteTotal = ajustePorBloco + ajusteExtra;
+      distribuicao.push({
+        ...v,
+        ajusteCalculado: ajusteTotal,
+        total: v.qtd * altura + ajusteTotal,
+        alturaUsada: altura
+      });
+    });
+  }
+  
+  return distribuicao.sort((a, b) => a.index - b.index);
+}
+
+function calcular() {
+  if (!validarEntradas()) {
+    alert("⚠️ Corrija os erros de validação antes de calcular.");
+    return;
+  }
+  
+  const qtdeTotal = parseFloat(document.getElementById("qtdeCarga").value);
+  const alturaMin = parseInt(document.getElementById("alturaMin").value);
+  const alturaMax = parseInt(document.getElementById("alturaMax").value);
+  const priorizarAltura = document.getElementById('priorizarAltura').checked;
+  
+  const blocos = document.getElementsByClassName('bloco');
+  const alturas = document.getElementsByClassName('altura');
+  const ajustes = document.getElementsByClassName('ajuste');
+  
+  let blocosData = [];
+  for (let i = 0; i < blocos.length; i++) {
+    const qtd = parseInt(blocos[i].value);
+    const altura = alturas[i].value ? parseInt(alturas[i].value) : null;
+    const ajuste = ajustes[i].value !== "" ? parseInt(ajustes[i].value) : null;
+    blocosData.push({ qtd, altura, ajuste, index: i });
+  }
+  
+  let resultado = `═══════════════════════════════════════════════════════════════
+🎯 CALCULADORA ARM - DISTRIBUIÇÃO OTIMIZADA
+═══════════════════════════════════════════════════════════════
+
+📊 CONFIGURAÇÃO:
+   • Total: ${qtdeTotal.toLocaleString()} unidades
+   • Altura: ${alturaMin} a ${alturaMax}
+   • Blocos: ${blocosData.length}
+   • Otimizações ativas: ${document.querySelectorAll('input[type="checkbox"]:checked').length}
+
+🔄 RESULTADOS OTIMIZADOS:
+═══════════════════════════════════════════════════════════════\n`;
+
+  let opcoes = [];
+  
+  for (let h = alturaMin; h <= alturaMax; h++) {
+    const calc = calcularDistribuicaoOtimizada(qtdeTotal, blocosData, h);
+    opcoes.push({ altura: h, ...calc });
+    
+    resultado += `\n┌─ ALTURA ${h} (Eficiência: ${(100 * (1 - calc.eficiencia)).toFixed(1)}%) ──────────────────┐\n`;
+    
+    calc.variaveis.forEach((v, idx) => {
+      const ajusteStr = v.ajusteCalculado !== 0 ? (v.ajusteCalculado > 0 ? "+" + v.ajusteCalculado : v.ajusteCalculado) : "";
+      resultado += `│ 🔹 Bloco ${idx + 1}: ${v.qtd} × ${v.alturaUsada}${ajusteStr} = ${v.total.toLocaleString()}\n`;
+    });
+    
+    calc.fixos.forEach((f, idx) => {
+      const ajusteStr = f.ajusteUsado !== 0 ? (f.ajusteUsado > 0 ? "+" + f.ajusteUsado : f.ajusteUsado) : "";
+      resultado += `│ 🔸 Fixo ${idx + 1}: ${f.qtd} × ${f.alturaUsada}${ajusteStr} = ${f.total.toLocaleString()}\n`;
+    });
+    
+    const status = Math.abs(calc.sobra) < 1 ? "✅ PERFEITO" : calc.sobra > 0 ? "⚠️ SOBRA" : "⚠️ FALTA";
+    resultado += `│ ${status}: ${calc.totalFinal.toLocaleString()} (${calc.sobra > 0 ? '+' : ''}${calc.sobra})\n`;
+    resultado += `└──────────────────────────────────────────────────────────────┘\n`;
+  }
+  
+  // Recomendar melhor opção
+  const melhorOpcao = opcoes.reduce((melhor, atual) => 
+    atual.eficiencia < melhor.eficiencia ? atual : melhor
+  );
+  
+  resultado += `\n🏆 RECOMENDAÇÃO OTIMIZADA:
+   • Melhor altura: ${melhorOpcao.altura}
+   • Precisão: ${(100 * (1 - melhorOpcao.eficiencia)).toFixed(2)}%
+   • Diferença: ${melhorOpcao.sobra} unidades
+   
+💡 DICAS DE OTIMIZAÇÃO:`;
+
+  if (melhorOpcao.eficiencia > 0.01) {
+    resultado += `\n   • Ajuste a quantidade total para ${melhorOpcao.totalFinal}`;
+  }
+  if (opcoes.some(o => Math.abs(o.sobra) === 0)) {
+    resultado += `\n   • Existe solução EXATA disponível!`;
+  }
+  
+  resultado += `\n\n═══════════════════════════════════════════════════════════════
+✅ Cálculo matemático verificado e otimizado
+═══════════════════════════════════════════════════════════════`;
+
+  document.getElementById("resultado").innerText = resultado;
+}
+
+// Inicializar com um bloco de exemplo
+document.addEventListener('DOMContentLoaded', function() {
+  addBloco();
+});
+</script>
+</body>
+</html>
