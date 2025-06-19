@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Contador Regressivo para 10 de Setembro de 2025</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      background: #f4f4f4;
+      padding-top: 50px;
+    }
+    #contador {
+      font-size: 2em;
+      background: #222;
+      color: #00ff88;
+      padding: 20px;
+      border-radius: 10px;
+      display: inline-block;
+    }
+  </style>
+</head>
+<body>
+  <h1>Contagem Regressiva para 10 de Setembro de 2025</h1>
+  <div id="contador"></div>
+
+  <script>
+    const destino = new Date("2025-09-10T00:00:00").getTime();
+
+    const intervalo = setInterval(() => {
+      const agora = new Date().getTime();
+      const distancia = destino - agora;
+
+      if (distancia < 0) {
+        clearInterval(intervalo);
+        document.getElementById("contador").innerHTML = "🎉 Chegou o dia!";
+        return;
+      }
+
+      const dias = Math.floor(distancia / (1000 * 60 * 60 * 24));
+      const horas = Math.floor((distancia % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      const minutos = Math.floor((distancia % (1000 * 60 * 60)) / (1000 * 60));
+      const segundos = Math.floor((distancia % (1000 * 60)) / 1000);
+
+      document.getElementById("contador").innerHTML =
+        `${dias} dias, ${horas}h ${minutos}min ${segundos}s`;
+    }, 1000);
+  </script>
+</body>
+</html>
