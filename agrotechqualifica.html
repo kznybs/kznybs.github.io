@@ -213,75 +213,87 @@
                     <thead class="text-xs text-slate-700 uppercase bg-slate-100">
                         <tr>
                             <th scope="col" class="px-6 py-4">Produto/Serviço</th>
-                            <th scope="col" class="px-6 py-4">Fornecedor</th>
+                            <th scope="col" class="px-6 py-4">Imagem</th>
                             <th scope="col" class="px-6 py-4">Valor</th>
-                            <th scope="col" class="px-6 py-4">Validade</th>
-                            <th scope="col" class="px-6 py-4">Verificado em</th>
                             <th scope="col" class="px-6 py-4">Anotações</th>
+                            <th scope="col" class="px-6 py-4 text-center">Link</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-slate-200">
+                    <tbody class="divide-y divide-slate-200 align-middle">
+                        <tr class="bg-slate-50">
+                            <td colspan="5" class="px-6 py-3 text-center font-bold text-slate-500 uppercase tracking-wider">Hardware</td>
+                        </tr>
+                        <tr class="hover:bg-slate-50">
+                            <td class="px-6 py-4">
+                                <p class="font-semibold">Computador - Opção 1</p>
+                                <p class="text-xs text-slate-500">Asus TUF F15</p>
+                            </td>
+                            <td class="px-6 py-4">
+                                <img src="https://placehold.co/120x80/2d3748/ffffff?text=Asus+TUF" alt="Imagem do notebook Asus TUF F15" class="rounded-lg">
+                            </td>
+                            <td class="px-6 py-4 font-bold text-lg text-green-700">R$ 4.547,00</td>
+                            <td class="px-6 py-4">RTX 3050, 512GB SSD. Ideal para desenvolvimento.</td>
+                            <td class="px-6 py-4 text-center">
+                                <a href="https://www.amazon.com.br/Notebook-ASUS-Gaming-NVIDIA-RTX3050/dp/B0CQ8PD4L3/ref=asc_df_B0CQ8PD4L3?mcid=a57b7891e34837608484130febd82d48&tag=googleshopp00-20&linkCode=df0&hvadid=709884378364&hvpos=&hvnetw=g&hvrand=11605147563968880122&hvpone=&hvptwo=&hvqmt=&hvdev=c&hvdvcmdl=&hvlocint=&hvlocphy=20096&hvtargid=pla-2283905551356&language=pt_BR&gad_source=1&th=1" target="_blank" class="bg-green-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-green-700 transition-colors">Ver Oferta</a>
+                            </td>
+                        </tr>
+                        <tr class="hover:bg-slate-50">
+                            <td class="px-6 py-4">
+                                <p class="font-semibold">Computador - Opção 2</p>
+                                <p class="text-xs text-slate-500">Acer Nitro V15</p>
+                            </td>
+                            <td class="px-6 py-4">
+                                <img src="https://www.mercadolivre.com.br/notebook-acer-nitro-v15-anv15-51-58az-core-i5-13420h-8gb-512gb-rtx-3050-cor-preto/p/MLB39107224?pdp_filters=item_id%3AMLB5117986194&from=gshop&matt_tool=87164264&matt_internal_campaign_id=&matt_word=&matt_source=google&matt_campaign_id=22123786079&matt_ad_group_id=174240716100&matt_match_type=&matt_network=g&matt_device=c&matt_creative=728942948118&matt_keyword=&matt_ad_position=&matt_ad_type=pla&matt_merchant_id=735125422&matt_product_id=MLB39107224-product&matt_product_partition_id=2389933078058&matt_target_id=pla-2389933078058&cq_src=google_ads&cq_cmp=22123786079&cq_net=g&cq_plt=gp&cq_med=pla&gad_source=1&gad_campaignid=22123786079&gclid=CjwKCAjw6s7CBhACEiwAuHQckraQ4vSczD52zkc2uJdhiSInkBu0AHypCjXd25t6p6P73Qkki59gKRoCxXEQAvD_BwE#&gid=1&pid=1" alt="Imagem do notebook Acer Nitro V15" class="rounded-lg">
+                            </td>
+                            <td class="px-6 py-4 font-bold text-lg text-green-700">R$ 4.409,00</td>
+                            <td class="px-6 py-4">RTX 3050. Essencial para Unity/Unreal Engine.</td>
+                            <td class="px-6 py-4 text-center">
+                                <a href="https://www.amazon.com.br/Notebook-Gamer-Acer-Windows-ANV15-51-58AZ/dp/B0CL8YTVH5" target="_blank" class="bg-green-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-green-700 transition-colors">Ver Oferta</a>
+                            </td>
+                        </tr>
+
+                        <tr class="bg-slate-50">
+                            <td colspan="5" class="px-6 py-3 text-center font-bold text-slate-500 uppercase tracking-wider">Hospedagem e Domínio</td>
+                        </tr>
                         <tr class="hover:bg-slate-50">
                             <td class="px-6 py-4 font-semibold">Hospedagem - Opção 1</td>
-                            <td class="px-6 py-4">Hostgator</td>
-                            <td class="px-6 py-4 font-bold text-green-700">R$ 140,00</td>
-                            <td class="px-6 py-4">12 meses</td>
-                            <td class="px-6 py-4">19/06/2025</td>
-                            <td class="px-6 py-4">Inclui e-mail, SSL, CDN Grátis, cPanel.</td>
+                            <td class="px-6 py-4 text-center text-3xl text-sky-500"><i class="fas fa-server"></i></td>
+                            <td class="px-6 py-4 font-bold text-lg text-green-700">R$ 140,00</td>
+                            <td class="px-6 py-4">Hostgator: Inclui e-mail, SSL, CDN Grátis, cPanel.</td>
+                            <td class="px-6 py-4 text-center">
+                                <a href="https://www.hostgator.com.br/hospedagem-de-sites-passo-2?pid=5" target="_blank" class="bg-green-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-green-700 transition-colors">Visitar</a>
+                            </td>
                         </tr>
                         <tr class="hover:bg-slate-50">
                             <td class="px-6 py-4 font-semibold">Hospedagem - Opção 2</td>
-                            <td class="px-6 py-4">Hostinger</td>
-                            <td class="px-6 py-4 font-bold text-green-700">R$ 205,00</td>
-                            <td class="px-6 py-4">12 meses</td>
-                            <td class="px-6 py-4">19/06/2025</td>
-                            <td class="px-6 py-4">Até 25 sites, 25GB de espaço, otimização com IA.</td>
+                            <td class="px-6 py-4 text-center text-3xl text-sky-500"><i class="fas fa-server"></i></td>
+                            <td class="px-6 py-4 font-bold text-lg text-green-700">R$ 205,00</td>
+                            <td class="px-6 py-4">Hostinger: Até 25 sites, 25GB, otimização com IA.</td>
+                            <td class="px-6 py-4 text-center">
+                                <a href="https://www.hostinger.com/br/hospedagem-de-sites?utm_campaign=Generic-Hosting%7CNT:Se%7CLO:BR&utm_medium=ppc&gad_source=1&gad_campaignid=19605518140&gclid=CjwKCAjw6s7CBhACEiwAuHQckqrvHcwycA9aGtHDF9GVgHELl3ZQGsoZgzShLIfClpCxlo0s5ggDcBoC65EQAvD_BwE" target="_blank" class="bg-green-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-green-700 transition-colors">Visitar</a>
+                            </td>
                         </tr>
                         <tr class="hover:bg-slate-50">
                             <td class="px-6 py-4 font-semibold">Hospedagem - Opção 3</td>
-                            <td class="px-6 py-4">KingHost</td>
-                            <td class="px-6 py-4 font-bold text-green-700">R$ 156,00</td>
-                            <td class="px-6 py-4">12 meses</td>
-                            <td class="px-6 py-4">19/06/2025</td>
-                            <td class="px-6 py-4">Até 5 e-mails, 10GB de espaço, SSL grátis.</td>
+                            <td class="px-6 py-4 text-center text-3xl text-sky-500"><i class="fas fa-server"></i></td>
+                            <td class="px-6 py-4 font-bold text-lg text-green-700">R$ 156,00</td>
+                            <td class="px-6 py-4">KingHost: Até 5 e-mails, 10GB de espaço.</td>
+                            <td class="px-6 py-4 text-center">
+                                <a href="https://king.host/hospedagem-de-sites#planoshttps://www.hostgator.com.br/hospedagem-de-sites-passo-2?pid=5" target="_blank" class="bg-green-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-green-700 transition-colors">Visitar</a>
+                            </td>
                         </tr>
-                         <tr class="bg-slate-50">
-                            <td colspan="6" class="px-6 py-3 text-center font-bold text-slate-500 uppercase tracking-wider">Hardware</td>
-                        </tr>
-                        <tr class="hover:bg-slate-50">
-                            <td class="px-6 py-4 font-semibold">Computador - Opção 1</td>
-                            <td class="px-6 py-4">N/A</td>
-                            <td class="px-6 py-4 font-bold text-green-700">R$ 4.547,00</td>
-                            <td class="px-6 py-4">Indeterminado</td>
-                            <td class="px-6 py-4">19/06/2025</td>
-                            <td class="px-6 py-4">Asus TUF F15 com RTX 3050, 512GB SSD.</td>
-                        </tr>
-                        <tr class="hover:bg-slate-50">
-                            <td class="px-6 py-4 font-semibold">Computador - Opção 2</td>
-                            <td class="px-6 py-4">N/A</td>
-                            <td class="px-6 py-4 font-bold text-green-700">R$ 4.409,00</td>
-                            <td class="px-6 py-4">Indeterminado</td>
-                            <td class="px-6 py-4">19/06/2025</td>
-                            <td class="px-6 py-4">Acer Nitro V15 com RTX 3050. Essencial para Unity/Unreal Engine.</td>
-                        </tr>
+                        
                         <tr class="bg-slate-50">
-                            <td colspan="6" class="px-6 py-3 text-center font-bold text-slate-500 uppercase tracking-wider">Propriedade Intelectual</td>
+                            <td colspan="5" class="px-6 py-3 text-center font-bold text-slate-500 uppercase tracking-wider">Propriedade Intelectual</td>
                         </tr>
                         <tr class="hover:bg-slate-50">
-                            <td class="px-6 py-4 font-semibold">Pedido de Registro (GRU)</td>
-                            <td class="px-6 py-4">INPI</td>
-                            <td class="px-6 py-4 font-bold text-green-700">R$ 142,00</td>
-                            <td class="px-6 py-4">N/A</td>
-                            <td class="px-6 py-4">19/06/2025</td>
-                            <td class="px-6 py-4">Taxa inicial para registrar a marca.</td>
-                        </tr>
-                        <tr class="hover:bg-slate-50">
-                            <td class="px-6 py-4 font-semibold">Taxa de Concessão (GRU)</td>
-                            <td class="px-6 py-4">INPI</td>
-                            <td class="px-6 py-4 font-bold text-green-700">R$ 298,00</td>
-                            <td class="px-6 py-4">10 anos</td>
-                            <td class="px-6 py-4">19/06/2025</td>
-                            <td class="px-6 py-4">Garante o direito exclusivo de uso da marca.</td>
+                            <td class="px-6 py-4 font-semibold">Registro de Marca</td>
+                            <td class="px-6 py-4 text-center text-3xl text-sky-500"><i class="fas fa-file-signature"></i></td>
+                            <td class="px-6 py-4 font-bold text-lg text-green-700">R$ 440,00</td>
+                            <td class="px-6 py-4">Total (Pedido R$142 + Concessão R$298).</td>
+                            <td class="px-6 py-4 text-center">
+                                <a href="https://www.gov.br/inpi/pt-br" target="_blank" class="bg-green-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-green-700 transition-colors">INPI</a>
+                            </td>
                         </tr>
                     </tbody>
                 </table>
