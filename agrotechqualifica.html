@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Orçamento de Projeto: Agrotech</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts: Poppins -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+
+    <style>
+        /* Custom styles to apply the Poppins font */
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #f0f4f8;
+        }
+        /* Custom gradient for the header */
+        .header-gradient {
+            background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);
+        }
+        /* Custom shadow for cards */
+        .card-shadow {
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        /* Transition for hover effects */
+        .card-hover {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .card-hover:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+    </style>
+</head>
+<body class="antialiased text-gray-800">
+
+    <!-- Header Section -->
+    <header class="header-gradient text-white p-8 md:p-12 text-center rounded-b-3xl">
+        <div class="max-w-4xl mx-auto">
+            <i class="fas fa-leaf text-4xl mb-4 text-green-200"></i>
+            <h1 class="text-4xl md:text-5xl font-bold mb-2">Orçamento de Projeto: Agrotech</h1>
+            <p class="text-lg text-green-200">
+                Apresentado por: Adilson, Gabriel & Vinicius | Data: 19 de Junho de 2025
+            </p>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container mx-auto p-4 md:p-8">
+
+        <!-- Summary Section -->
+        <section id="resumo" class="mb-12">
+            <h2 class="text-3xl font-bold text-center mb-8 text-green-800">Resumo de Custos</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-center max-w-5xl mx-auto">
+                <!-- Fixed Cost Card -->
+                <div class="bg-white p-6 rounded-2xl card-shadow">
+                    <i class="fas fa-file-signature text-3xl text-blue-500 mb-3"></i>
+                    <h3 class="text-lg font-semibold text-gray-600">Custo Fixo</h3>
+                    <p class="text-2xl font-bold text-blue-600 mt-1">R$ 440,00</p>
+                    <p class="text-sm text-gray-500">(Registro de Marca)</p>
+                </div>
+                <!-- Variable Cost Card -->
+                <div class="bg-white p-6 rounded-2xl card-shadow">
+                    <i class="fas fa-cogs text-3xl text-yellow-500 mb-3"></i>
+                    <h3 class="text-lg font-semibold text-gray-600">Custo Variável</h3>
+                    <p class="text-2xl font-bold text-yellow-600 mt-1">R$ 4.549 a R$ 4.752</p>
+                    <p class="text-sm text-gray-500">(Hardware + Hospedagem)</p>
+                </div>
+                <!-- Total Cost Card -->
+                <div class="bg-green-700 text-white p-6 rounded-2xl card-shadow">
+                    <i class="fas fa-sack-dollar text-3xl text-green-200 mb-3"></i>
+                    <h3 class="text-lg font-semibold text-green-100">Valor Total Estimado</h3>
+                    <p class="text-2xl font-bold mt-1">R$ 4.989 a R$ 5.192</p>
+                    <p class="text-sm text-green-200">(Projeto Completo)</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Detailed Breakdown -->
+        <section id="detalhamento">
+            <h2 class="text-3xl font-bold text-center mb-10 text-green-800">Detalhamento do Orçamento</h2>
+
+            <!-- Hosting Section -->
+            <div class="mb-12">
+                <h3 class="flex items-center justify-center text-2xl font-semibold mb-6 text-gray-700">
+                    <i class="fas fa-server text-green-600 mr-3"></i>
+                    1. Hospedagem de Site e Domínio
+                </h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <!-- Option 1 -->
+                    <div class="bg-white p-6 rounded-xl card-shadow card-hover">
+                        <h4 class="font-bold text-lg text-green-800">Opção 1: Hnetus</h4>
+                        <p class="text-3xl font-bold my-3">R$ 140<span class="text-lg font-normal text-gray-500">/ano</span></p>
+                        <ul class="text-gray-600 space-y-2 text-sm">
+                            <li><i class="fas fa-check-circle text-green-500 mr-2"></i>E-mail profissional</li>
+                            <li><i class="fas fa-check-circle text-green-500 mr-2"></i>Certificado SSL e CDN Grátis</li>
+                            <li><i class="fas fa-check-circle text-green-500 mr-2"></i>cPanel e Criador de Sites</li>
+                        </ul>
+                    </div>
+                    <!-- Option 2 -->
+                    <div class="bg-white p-6 rounded-xl card-shadow card-hover border-2 border-green-600 relative">
+                         <span class="absolute top-0 right-4 -mt-3 bg-green-600 text-white text-xs font-bold px-3 py-1 rounded-full">MAIS ROBUSTO</span>
+                        <h4 class="font-bold text-lg text-green-800">Opção 2: Bastinger</h4>
+                        <p class="text-3xl font-bold my-3">R$ 205<span class="text-lg font-normal text-gray-500">/ano</span></p>
+                        <ul class="text-gray-600 space-y-2 text-sm">
+                            <li><i class="fas fa-check-circle text-green-500 mr-2"></i>Até 25 sites</li>
+                            <li><i class="fas fa-check-circle text-green-500 mr-2"></i>25 GB de espaço e Otimização IA</li>
+                            <li><i class="fas fa-check-circle text-green-500 mr-2"></i>Atualizações automáticas</li>
+                        </ul>
+                    </div>
+                    <!-- Option 3 -->
+                    <div class="bg-white p-6 rounded-xl card-shadow card-hover">
+                        <h4 class="font-bold text-lg text-green-800">Opção 3: Hin</h4>
+                        <p class="text-3xl font-bold my-3">R$ 156<span class="text-lg font-normal text-gray-500">/ano</span></p>
+                        <ul class="text-gray-600 space-y-2 text-sm">
+                            <li><i class="fas fa-check-circle text-green-500 mr-2"></i>Até 5 e-mails profissionais</li>
+                            <li><i class="fas fa-check-circle text-green-500 mr-2"></i>10 GB de espaço por e-mail</li>
+                            <li><i class="fas fa-check-circle text-green-500 mr-2"></i>Certificado SSL grátis</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Hardware Section -->
+            <div class="mb-12">
+                <h3 class="flex items-center justify-center text-2xl font-semibold mb-6 text-gray-700">
+                    <i class="fas fa-desktop text-green-600 mr-3"></i>
+                    2. Aquisição de Hardware
+                </h3>
+                <div class="bg-white rounded-xl p-6 md:p-8 card-shadow grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <!-- Hardware Options -->
+                    <div>
+                        <h4 class="font-bold text-xl mb-4">Opções de Computador</h4>
+                        <div class="space-y-4">
+                            <div class="border p-4 rounded-lg flex justify-between items-center card-hover bg-gray-50">
+                                <span class="font-semibold text-gray-700">Acer Nitro V15</span>
+                                <span class="font-bold text-lg text-green-700">R$ 4.409,00</span>
+                            </div>
+                            <div class="border p-4 rounded-lg flex justify-between items-center card-hover bg-gray-50">
+                                <span class="font-semibold text-gray-700">Asus TUF F15</span>
+                                <span class="font-bold text-lg text-green-700">R$ 4.547,00</span>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Justification -->
+                    <div>
+                        <h4 class="font-bold text-xl mb-4">Justificativa para Aquisição</h4>
+                        <div class="space-y-4 text-sm text-gray-600">
+                            <p><strong>Necessidade Técnica:</strong> Ferramentas como Unity e Unreal Engine 5 exigem alto desempenho gráfico (GPU dedicada como a RTX 3050) para desenvolvimento de simuladores realistas.</p>
+                            <p><strong>Infraestrutura Atual:</strong> A falta de computadores com GPU dedicada no SENAI impede a execução dos softwares e o uso do Meta Quest 2, inviabilizando o projeto.</p>
+                            <p><strong>Investimento de Longo Prazo:</strong> O equipamento beneficiará futuros projetos e equipes, como a BioBots, representando um ativo valioso para a instituição.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Intellectual Property Section -->
+            <div class="mb-12">
+                 <h3 class="flex items-center justify-center text-2xl font-semibold mb-6 text-gray-700">
+                    <i class="fas fa-shield-alt text-green-600 mr-3"></i>
+                    3. Registro de Marca
+                </h3>
+                <div class="bg-white rounded-xl p-6 card-shadow max-w-2xl mx-auto">
+                    <p class="text-center text-gray-600 mb-4">Taxas para garantir o direito de uso exclusivo da marca "Agrotech".</p>
+                    <div class="divide-y divide-gray-200">
+                        <div class="flex justify-between items-center py-3">
+                            <span class="text-gray-700">Pedido de Registro (GRU)</span>
+                            <span class="font-bold text-lg text-green-700">R$ 142,00</span>
+                        </div>
+                        <div class="flex justify-between items-center py-3">
+                            <div>
+                                <p class="text-gray-700">Taxa de Concessão (GRU)</p>
+                                <p class="text-xs text-gray-500">Garante o direito por 10 anos</p>
+                            </div>
+                            <span class="font-bold text-lg text-green-700">R$ 298,00</span>
+                        </div>
+                         <div class="flex justify-between items-center pt-4 mt-2 border-t-2 border-gray-300">
+                            <span class="font-bold text-gray-800">Total Registro</span>
+                            <span class="font-bold text-xl text-green-800">R$ 440,00</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="text-center p-6 bg-gray-800 text-gray-400 mt-8">
+        <p>&copy; 2025 Projeto Agrotech | SENAI Barra do Bugres</p>
+    </footer>
+
+</body>
+</html>
