@@ -161,19 +161,13 @@
         </footer>
     </div>
     <script>
-        // Alpine.js is deferred, so we'll listen for its initialization.
         document.addEventListener('alpine:init', () => {
             // No custom Alpine.js logic is needed for this setup to function.
-            // Lucide icons are automatically replaced.
         });
 
-        // Initialize Lucide icons on DOMContentLoaded
         document.addEventListener('DOMContentLoaded', () => {
-             // In newer versions of lucide-static, createIcons() is called automatically.
-             // If it's not working, uncomment the line below.
-             // if (typeof lucide !== 'undefined') {
-             //    lucide.createIcons();
-             // }
+             // Lucide icons are automatically replaced.
+             // Ensure the script is loaded before this runs.
         });
     </script>
 </body>
