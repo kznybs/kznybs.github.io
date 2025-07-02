@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Poker Blind Timer & Chip Counter</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;700&family=Teko:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Roboto Mono', monospace;
+            background-color: #1a202c; /* bg-gray-900 */
+            color: #e2e8f0; /* text-gray-300 */
+        }
+        .font-teko {
+            font-family: 'Teko', sans-serif;
+        }
+        .chip {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-radius: 50%;
+            width: 80px;
+            height: 80px;
+            font-weight: bold;
+            font-size: 1.25rem;
+            color: black;
+            position: relative;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.5), inset 0 2px 4px rgba(255,255,255,0.3);
+            border: 5px solid #4a5568; /* Borda cinza para efeito de profundidade */
+            text-shadow: 1px 1px 1px rgba(0,0,0,0.2);
+        }
+        .chip-white { background-color: #edf2f7; border-color: #a0aec0; }
+        .chip-red { background-color: #f56565; border-color: #c53030; color: white; }
+        .chip-green { background-color: #48bb78; border-color: #2f855a; color: white; }
+        .chip-black { background-color: #2d3748; border-color: #1a202c; color: white; }
+        .chip-blue { background-color: #4299e1; border-color: #2b6cb0; color: white; }
+        
+        .btn-control {
+            transition: all 0.2s ease-in-out;
+        }
+        .btn-control:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 10px rgba(0,0,0,0.3);
+        }
+        .btn-control:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+        .increment-btn.active {
+            background-color: #4299e1; /* bg-blue-500 */
+            color: white;
+            box-shadow: 0 0 10px #4299e1;
+        }
+    </style>
+</head>
+<body class="flex items-center justify-center min-h-screen p-4">
+
+    <div class="w-full max-w-4xl mx-auto bg-gray-800 rounded-2xl shadow-2xl p-6 space-y-8">
+
+        <!-- Seção do Timer -->
+        <div class="bg-gray-900 rounded-lg p-6 text-center shadow-inner">
+            <h1 class="text-4xl font-bold text-white mb-2 font-teko">TIMER DOS BLINDS</h1>
+            
+            <div id="timer-display" class="text-8xl font-bold text-blue-400 tracking-wider font-teko">25:00</div>
+            
+            <div class="flex justify-center items-baseline space-x-6 my-4">
+                <div>
+                    <p class="text-lg text-gray-400">RODADA</p>
+                    <p id="round-display" class="text-4xl font-bold text-white font-teko">1</p>
+                </div>
+                <div>
+                    <p class="text-lg text-gray-400">BLINDS</p>
+                    <p id="blinds-display" class="text-4xl font-bold text-white font-teko">25 / 50</p>
+                </div>
+            </div>
+
+            <div class="flex flex-wrap justify-center items-center gap-4 mt-6">
+                <div class="flex items-center space-x-2">
+                    <label for="timer-input" class="text-gray-400">Duração (min):</label>
+                    <input type="number" id="timer-input" value="25" class="bg-gray-700 text-white w-20 text-center rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                <button id="start-pause-btn" class="btn-control bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-lg shadow-md">INICIAR</button>
+                <button id="reset-btn" class="btn-control bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-6 rounded-lg shadow-md">RESETAR</button>
+            </div>
+        </div>
+
+        <!-- Seção das Fichas -->
+        <div class="bg-gray-900 rounded-lg p-6 shadow-inner">
+            <h2 class="text-3xl font-bold text-center text-white mb-4 font-teko">CONTADOR DE FICHAS</h2>
+            
+            <div class="flex justify-center flex-wrap gap-4 mb-6">
+                <button data-increment="1" class="increment-btn active btn-control bg-gray-700 hover:bg-gray-600 font-bold py-2 px-5 rounded-lg">1</button>
+                <button data-increment="5" class="increment-btn btn-control bg-gray-700 hover:bg-gray-600 font-bold py-2 px-5 rounded-lg">5</button>
+                <button data-increment="10" class="increment-btn btn-control bg-gray-700 hover:bg-gray-600 font-bold py-2 px-5 rounded-lg">10</button>
+                <button data-increment="25" class="increment-btn btn-control bg-gray-700 hover:bg-gray-600 font-bold py-2 px-5 rounded-lg">25</button>
+            </div>
+
+            <div id="chip-container" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-6 text-center">
+                <!-- As fichas serão inseridas aqui pelo JavaScript -->
+            </div>
+
+            <div class="mt-8 text-center">
+                <p class="text-2xl text-gray-400 font-teko">VALOR TOTAL DO STACK</p>
+                <p id="total-value" class="text-6xl font-bold text-green-400 font-teko">R$ 0</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- CONFIGURAÇÃO INICIAL ---
+            const chipsData = [
+                { id: 'white', name: 'Branca', value: 200, count: 0, class: 'chip-white' },
+                { id: 'red', name: 'Vermelha', value: 25, count: 0, class: 'chip-red' },
+                { id: 'green', name: 'Verde', value: 25, count: 0, class: 'chip-green' },
+                { id: 'black', name: 'Preta', value: 50, count: 0, class: 'chip-black' },
+                { id: 'blue', name: 'Azul', value: 400, count: 0, class: 'chip-blue' },
+            ];
+
+            const blindLevels = [
+                { small: 25, big: 50 },
+                { small: 50, big: 100 },
+                { small: 75, big: 150 },
+                { small: 100, big: 200 },
+                { small: 150, big: 300 },
+                { small: 200, big: 400 },
+                { small: 300, big: 600 },
+                { small: 400, big: 800 },
+                { small: 500, big: 1000 },
+                { small: 800, big: 1600 },
+                { small: 1000, big: 2000 },
+            ];
+
+            // --- VARIÁVEIS DE ESTADO ---
+            let currentIncrement = 1;
+            let timerInterval = null;
+            let timeRemaining = parseInt(document.getElementById('timer-input').value) * 60;
+            let isPaused = true;
+            let currentRound = 0;
+
+            // --- ELEMENTOS DO DOM ---
+            const chipContainer = document.getElementById('chip-container');
+            const totalValueEl = document.getElementById('total-value');
+            const incrementBtns = document.querySelectorAll('.increment-btn');
+            
+            const timerDisplay = document.getElementById('timer-display');
+            const roundDisplay = document.getElementById('round-display');
+            const blindsDisplay = document.getElementById('blinds-display');
+            const timerInput = document.getElementById('timer-input');
+            const startPauseBtn = document.getElementById('start-pause-btn');
+            const resetBtn = document.getElementById('reset-btn');
+
+            // --- LÓGICA DAS FICHAS ---
+            function updateTotalValue() {
+                const total = chipsData.reduce((sum, chip) => sum + (chip.count * chip.value), 0);
+                totalValueEl.textContent = `R$ ${total.toLocaleString('pt-BR')}`;
+            }
+
+            function updateChipDisplay(id) {
+                const chip = chipsData.find(c => c.id === id);
+                document.getElementById(`count-${id}`).textContent = chip.count;
+            }
+
+            function renderChips() {
+                chipContainer.innerHTML = '';
+                chipsData.forEach(chip => {
+                    const chipEl = document.createElement('div');
+                    chipEl.className = 'flex flex-col items-center space-y-3';
+                    chipEl.innerHTML = `
+                        <div class="chip ${chip.class}">${chip.value}</div>
+                        <p class="font-bold text-white">${chip.name}</p>
+                        <div class="flex items-center space-x-3">
+                            <button data-chip-id="${chip.id}" data-action="decrease" class="btn-control bg-red-600 hover:bg-red-700 text-white w-8 h-8 rounded-full font-bold text-xl flex items-center justify-center">-</button>
+                            <span id="count-${chip.id}" class="text-2xl font-bold w-12 text-center">${chip.count}</span>
+                            <button data-chip-id="${chip.id}" data-action="increase" class="btn-control bg-green-600 hover:bg-green-700 text-white w-8 h-8 rounded-full font-bold text-xl flex items-center justify-center">+</button>
+                        </div>
+                    `;
+                    chipContainer.appendChild(chipEl);
+                });
+                updateTotalValue();
+            }
+
+            chipContainer.addEventListener('click', (e) => {
+                if (e.target.tagName === 'BUTTON') {
+                    const id = e.target.dataset.chipId;
+                    const action = e.target.dataset.action;
+                    const chip = chipsData.find(c => c.id === id);
+
+                    if (action === 'increase') {
+                        chip.count += currentIncrement;
+                    } else if (action === 'decrease') {
+                        chip.count = Math.max(0, chip.count - currentIncrement);
+                    }
+                    updateChipDisplay(id);
+                    updateTotalValue();
+                }
+            });
+
+            incrementBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    incrementBtns.forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    currentIncrement = parseInt(btn.dataset.increment);
+                });
+            });
+
+            // --- LÓGICA DO TIMER ---
+            function formatTime(seconds) {
+                const mins = Math.floor(seconds / 60);
+                const secs = seconds % 60;
+                return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+            }
+
+            function updateTimerDisplay() {
+                timerDisplay.textContent = formatTime(timeRemaining);
+            }
+
+
+            function updateLevelDisplay() {
+                const level = blindLevels[currentRound] || blindLevels[blindLevels.length - 1];
+                roundDisplay.textContent = currentRound + 1;
+                blindsDisplay.textContent = `${level.small} / ${level.big}`;
+            }
+
+            function startTimer() {
+                if (isPaused) {
+                    isPaused = false;
+                    startPauseBtn.textContent = 'PAUSAR';
+                    startPauseBtn.classList.remove('bg-blue-600', 'hover:bg-blue-700');
+                    startPauseBtn.classList.add('bg-yellow-500', 'hover:bg-yellow-600');
+                    timerInput.disabled = true;
+
+                    timerInterval = setInterval(() => {
+                        timeRemaining--;
+                        updateTimerDisplay();
+
+                        if (timeRemaining <= 0) {
+                            levelUp();
+                        }
+                    }, 1000);
+                }
+            }
+            
+            function pauseTimer() {
+                 if (!isPaused) {
+                    isPaused = true;
+                    clearInterval(timerInterval);
+                    startPauseBtn.textContent = 'CONTINUAR';
+                    startPauseBtn.classList.remove('bg-yellow-500', 'hover:bg-yellow-600');
+                    startPauseBtn.classList.add('bg-blue-600', 'hover:bg-blue-700');
+                }
+            }
+
+            function levelUp() {
+                currentRound++;
+                if (currentRound >= blindLevels.length) {
+                    currentRound = blindLevels.length - 1; // Fica no último nível
+                    // Opcional: parar o timer no final
+                    pauseTimer();
+                    startPauseBtn.textContent = 'FIM DE JOGO';
+                    startPauseBtn.disabled = true;
+                }
+                updateLevelDisplay();
+                timeRemaining = parseInt(timerInput.value) * 60;
+                updateTimerDisplay();
+                
+                // Toca um som de alerta
+                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                oscillator.type = 'sine';
+                oscillator.frequency.setValueAtTime(880, audioContext.currentTime);
+                gainNode.gain.setValueAtTime(0.5, audioContext.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.0001, audioContext.currentTime + 1);
+                oscillator.start();
+                oscillator.stop(audioContext.currentTime + 1);
+            }
+
+            function resetTimer() {
+                pauseTimer();
+                isPaused = true;
+                currentRound = 0;
+                timeRemaining = parseInt(timerInput.value) * 60;
+                timerInput.disabled = false;
+                startPauseBtn.disabled = false;
+                startPauseBtn.textContent = 'INICIAR';
+                startPauseBtn.classList.remove('bg-yellow-500', 'hover:bg-yellow-600');
+                startPauseBtn.classList.add('bg-blue-600', 'hover:bg-blue-700');
+                updateTimerDisplay();
+                updateLevelDisplay();
+            }
+
+            startPauseBtn.addEventListener('click', () => {
+                if (isPaused) {
+                    startTimer();
+                } else {
+                    pauseTimer();
+                }
+            });
+
+            resetBtn.addEventListener('click', resetTimer);
+            
+            timerInput.addEventListener('change', () => {
+                if (isPaused) {
+                   timeRemaining = parseInt(timerInput.value) * 60;
+                   updateTimerDisplay();
+                }
+            });
+
+            // --- INICIALIZAÇÃO ---
+            renderChips();
+            updateTimerDisplay();
+            updateLevelDisplay();
+        });
+    </script>
+</body>
+</html>
