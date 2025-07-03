@@ -21,9 +21,10 @@
             margin: 0;
             padding: 0;
             width: 100%;
+            height: 100%;
             font-family: 'Merriweather', serif;
             color: #e0e0e0;
-            overflow: hidden; /* Evita barras de rolagem */
+            overflow: hidden; /* Mantém o fundo fixo e sem rolagem */
         }
 
         /* Fundo com imagem e sobreposição escura */
@@ -61,11 +62,12 @@
         .main-container {
             display: flex;
             justify-content: center;
-            align-items: center;
-            /* Height is set by JS */
+            align-items: flex-start; /* Alinha ao topo para facilitar a rolagem */
             width: 100%;
+            height: 100%;
             padding: 2rem;
             box-sizing: border-box;
+            overflow-y: auto; /* Permite que este container role se o conteúdo for grande */
         }
 
         /* A carta de amor */
@@ -82,6 +84,8 @@
             opacity: 0;
             transform: translateY(30px);
             animation: fadeInLetter 2s ease-out 0.5s forwards;
+            margin-top: 2rem; /* Adiciona uma margem no topo */
+            margin-bottom: 2rem; /* Adiciona uma margem no fundo */
         }
         
         /* Animação de entrada da carta */
@@ -136,6 +140,8 @@
             }
             .love-letter {
                 padding: 2rem 1.5rem;
+                margin-top: 1rem;
+                margin-bottom: 1rem;
             }
             .love-letter h1 {
                 font-size: 2rem;
@@ -176,16 +182,14 @@
         </article>
     </main>
 
+    <!-- O JavaScript para ajustar a altura não é mais estritamente necessário com a rolagem, mas não prejudica. -->
     <script>
-        // Script para corrigir a altura em navegadores mobile (iOS Chrome, etc.)
         function setContainerHeight() {
             const mainContainer = document.querySelector('.main-container');
             if (mainContainer) {
                 mainContainer.style.height = `${window.innerHeight}px`;
             }
         }
-
-        // Ajusta a altura na carga da página e em redimensionamentos
         window.addEventListener('load', setContainerHeight);
         window.addEventListener('resize', setContainerHeight);
     </script>
