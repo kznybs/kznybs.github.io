@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Proposta de Contratação 💖</title>
+    
+    <!-- Tailwind CSS for styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts for a cute look -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700;900&display=swap" rel="stylesheet">
+    
+    <style>
+        /* * =================================
+         * ESTILOS LINDOS E AVANÇADOS ✨
+         * =================================
+         */
+        body {
+            font-family: 'Poppins', sans-serif;
+            overflow: hidden; /* Prevent scrollbars during animations */
+        }
+
+        /* Gradient background with a subtle animation */
+        .gradient-bg {
+            background: linear-gradient(135deg, #fff1f2, #ffe4e6, #fce7f3);
+            background-size: 400% 400%;
+            animation: gradient-flow 15s ease infinite;
+        }
+
+        @keyframes gradient-flow {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* Animated shapes background container */
+        #background-shapes {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            overflow: hidden;
+        }
+        
+        /* Style for individual shapes */
+        .shape {
+            position: absolute;
+            bottom: -150px; /* Start below the screen */
+            border-radius: 50%;
+            opacity: 0.15;
+            animation: floatUp 25s infinite linear;
+        }
+
+        /* Animation for shapes floating up */
+        @keyframes floatUp {
+            0% {
+                transform: translateY(0) translateX(0);
+            }
+            100% {
+                transform: translateY(-120vh) translateX(50px); /* Move up and slightly to the side */
+            }
+        }
+
+
+        /* Main container for the slide deck */
+        .slide-deck {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            perspective: 1000px; /* For 3D effects if needed */
+            z-index: 1; /* Ensure slides are above the background shapes */
+        }
+
+        /* Individual slide styling */
+        .slide {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transform: translateX(100%);
+            transition: transform 0.8s cubic-bezier(0.77, 0, 0.175, 1), opacity 0.8s ease;
+            pointer-events: none; /* Prevent interaction with hidden slides */
+        }
+
+        .slide.active {
+            opacity: 1;
+            transform: translateX(0);
+            pointer-events: auto;
+        }
+
+        .slide.exiting {
+            transform: translateX(-100%);
+            opacity: 0;
+        }
+
+        /* Card styling */
+        .content-card {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(10px);
+            border-radius: 24px;
+            box-shadow: 0 20px 40px rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            max-width: 600px;
+            width: 90%;
+        }
+
+        /* Staggered animation for list items */
+        .slide.active .animated-item {
+            animation: fadeInUp 0.5s ease-out forwards;
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        @keyframes fadeInUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Navigation buttons styling */
+        .nav-btn {
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        .nav-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+        .nav-btn:disabled {
+            background-color: #fda4af;
+            cursor: not-allowed;
+            opacity: 0.5;
+            transform: translateY(0);
+            box-shadow: none;
+        }
+
+        /* Progress bar styling */
+        #progress-bar-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 6px;
+            background-color: rgba(255, 255, 255, 0.5);
+            z-index: 10;
+        }
+        #progress-bar {
+            width: 0%;
+            height: 100%;
+            background-color: #f43f5e;
+            transition: width 0.5s ease-out;
+            border-radius: 0 3px 3px 0;
+        }
+
+        /* Confetti styling */
+        #confetti-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            overflow: hidden;
+            z-index: 9999;
+        }
+        .confetti {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background-color: #f43f5e;
+            opacity: 0.7;
+            animation: fall 5s linear forwards; /* Changed to 'forwards' to stop at the end */
+        }
+        @keyframes fall {
+            to {
+                transform: translateY(100vh) rotate(360deg);
+                opacity: 0;
+            }
+        }
+    </style>
+</head>
+<body class="gradient-bg">
+
+    <div id="progress-bar-container"><div id="progress-bar"></div></div>
+    <div id="confetti-container"></div>
+    <div id="background-shapes"></div>
+
+    <div class="slide-deck flex flex-col h-screen">
+        
+        <!-- Main content area for slides -->
+        <main class="flex-grow relative">
+            <!-- Slide 1 -->
+            <div class="slide active">
+                <div class="content-card p-8 text-center">
+                    <h1 class="text-3xl font-black text-rose-600 mb-2 animated-item" style="animation-delay: 0.1s;">Proposta de Contratação 💖</h1>
+                    <div class="text-lg text-gray-700 mb-6 animated-item" style="animation-delay: 0.2s;">
+                        <p><span class="font-bold">Para:</span> Mãe da Alice</p>
+                        <p><span class="font-bold">De:</span> Seu Ingrediente Secreto para o Sucesso</p>
+                    </div>
+                    <p class="text-gray-600 animated-item" style="animation-delay: 0.3s;">Clique em "Próximo" para começar!</p>
+                </div>
+            </div>
+
+            <!-- Slide 2 -->
+            <div class="slide">
+                <div class="content-card p-6 sm:p-8">
+                    <h2 class="text-2xl font-bold text-rose-500 mb-4 animated-item" style="animation-delay: 0.1s;">Slide 1: Investimento no Sucesso!</h2>
+                    <p class="mb-4 text-gray-600 animated-item" style="animation-delay: 0.2s;">Me contratar é investir no crescimento do nosso restaurante e no seu bem-estar.</p>
+                    <ul class="space-y-3">
+                        <li class="flex items-start animated-item" style="animation-delay: 0.3s;"><span class="text-rose-400 mr-3 text-xl">✨</span><div><span class="font-bold">Menos preocupação:</span> Deixe a tecnologia e as tarefas do dia a dia comigo!</div></li>
+                        <li class="flex items-start animated-item" style="animation-delay: 0.4s;"><span class="text-rose-400 mr-3 text-xl">😊</span><div><span class="font-bold">Mais clientes felizes:</span> O atendimento e a organização vão brilhar.</div></li>
+                        <li class="flex items-start animated-item" style="animation-delay: 0.5s;"><span class="text-rose-400 mr-3 text-xl">💪</span><div><span class="font-bold">Energia e dedicação:</span> Sou um ótimo trabalhador, pronto para dar o meu melhor.</div></li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Slide 3 -->
+            <div class="slide">
+                 <div class="content-card p-6 sm:p-8">
+                    <h2 class="text-2xl font-bold text-amber-600 mb-4 animated-item" style="animation-delay: 0.1s;">Slide 2: Minhas Habilidades Especiais</h2>
+                    <ul class="space-y-4">
+                        <li class="animated-item" style="animation-delay: 0.2s;"><p class="font-bold flex items-center"><span class="text-xl mr-2">💻</span> Mago da Tecnologia:</p><ul class="list-disc list-inside pl-6 mt-1 space-y-1 text-gray-600"><li>Gerenciar pedidos, redes sociais e pagamentos.</li></ul></li>
+                        <li class="animated-item" style="animation-delay: 0.3s;"><p><span class="font-bold">⭐ Funcionário Nota 1000:</span> Dedicação total para ver o restaurante lotado.</p></li>
+                        <li class="animated-item" style="animation-delay: 0.4s;"><p><span class="font-bold">😄 Gerador Oficial de Bom Humor:</span> Mantenho o ambiente leve e positivo.</p></li>
+                        <li class="animated-item" style="animation-delay: 0.5s;"><p><span class="font-bold">🤗 Doutorado em Abraços:</span> Para celebrar vitórias e acalmar nos dias corridos.</p></li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Slide 4 -->
+            <div class="slide">
+                <div class="content-card p-6 sm:p-8">
+                    <h2 class="text-2xl font-bold text-teal-600 mb-4 animated-item" style="animation-delay: 0.1s;">Slide 3: Benefícios Exclusivos</h2>
+                    <ul class="space-y-3 text-gray-700">
+                        <li class="flex items-start animated-item" style="animation-delay: 0.2s;"><span class="mr-3 text-xl">👨‍🍳</span><div><span class="font-bold">Assistente de Chef:</span> Pronto para ajudar a criar e aprimorar os pratos mais deliciosos!</div></li>
+                        <li class="flex items-start animated-item" style="animation-delay: 0.3s;"><span class="mr-3 text-xl">🎶</span><div><span class="font-bold">Playlist Perfeita:</span> As melhores músicas para deixar os clientes à vontade.</div></li>
+                        <li class="flex items-start animated-item" style="animation-delay: 0.4s;"><span class="mr-3 text-xl">🏃‍♂️</span><div><span class="font-bold">Flexibilidade Total:</span> Estou aqui para o que der e vier.</div></li>
+                        <li class="flex items-start animated-item" style="animation-delay: 0.5s;"><span class="mr-3 text-xl">❤️</span><div><span class="font-bold">Amor Incondicional:</span> O melhor tempero de todos, presente em cada tarefa.</div></li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Slide 5 -->
+            <div class="slide">
+                <div class="content-card bg-rose-500 text-white p-8 text-center">
+                    <h2 class="text-3xl font-bold mb-3 animated-item" style="animation-delay: 0.1s;">A Decisão Final</h2>
+                    <p class="mb-6 text-rose-100 animated-item" style="animation-delay: 0.2s;">Então, Mãe da Alice... temos um acordo? Prometo ser a melhor contratação que você já fez!</p>
+                    <h3 class="text-xl font-bold mb-4 text-white animated-item" style="animation-delay: 0.3s;">Aceita?</h3>
+                    <div class="flex flex-col sm:flex-row justify-center gap-4 animated-item" style="animation-delay: 0.4s;">
+                        <div id="acceptBtn1" class="bg-white text-rose-500 font-bold py-3 px-6 rounded-full shadow-lg cursor-pointer hover:bg-rose-100 transition-transform transform hover:scale-105">Sim! Vamos fazer sucesso!</div>
+                        <div id="acceptBtn2" class="bg-rose-100 text-rose-600 font-bold py-3 px-6 rounded-full shadow-lg cursor-pointer hover:bg-white transition-transform transform hover:scale-105">Com certeza!</div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Navigation Footer -->
+        <footer class="p-4 w-full max-w-4xl mx-auto z-10">
+            <div class="flex justify-between items-center">
+                <button id="prevBtn" class="nav-btn bg-white text-rose-500 font-bold py-3 px-8 rounded-full">Anterior</button>
+                <span id="slide-counter" class="text-gray-500 font-semibold"></span>
+                <button id="nextBtn" class="nav-btn bg-rose-500 text-white font-bold py-3 px-8 rounded-full">Próximo</button>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+    /* * =================================
+     * JAVASCRIPT PARA INTERATIVIDADE 🚀
+     * =================================
+     */
+    document.addEventListener('DOMContentLoaded', () => {
+        // --- Elementos do DOM ---
+        const slides = document.querySelectorAll('.slide');
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+        const slideCounter = document.getElementById('slide-counter');
+        const progressBar = document.getElementById('progress-bar');
+        const confettiContainer = document.getElementById('confetti-container');
+        const shapesContainer = document.getElementById('background-shapes');
+        const acceptBtn1 = document.getElementById('acceptBtn1');
+        const acceptBtn2 = document.getElementById('acceptBtn2');
+
+        // --- Estado da Apresentação ---
+        let currentSlide = 0;
+        const totalSlides = slides.length;
+
+        // --- Funções ---
+
+        /**
+         * Atualiza a tela para mostrar o slide correto e o estado dos botões.
+         */
+        function updateDisplay() {
+            slides.forEach((slide, index) => {
+                slide.classList.remove('active', 'exiting');
+                if (index === currentSlide) slide.classList.add('active');
+            });
+            slideCounter.textContent = `${currentSlide + 1} / ${totalSlides}`;
+            const progressPercentage = (currentSlide) / (totalSlides - 1) * 100;
+            progressBar.style.width = `${progressPercentage}%`;
+            prevBtn.disabled = currentSlide === 0;
+            nextBtn.disabled = currentSlide === totalSlides - 1;
+        }
+        
+        /**
+         * Navega para um slide específico com animação.
+         */
+        function goToSlide(slideIndex) {
+            if (slideIndex < 0 || slideIndex >= totalSlides) return;
+            const previousSlide = slides[currentSlide];
+            previousSlide.classList.add('exiting');
+            currentSlide = slideIndex;
+            setTimeout(() => updateDisplay(), 100); 
+        }
+
+        /**
+         * Cria e anima confetes para uma celebração no final.
+         */
+        function launchConfetti() {
+            confettiContainer.innerHTML = '';
+            const colors = ['#f43f5e', '#fb7185', '#fda4af', '#fde2e4', '#fecdd3'];
+            for (let i = 0; i < 150; i++) { // More confetti!
+                const confetti = document.createElement('div');
+                confetti.classList.add('confetti');
+                confetti.style.left = `${Math.random() * 100}vw`;
+                confetti.style.top = `${Math.random() * -50}vh`;
+                confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                confetti.style.animationDelay = `${Math.random() * 2}s`;
+                confetti.style.transform = `scale(${Math.random() * 1.5 + 0.5})`;
+                confettiContainer.appendChild(confetti);
+            }
+        }
+
+        /**
+         * Cria as formas flutuantes no fundo.
+         */
+        function createBackgroundShapes() {
+            const shapeCount = 20;
+            const colors = ['rgba(252, 211, 77, 0.5)', 'rgba(59, 130, 246, 0.3)', 'rgba(244, 63, 94, 0.4)', 'rgba(255, 255, 255, 0.6)'];
+            for (let i = 0; i < shapeCount; i++) {
+                const shape = document.createElement('div');
+                shape.classList.add('shape');
+                const size = Math.random() * 120 + 20;
+                shape.style.width = `${size}px`;
+                shape.style.height = `${size}px`;
+                shape.style.left = `${Math.random() * 100}%`;
+                shape.style.animationDuration = `${Math.random() * 15 + 10}s`;
+                shape.style.animationDelay = `${Math.random() * 10}s`;
+                shape.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                shapesContainer.appendChild(shape);
+            }
+        }
+
+        // --- Event Listeners ---
+        nextBtn.addEventListener('click', () => goToSlide(currentSlide + 1));
+        prevBtn.addEventListener('click', () => goToSlide(currentSlide - 1));
+        
+        // Add event listeners to the final acceptance buttons
+        acceptBtn1.addEventListener('click', launchConfetti);
+        acceptBtn2.addEventListener('click', launchConfetti);
+        
+        // --- Inicialização ---
+        updateDisplay();
+        createBackgroundShapes();
+    });
+    </script>
+</body>
+</html>
