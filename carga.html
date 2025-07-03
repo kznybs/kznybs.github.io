@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Calculadora de Balanceamento de Carga</title>
+  <!-- Incluindo Tailwind CSS para um design moderno -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    /* Fonte personalizada para uma melhor aparência */
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+    body {
+      font-family: 'Inter', sans-serif;
+    }
+    /* Estilo para placeholders */
+    ::placeholder {
+        color: #9ca3af;
+    }
+    /* Garante que o ícone de lixeira não seja afetado pela cor do texto do botão */
+    .remove-btn svg {
+        color: white;
+    }
+  </style>
+</head>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen p-4">
+
+<div class="container w-full max-w-5xl mx-auto bg-white p-6 sm:p-8 rounded-2xl shadow-lg">
+  
+  <header class="text-center mb-8">
+    <h1 class="text-3xl font-bold text-gray-800">Calculadora de Balanceamento de Carga</h1>
+    <p class="text-gray-500 mt-2">Insira as cargas e os vagões para cada cálculo de forma independente.</p>
+  </header>
+
+  <!-- CÁLCULO 1 -->
+  <div id="calculoContainer1" class="p-4 rounded-lg border border-gray-200">
+    <h2 class="text-2xl font-bold text-blue-600 mb-4">Cálculo 1</h2>
+    <!-- Seção de Carga Total 1 -->
+    <div class="mb-6">
+        <label for="cargaTotal1" class="block text-sm font-medium text-gray-700 mb-2">Carga Total 1</label>
+        <input type="number" id="cargaTotal1" placeholder="Ex: 2475" class="w-full max-w-sm p-3 bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
+    </div>
+    <!-- Entradas dos Vagões 1 -->
+    <div>
+      <h3 class="text-xl font-semibold text-gray-800 mb-4">Vagões - Carga 1</h3>
+      <div id="vagoesLista1" class="space-y-4"></div>
+      <button onclick="adicionarVagao(1)" class="mt-4 bg-blue-500 text-white font-semibold py-2 px-4 rounded-lg hover:bg-blue-600 transition-all text-sm">
+        + Adicionar Vagão para Carga 1
+      </button>
+    </div>
+  </div>
+
+  <hr class="my-8 border-dashed">
+
+  <!-- CÁLCULO 2 -->
+  <div id="calculoContainer2" class="p-4 rounded-lg bg-slate-800 border border-slate-700">
+    <h2 class="text-2xl font-bold text-indigo-400 mb-4">Cálculo 2</h2>
+    <!-- Seção de Carga Total 2 -->
+    <div class="mb-6">
+        <label for="cargaTotal2" class="block text-sm font-medium text-slate-300 mb-2">Carga Total 2 (Opcional)</label>
+        <input type="number" id="cargaTotal2" placeholder="Ex: 3000" class="w-full max-w-sm p-3 bg-slate-700 border border-slate-600 text-white rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition">
+    </div>
+    <!-- Entradas dos Vagões 2 -->
+    <div>
+      <h3 class="text-xl font-semibold text-white mb-4">Vagões - Carga 2</h3>
+      <div id="vagoesLista2" class="space-y-4"></div>
+      <button onclick="adicionarVagao(2)" class="mt-4 bg-indigo-500 text-white font-semibold py-2 px-4 rounded-lg hover:bg-indigo-600 transition-all text-sm">
+        + Adicionar Vagão para Carga 2
+      </button>
+    </div>
+  </div>
+
+    <!-- Botões de Ação Globais -->
+    <div class="flex flex-col sm:flex-row gap-4 mt-8 pt-8 border-t border-gray-200">
+        <button onclick="iniciarCalculos()" class="w-full sm:w-auto flex-grow bg-blue-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-blue-700 transition-all duration-300 shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+          Calcular Todas as Distribuições
+        </button>
+        <button onclick="limparTudo()" class="w-full sm:w-auto flex-grow bg-gray-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-gray-700 transition-all duration-300 shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
+          Limpar Tudo
+        </button>
+      </div>
+  
+  <!-- Seção de Resultados -->
+  <div id="resultado1" class="mt-10"></div>
+  <div id="resultado2" class="mt-6"></div>
+
+</div>
+
+<script>
+  let vagaoCounter1 = 0;
+  let vagaoCounter2 = 0;
+
+  // Função para adicionar uma nova linha de vagão para uma lista específica
+  function adicionarVagao(listNumber) {
+    const isDark = listNumber === 2;
+    const counter = listNumber === 1 ? ++vagaoCounter1 : ++vagaoCounter2;
+    const lista = document.getElementById(`vagoesLista${listNumber}`);
+    
+    const vagaoDiv = document.createElement('div');
+    const themeClasses = {
+        bg: isDark ? 'bg-slate-700 border-slate-600' : 'bg-gray-50 border-gray-200',
+        text: isDark ? 'text-slate-300' : 'text-gray-700',
+        inputBg: isDark ? 'bg-slate-600 border-slate-500 text-white' : 'bg-white border-gray-300'
+    };
+
+    vagaoDiv.className = `vagao-item grid grid-cols-1 sm:grid-cols-12 gap-3 p-4 border rounded-lg ${themeClasses.bg}`;
+    vagaoDiv.id = `vagao-item-${listNumber}-${counter}`;
+
+    vagaoDiv.innerHTML = `
+        <div class="sm:col-span-1 flex items-center justify-center sm:justify-start">
+            <span class="font-bold ${themeClasses.text}">#${counter}</span>
+        </div>
+        <div class="sm:col-span-4">
+            <label class="block text-xs font-medium ${themeClasses.text} mb-1">Valor de Base (Bloco)</label>
+            <input type="number" class="base-valor w-full p-2 border rounded-md ${themeClasses.inputBg}" placeholder="Ex: 850">
+        </div>
+        <div class="sm:col-span-3">
+            <label class="block text-xs font-medium ${themeClasses.text} mb-1">Altura (opcional)</label>
+            <input type="number" class="altura-valor w-full p-2 border rounded-md ${themeClasses.inputBg}" placeholder="Auto">
+        </div>
+        <div class="sm:col-span-3">
+            <label class="block text-xs font-medium ${themeClasses.text} mb-1">Ajuste Sobra (opcional)</label>
+            <input type="number" class="ajuste-valor w-full p-2 border rounded-md ${themeClasses.inputBg}" placeholder="Auto">
+        </div>
+        <div class="sm:col-span-1 flex items-center justify-center">
+            <button onclick="removerVagao('${vagaoDiv.id}')" class="remove-btn mt-4 sm:mt-0 bg-red-500 hover:bg-red-600 text-white p-2 rounded-full transition-all">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16"><path d="M2.5 1a1 1 0 0 0-1 1v1a1 1 0 0 0 1 1H3v9a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V4h.5a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H10a1 1 0 0 0-1-1H7a1 1 0 0 0-1 1zm3 4a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 .5-.5M8 5a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7A.5.5 0 0 1 8 5m3 .5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 1 0"/></svg>
+            </button>
+        </div>
+    `;
+    lista.appendChild(vagaoDiv);
+  }
+
+  function removerVagao(elementId) {
+    const vagaoParaRemover = document.getElementById(elementId);
+    if (vagaoParaRemover) vagaoParaRemover.remove();
+  }
+
+  function exibirMensagem(containerId, titulo, mensagem, tipo = 'erro') {
+    const resultadoDiv = document.getElementById(containerId);
+    if (!resultadoDiv) return;
+    const corBorda = tipo === 'erro' ? 'border-red-500' : 'border-blue-500';
+    const corTexto = tipo === 'erro' ? 'text-red-700' : 'text-blue-700';
+    const corBg = tipo === 'erro' ? 'bg-red-50' : 'bg-blue-50';
+    resultadoDiv.innerHTML = `<div class="p-4 rounded-lg ${corBg} ${corBorda} border-l-4"><h3 class="font-bold ${corTexto}">${titulo}</h3><p class="${corTexto}">${mensagem}</p></div>`;
+  }
+  
+  function getCombinations(arrays) {
+    if (!arrays || arrays.length === 0) return [[]];
+    return arrays.reduce((acc, current) => acc.flatMap(a => current.map(c => [...a, c])), [[]]);
+  }
+
+  function iniciarCalculos() {
+    document.getElementById('resultado1').innerHTML = '';
+    document.getElementById('resultado2').innerHTML = '';
+
+    // Processar Carga 1
+    const cargaTotal1 = parseFloat(document.getElementById('cargaTotal1').value);
+    if (!isNaN(cargaTotal1) && cargaTotal1 > 0) {
+        const vagoesData1 = lerDadosVagoes('vagoesLista1', 'resultado1');
+        if (vagoesData1) calcularCarga(cargaTotal1, vagoesData1, 'resultado1', 'light');
+    } else {
+        exibirMensagem('resultado1', 'Entrada Inválida', 'Insira um valor válido para a Carga Total 1.');
+    }
+
+    // Processar Carga 2
+    const cargaTotal2 = parseFloat(document.getElementById('cargaTotal2').value);
+    if (!isNaN(cargaTotal2) && cargaTotal2 > 0) {
+        const vagoesData2 = lerDadosVagoes('vagoesLista2', 'resultado2');
+        if (vagoesData2) calcularCarga(cargaTotal2, vagoesData2, 'resultado2', 'dark');
+    }
+  }
+
+  function lerDadosVagoes(listId, resultContainerId) {
+    const vagaoItems = document.querySelectorAll(`#${listId} .vagao-item`);
+    if (vagaoItems.length === 0) {
+        exibirMensagem(resultContainerId, 'Nenhum Vagão', 'Adicione pelo menos um vagão para este cálculo.');
+        return null;
+    }
+    let vagoesData = [];
+    let erroValidacao = false;
+    for (const item of vagaoItems) {
+        const base = parseFloat(item.querySelector('.base-valor').value);
+        const altura = item.querySelector('.altura-valor').value !== '' ? parseFloat(item.querySelector('.altura-valor').value) : null;
+        const ajusteManual = item.querySelector('.ajuste-valor').value !== '' ? parseFloat(item.querySelector('.ajuste-valor').value) : null;
+        const idOriginal = parseInt(item.querySelector('.font-bold').textContent.replace('#', ''));
+        if (isNaN(base) || base <= 0) {
+            exibirMensagem(resultContainerId, 'Erro no Vagão', `O valor de base do vagão #${idOriginal} é inválido.`);
+            erroValidacao = true;
+            break; 
+        }
+        vagoesData.push({
+            id: idOriginal, base, altura,
+            ajuste: ajusteManual ?? 0,
+            ajusteLocked: ajusteManual !== null,
+            tipo: altura !== null ? 'Manual' : 'Auto'
+        });
+    }
+    return erroValidacao ? null : vagoesData;
+  }
+
+  function calcularCarga(cargaTotal, todosOsVagoes, containerId, theme) {
+    const vagoesVariaveis = todosOsVagoes.filter(v => v.altura === null);
+    const vagoesComAlturaDefinida = todosOsVagoes.filter(v => v.altura !== null);
+    const cargaInicialDefinida = vagoesComAlturaDefinida.reduce((acc, v) => acc + (v.base * v.altura) + (v.ajusteLocked ? v.ajuste : 0), 0);
+
+    if (vagoesVariaveis.length > 0) {
+        const cargaRestante = cargaTotal - cargaInicialDefinida;
+        const vagoesAgrupados = vagoesVariaveis.reduce((acc, vagao) => {
+            if (!acc[vagao.base]) acc[vagao.base] = [];
+            acc[vagao.base].push(vagao);
+            return acc;
+        }, {});
+        const groupKeys = Object.keys(vagoesAgrupados);
+        const avgLoadPerWagon = vagoesVariaveis.length > 0 ? cargaRestante / vagoesVariaveis.length : 0;
+        const alturaOptionsPorGrupo = groupKeys.map(base => [...new Set([Math.floor(avgLoadPerWagon / parseInt(base)), Math.ceil(avgLoadPerWagon / parseInt(base))])].filter(h => h > 0));
+        const heightCombinations = getCombinations(alturaOptionsPorGrupo);
+        let melhorCombinacao = null;
+        for (const combo of heightCombinations) {
+            let cargaProvisoria = 0;
+            groupKeys.forEach((base, index) => { cargaProvisoria += vagoesAgrupados[base].length * parseInt(base) * combo[index]; });
+            const sobraTotal = cargaRestante - cargaProvisoria;
+            if (melhorCombinacao === null || Math.abs(sobraTotal) < Math.abs(melhorCombinacao.sobraTotal)) {
+                melhorCombinacao = { sobraTotal, heights: combo.reduce((acc, height, index) => ({...acc, [groupKeys[index]]: height}), {}) };
+            }
+        }
+        if (!melhorCombinacao) {
+            exibirMensagem(containerId, 'Erro de Cálculo', 'Não foi possível encontrar uma combinação de alturas viável.');
+            return;
+        }
+        vagoesVariaveis.forEach(vagao => { vagao.altura = melhorCombinacao.heights[vagao.base]; });
+    }
+
+    const vagoesParaAjuste = todosOsVagoes.filter(v => !v.ajusteLocked);
+    const cargaProvisoriaTotal = todosOsVagoes.reduce((acc, v) => acc + (v.base * v.altura) + (v.ajusteLocked ? v.ajuste : 0), 0);
+    const sobraFinal = cargaTotal - cargaProvisoriaTotal;
+    if (vagoesParaAjuste.length > 0) {
+        const quociente = Math.trunc(sobraFinal / vagoesParaAjuste.length);
+        const resto = sobraFinal % vagoesParaAjuste.length;
+        let restoCounter = 0;
+        vagoesParaAjuste.forEach(vagao => {
+            let ajusteAutomatico = quociente;
+            if (restoCounter < Math.abs(resto)) { ajusteAutomatico += (resto > 0 ? 1 : -1); restoCounter++; }
+            vagao.ajuste += ajusteAutomatico;
+        });
+    }
+    
+    todosOsVagoes.forEach(v => v.cargaFinal = (v.base * v.altura) + v.ajuste);
+    const cargaCalculadaTotal = todosOsVagoes.reduce((acc, vagao) => acc + vagao.cargaFinal, 0);
+    todosOsVagoes.sort((a, b) => a.id - b.id);
+    renderizarResultados(cargaTotal, cargaCalculadaTotal, todosOsVagoes, containerId, theme);
+  }
+
+  function renderizarResultados(cargaTotal, cargaCalculadaTotal, resultados, containerId, theme) {
+    const isDark = theme === 'dark';
+    const themeClasses = {
+        bg: isDark ? 'bg-slate-800' : 'bg-gray-50',
+        text: isDark ? 'text-slate-200' : 'text-gray-800',
+        textMuted: isDark ? 'text-slate-400' : 'text-gray-700',
+        cardBg: isDark ? 'bg-slate-700' : 'bg-white',
+        cardBorder: isDark ? 'border-slate-600' : 'border-gray-200',
+        title: isDark ? 'text-indigo-400' : 'text-blue-600'
+    };
+    let resultadosHTML = `<div class="${themeClasses.bg} p-6 rounded-xl border ${themeClasses.cardBorder}">
+        <h2 class="text-2xl font-bold ${themeClasses.title} text-center mb-6">Resultado para Carga de ${cargaTotal}</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">`;
+    resultados.forEach(res => {
+        const borderColor = res.ajusteLocked ? 'border-purple-400' : (res.tipo === 'Manual' ? 'border-yellow-400' : themeClasses.cardBorder);
+        const tagBg = res.ajusteLocked ? 'bg-purple-200' : (res.tipo === 'Manual' ? 'bg-yellow-200' : (isDark ? 'bg-slate-600' : 'bg-blue-100'));
+        const tagText = res.ajusteLocked ? 'text-purple-800' : (res.tipo === 'Manual' ? 'text-yellow-800' : (isDark ? 'text-slate-100' : 'text-blue-800'));
+        resultadosHTML += `<div class="${themeClasses.cardBg} p-4 rounded-lg border ${borderColor} shadow-sm text-center">
+            <div class="flex justify-between items-center">
+                <p class="font-bold text-lg ${isDark ? 'text-blue-400' : 'text-blue-700'}">Vagão #${res.id}</p>
+                <span class="text-xs font-semibold ${tagBg} ${tagText} px-2 py-1 rounded-full">${res.tipo}</span>
+            </div>
+            <p class="${themeClasses.textMuted} mt-2">Base: ${res.base}</p>
+            <p class="${themeClasses.textMuted}">Altura: <strong class="${themeClasses.text}">${res.altura}</strong></p>
+            <p class="${themeClasses.textMuted}">Sobra/Ajuste: <strong class="${res.ajuste >= 0 ? 'text-green-500' : 'text-red-500'}">${res.ajuste}</strong></p>
+            <hr class="my-2 ${themeClasses.cardBorder}">
+            <p class="font-semibold ${themeClasses.text}">Carga Final: <span class="text-xl">${res.cargaFinal}</span></p>
+          </div>`;
+    });
+    resultadosHTML += `</div>
+        <div class="mt-8 pt-6 border-t-2 border-dashed ${themeClasses.cardBorder} text-center">
+          <h3 class="text-xl font-semibold ${themeClasses.title}">Resumo Geral</h3>
+          <div class="flex justify-center items-center gap-6 mt-4 flex-wrap">
+              <p class="${themeClasses.textMuted}">Carga Desejada: <strong class="text-lg ${themeClasses.text}">${cargaTotal}</strong></p>
+              <p class="${themeClasses.textMuted}">Carga Calculada: <strong class="text-lg ${isDark ? 'text-blue-400' : 'text-blue-700'}">${cargaCalculadaTotal}</strong></p>
+              <p class="${themeClasses.textMuted}">Sobra Final: <strong class="text-lg ${Math.round(cargaTotal - cargaCalculadaTotal) === 0 ? 'text-green-500' : 'text-red-500'}">${(cargaTotal - cargaCalculadaTotal).toFixed(0)}</strong></p>
+          </div>
+        </div>
+      </div>`;
+    document.getElementById(containerId).innerHTML = resultadosHTML;
+  }
+  
+  function limparTudo() {
+      document.getElementById('cargaTotal1').value = '';
+      document.getElementById('cargaTotal2').value = '';
+      document.getElementById('vagoesLista1').innerHTML = '';
+      document.getElementById('vagoesLista2').innerHTML = '';
+      document.getElementById('resultado1').innerHTML = '';
+      document.getElementById('resultado2').innerHTML = '';
+      vagaoCounter1 = 0;
+      vagaoCounter2 = 0;
+      exibirMensagem('resultado1', 'Formulário Limpo', 'Pode começar um novo cálculo.', 'info');
+      adicionarVagao(1);
+      adicionarVagao(2);
+  }
+
+  window.onload = () => {
+    adicionarVagao(1);
+    adicionarVagao(2);
+  };
+</script>
+
+</body>
+</html>
