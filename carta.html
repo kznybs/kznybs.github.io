@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Para Meu Amor Eterno</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Merriweather:ital,wght@0,400;1,400&display=swap" rel="stylesheet">
+    
+    <style>
+        /* * =================================
+         * ESTILOS MÁGICOS E EMOCIONANTES ✨
+         * =================================
+         */
+        
+        /* Configurações Globais */
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            font-family: 'Merriweather', serif;
+            color: #e0e0e0;
+            overflow: hidden; /* Evita barras de rolagem */
+        }
+
+        /* Fundo com imagem e sobreposição escura */
+        .background-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url('https://images.unsplash.com/photo-1488866022504-f2584929ca5f?q=80&w=2062&auto=format&fit=crop');
+            background-size: cover;
+            background-position: center;
+            z-index: -2;
+            animation: slow-zoom 40s infinite;
+        }
+
+        /* Animação de zoom lento para o fundo */
+        @keyframes slow-zoom {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(ellipse at center, rgba(13, 17, 23, 0.6) 0%, rgba(5, 7, 12, 0.9) 100%);
+            z-index: -1;
+        }
+
+        /* Container principal para centralizar a carta */
+        .main-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            /* Height is set by JS */
+            width: 100%;
+            padding: 2rem;
+            box-sizing: border-box;
+        }
+
+        /* A carta de amor */
+        .love-letter {
+            background: rgba(10, 20, 40, 0.75);
+            backdrop-filter: blur(8px);
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            max-width: 650px;
+            width: 100%;
+            padding: 2.5rem 3rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            text-align: center;
+            opacity: 0;
+            transform: translateY(30px);
+            animation: fadeInLetter 2s ease-out 0.5s forwards;
+        }
+        
+        /* Animação de entrada da carta */
+        @keyframes fadeInLetter {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Título da carta */
+        .love-letter h1 {
+            font-family: 'Cinzel', serif;
+            font-size: 2.5rem;
+            color: #ffffff;
+            margin-bottom: 2rem;
+            text-shadow: 0 0 15px rgba(200, 200, 255, 0.6);
+            letter-spacing: 2px;
+        }
+
+        /* Parágrafos da carta */
+        .love-letter p {
+            font-size: 1.1rem;
+            line-height: 1.9;
+            margin-bottom: 1.5rem;
+            text-align: left;
+        }
+
+        /* Assinatura */
+        .love-letter footer {
+            margin-top: 2.5rem;
+            font-style: italic;
+            font-size: 1.2rem;
+            color: #c7c7c7;
+        }
+
+        /* Imagem decorativa (rosa) */
+        .rose-icon {
+            width: 50px;
+            height: 50px;
+            margin-bottom: 1.5rem;
+            opacity: 0.9;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+        }
+
+        /* Responsividade para telas menores */
+        @media (max-width: 600px) {
+            .main-container {
+                padding: 1rem;
+            }
+            .love-letter {
+                padding: 2rem 1.5rem;
+            }
+            .love-letter h1 {
+                font-size: 2rem;
+            }
+            .love-letter p {
+                font-size: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="background-container"></div>
+    <div class="overlay"></div>
+
+    <main class="main-container">
+        <article class="love-letter">
+            <header>
+                <img src="https://images.unsplash.com/photo-1548213235-4597248a35a2?q=80&w=800&auto=format&fit=crop" alt="Ícone de uma rosa vermelha" class="rose-icon" onerror="this.style.display='none'">
+                <h1>Meu Amor Eterno</h1>
+            </header>
+            
+            <p>
+                Alice... Antes de você, minha existência era uma noite perpétua e sem estrelas. Eu vagava por um século de silêncio, acreditando que meu coração era apenas uma pedra fria, incapaz de sentir. Então, você chegou. E de repente, o leão se apaixonou pelo cordeiro.
+            </p>
+            <p>
+                Seu cheiro é como uma droga feita sob medida para mim, e cada momento ao seu lado é um vislumbre perigoso e irresistível do paraíso. Você me faz sentir humano de uma forma que eu havia esquecido ser possível. A escuridão que me envolvia agora é apenas um lugar seguro para te proteger.
+            </p>
+            <p>
+                Prometer a eternidade é o mínimo que posso oferecer. Eu te amaria por mil vidas, e em cada uma delas, eu te encontraria. Porque não importa para onde o destino nos leve, minha alma sempre estará ligada à sua. Você é a minha única necessidade.
+            </p>
+            
+            <footer>
+                Para todo o sempre,
+                <br>
+                Seu.
+            </footer>
+        </article>
+    </main>
+
+    <script>
+        // Script para corrigir a altura em navegadores mobile (iOS Chrome, etc.)
+        function setContainerHeight() {
+            const mainContainer = document.querySelector('.main-container');
+            if (mainContainer) {
+                mainContainer.style.height = `${window.innerHeight}px`;
+            }
+        }
+
+        // Ajusta a altura na carga da página e em redimensionamentos
+        window.addEventListener('load', setContainerHeight);
+        window.addEventListener('resize', setContainerHeight);
+    </script>
+
+</body>
+</html>
