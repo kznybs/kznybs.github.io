@@ -237,7 +237,7 @@
             ];
             
             let players = [];
-            let pot = 0;
+            let pot = {}; // MUDANÇA: Pote agora é um objeto de fichas
             let chipSelection = {};
             let activePlayerId = null;
             let playerSelectionCallback = null;
@@ -279,7 +279,8 @@
 
             // --- FUNÇÕES DE INICIALIZAÇÃO E RENDERIZAÇÃO ---
             function initializeGame() {
-                pot = 0;
+                // MUDANÇA: Reseta o pote como um objeto
+                pot = { white: 0, red: 0, green: 0, black: 0, blue: 0 };
                 players = [];
                 for (let i = 1; i <= 6; i++) {
                     players.push({
@@ -294,6 +295,11 @@
             function calculatePlayerStack(player) {
                 return Object.keys(player.chips).reduce((total, chipType) => total + (player.chips[chipType] * CHIP_TYPES[chipType].value), 0);
             }
+            
+            // MUDANÇA: Nova função para calcular o valor total do pote
+            function calculatePotValue() {
+                return Object.keys(pot).reduce((total, chipType) => total + (pot[chipType] * CHIP_TYPES[chipType].value), 0);
+            }
 
             function renderAll() {
                 playerGrid.innerHTML = '';
@@ -305,7 +311,8 @@
                     playerEl.innerHTML = `<div class="player-name">${player.name}</div><div class="player-stack">${stackValue.toLocaleString('pt-BR')}</div>`;
                     playerGrid.appendChild(playerEl);
                 });
-                potValueEl.textContent = pot.toLocaleString('pt-BR');
+                // MUDANÇA: Renderiza o valor total do pote
+                potValueEl.textContent = calculatePotValue().toLocaleString('pt-BR');
             }
 
             // --- LÓGICA DE JOGO E OVERLAYS ---
@@ -355,7 +362,6 @@
                 const chipInfo = CHIP_TYPES[chipType];
                 const itemEl = document.createElement('div');
                 itemEl.className = 'chip-selection-item';
-                // CORREÇÃO: Verifica se playerChips existe antes de acessá-lo
                 const currentChips = (playerChips && playerChips[chipType] !== undefined) ? playerChips[chipType] : maxAmount;
                 const availableText = showAvailable ? `<span>No Jogador: ${currentChips}</span>` : '';
                 itemEl.innerHTML = `
@@ -423,12 +429,11 @@
 
             confirmBetBtn.addEventListener('click', () => {
                 const player = players.find(p => p.id === activePlayerId);
-                let betValue = 0;
+                // MUDANÇA: Adiciona as fichas exatas ao pote
                 Object.keys(chipSelection).forEach(chipType => {
                     player.chips[chipType] -= chipSelection[chipType];
-                    betValue += chipSelection[chipType] * CHIP_TYPES[chipType].value;
+                    pot[chipType] += chipSelection[chipType];
                 });
-                pot += betValue;
                 closeAllOverlays();
                 renderAll();
             });
@@ -443,22 +448,20 @@
             });
 
             distributePotBtn.addEventListener('click', () => {
-                if (pot > 0) openPlayerSelection('Quem ganhou o pote?', (winnerId) => {
-                    const winner = players.find(p => p.id === winnerId);
-                    let remainingPot = pot;
-                    const sortedChips = Object.entries(CHIP_TYPES).sort((a,b) => b[1].value - a[1].value);
-                    sortedChips.forEach(([type, info]) => {
-                        const numChips = Math.floor(remainingPot / info.value);
-                        if (numChips > 0) {
-                            winner.chips[type] += numChips;
-                            remainingPot -= numChips * info.value;
-                        }
+                // MUDANÇA: Verifica o valor do pote antes de abrir
+                if (calculatePotValue() > 0) {
+                    openPlayerSelection('Quem ganhou o pote?', (winnerId) => {
+                        const winner = players.find(p => p.id === winnerId);
+                        // MUDANÇA: Transfere as fichas exatas do pote para o vencedor
+                        Object.keys(pot).forEach(chipType => {
+                            winner.chips[chipType] += pot[chipType];
+                        });
+                        // Reseta o pote
+                        pot = { white: 0, red: 0, green: 0, black: 0, blue: 0 };
+                        closeAllOverlays();
+                        renderAll();
                     });
-                    if (remainingPot > 0) winner.chips.red += 1;
-                    pot = 0;
-                    closeAllOverlays();
-                    renderAll();
-                });
+                }
             });
 
             manageChipsBtn.addEventListener('click', () => {
