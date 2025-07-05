@@ -66,6 +66,13 @@
             margin-bottom: 1rem;
             letter-spacing: 1px;
         }
+        
+        .editable-title {
+            cursor: pointer;
+            text-decoration: underline dotted;
+            text-decoration-thickness: 1px;
+            text-underline-offset: 4px;
+        }
 
         /* --- Timer --- */
         .timer-display { font-family: 'Teko', sans-serif; font-size: 4rem; font-weight: 700; color: var(--primary); text-align: center; line-height: 1; }
@@ -166,7 +173,7 @@
                 </div>
                 <div id="player-grid" class="player-grid"></div>
                 <button id="distribute-pot-btn" class="btn btn-distribute">Distribuir Pote</button>
-                <button id="manage-chips-btn" class="btn btn-manage-chips">Gerenciar Fichas</button>
+                <button id="manage-chips-btn" class="btn btn-manage-chips">Gerenciar</button>
                 <button id="reset-all-btn" class="btn btn-reset-all">Resetar Fichas de Todos</button>
             </div>
         </div>
@@ -186,7 +193,7 @@
 
     <div id="manage-chips-view" class="overlay hidden">
         <div class="overlay-content">
-            <h2 id="manage-chips-player-name" class="card-title">Gerenciar Fichas</h2>
+            <h2 id="manage-chips-player-name" class="card-title editable-title">Gerenciar Fichas</h2>
             <div id="manage-chip-list" class="chip-selection-list"></div>
             <div class="overlay-actions">
                 <button id="cancel-manage-chips-btn" class="btn btn-cancel">Cancelar</button>
@@ -222,7 +229,7 @@
                 red: { name: 'Vermelha', value: 25, class: 'chip-red' },
                 green: { name: 'Verde', value: 25, class: 'chip-green' },
                 black: { name: 'Preta', value: 50, class: 'chip-black' },
-                blue: { name: 'Azul', value: 400, class: 'chip-blue' } // Ficha azul adicionada
+                blue: { name: 'Azul', value: 400, class: 'chip-blue' }
             };
             const BLIND_LEVELS = [
                 { small: 25, big: 50 }, { small: 50, big: 100 }, { small: 75, big: 150 },
@@ -262,6 +269,8 @@
             const manageChipsBtn = document.getElementById('manage-chips-btn');
             const resetAllBtn = document.getElementById('reset-all-btn');
 
+            const manageChipsPlayerNameEl = document.getElementById('manage-chips-player-name');
+
             const cancelBetBtn = document.getElementById('cancel-bet-btn');
             const cancelManageChipsBtn = document.getElementById('cancel-manage-chips-btn');
             const cancelPlayerSelectionBtn = document.getElementById('cancel-player-selection-btn');
@@ -276,7 +285,6 @@
                     players.push({
                         id: i,
                         name: `Jogador ${i}`,
-                        // Ficha azul começa com 0
                         chips: { white: 8, red: 8, green: 8, black: 8, blue: 0 },
                     });
                 }
@@ -325,7 +333,7 @@
                 document.getElementById('betting-player-name').textContent = `Apostar - ${player.name}`;
                 const list = document.getElementById('bet-chip-list');
                 list.innerHTML = '';
-                Object.keys(CHIP_TYPES).forEach(chipType => list.appendChild(createChipSelectorItem(chipType, { maxAmount: player.chips[chipType], showAvailable: true })));
+                Object.keys(CHIP_TYPES).forEach(chipType => list.appendChild(createChipSelectorItem(chipType, { maxAmount: player.chips[chipType], showAvailable: true, playerChips: player.chips })));
                 mainView.classList.add('hidden');
                 bettingView.classList.remove('hidden');
             }
@@ -334,20 +342,22 @@
                 activePlayerId = playerId;
                 const player = players.find(p => p.id === playerId);
                 chipSelection = {};
-                document.getElementById('manage-chips-player-name').textContent = `Gerenciar Fichas - ${player.name}`;
+                manageChipsPlayerNameEl.textContent = `Gerenciar - ${player.name}`;
                 const list = document.getElementById('manage-chip-list');
                 list.innerHTML = '';
-                Object.keys(CHIP_TYPES).forEach(chipType => list.appendChild(createChipSelectorItem(chipType, { showAvailable: true, maxAmount: Infinity })));
+                Object.keys(CHIP_TYPES).forEach(chipType => list.appendChild(createChipSelectorItem(chipType, { showAvailable: true, playerChips: player.chips })));
                 mainView.classList.add('hidden');
                 manageChipsView.classList.remove('hidden');
             }
 
             function createChipSelectorItem(chipType, options = {}) {
-                const { maxAmount = Infinity, showAvailable = false } = options;
+                const { maxAmount = Infinity, showAvailable = false, playerChips } = options;
                 const chipInfo = CHIP_TYPES[chipType];
                 const itemEl = document.createElement('div');
                 itemEl.className = 'chip-selection-item';
-                const availableText = showAvailable ? `<span>No Jogador: ${maxAmount}</span>` : '';
+                // CORREÇÃO: Verifica se playerChips existe antes de acessá-lo
+                const currentChips = (playerChips && playerChips[chipType] !== undefined) ? playerChips[chipType] : maxAmount;
+                const availableText = showAvailable ? `<span>No Jogador: ${currentChips}</span>` : '';
                 itemEl.innerHTML = `
                     <div class="chip-info">
                         <div class="chip-display ${chipInfo.class}">${chipInfo.value}</div>
@@ -375,10 +385,7 @@
             function handleManageChipSelection(chipType, amount) {
                 const player = players.find(p => p.id === activePlayerId);
                 const newAmount = (chipSelection[chipType] || 0) + amount;
-                // Prevent removing more chips than the player has
-                if (player.chips[chipType] + newAmount < 0) {
-                    return;
-                }
+                if (player.chips[chipType] + newAmount < 0) return;
                 chipSelection[chipType] = newAmount;
                 manageChipsView.querySelector(`#select-count-${chipType}`).textContent = newAmount;
             }
@@ -459,6 +466,17 @@
                     closeAllOverlays();
                     showManageChipsView(playerId);
                 });
+            });
+
+            manageChipsPlayerNameEl.addEventListener('click', () => {
+                if (!activePlayerId) return;
+                const player = players.find(p => p.id === activePlayerId);
+                const newName = prompt("Digite o novo nome do jogador:", player.name);
+                if (newName && newName.trim() !== "") {
+                    player.name = newName.trim();
+                    manageChipsPlayerNameEl.textContent = `Gerenciar - ${player.name}`;
+                    renderAll();
+                }
             });
 
             resetAllBtn.addEventListener('click', () => {
