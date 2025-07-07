@@ -3,11 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>PokerMaster Manager</title>
+    <title>Poker Manager</title>
     
-
-    <link rel="icon" href="https://cdn-icons-png.flaticon.com/512/8336/8336946.png" type="image/png" />
-
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;700&family=Teko:wght@400;600&display=swap" rel="stylesheet">
@@ -245,7 +242,7 @@
 
     <!-- Rodapé de Créditos -->
     <footer class="credits-footer">
-        <p>Desenvolvido por @kznybs, @srvinus e @adilson.pn</p>
+        <p>Desenvolvido por Gabriel, Vinicius e Adilson</p>
     </footer>
 
     <script>
@@ -307,8 +304,36 @@
             const confirmBetBtn = document.getElementById('confirm-bet-btn');
             const confirmManageChipsBtn = document.getElementById('confirm-manage-chips-btn');
 
+            // --- FUNÇÕES DE PERSISTÊNCIA DE DADOS ---
+            function saveGameState() {
+                const gameState = {
+                    players: players,
+                    pot: pot,
+                    currentRound: currentRound,
+                    timeRemaining: timeRemaining,
+                    isPaused: isPaused,
+                    timerInputValue: timerInput.value
+                };
+                localStorage.setItem('pokerMasterGameState', JSON.stringify(gameState));
+            }
+
+            function loadGameState() {
+                const savedState = localStorage.getItem('pokerMasterGameState');
+                if (savedState) {
+                    const gameState = JSON.parse(savedState);
+                    players = gameState.players;
+                    pot = gameState.pot;
+                    currentRound = gameState.currentRound;
+                    timeRemaining = gameState.timeRemaining;
+                    isPaused = gameState.isPaused;
+                    timerInput.value = gameState.timerInputValue || 25;
+                    return true;
+                }
+                return false;
+            }
+
             // --- FUNÇÕES DE INICIALIZAÇÃO E RENDERIZAÇÃO ---
-            function initializeGame() {
+            function startNewGame() {
                 pot = { white: 0, red: 0, green: 0, black: 0, blue: 0 };
                 players = [];
                 for (let i = 1; i <= 6; i++) {
@@ -318,7 +343,6 @@
                         chips: { white: 8, red: 8, green: 8, black: 8, blue: 0 },
                     });
                 }
-                renderAll();
             }
 
             function calculatePlayerStack(player) {
@@ -340,6 +364,7 @@
                     playerGrid.appendChild(playerEl);
                 });
                 potValueEl.textContent = calculatePotValue().toLocaleString('pt-BR');
+                saveGameState(); // Salva o estado após qualquer renderização
             }
 
             // --- LÓGICA DE JOGO E OVERLAYS ---
@@ -523,8 +548,10 @@
                 resetConfirmView.classList.remove('hidden');
             });
             document.getElementById('confirm-reset-all-btn').addEventListener('click', () => {
-                initializeGame();
+                startNewGame();
                 closeAllOverlays();
+                renderAll();
+                localStorage.removeItem('pokerMasterGameState');
             });
 
             document.getElementById('player-selection-grid').addEventListener('click', e => {
@@ -547,20 +574,31 @@
             }
             function formatTime(s) { return `${String(Math.floor(s/60)).padStart(2,'0')}:${String(s%60).padStart(2,'0')}`; }
             function playSound() { try { if (navigator.vibrate) navigator.vibrate([200,100,200]); const a=new(window.AudioContext||window.webkitAudioContext)(),o=a.createOscillator();o.type='sine';o.frequency.setValueAtTime(880,a.currentTime);o.connect(a.destination);o.start();setTimeout(()=>o.stop(),500); } catch(e){} }
-            function levelUp() { if (currentRound < BLIND_LEVELS.length - 1) { currentRound++; timeRemaining = parseInt(timerInput.value)*60; playSound(); } else { isPaused=true; clearInterval(timerInterval); startPauseBtn.textContent='FIM'; startPauseBtn.disabled=true; } updateTimerUI(); }
-            function levelDown() { if (currentRound > 0) { currentRound--; timeRemaining = parseInt(timerInput.value)*60; } updateTimerUI(); }
-            function handleStartPause() { if(isPaused){isPaused=false;startPauseBtn.textContent='PAUSAR';startPauseBtn.className='btn btn-sm btn-pause';timerInput.disabled=true;timerInterval=setInterval(()=>{if(timeRemaining>0)timeRemaining--;else levelUp();updateTimerUI();},1000);}else{isPaused=true;clearInterval(timerInterval);startPauseBtn.textContent='CONTINUAR';startPauseBtn.className='btn btn-sm btn-start';}updateTimerUI(); }
-            function resetTimer() { isPaused=true;clearInterval(timerInterval);currentRound=0;timeRemaining=parseInt(timerInput.value)*60;timerInput.disabled=false;startPauseBtn.disabled=false;startPauseBtn.textContent='INICIAR';startPauseBtn.className='btn btn-sm btn-start';updateTimerUI(); }
+            function levelUp() { if (currentRound < BLIND_LEVELS.length - 1) { currentRound++; timeRemaining = parseInt(timerInput.value)*60; playSound(); } else { isPaused=true; clearInterval(timerInterval); startPauseBtn.textContent='FIM'; startPauseBtn.disabled=true; } updateTimerUI(); saveGameState(); }
+            function levelDown() { if (currentRound > 0) { currentRound--; timeRemaining = parseInt(timerInput.value)*60; } updateTimerUI(); saveGameState(); }
+            function handleStartPause() { if(isPaused){isPaused=false;startPauseBtn.textContent='PAUSAR';startPauseBtn.className='btn btn-sm btn-pause';timerInput.disabled=true;timerInterval=setInterval(()=>{if(timeRemaining>0)timeRemaining--;else levelUp();updateTimerUI();saveGameState();},1000);}else{isPaused=true;clearInterval(timerInterval);startPauseBtn.textContent='CONTINUAR';startPauseBtn.className='btn btn-sm btn-start';}updateTimerUI();saveGameState(); }
+            function resetTimer() { isPaused=true;clearInterval(timerInterval);currentRound=0;timeRemaining=parseInt(timerInput.value)*60;timerInput.disabled=false;startPauseBtn.disabled=false;startPauseBtn.textContent='INICIAR';startPauseBtn.className='btn btn-sm btn-start';updateTimerUI();saveGameState(); }
             
             startPauseBtn.addEventListener('click', handleStartPause);
             resetTimerBtn.addEventListener('click', resetTimer);
             nextRoundBtn.addEventListener('click', levelUp);
             prevRoundBtn.addEventListener('click', levelDown);
-            timerInput.addEventListener('change', () => { if (isPaused) { timeRemaining = parseInt(timerInput.value)*60; updateTimerUI(); } });
+            timerInput.addEventListener('change', () => { if (isPaused) { timeRemaining = parseInt(timerInput.value)*60; updateTimerUI(); saveGameState(); } });
 
             // --- INICIALIZAÇÃO DO JOGO ---
-            initializeGame();
-            updateTimerUI();
+            function initializeApp() {
+                if (!loadGameState()) {
+                    startNewGame();
+                }
+                renderAll();
+                updateTimerUI();
+                if (!isPaused) {
+                    isPaused = true; // Temporarily set to paused
+                    handleStartPause(); // Toggle to start it again
+                }
+            }
+
+            initializeApp();
         });
     </script>
 </body>
