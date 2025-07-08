@@ -88,15 +88,11 @@
         .chip-area { margin-top: 1rem; flex-shrink: 0; }
         .chip-area-title { color: var(--text-medium); margin-bottom: 0.5rem; text-align: center; }
         
-        /* --- Visualizador de Fichas Empilhadas (Gerenciar) --- */
-        .chip-stack-visualizer { display: flex; justify-content: space-around; align-items: flex-end; padding: 1rem; min-height: 100px; }
+        /* --- Visualizador de Fichas Empilhadas --- */
+        .chip-stack-visualizer { display: flex; justify-content: space-around; align-items: flex-end; padding: 1rem; min-height: 100px; background-color: var(--bg-accent); border-radius: 12px;}
         .chip-stack { position: relative; width: 50px; cursor: pointer; display: flex; flex-direction: column; align-items: center; }
         .chip-in-stack { width: 50px; height: 10px; border-radius: 5px; border: 1px solid rgba(0,0,0,0.2); position: absolute; bottom: 0; }
         .chip-stack-count { margin-top: 5px; font-size: 0.9rem; font-weight: bold; }
-
-        /* --- Visualizador de Fichas Pequenas (Aposta) --- */
-        .chip-visualizer { background-color: var(--bg-accent); border-radius: 12px; padding: 1rem; min-height: 60px; display: flex; flex-wrap: wrap; gap: 0.5rem; align-content: flex-start; overflow-y: auto; }
-        .chip-visualizer .mini-chip { width: 20px; height: 20px; border-radius: 10px; cursor: pointer; }
         
         /* --- Seletor de Fichas --- */
         .chip-selector { display: grid; grid-template-columns: repeat(auto-fit, minmax(80px, 1fr)); gap: 1rem; margin-top: 1rem; }
@@ -179,7 +175,7 @@
             </div>
             <div class="chip-area">
                 <div class="chip-area-title">Remover</div>
-                <div id="bet-visualizer" class="chip-visualizer"></div>
+                <div id="bet-stack-visualizer" class="chip-stack-visualizer"></div>
             </div>
             <div class="chip-area">
                 <div class="chip-area-title">Apostar</div>
@@ -280,7 +276,7 @@
         
         // --- Lógica Principal ---
         function saveState() {
-            localStorage.setItem('pokerMasterStateV9', JSON.stringify(state));
+            localStorage.setItem('pokerMasterStateV10', JSON.stringify(state));
         }
 
         function calculateStack(player) {
@@ -335,33 +331,51 @@
 
             document.getElementById('bet-player-name').textContent = player.name;
             
-            const selectorEl = document.getElementById('bet-chip-selector');
-            selectorEl.innerHTML = '';
-            Object.entries(CHIP_TYPES).forEach(([type, config]) => {
-                if (player.chips[type] > 0) {
-                     const chipBtn = document.createElement('button');
-                     chipBtn.className = `chip-btn ${config.class}`;
-                     chipBtn.dataset.chipType = type;
-                     chipBtn.innerHTML = `<span class="value">${config.value}</span><span class="count">${player.chips[type]}</span>`;
-                     selectorEl.appendChild(chipBtn);
-                }
-            });
             renderBetVisuals();
             switchScreen('bet');
         }
 
         function renderBetVisuals() {
+            const player = state.players.find(p => p.id === state.activePlayerId);
             const betValue = Object.entries(state.currentBet).reduce((sum, [type, count]) => sum + (CHIP_TYPES[type].value * count), 0);
             document.getElementById('bet-total-value').textContent = betValue.toLocaleString('pt-BR');
 
-            const visualizerEl = document.getElementById('bet-visualizer');
+            const visualizerEl = document.getElementById('bet-stack-visualizer');
             visualizerEl.innerHTML = '';
             Object.entries(state.currentBet).forEach(([type, count]) => {
-                for (let i = 0; i < count; i++) {
-                    const miniChip = document.createElement('div');
-                    miniChip.className = `mini-chip ${CHIP_TYPES[type].class}`;
-                    miniChip.dataset.chipType = type;
-                    visualizerEl.appendChild(miniChip);
+                if (count > 0) {
+                    const stackEl = document.createElement('div');
+                    stackEl.className = 'chip-stack';
+                    stackEl.dataset.chipType = type;
+                    const chipContainer = document.createElement('div');
+                    chipContainer.style.position = 'relative';
+                    chipContainer.style.width = '50px';
+                    chipContainer.style.height = `${10 + (count - 1) * 3}px`;
+                    for (let i = 0; i < count; i++) {
+                        const chipEl = document.createElement('div');
+                        chipEl.className = `chip-in-stack ${CHIP_TYPES[type].class}`;
+                        chipEl.style.bottom = `${i * 3}px`;
+                        chipContainer.appendChild(chipEl);
+                    }
+                    const countEl = document.createElement('div');
+                    countEl.className = 'chip-stack-count';
+                    countEl.textContent = count;
+                    stackEl.appendChild(chipContainer);
+                    stackEl.appendChild(countEl);
+                    visualizerEl.appendChild(stackEl);
+                }
+            });
+
+            const selectorEl = document.getElementById('bet-chip-selector');
+            selectorEl.innerHTML = '';
+            Object.entries(CHIP_TYPES).forEach(([type, config]) => {
+                const remaining = player.chips[type] - (state.currentBet[type] || 0);
+                if (remaining > 0) {
+                     const chipBtn = document.createElement('button');
+                     chipBtn.className = `chip-btn ${config.class}`;
+                     chipBtn.dataset.chipType = type;
+                     chipBtn.innerHTML = `<span class="value">${config.value}</span><span class="count">${remaining}</span>`;
+                     selectorEl.appendChild(chipBtn);
                 }
             });
         }
@@ -575,8 +589,8 @@
                 if (player.chips[type] > betCount) { state.currentBet[type] = betCount + 1; renderBetVisuals(); }
                 return;
             }
-            if (target.closest('#bet-visualizer .mini-chip')) {
-                const type = target.closest('.mini-chip').dataset.chipType;
+            if (target.closest('#bet-stack-visualizer .chip-stack')) {
+                const type = target.closest('.chip-stack').dataset.chipType;
                 if (state.currentBet[type] > 0) { state.currentBet[type]--; renderBetVisuals(); }
                 return;
             }
