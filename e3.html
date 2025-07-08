@@ -74,6 +74,8 @@
         .sub-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: var(--bg-dark); z-index: 100; display: flex; flex-direction: column; padding: 1.5rem 1rem; gap: 1rem; transform: translateX(100%); transition: transform 0.3s ease-in-out; }
         .sub-screen.active { transform: translateX(0); }
         
+        .sub-screen-main-content { flex-grow: 1; min-height: 0; overflow-y: auto; display: flex; flex-direction: column; gap: 1rem; }
+
         .sub-screen-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-shrink: 0; }
         .sub-screen-header .nav-arrow { font-size: 2rem; color: var(--text-medium); padding: 0.5rem; cursor: pointer; }
         .sub-screen-header .player-name-display { font-family: 'Teko', sans-serif; font-size: 2.5rem; display: flex; align-items: center; gap: 0.5rem; }
@@ -108,7 +110,7 @@
         .chip-black { background-color: var(--black-chip); border-color: #111827; color: white; }
         .chip-blue { background-color: var(--blue-chip); border-color: #1d4ed8; color: white; }
 
-        .sub-screen-footer { display: flex; gap: 1rem; margin-top: auto; padding-top: 1rem; flex-shrink: 0; }
+        .sub-screen-footer { display: flex; gap: 1rem; margin-top: 1rem; padding-top: 1rem; flex-shrink: 0; }
         .sub-screen-footer .home-btn { background-color: var(--bg-accent); color: var(--text-light); width: 60px; height: 60px; display: flex; justify-content: center; align-items: center; font-size: 1.5rem; border-radius: 12px; }
         .sub-screen-footer .main-action-btn { background-color: var(--primary); color: var(--text-dark); flex-grow: 1; }
         .sub-screen-footer .secondary-action-btn { background-color: var(--bg-accent); color: var(--text-light); flex-grow: 1; }
@@ -170,17 +172,19 @@
             <div id="bet-player-name" class="player-name-display">JOGADOR 1</div>
             <div id="bet-next-player" class="nav-arrow">&gt;</div>
         </header>
-        <div class="card total-display-card">
-            <div class="total-label">Apostado</div>
-            <div id="bet-total-value" class="total-value">0</div>
-        </div>
-        <div class="chip-area">
-            <div class="chip-area-title">Remover</div>
-            <div id="bet-visualizer" class="chip-visualizer"></div>
-        </div>
-        <div class="chip-area">
-            <div class="chip-area-title">Apostar</div>
-            <div id="bet-chip-selector" class="chip-selector"></div>
+        <div class="sub-screen-main-content">
+            <div class="card total-display-card">
+                <div class="total-label">Apostado</div>
+                <div id="bet-total-value" class="total-value">0</div>
+            </div>
+            <div class="chip-area">
+                <div class="chip-area-title">Remover</div>
+                <div id="bet-visualizer" class="chip-visualizer"></div>
+            </div>
+            <div class="chip-area">
+                <div class="chip-area-title">Apostar</div>
+                <div id="bet-chip-selector" class="chip-selector"></div>
+            </div>
         </div>
         <footer class="sub-screen-footer">
             <button class="home-btn">🏠</button>
@@ -196,17 +200,19 @@
             <div id="manage-player-name" class="player-name-display">JOGADOR 1 <span class="edit-icon">✎</span></div>
             <div id="manage-next-player" class="nav-arrow">&gt;</div>
         </header>
-        <div class="card total-display-card">
-            <div class="total-label">Stack Total</div>
-            <div id="manage-total-value" class="total-value">2400</div>
-        </div>
-        <div class="chip-area">
-            <div class="chip-area-title">Remover do Stack</div>
-            <div id="manage-stack-visualizer" class="chip-stack-visualizer"></div>
-        </div>
-        <div class="chip-area">
-            <div class="chip-area-title">Adicionar ao Stack</div>
-            <div id="manage-chip-selector" class="chip-selector"></div>
+        <div class="sub-screen-main-content">
+            <div class="card total-display-card">
+                <div class="total-label">Stack Total</div>
+                <div id="manage-total-value" class="total-value">2400</div>
+            </div>
+            <div class="chip-area">
+                <div class="chip-area-title">Remover do Stack</div>
+                <div id="manage-stack-visualizer" class="chip-stack-visualizer"></div>
+            </div>
+            <div class="chip-area">
+                <div class="chip-area-title">Adicionar ao Stack</div>
+                <div id="manage-chip-selector" class="chip-selector"></div>
+            </div>
         </div>
         <footer class="sub-screen-footer">
              <button class="home-btn">🏠</button>
@@ -274,7 +280,7 @@
         
         // --- Lógica Principal ---
         function saveState() {
-            localStorage.setItem('pokerMasterStateV8', JSON.stringify(state));
+            localStorage.setItem('pokerMasterStateV9', JSON.stringify(state));
         }
 
         function calculateStack(player) {
@@ -385,12 +391,18 @@
         function renderManageVisuals() {
             const player = state.players.find(p => p.id === state.activePlayerId);
             let currentStack = calculateStack(player);
-            let change = 0;
+            let changeValue = 0;
             
             const visualizerEl = document.getElementById('manage-stack-visualizer');
             visualizerEl.innerHTML = '';
 
-            Object.entries(player.chips).forEach(([type, count]) => {
+            const tempChips = { ...player.chips };
+            Object.entries(state.manageChips).forEach(([type, count]) => {
+                tempChips[type] += count;
+                changeValue += CHIP_TYPES[type].value * count;
+            });
+
+            Object.entries(tempChips).forEach(([type, count]) => {
                 if(count > 0) {
                     const stackEl = document.createElement('div');
                     stackEl.className = 'chip-stack';
@@ -418,7 +430,6 @@
                 }
             });
             
-            let changeValue = Object.entries(state.manageChips).reduce((sum, [type, count]) => sum + (CHIP_TYPES[type].value * count), 0);
             document.getElementById('manage-total-value').textContent = (currentStack + changeValue).toLocaleString('pt-BR');
         }
 
@@ -549,7 +560,7 @@
             }
             if (target.closest('#reset-btn')) {
                 if (confirm('Tem certeza que deseja resetar todas as fichas?')) {
-                    localStorage.removeItem('pokerMasterStateV8');
+                    localStorage.removeItem('pokerMasterStateV9');
                     init();
                 }
                 return;
@@ -603,9 +614,9 @@
             if (target.closest('#manage-stack-visualizer .chip-stack')) {
                 const type = target.closest('.chip-stack').dataset.chipType;
                 const player = state.players.find(p => p.id === state.activePlayerId);
-                if(player.chips[type] > 0) {
-                    player.chips[type]--;
-                    renderManageScreen(state.activePlayerId); // Re-render to update counts
+                if(player.chips[type] + (state.manageChips[type] || 0) > 0) {
+                    state.manageChips[type] = (state.manageChips[type] || 0) - 1;
+                    renderManageVisuals();
                 }
                 return;
             }
@@ -640,7 +651,7 @@
 
         // --- INICIALIZAÇÃO ---
         function init() {
-            const savedState = localStorage.getItem('pokerMasterStateV8');
+            const savedState = localStorage.getItem('pokerMasterStateV9');
             if (savedState) {
                 state = JSON.parse(savedState);
                 if (state.timer.isRunning && state.timer.endTime) {
