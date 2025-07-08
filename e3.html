@@ -276,7 +276,7 @@
         
         // --- Lógica Principal ---
         function saveState() {
-            localStorage.setItem('pokerMasterStateV10', JSON.stringify(state));
+            localStorage.setItem('pokerMasterStateV11', JSON.stringify(state));
         }
 
         function calculateStack(player) {
@@ -448,15 +448,17 @@
         }
 
         function getNextPlayerId(currentId) {
-            const currentIndex = state.players.findIndex(p => p.id === currentId);
-            const nextIndex = (currentIndex + 1) % state.players.length;
-            return state.players[nextIndex].id;
+            const numericallySortedPlayers = [...state.players].sort((a, b) => a.id - b.id);
+            const currentIndex = numericallySortedPlayers.findIndex(p => p.id === currentId);
+            const nextIndex = (currentIndex + 1) % numericallySortedPlayers.length;
+            return numericallySortedPlayers[nextIndex].id;
         }
 
         function getPrevPlayerId(currentId) {
-            const currentIndex = state.players.findIndex(p => p.id === currentId);
-            const prevIndex = (currentIndex - 1 + state.players.length) % state.players.length;
-            return state.players[prevIndex].id;
+            const numericallySortedPlayers = [...state.players].sort((a, b) => a.id - b.id);
+            const currentIndex = numericallySortedPlayers.findIndex(p => p.id === currentId);
+            const prevIndex = (currentIndex - 1 + numericallySortedPlayers.length) % numericallySortedPlayers.length;
+            return numericallySortedPlayers[prevIndex].id;
         }
 
         // --- Lógica do Timer ---
@@ -574,7 +576,7 @@
             }
             if (target.closest('#reset-btn')) {
                 if (confirm('Tem certeza que deseja resetar todas as fichas?')) {
-                    localStorage.removeItem('pokerMasterStateV10');
+                    localStorage.removeItem('pokerMasterStateV11');
                     init();
                 }
                 return;
@@ -671,7 +673,7 @@
 
         // --- INICIALIZAÇÃO ---
         function init() {
-            const savedState = localStorage.getItem('pokerMasterStateV10');
+            const savedState = localStorage.getItem('pokerMasterStateV11');
             if (savedState) {
                 state = JSON.parse(savedState);
                 if (state.timer.isRunning && state.timer.endTime) {
