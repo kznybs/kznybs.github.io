@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0">
     <title>PokerMaster Manager</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -192,11 +192,11 @@
             <div id="manage-total-value" class="total-value">2400</div>
         </div>
         <div class="chip-area">
-            <div class="chip-area-title">Remover do Stack</div>
+            <div class="chip-area-title">Fichas a Alterar (+/-)</div>
             <div id="manage-visualizer" class="chip-visualizer"></div>
         </div>
         <div class="chip-area">
-            <div class="chip-area-title">Adicionar ao Stack</div>
+            <div class="chip-area-title">Adicionar Fichas</div>
             <div id="manage-chip-selector" class="chip-selector"></div>
         </div>
         <footer class="sub-screen-footer">
@@ -265,7 +265,7 @@
         
         // --- Lógica Principal ---
         function saveState() {
-            localStorage.setItem('pokerMasterStateV6', JSON.stringify(state));
+            localStorage.setItem('pokerMasterStateV7', JSON.stringify(state));
         }
 
         function calculateStack(player) {
@@ -359,19 +359,7 @@
             if (!player) return;
             
             document.getElementById('manage-player-name').innerHTML = `${player.name} <span class="edit-icon">✎</span>`;
-            document.getElementById('manage-total-value').textContent = calculateStack(player).toLocaleString('pt-BR');
-
-            const visualizerEl = document.getElementById('manage-visualizer');
-            visualizerEl.innerHTML = '';
-            Object.entries(player.chips).forEach(([type, count]) => {
-                for (let i = 0; i < count; i++) {
-                    const miniChip = document.createElement('div');
-                    miniChip.className = `mini-chip ${CHIP_TYPES[type].class}`;
-                    miniChip.dataset.chipType = type;
-                    visualizerEl.appendChild(miniChip);
-                }
-            });
-
+            
             const selectorEl = document.getElementById('manage-chip-selector');
             selectorEl.innerHTML = '';
             Object.entries(CHIP_TYPES).forEach(([type, config]) => {
@@ -381,8 +369,29 @@
                  chipBtn.innerHTML = `<span class="value">${config.value}</span><span class="count">∞</span>`;
                  selectorEl.appendChild(chipBtn);
             });
-            
+            renderManageVisuals();
             switchScreen('manage');
+        }
+
+        function renderManageVisuals() {
+            const player = state.players.find(p => p.id === state.activePlayerId);
+            let currentStack = calculateStack(player);
+            let change = 0;
+            
+            const visualizerEl = document.getElementById('manage-visualizer');
+            visualizerEl.innerHTML = '';
+
+            Object.entries(state.manageChips).forEach(([type, count]) => {
+                change += CHIP_TYPES[type].value * count;
+                for (let i = 0; i < Math.abs(count); i++) {
+                    const miniChip = document.createElement('div');
+                    miniChip.className = `mini-chip ${CHIP_TYPES[type].class}`;
+                    miniChip.dataset.chipType = type;
+                    miniChip.dataset.direction = count > 0 ? 'add' : 'remove';
+                    visualizerEl.appendChild(miniChip);
+                }
+            });
+            document.getElementById('manage-total-value').textContent = (currentStack + change).toLocaleString('pt-BR');
         }
 
         function getNextPlayerId(currentId) {
@@ -437,11 +446,15 @@
         }
 
         function tick() {
-            if (!state.timer.isRunning) return;
-            state.timer.time = Math.round((state.timer.endTime - Date.now()) / 1000);
-            if (state.timer.time <= 0) {
+            if (!state.timer.isRunning || !state.timer.endTime) return;
+            
+            let newTime = Math.round((state.timer.endTime - Date.now()) / 1000);
+            if (newTime < 0) newTime = 0;
+
+            if (newTime === 0 && state.timer.time > 0) { // Time just ran out
                 levelUp();
             }
+            state.timer.time = newTime;
             renderTimer();
             saveState();
         }
@@ -450,7 +463,9 @@
             if (state.timer.round < BLIND_LEVELS.length - 1) {
                 state.timer.round++;
                 state.timer.time = state.timer.duration * 60;
-                state.timer.endTime = Date.now() + state.timer.time * 1000;
+                if(state.timer.isRunning) {
+                    state.timer.endTime = Date.now() + state.timer.time * 1000;
+                }
                 try { if (navigator.vibrate) navigator.vibrate(200); } catch(e){}
             } else {
                 state.timer.isRunning = false;
@@ -506,7 +521,7 @@
             }
             if (target.closest('#reset-btn')) {
                 if (confirm('Tem certeza que deseja resetar todas as fichas?')) {
-                    localStorage.removeItem('pokerMasterStateV6');
+                    localStorage.removeItem('pokerMasterStateV7');
                     init();
                 }
                 return;
@@ -554,20 +569,14 @@
             if (target.closest('#manage-chip-selector .chip-btn')) {
                 const type = target.closest('.chip-btn').dataset.chipType;
                 state.manageChips[type] = (state.manageChips[type] || 0) + 1;
-                const visualizer = document.getElementById('manage-visualizer');
-                const newChip = document.createElement('div');
-                newChip.className = `mini-chip ${CHIP_TYPES[type].class}`;
-                newChip.dataset.chipType = type;
-                newChip.dataset.managed = true;
-                visualizer.appendChild(newChip);
+                renderManageVisuals();
                 return;
             }
             if (target.closest('#manage-visualizer .mini-chip')) {
                 const chip = target.closest('.mini-chip');
                 const type = chip.dataset.chipType;
-                if (chip.dataset.managed) { state.manageChips[type]--; } 
-                else { state.manageChips[type] = (state.manageChips[type] || 0) - 1; }
-                chip.remove();
+                state.manageChips[type]--;
+                renderManageVisuals();
                 return;
             }
             if (target.closest('#manage-save-btn')) {
@@ -601,17 +610,23 @@
 
         // --- INICIALIZAÇÃO ---
         function init() {
-            const savedState = localStorage.getItem('pokerMasterStateV6');
+            const savedState = localStorage.getItem('pokerMasterStateV7');
             if (savedState) {
                 state = JSON.parse(savedState);
                 if (state.timer.isRunning && state.timer.endTime) {
-                    const elapsed = Math.round((Date.now() - state.timer.endTime) / 1000);
-                    state.timer.time += elapsed; // O tempo é negativo, então somamos
+                    const now = Date.now();
+                    const newTime = Math.round((state.timer.endTime - now) / 1000);
                     
-                    while(state.timer.time <= 0) {
-                        const timeForLevel = state.timer.duration * 60;
-                        state.timer.time += timeForLevel;
-                        levelUp();
+                    if (newTime <= 0) {
+                        // Recalcula quantos níveis passaram
+                        let timePassed = (now - state.timer.endTime) / 1000;
+                        while(timePassed > 0 && state.timer.round < BLIND_LEVELS.length - 1) {
+                            levelUp();
+                            timePassed -= state.timer.duration * 60;
+                        }
+                        state.timer.time = Math.max(0, state.timer.time + timePassed);
+                    } else {
+                        state.timer.time = newTime;
                     }
                 }
             } else {
