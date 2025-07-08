@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0">
     <title>PokerMaster Manager</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -85,12 +85,21 @@
 
         .chip-area { margin-top: 1rem; flex-shrink: 0; }
         .chip-area-title { color: var(--text-medium); margin-bottom: 0.5rem; text-align: center; }
+        
+        /* --- Visualizador de Fichas Empilhadas (Gerenciar) --- */
+        .chip-stack-visualizer { display: flex; justify-content: space-around; align-items: flex-end; padding: 1rem; min-height: 100px; }
+        .chip-stack { position: relative; width: 50px; cursor: pointer; display: flex; flex-direction: column; align-items: center; }
+        .chip-in-stack { width: 50px; height: 10px; border-radius: 5px; border: 1px solid rgba(0,0,0,0.2); position: absolute; bottom: 0; }
+        .chip-stack-count { margin-top: 5px; font-size: 0.9rem; font-weight: bold; }
+
+        /* --- Visualizador de Fichas Pequenas (Aposta) --- */
         .chip-visualizer { background-color: var(--bg-accent); border-radius: 12px; padding: 1rem; min-height: 60px; display: flex; flex-wrap: wrap; gap: 0.5rem; align-content: flex-start; overflow-y: auto; }
         .chip-visualizer .mini-chip { width: 20px; height: 20px; border-radius: 10px; cursor: pointer; }
         
-        .chip-selector { display: grid; grid-template-columns: repeat(auto-fit, minmax(70px, 1fr)); gap: 1rem; margin-top: 1rem; }
-        .chip-btn { width: 100%; aspect-ratio: 1/1; border-radius: 50%; display: flex; flex-direction: column; justify-content: center; align-items: center; border: 4px solid; cursor: pointer; }
-        .chip-btn .value { font-size: 1.5rem; font-weight: bold; }
+        /* --- Seletor de Fichas --- */
+        .chip-selector { display: grid; grid-template-columns: repeat(auto-fit, minmax(80px, 1fr)); gap: 1rem; margin-top: 1rem; }
+        .chip-btn { width: 100%; aspect-ratio: 1/1; border-radius: 50%; display: flex; flex-direction: column; justify-content: center; align-items: center; border: 4px solid; cursor: pointer; box-shadow: 0 4px 8px rgba(0,0,0,0.3), inset 0 2px 4px rgba(255,255,255,0.2); }
+        .chip-btn .value { font-family: 'Teko', sans-serif; font-size: 2rem; font-weight: 700; line-height: 1; }
         .chip-btn .count { font-size: 0.8rem; }
 
         .chip-white { background-color: var(--white-chip); border-color: #9CA3AF; color: var(--text-dark); }
@@ -192,11 +201,11 @@
             <div id="manage-total-value" class="total-value">2400</div>
         </div>
         <div class="chip-area">
-            <div class="chip-area-title">Fichas a Alterar (+/-)</div>
-            <div id="manage-visualizer" class="chip-visualizer"></div>
+            <div class="chip-area-title">Remover do Stack</div>
+            <div id="manage-stack-visualizer" class="chip-stack-visualizer"></div>
         </div>
         <div class="chip-area">
-            <div class="chip-area-title">Adicionar Fichas</div>
+            <div class="chip-area-title">Adicionar ao Stack</div>
             <div id="manage-chip-selector" class="chip-selector"></div>
         </div>
         <footer class="sub-screen-footer">
@@ -265,7 +274,7 @@
         
         // --- Lógica Principal ---
         function saveState() {
-            localStorage.setItem('pokerMasterStateV7', JSON.stringify(state));
+            localStorage.setItem('pokerMasterStateV8', JSON.stringify(state));
         }
 
         function calculateStack(player) {
@@ -378,20 +387,39 @@
             let currentStack = calculateStack(player);
             let change = 0;
             
-            const visualizerEl = document.getElementById('manage-visualizer');
+            const visualizerEl = document.getElementById('manage-stack-visualizer');
             visualizerEl.innerHTML = '';
 
-            Object.entries(state.manageChips).forEach(([type, count]) => {
-                change += CHIP_TYPES[type].value * count;
-                for (let i = 0; i < Math.abs(count); i++) {
-                    const miniChip = document.createElement('div');
-                    miniChip.className = `mini-chip ${CHIP_TYPES[type].class}`;
-                    miniChip.dataset.chipType = type;
-                    miniChip.dataset.direction = count > 0 ? 'add' : 'remove';
-                    visualizerEl.appendChild(miniChip);
+            Object.entries(player.chips).forEach(([type, count]) => {
+                if(count > 0) {
+                    const stackEl = document.createElement('div');
+                    stackEl.className = 'chip-stack';
+                    stackEl.dataset.chipType = type;
+                    
+                    const chipContainer = document.createElement('div');
+                    chipContainer.style.position = 'relative';
+                    chipContainer.style.width = '50px';
+                    chipContainer.style.height = `${10 + (count - 1) * 3}px`;
+                    
+                    for(let i = 0; i < count; i++) {
+                        const chipEl = document.createElement('div');
+                        chipEl.className = `chip-in-stack ${CHIP_TYPES[type].class}`;
+                        chipEl.style.bottom = `${i * 3}px`;
+                        chipContainer.appendChild(chipEl);
+                    }
+                    
+                    const countEl = document.createElement('div');
+                    countEl.className = 'chip-stack-count';
+                    countEl.textContent = count;
+
+                    stackEl.appendChild(chipContainer);
+                    stackEl.appendChild(countEl);
+                    visualizerEl.appendChild(stackEl);
                 }
             });
-            document.getElementById('manage-total-value').textContent = (currentStack + change).toLocaleString('pt-BR');
+            
+            let changeValue = Object.entries(state.manageChips).reduce((sum, [type, count]) => sum + (CHIP_TYPES[type].value * count), 0);
+            document.getElementById('manage-total-value').textContent = (currentStack + changeValue).toLocaleString('pt-BR');
         }
 
         function getNextPlayerId(currentId) {
@@ -521,7 +549,7 @@
             }
             if (target.closest('#reset-btn')) {
                 if (confirm('Tem certeza que deseja resetar todas as fichas?')) {
-                    localStorage.removeItem('pokerMasterStateV7');
+                    localStorage.removeItem('pokerMasterStateV8');
                     init();
                 }
                 return;
@@ -572,11 +600,13 @@
                 renderManageVisuals();
                 return;
             }
-            if (target.closest('#manage-visualizer .mini-chip')) {
-                const chip = target.closest('.mini-chip');
-                const type = chip.dataset.chipType;
-                state.manageChips[type]--;
-                renderManageVisuals();
+            if (target.closest('#manage-stack-visualizer .chip-stack')) {
+                const type = target.closest('.chip-stack').dataset.chipType;
+                const player = state.players.find(p => p.id === state.activePlayerId);
+                if(player.chips[type] > 0) {
+                    player.chips[type]--;
+                    renderManageScreen(state.activePlayerId); // Re-render to update counts
+                }
                 return;
             }
             if (target.closest('#manage-save-btn')) {
@@ -610,7 +640,7 @@
 
         // --- INICIALIZAÇÃO ---
         function init() {
-            const savedState = localStorage.getItem('pokerMasterStateV7');
+            const savedState = localStorage.getItem('pokerMasterStateV8');
             if (savedState) {
                 state = JSON.parse(savedState);
                 if (state.timer.isRunning && state.timer.endTime) {
@@ -618,7 +648,6 @@
                     const newTime = Math.round((state.timer.endTime - now) / 1000);
                     
                     if (newTime <= 0) {
-                        // Recalcula quantos níveis passaram
                         let timePassed = (now - state.timer.endTime) / 1000;
                         while(timePassed > 0 && state.timer.round < BLIND_LEVELS.length - 1) {
                             levelUp();
@@ -638,7 +667,7 @@
                     manageChips: {},
                     timer: { round: 0, time: 15 * 60, isRunning: false, duration: 15, endTime: null }
                 };
-                for (let i = 1; i <= NUM_PLAYERS; i++) {
+                for (let i = 1; i <= 6; i++) {
                     state.players.push({ id: i, name: `Jogador ${i}`, chips: { ...INITIAL_CHIPS }, selectedForPot: false });
                 }
             }
