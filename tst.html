@@ -27,19 +27,21 @@
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        html, body { height: 100%; overflow: hidden; }
         body { background-color: var(--bg-dark); color: var(--text-light); font-family: 'Roboto Mono', monospace; }
         .hidden { display: none !important; }
         
         /* --- Layout Principal e Telas --- */
-        .screen { min-height: 100vh; padding: 1.5rem 1rem; display: flex; flex-direction: column; gap: 1.5rem; }
+        .screen { height: 100vh; padding: 1.5rem 1rem; display: flex; flex-direction: column; gap: 1rem; }
+        #home-screen { gap: 1rem; }
         
         /* --- Componentes Comuns --- */
-        .card { background-color: var(--bg-card); border-radius: 16px; padding: 1.5rem; border: 1px solid var(--border-color); }
-        .btn { border: none; border-radius: 12px; padding: 1rem; font-weight: bold; cursor: pointer; transition: all 0.2s ease; font-family: 'Teko', sans-serif; font-size: 1.5rem; letter-spacing: 1px; }
+        .card { background-color: var(--bg-card); border-radius: 16px; padding: 1rem; border: 1px solid var(--border-color); }
+        .btn { border: none; border-radius: 12px; padding: 0.75rem; font-weight: bold; cursor: pointer; transition: all 0.2s ease; font-family: 'Teko', sans-serif; font-size: 1.5rem; letter-spacing: 1px; }
         .btn:active { transform: scale(0.97); }
 
         /* --- Tela Home --- */
-        #home-screen .header { display: flex; justify-content: space-between; align-items: center; padding: 0 0.5rem; }
+        #home-screen .header { display: flex; justify-content: space-between; align-items: center; padding: 0 0.5rem; flex-shrink: 0; }
         #home-screen .header-block { text-align: center; flex: 1; }
         #home-screen .header-block.timer { flex: 1.5; }
         #home-screen .header-label { font-family: 'Teko', sans-serif; font-size: 1rem; color: var(--text-medium); }
@@ -47,47 +49,49 @@
         #home-screen .header-value.blinds { color: var(--primary); }
         #home-screen .settings-btn { font-size: 1.5rem; color: var(--text-medium); cursor: pointer; position: absolute; top: 1.5rem; right: 1rem; }
 
-        #home-screen .pot-card { text-align: center; border: 2px solid var(--primary); }
+        #home-screen .pot-card { text-align: center; border: 2px solid var(--primary); flex-shrink: 0; }
         #home-screen .pot-label { font-family: 'Teko', sans-serif; font-size: 1.5rem; color: var(--text-medium); }
-        #home-screen .pot-value { font-family: 'Teko', sans-serif; font-size: 4rem; color: var(--text-light); line-height: 1; }
+        #home-screen .pot-value { font-family: 'Teko', sans-serif; font-size: 3.5rem; color: var(--text-light); line-height: 1; }
 
-        #home-screen .ranking-card .card-title { font-family: 'Teko', sans-serif; font-size: 2rem; text-align: center; color: #FFF; margin-bottom: 1rem; }
-        #home-screen .player-list { display: flex; flex-direction: column; gap: 0.75rem; }
+        #home-screen .ranking-card { flex-grow: 1; display: flex; flex-direction: column; min-height: 0; }
+        #home-screen .ranking-card .card-title { font-family: 'Teko', sans-serif; font-size: 2rem; text-align: center; color: #FFF; margin-bottom: 1rem; flex-shrink: 0; }
+        #home-screen .player-list { display: flex; flex-direction: column; gap: 0.75rem; overflow-y: auto; flex-grow: 1; }
         #home-screen .player-item { display: flex; align-items: center; gap: 0.75rem; }
         #home-screen .player-position { font-family: 'Teko', sans-serif; font-size: 1.5rem; color: var(--text-medium); width: 2rem; }
-        #home-screen .player-stack { background-color: var(--primary); color: var(--text-dark); font-weight: bold; padding: 0.75rem; border-radius: 8px; flex-shrink: 0; cursor: pointer; }
-        #home-screen .player-name { background-color: var(--bg-accent); color: var(--text-light); padding: 0.75rem; border-radius: 8px; flex-grow: 1; text-align: left; cursor: pointer; }
-        #home-screen .select-winner-btn { background-color: var(--bg-accent); color: var(--green); font-size: 1.5rem; border-radius: 8px; width: 45px; height: 45px; flex-shrink: 0; display: flex; justify-content: center; align-items: center; cursor: pointer; }
+        #home-screen .player-stack { background-color: var(--primary); color: var(--text-dark); font-weight: bold; padding: 0.5rem; border-radius: 8px; flex-shrink: 0; cursor: pointer; }
+        #home-screen .player-name { background-color: var(--bg-accent); color: var(--text-light); padding: 0.5rem; border-radius: 8px; flex-grow: 1; text-align: left; cursor: pointer; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        #home-screen .select-winner-btn { background-color: var(--bg-accent); color: var(--green); font-size: 1.5rem; border-radius: 8px; width: 40px; height: 40px; flex-shrink: 0; display: flex; justify-content: center; align-items: center; cursor: pointer; }
         #home-screen .select-winner-btn.selected { background-color: var(--green); color: var(--text-dark); }
         
-        #home-screen .actions { display: flex; flex-direction: column; gap: 1rem; margin-top: 1.5rem; }
+        #home-screen .actions { display: flex; gap: 1rem; margin-top: 1rem; flex-shrink: 0; }
+        #home-screen .actions .btn { flex: 1; }
         #home-screen .btn-distribute { background-color: var(--primary); color: var(--text-dark); }
         #home-screen .btn-reset-all { background-color: var(--red); color: white; }
         
-        .credits-footer { text-align: center; margin-top: 1rem; color: var(--text-medium); font-size: 0.8rem; }
+        .credits-footer { text-align: center; margin-top: 1rem; color: var(--text-medium); font-size: 0.8rem; flex-shrink: 0; }
 
         /* --- Telas Secundárias (Sub-screens) --- */
-        .sub-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: var(--bg-dark); z-index: 100; display: flex; flex-direction: column; padding: 1.5rem 1rem; gap: 1.5rem; transform: translateX(100%); transition: transform 0.3s ease-in-out; }
+        .sub-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: var(--bg-dark); z-index: 100; display: flex; flex-direction: column; padding: 1.5rem 1rem; gap: 1rem; transform: translateX(100%); transition: transform 0.3s ease-in-out; }
         .sub-screen.active { transform: translateX(0); }
         
-        .sub-screen-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
+        .sub-screen-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-shrink: 0; }
         .sub-screen-header .nav-arrow { font-size: 2rem; color: var(--text-medium); padding: 0.5rem; cursor: pointer; }
         .sub-screen-header .player-name-display { font-family: 'Teko', sans-serif; font-size: 2.5rem; display: flex; align-items: center; gap: 0.5rem; }
         .sub-screen-header .player-name-display .edit-icon { font-size: 1.5rem; vertical-align: middle; color: var(--text-medium); cursor: pointer; }
 
-        .total-display-card { text-align: center; border: 2px solid var(--primary); padding: 1rem; }
+        .total-display-card { text-align: center; border: 2px solid var(--primary); padding: 1rem; flex-shrink: 0; }
         .total-display-card .total-label { font-family: 'Teko', sans-serif; font-size: 1.5rem; color: var(--text-medium); }
         .total-display-card .total-value { font-family: 'Teko', sans-serif; font-size: 4rem; color: var(--text-light); line-height: 1; }
 
-        .chip-area { margin-top: 1.5rem; }
-        .chip-area-title { color: var(--text-medium); margin-bottom: 1rem; text-align: center; }
-        .chip-visualizer { background-color: var(--bg-accent); border-radius: 12px; padding: 1rem; min-height: 80px; display: flex; flex-wrap: wrap; gap: 0.5rem; align-content: flex-start; }
+        .chip-area { margin-top: 1rem; flex-shrink: 0; }
+        .chip-area-title { color: var(--text-medium); margin-bottom: 0.5rem; text-align: center; }
+        .chip-visualizer { background-color: var(--bg-accent); border-radius: 12px; padding: 1rem; min-height: 60px; display: flex; flex-wrap: wrap; gap: 0.5rem; align-content: flex-start; overflow-y: auto; }
         .chip-visualizer .mini-chip { width: 20px; height: 20px; border-radius: 10px; cursor: pointer; }
         
-        .chip-selector { display: grid; grid-template-columns: repeat(auto-fit, minmax(80px, 1fr)); gap: 1rem; margin-top: 1.5rem; }
+        .chip-selector { display: grid; grid-template-columns: repeat(auto-fit, minmax(70px, 1fr)); gap: 1rem; margin-top: 1rem; }
         .chip-btn { width: 100%; aspect-ratio: 1/1; border-radius: 50%; display: flex; flex-direction: column; justify-content: center; align-items: center; border: 4px solid; cursor: pointer; }
-        .chip-btn .value { font-size: 1.8rem; font-weight: bold; }
-        .chip-btn .count { font-size: 0.9rem; }
+        .chip-btn .value { font-size: 1.5rem; font-weight: bold; }
+        .chip-btn .count { font-size: 0.8rem; }
 
         .chip-white { background-color: var(--white-chip); border-color: #9CA3AF; color: var(--text-dark); }
         .chip-red { background-color: var(--red); border-color: #b91c1c; color: white; }
@@ -95,11 +99,10 @@
         .chip-black { background-color: var(--black-chip); border-color: #111827; color: white; }
         .chip-blue { background-color: var(--blue-chip); border-color: #1d4ed8; color: white; }
 
-        .sub-screen-footer { display: flex; gap: 1rem; margin-top: auto; padding-top: 1rem; }
+        .sub-screen-footer { display: flex; gap: 1rem; margin-top: auto; padding-top: 1rem; flex-shrink: 0; }
         .sub-screen-footer .home-btn { background-color: var(--bg-accent); color: var(--text-light); width: 60px; height: 60px; display: flex; justify-content: center; align-items: center; font-size: 1.5rem; border-radius: 12px; }
         .sub-screen-footer .main-action-btn { background-color: var(--primary); color: var(--text-dark); flex-grow: 1; }
         .sub-screen-footer .secondary-action-btn { background-color: var(--bg-accent); color: var(--text-light); flex-grow: 1; }
-        .sub-screen-footer .cancel-link { background: none; border: none; color: var(--text-medium); text-align: center; width: 100%; margin-top: 0.5rem; padding: 0.5rem; }
         
         /* --- Tela de Configurações do Timer --- */
         #settings-screen .timer-config-card { display: flex; flex-direction: column; align-items: center; gap: 1.5rem; }
@@ -262,7 +265,7 @@
         
         // --- Lógica Principal ---
         function saveState() {
-            localStorage.setItem('pokerMasterStateV5', JSON.stringify(state));
+            localStorage.setItem('pokerMasterStateV6', JSON.stringify(state));
         }
 
         function calculateStack(player) {
@@ -413,6 +416,7 @@
             startPauseBtn.textContent = timer.isRunning ? 'PAUSAR' : 'INICIAR';
             startPauseBtn.classList.toggle('paused', !timer.isRunning);
             
+            document.getElementById('timer-input').value = timer.duration;
             document.getElementById('timer-input').disabled = timer.isRunning;
             document.getElementById('timer-prev-level-btn').disabled = timer.isRunning;
             document.getElementById('timer-next-level-btn').disabled = timer.isRunning;
@@ -421,17 +425,22 @@
         function handleStartPause() {
             state.timer.isRunning = !state.timer.isRunning;
             if (state.timer.isRunning) {
-                timerInterval = setInterval(() => {
-                    if (state.timer.time > 0) {
-                        state.timer.time--;
-                    } else {
-                        levelUp();
-                    }
-                    renderTimer();
-                    saveState();
-                }, 1000);
+                state.timer.endTime = Date.now() + state.timer.time * 1000;
+                timerInterval = setInterval(tick, 1000);
             } else {
                 clearInterval(timerInterval);
+                timerInterval = null;
+                state.timer.endTime = null;
+            }
+            renderTimer();
+            saveState();
+        }
+
+        function tick() {
+            if (!state.timer.isRunning) return;
+            state.timer.time = Math.round((state.timer.endTime - Date.now()) / 1000);
+            if (state.timer.time <= 0) {
+                levelUp();
             }
             renderTimer();
             saveState();
@@ -440,24 +449,26 @@
         function levelUp() {
             if (state.timer.round < BLIND_LEVELS.length - 1) {
                 state.timer.round++;
-                state.timer.time = parseInt(document.getElementById('timer-input').value) * 60;
+                state.timer.time = state.timer.duration * 60;
+                state.timer.endTime = Date.now() + state.timer.time * 1000;
                 try { if (navigator.vibrate) navigator.vibrate(200); } catch(e){}
             } else {
                 state.timer.isRunning = false;
                 clearInterval(timerInterval);
+                timerInterval = null;
             }
         }
         
         function levelDown() {
             if (state.timer.round > 0) {
                 state.timer.round--;
-                state.timer.time = parseInt(document.getElementById('timer-input').value) * 60;
+                state.timer.time = state.timer.duration * 60;
             }
         }
         
         function resetTimer() {
              state.timer.round = 0;
-             state.timer.time = parseInt(document.getElementById('timer-input').value) * 60;
+             state.timer.time = state.timer.duration * 60;
              if (state.timer.isRunning) {
                  handleStartPause(); // Pausa o timer
              }
@@ -495,7 +506,7 @@
             }
             if (target.closest('#reset-btn')) {
                 if (confirm('Tem certeza que deseja resetar todas as fichas?')) {
-                    localStorage.removeItem('pokerMasterStateV5');
+                    localStorage.removeItem('pokerMasterStateV6');
                     init();
                 }
                 return;
@@ -581,7 +592,8 @@
 
         document.getElementById('timer-input').addEventListener('change', (e) => {
             if (!state.timer.isRunning) {
-                state.timer.time = parseInt(e.target.value) * 60;
+                state.timer.duration = parseInt(e.target.value);
+                state.timer.time = state.timer.duration * 60;
                 renderTimer();
                 saveState();
             }
@@ -589,9 +601,19 @@
 
         // --- INICIALIZAÇÃO ---
         function init() {
-            const savedState = localStorage.getItem('pokerMasterStateV5');
+            const savedState = localStorage.getItem('pokerMasterStateV6');
             if (savedState) {
                 state = JSON.parse(savedState);
+                if (state.timer.isRunning && state.timer.endTime) {
+                    const elapsed = Math.round((Date.now() - state.timer.endTime) / 1000);
+                    state.timer.time += elapsed; // O tempo é negativo, então somamos
+                    
+                    while(state.timer.time <= 0) {
+                        const timeForLevel = state.timer.duration * 60;
+                        state.timer.time += timeForLevel;
+                        levelUp();
+                    }
+                }
             } else {
                 state = {
                     players: [],
@@ -599,7 +621,7 @@
                     activePlayerId: null,
                     currentBet: {},
                     manageChips: {},
-                    timer: { round: 0, time: 15 * 60, isRunning: false }
+                    timer: { round: 0, time: 15 * 60, isRunning: false, duration: 15, endTime: null }
                 };
                 for (let i = 1; i <= NUM_PLAYERS; i++) {
                     state.players.push({ id: i, name: `Jogador ${i}`, chips: { ...INITIAL_CHIPS }, selectedForPot: false });
@@ -607,7 +629,7 @@
             }
             renderAll();
             if (state.timer.isRunning) {
-                handleStartPause(); // Reinicia o intervalo se estava rodando
+                timerInterval = setInterval(tick, 1000);
             }
         }
 
