@@ -574,7 +574,7 @@
             }
             if (target.closest('#reset-btn')) {
                 if (confirm('Tem certeza que deseja resetar todas as fichas?')) {
-                    localStorage.removeItem('pokerMasterStateV9');
+                    localStorage.removeItem('pokerMasterStateV10');
                     init();
                 }
                 return;
@@ -586,12 +586,18 @@
                 const type = target.closest('.chip-btn').dataset.chipType;
                 const player = state.players.find(p => p.id === state.activePlayerId);
                 const betCount = state.currentBet[type] || 0;
-                if (player.chips[type] > betCount) { state.currentBet[type] = betCount + 1; renderBetVisuals(); }
+                if (player.chips[type] > betCount) { 
+                    state.currentBet[type] = betCount + 1; 
+                    renderBetVisuals(); 
+                }
                 return;
             }
             if (target.closest('#bet-stack-visualizer .chip-stack')) {
                 const type = target.closest('.chip-stack').dataset.chipType;
-                if (state.currentBet[type] > 0) { state.currentBet[type]--; renderBetVisuals(); }
+                if (state.currentBet[type] > 0) { 
+                    state.currentBet[type]--; 
+                    renderBetVisuals(); 
+                }
                 return;
             }
             if (target.closest('#bet-confirm-btn')) {
@@ -601,7 +607,7 @@
                     state.pot[type] = (state.pot[type] || 0) + count;
                 });
                 renderAll();
-                switchScreen('home');
+                renderBetScreen(state.activePlayerId);
                 return;
             }
             if (target.closest('#bet-next-action-btn') || target.closest('#bet-next-player')) { renderBetScreen(getNextPlayerId(state.activePlayerId)); return; }
@@ -665,7 +671,7 @@
 
         // --- INICIALIZAÇÃO ---
         function init() {
-            const savedState = localStorage.getItem('pokerMasterStateV9');
+            const savedState = localStorage.getItem('pokerMasterStateV10');
             if (savedState) {
                 state = JSON.parse(savedState);
                 if (state.timer.isRunning && state.timer.endTime) {
