@@ -40,11 +40,12 @@
 
         /* --- Tela Home --- */
         #home-screen .header { display: flex; justify-content: space-between; align-items: center; padding: 0 0.5rem; }
-        #home-screen .timer-block { text-align: center; }
-        #home-screen .timer-display { font-family: 'Teko', sans-serif; font-size: 2.5rem; color: var(--text-light); line-height: 1; }
-        #home-screen .blinds-display { font-family: 'Teko', sans-serif; font-size: 1.75rem; color: var(--primary); line-height: 1; }
-        #home-screen .round-display { color: var(--text-medium); font-size: 0.8rem; }
-        #home-screen .settings-btn { font-size: 1.5rem; color: var(--text-medium); cursor: pointer; }
+        #home-screen .header-block { text-align: center; flex: 1; }
+        #home-screen .header-block.timer { flex: 1.5; }
+        #home-screen .header-label { font-family: 'Teko', sans-serif; font-size: 1rem; color: var(--text-medium); }
+        #home-screen .header-value { font-family: 'Teko', sans-serif; font-size: 2.5rem; color: var(--text-light); line-height: 1; }
+        #home-screen .header-value.blinds { color: var(--primary); }
+        #home-screen .settings-btn { font-size: 1.5rem; color: var(--text-medium); cursor: pointer; position: absolute; top: 1.5rem; right: 1rem; }
 
         #home-screen .pot-card { text-align: center; border: 2px solid var(--primary); }
         #home-screen .pot-label { font-family: 'Teko', sans-serif; font-size: 1.5rem; color: var(--text-medium); }
@@ -65,7 +66,7 @@
         
         .credits-footer { text-align: center; margin-top: 1rem; color: var(--text-medium); font-size: 0.8rem; }
 
-        /* --- Telas de Aposta/Gerenciamento --- */
+        /* --- Telas Secundárias (Sub-screens) --- */
         .sub-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: var(--bg-dark); z-index: 100; display: flex; flex-direction: column; padding: 1.5rem 1rem; gap: 1.5rem; transform: translateX(100%); transition: transform 0.3s ease-in-out; }
         .sub-screen.active { transform: translateX(0); }
         
@@ -99,6 +100,18 @@
         .sub-screen-footer .main-action-btn { background-color: var(--primary); color: var(--text-dark); flex-grow: 1; }
         .sub-screen-footer .secondary-action-btn { background-color: var(--bg-accent); color: var(--text-light); flex-grow: 1; }
         .sub-screen-footer .cancel-link { background: none; border: none; color: var(--text-medium); text-align: center; width: 100%; margin-top: 0.5rem; padding: 0.5rem; }
+        
+        /* --- Tela de Configurações do Timer --- */
+        #settings-screen .timer-config-card { display: flex; flex-direction: column; align-items: center; gap: 1.5rem; }
+        #settings-screen .level-nav { display: flex; align-items: center; gap: 1rem; }
+        #settings-screen .level-nav .btn { font-size: 2rem; padding: 0 1rem; }
+        #settings-screen .level-display { font-size: 1.5rem; text-align: center; }
+        #settings-screen .input-group { display: flex; align-items: center; gap: 0.5rem; background-color: var(--bg-accent); padding: 0.5rem 1rem; border-radius: 8px; }
+        #settings-screen .input-group input { background: none; border: none; color: #FFF; font-size: 1rem; width: 50px; text-align: center; }
+        #settings-screen .main-controls { display: flex; gap: 1rem; }
+        #settings-screen .btn-start-pause { background-color: var(--green); color: var(--text-dark); }
+        #settings-screen .btn-start-pause.paused { background-color: var(--primary); }
+        #settings-screen .btn-reset-timer { background-color: var(--red); color: white; }
     </style>
 </head>
 <body>
@@ -106,15 +119,21 @@
     <!-- Tela Home -->
     <div id="home-screen" class="screen">
         <header class="header">
-            <div class="round-block">
-                <div class="round-display">RODADA <span id="home-round-num">1</span></div>
-                <div id="home-blinds-display" class="blinds-display">25 / 50</div>
+            <div class="header-block">
+                <div class="header-label">RODADA</div>
+                <div id="home-round-num" class="header-value">1</div>
             </div>
-            <div class="timer-block">
-                <div id="home-timer-display" class="timer-display">15:00</div>
+            <div class="header-block timer">
+                <div class="header-label">TIMER</div>
+                <div id="home-timer-display" class="header-value">15:00</div>
             </div>
-            <div id="settings-btn" class="settings-btn">⚙️</div>
+            <div class="header-block">
+                <div class="header-label">BLINDS</div>
+                <div id="home-blinds-display" class="header-value blinds">25/50</div>
+            </div>
         </header>
+        <div id="settings-btn" class="settings-btn">⚙️</div>
+
         <div class="card pot-card">
             <div class="pot-label">Total no Pote</div>
             <div id="home-pot-value" class="pot-value">0</div>
@@ -152,11 +171,10 @@
             <div id="bet-chip-selector" class="chip-selector"></div>
         </div>
         <footer class="sub-screen-footer">
-            <button id="bet-home-btn" class="home-btn">🏠</button>
+            <button class="home-btn">🏠</button>
             <button id="bet-confirm-btn" class="btn main-action-btn">Apostar</button>
             <button id="bet-next-action-btn" class="btn secondary-action-btn">Próx. &gt;</button>
         </footer>
-        <button id="bet-cancel-btn" class="btn cancel-link">Cancelar Aposta</button>
     </div>
 
     <!-- Tela de Gerenciamento -->
@@ -179,10 +197,38 @@
             <div id="manage-chip-selector" class="chip-selector"></div>
         </div>
         <footer class="sub-screen-footer">
-             <button id="manage-cancel-btn" class="btn secondary-action-btn">Cancelar</button>
+             <button class="home-btn">🏠</button>
              <button id="manage-save-btn" class="btn main-action-btn">Salvar</button>
         </footer>
     </div>
+    
+    <!-- Tela de Configurações do Timer -->
+    <div id="settings-screen" class="sub-screen">
+        <header class="sub-screen-header">
+            <div class="nav-arrow" style="visibility: hidden;">&lt;</div>
+            <div class="player-name-display">TIMER</div>
+            <div class="nav-arrow home-btn" style="font-size: 1.5rem;">✖</div>
+        </header>
+        <div class="card timer-config-card">
+            <div class="level-nav">
+                <button id="timer-prev-level-btn" class="btn">&lt;</button>
+                <div class="level-display">
+                    <div class="header-label">RODADA <span id="settings-round-num">1</span></div>
+                    <div id="settings-blinds-display" class="header-value blinds">25/50</div>
+                </div>
+                <button id="timer-next-level-btn" class="btn">&gt;</button>
+            </div>
+            <div class="input-group">
+                <label for="timer-input">Duração (min):</label>
+                <input type="number" id="timer-input" value="15">
+            </div>
+            <div class="main-controls">
+                <button id="timer-start-pause-btn" class="btn btn-start-pause paused">INICIAR</button>
+                <button id="timer-reset-btn" class="btn btn-reset-timer">RESETAR</button>
+            </div>
+        </div>
+    </div>
+
 
     <script>
     document.addEventListener('DOMContentLoaded', () => {
@@ -196,34 +242,37 @@
         };
         const INITIAL_CHIPS = { white: 8, red: 8, green: 8, black: 8, blue: 0 };
         const NUM_PLAYERS = 6;
+        const BLIND_LEVELS = [
+            { small: 25, big: 50 }, { small: 50, big: 100 }, { small: 75, big: 150 },
+            { small: 100, big: 200 }, { small: 150, big: 300 }, { small: 200, big: 400 },
+            { small: 500, big: 1000 }, { small: 800, big: 1600 }, { small: 1000, big: 2000 },
+        ];
 
         // --- ESTADO DO JOGO ---
         let state = {};
+        let timerInterval = null;
 
         // --- ELEMENTOS DO DOM ---
         const screens = {
             home: document.getElementById('home-screen'),
             bet: document.getElementById('bet-screen'),
             manage: document.getElementById('manage-screen'),
+            settings: document.getElementById('settings-screen'),
         };
         
         // --- Lógica Principal ---
         function saveState() {
-            localStorage.setItem('pokerMasterStateV4', JSON.stringify(state));
+            localStorage.setItem('pokerMasterStateV5', JSON.stringify(state));
         }
 
         function calculateStack(player) {
             if (!player || !player.chips) return 0;
-            return Object.entries(player.chips).reduce((sum, [type, count]) => {
-                return sum + (CHIP_TYPES[type].value * count);
-            }, 0);
+            return Object.entries(player.chips).reduce((sum, [type, count]) => sum + (CHIP_TYPES[type].value * count), 0);
         }
 
         function calculatePotValue() {
             if (!state.pot) return 0;
-            return Object.entries(state.pot).reduce((sum, [type, count]) => {
-                return sum + (CHIP_TYPES[type].value * count);
-            }, 0);
+            return Object.entries(state.pot).reduce((sum, [type, count]) => sum + (CHIP_TYPES[type].value * count), 0);
         }
 
         function switchScreen(screenName) {
@@ -234,6 +283,12 @@
         }
         
         // --- RENDERIZAÇÃO ---
+        function renderAll() {
+            renderHomeScreen();
+            renderTimer();
+            saveState();
+        }
+
         function renderHomeScreen() {
             state.players.sort((a, b) => calculateStack(b) - calculateStack(a));
             
@@ -339,19 +394,85 @@
             return state.players[prevIndex].id;
         }
 
+        // --- Lógica do Timer ---
+        function formatTime(s) { return `${String(Math.floor(s/60)).padStart(2,'0')}:${String(s%60).padStart(2,'0')}`; }
+
+        function renderTimer() {
+            const timer = state.timer;
+            const level = BLIND_LEVELS[timer.round];
+            const blindsText = level ? `${level.small}/${level.big}` : 'FIM';
+
+            document.getElementById('home-timer-display').textContent = formatTime(timer.time);
+            document.getElementById('home-round-num').textContent = timer.round + 1;
+            document.getElementById('home-blinds-display').textContent = blindsText;
+            
+            document.getElementById('settings-round-num').textContent = timer.round + 1;
+            document.getElementById('settings-blinds-display').textContent = blindsText;
+            
+            const startPauseBtn = document.getElementById('timer-start-pause-btn');
+            startPauseBtn.textContent = timer.isRunning ? 'PAUSAR' : 'INICIAR';
+            startPauseBtn.classList.toggle('paused', !timer.isRunning);
+            
+            document.getElementById('timer-input').disabled = timer.isRunning;
+            document.getElementById('timer-prev-level-btn').disabled = timer.isRunning;
+            document.getElementById('timer-next-level-btn').disabled = timer.isRunning;
+        }
+
+        function handleStartPause() {
+            state.timer.isRunning = !state.timer.isRunning;
+            if (state.timer.isRunning) {
+                timerInterval = setInterval(() => {
+                    if (state.timer.time > 0) {
+                        state.timer.time--;
+                    } else {
+                        levelUp();
+                    }
+                    renderTimer();
+                    saveState();
+                }, 1000);
+            } else {
+                clearInterval(timerInterval);
+            }
+            renderTimer();
+            saveState();
+        }
+
+        function levelUp() {
+            if (state.timer.round < BLIND_LEVELS.length - 1) {
+                state.timer.round++;
+                state.timer.time = parseInt(document.getElementById('timer-input').value) * 60;
+                try { if (navigator.vibrate) navigator.vibrate(200); } catch(e){}
+            } else {
+                state.timer.isRunning = false;
+                clearInterval(timerInterval);
+            }
+        }
+        
+        function levelDown() {
+            if (state.timer.round > 0) {
+                state.timer.round--;
+                state.timer.time = parseInt(document.getElementById('timer-input').value) * 60;
+            }
+        }
+        
+        function resetTimer() {
+             state.timer.round = 0;
+             state.timer.time = parseInt(document.getElementById('timer-input').value) * 60;
+             if (state.timer.isRunning) {
+                 handleStartPause(); // Pausa o timer
+             }
+             renderTimer();
+             saveState();
+        }
+
+
         // --- MANIPULADORES DE EVENTOS ---
         document.body.addEventListener('click', (e) => {
             const target = e.target;
             
             // Navegação Home
-            if (target.closest('.player-stack')) {
-                renderBetScreen(parseInt(target.closest('.player-stack').dataset.playerId));
-                return;
-            }
-            if (target.closest('.player-name')) {
-                renderManageScreen(parseInt(target.closest('.player-name').dataset.playerId));
-                return;
-            }
+            if (target.closest('.player-stack')) { renderBetScreen(parseInt(target.closest('.player-stack').dataset.playerId)); return; }
+            if (target.closest('.player-name')) { renderManageScreen(parseInt(target.closest('.player-name').dataset.playerId)); return; }
             if (target.closest('.select-winner-btn')) {
                 const player = state.players.find(p => p.id === parseInt(target.closest('.select-winner-btn').dataset.playerId));
                 player.selectedForPot = !player.selectedForPot;
@@ -368,36 +489,30 @@
                     });
                      state.pot = { white: 0, red: 0, green: 0, black: 0, blue: 0 };
                      state.players.forEach(p => p.selectedForPot = false);
-                     renderHomeScreen();
-                     saveState();
+                     renderAll();
                 }
                 return;
             }
             if (target.closest('#reset-btn')) {
                 if (confirm('Tem certeza que deseja resetar todas as fichas?')) {
-                    localStorage.removeItem('pokerMasterStateV4');
+                    localStorage.removeItem('pokerMasterStateV5');
                     init();
                 }
                 return;
             }
+            if (target.closest('#settings-btn')) { switchScreen('settings'); return; }
 
             // Tela de Aposta
             if (target.closest('#bet-chip-selector .chip-btn')) {
                 const type = target.closest('.chip-btn').dataset.chipType;
                 const player = state.players.find(p => p.id === state.activePlayerId);
                 const betCount = state.currentBet[type] || 0;
-                if (player.chips[type] > betCount) {
-                    state.currentBet[type] = betCount + 1;
-                    renderBetVisuals();
-                }
+                if (player.chips[type] > betCount) { state.currentBet[type] = betCount + 1; renderBetVisuals(); }
                 return;
             }
             if (target.closest('#bet-visualizer .mini-chip')) {
                 const type = target.closest('.mini-chip').dataset.chipType;
-                if (state.currentBet[type] > 0) {
-                    state.currentBet[type]--;
-                    renderBetVisuals();
-                }
+                if (state.currentBet[type] > 0) { state.currentBet[type]--; renderBetVisuals(); }
                 return;
             }
             if (target.closest('#bet-confirm-btn')) {
@@ -406,19 +521,12 @@
                     player.chips[type] -= count;
                     state.pot[type] = (state.pot[type] || 0) + count;
                 });
-                renderHomeScreen();
-                saveState();
+                renderAll();
                 switchScreen('home');
                 return;
             }
-            if (target.closest('#bet-next-action-btn') || target.closest('#bet-next-player')) {
-                renderBetScreen(getNextPlayerId(state.activePlayerId));
-                return;
-            }
-            if (target.closest('#bet-prev-player')) {
-                renderBetScreen(getPrevPlayerId(state.activePlayerId));
-                return;
-            }
+            if (target.closest('#bet-next-action-btn') || target.closest('#bet-next-player')) { renderBetScreen(getNextPlayerId(state.activePlayerId)); return; }
+            if (target.closest('#bet-prev-player')) { renderBetScreen(getPrevPlayerId(state.activePlayerId)); return; }
 
             // Tela de Gerenciamento
             if (target.closest('#manage-player-name .edit-icon')) {
@@ -446,43 +554,42 @@
             if (target.closest('#manage-visualizer .mini-chip')) {
                 const chip = target.closest('.mini-chip');
                 const type = chip.dataset.chipType;
-                if (chip.dataset.managed) {
-                    state.manageChips[type]--;
-                } else {
-                    state.manageChips[type] = (state.manageChips[type] || 0) - 1;
-                }
+                if (chip.dataset.managed) { state.manageChips[type]--; } 
+                else { state.manageChips[type] = (state.manageChips[type] || 0) - 1; }
                 chip.remove();
                 return;
             }
             if (target.closest('#manage-save-btn')) {
                 const player = state.players.find(p => p.id === state.activePlayerId);
-                Object.entries(state.manageChips).forEach(([type, count]) => {
-                    player.chips[type] += count;
-                });
-                renderHomeScreen();
-                saveState();
+                Object.entries(state.manageChips).forEach(([type, count]) => { player.chips[type] += count; });
+                renderAll();
                 switchScreen('home');
                 return;
             }
-            if (target.closest('#manage-next-player')) {
-                renderManageScreen(getNextPlayerId(state.activePlayerId));
-                return;
-            }
-            if (target.closest('#manage-prev-player')) {
-                renderManageScreen(getPrevPlayerId(state.activePlayerId));
-                return;
-            }
+            if (target.closest('#manage-next-player')) { renderManageScreen(getNextPlayerId(state.activePlayerId)); return; }
+            if (target.closest('#manage-prev-player')) { renderManageScreen(getPrevPlayerId(state.activePlayerId)); return; }
+
+            // Tela de Configurações do Timer
+            if (target.closest('#timer-start-pause-btn')) { handleStartPause(); return; }
+            if (target.closest('#timer-reset-btn')) { resetTimer(); return; }
+            if (target.closest('#timer-next-level-btn')) { levelUp(); renderTimer(); saveState(); return; }
+            if (target.closest('#timer-prev-level-btn')) { levelDown(); renderTimer(); saveState(); return; }
 
             // Ações genéricas de cancelar/voltar
-            if(target.closest('.home-btn, .cancel-link, #manage-cancel-btn, #bet-cancel-btn')) {
-                switchScreen('home');
-                return;
+            if(target.closest('.home-btn')) { switchScreen('home'); return; }
+        });
+
+        document.getElementById('timer-input').addEventListener('change', (e) => {
+            if (!state.timer.isRunning) {
+                state.timer.time = parseInt(e.target.value) * 60;
+                renderTimer();
+                saveState();
             }
         });
 
         // --- INICIALIZAÇÃO ---
         function init() {
-            const savedState = localStorage.getItem('pokerMasterStateV4');
+            const savedState = localStorage.getItem('pokerMasterStateV5');
             if (savedState) {
                 state = JSON.parse(savedState);
             } else {
@@ -492,18 +599,16 @@
                     activePlayerId: null,
                     currentBet: {},
                     manageChips: {},
+                    timer: { round: 0, time: 15 * 60, isRunning: false }
                 };
                 for (let i = 1; i <= NUM_PLAYERS; i++) {
-                    state.players.push({
-                        id: i,
-                        name: `Jogador ${i}`,
-                        chips: { ...INITIAL_CHIPS },
-                        selectedForPot: false,
-                    });
+                    state.players.push({ id: i, name: `Jogador ${i}`, chips: { ...INITIAL_CHIPS }, selectedForPot: false });
                 }
             }
-            renderHomeScreen();
-            switchScreen('home');
+            renderAll();
+            if (state.timer.isRunning) {
+                handleStartPause(); // Reinicia o intervalo se estava rodando
+            }
         }
 
         init();
