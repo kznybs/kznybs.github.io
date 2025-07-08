@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>PokerMaster Manager</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;700&family=Teko:wght@500;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --bg-dark: #0d1117;
+            --bg-card: #161b22;
+            --bg-accent: #21262d;
+            --border-color: #30363d;
+            --text-light: #c9d1d9;
+            --text-medium: #8b949e;
+            --text-dark: #111827;
+            --primary: #58a6ff;
+            --green: #3fb950;
+            --red: #f85149;
+            --white-chip: #E5E7EB;
+            --black-chip: #374151;
+            --blue-chip: #3b82f6;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body { background-color: var(--bg-dark); color: var(--text-light); font-family: 'Roboto Mono', monospace; }
+        .hidden { display: none !important; }
+        
+        /* --- Layout Principal e Telas --- */
+        .screen { min-height: 100vh; padding: 1.5rem 1rem; display: flex; flex-direction: column; gap: 1.5rem; }
+        
+        /* --- Componentes Comuns --- */
+        .card { background-color: var(--bg-card); border-radius: 16px; padding: 1.5rem; border: 1px solid var(--border-color); }
+        .btn { border: none; border-radius: 12px; padding: 1rem; font-weight: bold; cursor: pointer; transition: all 0.2s ease; font-family: 'Teko', sans-serif; font-size: 1.5rem; letter-spacing: 1px; }
+        .btn:active { transform: scale(0.97); }
+
+        /* --- Tela Home --- */
+        #home-screen .header { display: flex; justify-content: space-between; align-items: center; padding: 0 0.5rem; }
+        #home-screen .timer-block { text-align: center; }
+        #home-screen .timer-display { font-family: 'Teko', sans-serif; font-size: 2.5rem; color: var(--text-light); line-height: 1; }
+        #home-screen .blinds-display { font-family: 'Teko', sans-serif; font-size: 1.75rem; color: var(--primary); line-height: 1; }
+        #home-screen .round-display { color: var(--text-medium); font-size: 0.8rem; }
+        #home-screen .settings-btn { font-size: 1.5rem; color: var(--text-medium); cursor: pointer; }
+
+        #home-screen .pot-card { text-align: center; border: 2px solid var(--primary); }
+        #home-screen .pot-label { font-family: 'Teko', sans-serif; font-size: 1.5rem; color: var(--text-medium); }
+        #home-screen .pot-value { font-family: 'Teko', sans-serif; font-size: 4rem; color: var(--text-light); line-height: 1; }
+
+        #home-screen .ranking-card .card-title { font-family: 'Teko', sans-serif; font-size: 2rem; text-align: center; color: #FFF; margin-bottom: 1rem; }
+        #home-screen .player-list { display: flex; flex-direction: column; gap: 0.75rem; }
+        #home-screen .player-item { display: flex; align-items: center; gap: 0.75rem; }
+        #home-screen .player-position { font-family: 'Teko', sans-serif; font-size: 1.5rem; color: var(--text-medium); width: 2rem; }
+        #home-screen .player-stack { background-color: var(--primary); color: var(--text-dark); font-weight: bold; padding: 0.75rem; border-radius: 8px; flex-shrink: 0; cursor: pointer; }
+        #home-screen .player-name { background-color: var(--bg-accent); color: var(--text-light); padding: 0.75rem; border-radius: 8px; flex-grow: 1; text-align: left; cursor: pointer; }
+        #home-screen .select-winner-btn { background-color: var(--bg-accent); color: var(--green); font-size: 1.5rem; border-radius: 8px; width: 45px; height: 45px; flex-shrink: 0; display: flex; justify-content: center; align-items: center; cursor: pointer; }
+        #home-screen .select-winner-btn.selected { background-color: var(--green); color: var(--text-dark); }
+        
+        #home-screen .actions { display: flex; flex-direction: column; gap: 1rem; margin-top: 1.5rem; }
+        #home-screen .btn-distribute { background-color: var(--primary); color: var(--text-dark); }
+        #home-screen .btn-reset-all { background-color: var(--red); color: white; }
+        
+        .credits-footer { text-align: center; margin-top: 1rem; color: var(--text-medium); font-size: 0.8rem; }
+
+        /* --- Telas de Aposta/Gerenciamento --- */
+        .sub-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: var(--bg-dark); z-index: 100; display: flex; flex-direction: column; padding: 1.5rem 1rem; gap: 1.5rem; transform: translateX(100%); transition: transform 0.3s ease-in-out; }
+        .sub-screen.active { transform: translateX(0); }
+        
+        .sub-screen-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
+        .sub-screen-header .nav-arrow { font-size: 2rem; color: var(--text-medium); padding: 0.5rem; cursor: pointer; }
+        .sub-screen-header .player-name-display { font-family: 'Teko', sans-serif; font-size: 2.5rem; display: flex; align-items: center; gap: 0.5rem; }
+        .sub-screen-header .player-name-display .edit-icon { font-size: 1.5rem; vertical-align: middle; color: var(--text-medium); cursor: pointer; }
+
+        .total-display-card { text-align: center; border: 2px solid var(--primary); padding: 1rem; }
+        .total-display-card .total-label { font-family: 'Teko', sans-serif; font-size: 1.5rem; color: var(--text-medium); }
+        .total-display-card .total-value { font-family: 'Teko', sans-serif; font-size: 4rem; color: var(--text-light); line-height: 1; }
+
+        .chip-area { margin-top: 1.5rem; }
+        .chip-area-title { color: var(--text-medium); margin-bottom: 1rem; text-align: center; }
+        .chip-visualizer { background-color: var(--bg-accent); border-radius: 12px; padding: 1rem; min-height: 80px; display: flex; flex-wrap: wrap; gap: 0.5rem; align-content: flex-start; }
+        .chip-visualizer .mini-chip { width: 20px; height: 20px; border-radius: 10px; cursor: pointer; }
+        
+        .chip-selector { display: grid; grid-template-columns: repeat(auto-fit, minmax(80px, 1fr)); gap: 1rem; margin-top: 1.5rem; }
+        .chip-btn { width: 100%; aspect-ratio: 1/1; border-radius: 50%; display: flex; flex-direction: column; justify-content: center; align-items: center; border: 4px solid; cursor: pointer; }
+        .chip-btn .value { font-size: 1.8rem; font-weight: bold; }
+        .chip-btn .count { font-size: 0.9rem; }
+
+        .chip-white { background-color: var(--white-chip); border-color: #9CA3AF; color: var(--text-dark); }
+        .chip-red { background-color: var(--red); border-color: #b91c1c; color: white; }
+        .chip-green { background-color: var(--green); border-color: #15803d; color: white; }
+        .chip-black { background-color: var(--black-chip); border-color: #111827; color: white; }
+        .chip-blue { background-color: var(--blue-chip); border-color: #1d4ed8; color: white; }
+
+        .sub-screen-footer { display: flex; gap: 1rem; margin-top: auto; padding-top: 1rem; }
+        .sub-screen-footer .home-btn { background-color: var(--bg-accent); color: var(--text-light); width: 60px; height: 60px; display: flex; justify-content: center; align-items: center; font-size: 1.5rem; border-radius: 12px; }
+        .sub-screen-footer .main-action-btn { background-color: var(--primary); color: var(--text-dark); flex-grow: 1; }
+        .sub-screen-footer .secondary-action-btn { background-color: var(--bg-accent); color: var(--text-light); flex-grow: 1; }
+        .sub-screen-footer .cancel-link { background: none; border: none; color: var(--text-medium); text-align: center; width: 100%; margin-top: 0.5rem; padding: 0.5rem; }
+    </style>
+</head>
+<body>
+
+    <!-- Tela Home -->
+    <div id="home-screen" class="screen">
+        <header class="header">
+            <div class="round-block">
+                <div class="round-display">RODADA <span id="home-round-num">1</span></div>
+                <div id="home-blinds-display" class="blinds-display">25 / 50</div>
+            </div>
+            <div class="timer-block">
+                <div id="home-timer-display" class="timer-display">15:00</div>
+            </div>
+            <div id="settings-btn" class="settings-btn">⚙️</div>
+        </header>
+        <div class="card pot-card">
+            <div class="pot-label">Total no Pote</div>
+            <div id="home-pot-value" class="pot-value">0</div>
+        </div>
+        <div class="card ranking-card">
+            <h2 class="card-title">RANKING</h2>
+            <div id="player-list" class="player-list"></div>
+        </div>
+        <div class="actions">
+            <button id="distribute-btn" class="btn btn-distribute">Distribuir</button>
+            <button id="reset-btn" class="btn btn-reset-all">Resetar Fichas de Todos</button>
+        </div>
+        <footer class="credits-footer">
+            Desenvolvido por Gabriel, Vinicius e Adilson
+        </footer>
+    </div>
+
+    <!-- Tela de Aposta -->
+    <div id="bet-screen" class="sub-screen">
+        <header class="sub-screen-header">
+            <div id="bet-prev-player" class="nav-arrow">&lt;</div>
+            <div id="bet-player-name" class="player-name-display">JOGADOR 1</div>
+            <div id="bet-next-player" class="nav-arrow">&gt;</div>
+        </header>
+        <div class="card total-display-card">
+            <div class="total-label">Apostado</div>
+            <div id="bet-total-value" class="total-value">0</div>
+        </div>
+        <div class="chip-area">
+            <div class="chip-area-title">Remover</div>
+            <div id="bet-visualizer" class="chip-visualizer"></div>
+        </div>
+        <div class="chip-area">
+            <div class="chip-area-title">Apostar</div>
+            <div id="bet-chip-selector" class="chip-selector"></div>
+        </div>
+        <footer class="sub-screen-footer">
+            <button id="bet-home-btn" class="home-btn">🏠</button>
+            <button id="bet-confirm-btn" class="btn main-action-btn">Apostar</button>
+            <button id="bet-next-action-btn" class="btn secondary-action-btn">Próx. &gt;</button>
+        </footer>
+        <button id="bet-cancel-btn" class="btn cancel-link">Cancelar Aposta</button>
+    </div>
+
+    <!-- Tela de Gerenciamento -->
+    <div id="manage-screen" class="sub-screen">
+        <header class="sub-screen-header">
+            <div id="manage-prev-player" class="nav-arrow">&lt;</div>
+            <div id="manage-player-name" class="player-name-display">JOGADOR 1 <span class="edit-icon">✎</span></div>
+            <div id="manage-next-player" class="nav-arrow">&gt;</div>
+        </header>
+        <div class="card total-display-card">
+            <div class="total-label">Stack Total</div>
+            <div id="manage-total-value" class="total-value">2400</div>
+        </div>
+        <div class="chip-area">
+            <div class="chip-area-title">Remover do Stack</div>
+            <div id="manage-visualizer" class="chip-visualizer"></div>
+        </div>
+        <div class="chip-area">
+            <div class="chip-area-title">Adicionar ao Stack</div>
+            <div id="manage-chip-selector" class="chip-selector"></div>
+        </div>
+        <footer class="sub-screen-footer">
+             <button id="manage-cancel-btn" class="btn secondary-action-btn">Cancelar</button>
+             <button id="manage-save-btn" class="btn main-action-btn">Salvar</button>
+        </footer>
+    </div>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        // --- CONFIGURAÇÃO ---
+        const CHIP_TYPES = {
+            blue: { value: 400, class: 'chip-blue' },
+            white: { value: 200, class: 'chip-white' },
+            black: { value: 50, class: 'chip-black' },
+            green: { value: 25, class: 'chip-green' },
+            red: { value: 25, class: 'chip-red' },
+        };
+        const INITIAL_CHIPS = { white: 8, red: 8, green: 8, black: 8, blue: 0 };
+        const NUM_PLAYERS = 6;
+
+        // --- ESTADO DO JOGO ---
+        let state = {};
+
+        // --- ELEMENTOS DO DOM ---
+        const screens = {
+            home: document.getElementById('home-screen'),
+            bet: document.getElementById('bet-screen'),
+            manage: document.getElementById('manage-screen'),
+        };
+        
+        // --- Lógica Principal ---
+        function saveState() {
+            localStorage.setItem('pokerMasterStateV4', JSON.stringify(state));
+        }
+
+        function calculateStack(player) {
+            if (!player || !player.chips) return 0;
+            return Object.entries(player.chips).reduce((sum, [type, count]) => {
+                return sum + (CHIP_TYPES[type].value * count);
+            }, 0);
+        }
+
+        function calculatePotValue() {
+            if (!state.pot) return 0;
+            return Object.entries(state.pot).reduce((sum, [type, count]) => {
+                return sum + (CHIP_TYPES[type].value * count);
+            }, 0);
+        }
+
+        function switchScreen(screenName) {
+            Object.values(screens).forEach(s => s.classList.remove('active'));
+            if (screens[screenName]) {
+                screens[screenName].classList.add('active');
+            }
+        }
+        
+        // --- RENDERIZAÇÃO ---
+        function renderHomeScreen() {
+            state.players.sort((a, b) => calculateStack(b) - calculateStack(a));
+            
+            const playerListEl = document.getElementById('player-list');
+            playerListEl.innerHTML = '';
+            state.players.forEach((player, index) => {
+                const playerEl = document.createElement('div');
+                playerEl.className = 'player-item';
+                playerEl.innerHTML = `
+                    <div class="player-position">${index + 1}º</div>
+                    <button class="player-stack" data-player-id="${player.id}">${calculateStack(player).toLocaleString('pt-BR')}</button>
+                    <button class="player-name" data-player-id="${player.id}">${player.name}</button>
+                    <button class="select-winner-btn ${player.selectedForPot ? 'selected' : ''}" data-player-id="${player.id}">+</button>
+                `;
+                playerListEl.appendChild(playerEl);
+            });
+            document.getElementById('home-pot-value').textContent = calculatePotValue().toLocaleString('pt-BR');
+        }
+
+        function renderBetScreen(playerId) {
+            state.activePlayerId = playerId;
+            state.currentBet = {};
+
+            const player = state.players.find(p => p.id === playerId);
+            if (!player) return;
+
+            document.getElementById('bet-player-name').textContent = player.name;
+            
+            const selectorEl = document.getElementById('bet-chip-selector');
+            selectorEl.innerHTML = '';
+            Object.entries(CHIP_TYPES).forEach(([type, config]) => {
+                if (player.chips[type] > 0) {
+                     const chipBtn = document.createElement('button');
+                     chipBtn.className = `chip-btn ${config.class}`;
+                     chipBtn.dataset.chipType = type;
+                     chipBtn.innerHTML = `<span class="value">${config.value}</span><span class="count">${player.chips[type]}</span>`;
+                     selectorEl.appendChild(chipBtn);
+                }
+            });
+            renderBetVisuals();
+            switchScreen('bet');
+        }
+
+        function renderBetVisuals() {
+            const betValue = Object.entries(state.currentBet).reduce((sum, [type, count]) => sum + (CHIP_TYPES[type].value * count), 0);
+            document.getElementById('bet-total-value').textContent = betValue.toLocaleString('pt-BR');
+
+            const visualizerEl = document.getElementById('bet-visualizer');
+            visualizerEl.innerHTML = '';
+            Object.entries(state.currentBet).forEach(([type, count]) => {
+                for (let i = 0; i < count; i++) {
+                    const miniChip = document.createElement('div');
+                    miniChip.className = `mini-chip ${CHIP_TYPES[type].class}`;
+                    miniChip.dataset.chipType = type;
+                    visualizerEl.appendChild(miniChip);
+                }
+            });
+        }
+        
+        function renderManageScreen(playerId) {
+            state.activePlayerId = playerId;
+            state.manageChips = {};
+
+            const player = state.players.find(p => p.id === playerId);
+            if (!player) return;
+            
+            document.getElementById('manage-player-name').innerHTML = `${player.name} <span class="edit-icon">✎</span>`;
+            document.getElementById('manage-total-value').textContent = calculateStack(player).toLocaleString('pt-BR');
+
+            const visualizerEl = document.getElementById('manage-visualizer');
+            visualizerEl.innerHTML = '';
+            Object.entries(player.chips).forEach(([type, count]) => {
+                for (let i = 0; i < count; i++) {
+                    const miniChip = document.createElement('div');
+                    miniChip.className = `mini-chip ${CHIP_TYPES[type].class}`;
+                    miniChip.dataset.chipType = type;
+                    visualizerEl.appendChild(miniChip);
+                }
+            });
+
+            const selectorEl = document.getElementById('manage-chip-selector');
+            selectorEl.innerHTML = '';
+            Object.entries(CHIP_TYPES).forEach(([type, config]) => {
+                 const chipBtn = document.createElement('button');
+                 chipBtn.className = `chip-btn ${config.class}`;
+                 chipBtn.dataset.chipType = type;
+                 chipBtn.innerHTML = `<span class="value">${config.value}</span><span class="count">∞</span>`;
+                 selectorEl.appendChild(chipBtn);
+            });
+            
+            switchScreen('manage');
+        }
+
+        function getNextPlayerId(currentId) {
+            const currentIndex = state.players.findIndex(p => p.id === currentId);
+            const nextIndex = (currentIndex + 1) % state.players.length;
+            return state.players[nextIndex].id;
+        }
+
+        function getPrevPlayerId(currentId) {
+            const currentIndex = state.players.findIndex(p => p.id === currentId);
+            const prevIndex = (currentIndex - 1 + state.players.length) % state.players.length;
+            return state.players[prevIndex].id;
+        }
+
+        // --- MANIPULADORES DE EVENTOS ---
+        document.body.addEventListener('click', (e) => {
+            const target = e.target;
+            
+            // Navegação Home
+            if (target.closest('.player-stack')) {
+                renderBetScreen(parseInt(target.closest('.player-stack').dataset.playerId));
+                return;
+            }
+            if (target.closest('.player-name')) {
+                renderManageScreen(parseInt(target.closest('.player-name').dataset.playerId));
+                return;
+            }
+            if (target.closest('.select-winner-btn')) {
+                const player = state.players.find(p => p.id === parseInt(target.closest('.select-winner-btn').dataset.playerId));
+                player.selectedForPot = !player.selectedForPot;
+                renderHomeScreen();
+                saveState();
+                return;
+            }
+            if (target.closest('#distribute-btn')) {
+                const winners = state.players.filter(p => p.selectedForPot);
+                if (winners.length > 0 && calculatePotValue() > 0) {
+                    Object.entries(state.pot).forEach(([type, potCount]) => {
+                        const chipsPerWinner = Math.floor(potCount / winners.length);
+                        winners.forEach(winner => winner.chips[type] += chipsPerWinner);
+                    });
+                     state.pot = { white: 0, red: 0, green: 0, black: 0, blue: 0 };
+                     state.players.forEach(p => p.selectedForPot = false);
+                     renderHomeScreen();
+                     saveState();
+                }
+                return;
+            }
+            if (target.closest('#reset-btn')) {
+                if (confirm('Tem certeza que deseja resetar todas as fichas?')) {
+                    localStorage.removeItem('pokerMasterStateV4');
+                    init();
+                }
+                return;
+            }
+
+            // Tela de Aposta
+            if (target.closest('#bet-chip-selector .chip-btn')) {
+                const type = target.closest('.chip-btn').dataset.chipType;
+                const player = state.players.find(p => p.id === state.activePlayerId);
+                const betCount = state.currentBet[type] || 0;
+                if (player.chips[type] > betCount) {
+                    state.currentBet[type] = betCount + 1;
+                    renderBetVisuals();
+                }
+                return;
+            }
+            if (target.closest('#bet-visualizer .mini-chip')) {
+                const type = target.closest('.mini-chip').dataset.chipType;
+                if (state.currentBet[type] > 0) {
+                    state.currentBet[type]--;
+                    renderBetVisuals();
+                }
+                return;
+            }
+            if (target.closest('#bet-confirm-btn')) {
+                const player = state.players.find(p => p.id === state.activePlayerId);
+                Object.entries(state.currentBet).forEach(([type, count]) => {
+                    player.chips[type] -= count;
+                    state.pot[type] = (state.pot[type] || 0) + count;
+                });
+                renderHomeScreen();
+                saveState();
+                switchScreen('home');
+                return;
+            }
+            if (target.closest('#bet-next-action-btn') || target.closest('#bet-next-player')) {
+                renderBetScreen(getNextPlayerId(state.activePlayerId));
+                return;
+            }
+            if (target.closest('#bet-prev-player')) {
+                renderBetScreen(getPrevPlayerId(state.activePlayerId));
+                return;
+            }
+
+            // Tela de Gerenciamento
+            if (target.closest('#manage-player-name .edit-icon')) {
+                const player = state.players.find(p => p.id === state.activePlayerId);
+                const newName = prompt('Digite o novo nome:', player.name);
+                if (newName && newName.trim()) {
+                    player.name = newName.trim();
+                    renderManageScreen(player.id);
+                    renderHomeScreen();
+                    saveState();
+                }
+                return;
+            }
+            if (target.closest('#manage-chip-selector .chip-btn')) {
+                const type = target.closest('.chip-btn').dataset.chipType;
+                state.manageChips[type] = (state.manageChips[type] || 0) + 1;
+                const visualizer = document.getElementById('manage-visualizer');
+                const newChip = document.createElement('div');
+                newChip.className = `mini-chip ${CHIP_TYPES[type].class}`;
+                newChip.dataset.chipType = type;
+                newChip.dataset.managed = true;
+                visualizer.appendChild(newChip);
+                return;
+            }
+            if (target.closest('#manage-visualizer .mini-chip')) {
+                const chip = target.closest('.mini-chip');
+                const type = chip.dataset.chipType;
+                if (chip.dataset.managed) {
+                    state.manageChips[type]--;
+                } else {
+                    state.manageChips[type] = (state.manageChips[type] || 0) - 1;
+                }
+                chip.remove();
+                return;
+            }
+            if (target.closest('#manage-save-btn')) {
+                const player = state.players.find(p => p.id === state.activePlayerId);
+                Object.entries(state.manageChips).forEach(([type, count]) => {
+                    player.chips[type] += count;
+                });
+                renderHomeScreen();
+                saveState();
+                switchScreen('home');
+                return;
+            }
+            if (target.closest('#manage-next-player')) {
+                renderManageScreen(getNextPlayerId(state.activePlayerId));
+                return;
+            }
+            if (target.closest('#manage-prev-player')) {
+                renderManageScreen(getPrevPlayerId(state.activePlayerId));
+                return;
+            }
+
+            // Ações genéricas de cancelar/voltar
+            if(target.closest('.home-btn, .cancel-link, #manage-cancel-btn, #bet-cancel-btn')) {
+                switchScreen('home');
+                return;
+            }
+        });
+
+        // --- INICIALIZAÇÃO ---
+        function init() {
+            const savedState = localStorage.getItem('pokerMasterStateV4');
+            if (savedState) {
+                state = JSON.parse(savedState);
+            } else {
+                state = {
+                    players: [],
+                    pot: { white: 0, red: 0, green: 0, black: 0, blue: 0 },
+                    activePlayerId: null,
+                    currentBet: {},
+                    manageChips: {},
+                };
+                for (let i = 1; i <= NUM_PLAYERS; i++) {
+                    state.players.push({
+                        id: i,
+                        name: `Jogador ${i}`,
+                        chips: { ...INITIAL_CHIPS },
+                        selectedForPot: false,
+                    });
+                }
+            }
+            renderHomeScreen();
+            switchScreen('home');
+        }
+
+        init();
+    });
+    </script>
+</body>
+</html>
