@@ -627,7 +627,7 @@
                     state.pot[type] = (state.pot[type] || 0) + count;
                 });
                 renderAll();
-                renderBetScreen(state.activePlayerId);
+                renderBetScreen(getNextPlayerId(state.activePlayerId));
                 return;
             }
             if (target.closest('#bet-next-action-btn') || target.closest('#bet-next-player')) { renderBetScreen(getNextPlayerId(state.activePlayerId)); return; }
