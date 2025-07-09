@@ -349,12 +349,19 @@
 
         function renderBetVisuals() {
             const player = state.players.find(p => p.id === state.activePlayerId);
-            const betValue = Object.entries(state.currentBet).reduce((sum, [type, count]) => sum + (CHIP_TYPES[type].value * count), 0);
-            document.getElementById('bet-total-value').textContent = betValue.toLocaleString('pt-BR');
+            const roundBetValue = calculateRoundBetValue(player);
+            const currentBetValue = Object.entries(state.currentBet).reduce((sum, [type, count]) => sum + (CHIP_TYPES[type].value * count), 0);
+            document.getElementById('bet-total-value').textContent = (roundBetValue + currentBetValue).toLocaleString('pt-BR');
 
             const visualizerEl = document.getElementById('bet-stack-visualizer');
             visualizerEl.innerHTML = '';
+            
+            const chipsToVisualize = {...player.roundBet};
             Object.entries(state.currentBet).forEach(([type, count]) => {
+                chipsToVisualize[type] = (chipsToVisualize[type] || 0) + count;
+            });
+
+            Object.entries(chipsToVisualize).forEach(([type, count]) => {
                 if (count > 0) {
                     const stackEl = document.createElement('div');
                     stackEl.className = 'chip-stack';
@@ -603,17 +610,6 @@
                 }
                 return;
             }
-            if (target.closest('#end-betting-btn')) {
-                state.players.forEach(player => {
-                    Object.entries(player.roundBet).forEach(([type, count]) => {
-                        state.pot[type] += count;
-                    });
-                    player.roundBet = { white: 0, red: 0, green: 0, black: 0, blue: 0 };
-                });
-                renderAll();
-                switchScreen('home');
-                return;
-            }
             if (target.closest('#reset-btn')) {
                 if (confirm('Tem certeza que deseja resetar todas as fichas?')) {
                     localStorage.removeItem('pokerMasterStateV12');
@@ -650,6 +646,17 @@
                 });
                 renderAll();
                 renderBetScreen(state.activePlayerId);
+                return;
+            }
+            if (target.closest('#end-betting-btn')) {
+                state.players.forEach(player => {
+                    Object.entries(player.roundBet).forEach(([type, count]) => {
+                        state.pot[type] += count;
+                    });
+                    player.roundBet = { white: 0, red: 0, green: 0, black: 0, blue: 0 };
+                });
+                renderAll();
+                switchScreen('home');
                 return;
             }
             if (target.closest('#bet-next-player')) { renderBetScreen(getNextPlayerId(state.activePlayerId)); return; }
