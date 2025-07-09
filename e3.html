@@ -21,10 +21,10 @@
             --primary: #58a6ff;
             --green: #3fb950;
             --red: #f85149;
-            --white-chip: #FFFFFF; /* Corrigido para branco puro */
+            --yellow: #fbbf24;
+            --white-chip: #FFFFFF;
             --black-chip: #374151;
             --blue-chip: #3b82f6;
-            --yellow: #fbbf24;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -111,7 +111,7 @@
         .sub-screen-footer { display: flex; gap: 1rem; margin-top: 1rem; padding-top: 1rem; flex-shrink: 0; }
         .sub-screen-footer .home-btn, .sub-screen-footer .prev-btn { background-color: var(--bg-accent); color: var(--text-light); width: 60px; height: 60px; display: flex; justify-content: center; align-items: center; font-size: 1.5rem; border-radius: 12px; }
         .sub-screen-footer .main-action-btn { background-color: var(--primary); color: var(--text-dark); flex-grow: 1; }
-        .sub-screen-footer .secondary-action-btn { background-color: var(--bg-accent); color: var(--text-light); flex-grow: 1; }
+        .sub-screen-footer .secondary-action-btn { background-color: var(--yellow); color: var(--text-dark); flex-grow: 1; }
         
         /* --- Tela de Configurações do Timer --- */
         #settings-screen .timer-config-card { display: flex; flex-direction: column; align-items: center; gap: 1.5rem; }
@@ -185,9 +185,9 @@
             </div>
         </div>
         <footer class="sub-screen-footer">
-            <button class="prev-btn" data-target="bet">&lt; Ant.</button>
             <button class="home-btn">🏠</button>
             <button id="bet-confirm-btn" class="btn main-action-btn">Apostar</button>
+            <button id="end-betting-btn" class="btn secondary-action-btn">Encerrar Apostas</button>
         </footer>
     </div>
 
@@ -279,7 +279,7 @@
         
         // --- Lógica Principal ---
         function saveState() {
-            localStorage.setItem('pokerMasterStateV11', JSON.stringify(state));
+            localStorage.setItem('pokerMasterStateV12', JSON.stringify(state));
         }
 
         function calculateStack(player) {
@@ -646,8 +646,9 @@
                     player.chips[type] -= count;
                     player.roundBet[type] += count;
                 });
+                state.currentBet = {}; // Limpa a aposta atual após confirmar
                 renderAll();
-                renderBetScreen(state.activePlayerId);
+                renderBetVisuals(); // Re-renderiza a tela de aposta para mostrar o estado atualizado
                 return;
             }
             if (target.closest('#end-betting-btn')) {
