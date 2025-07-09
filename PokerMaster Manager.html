@@ -29,7 +29,6 @@
 
         * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         
-        /* CORREÇÃO APLICADA: Removido 'overflow: hidden' para permitir rolagem se necessário */
         html, body { 
             height: 100%; 
         }
@@ -37,26 +36,21 @@
         body { background-color: var(--bg-dark); color: var(--text-light); font-family: 'Roboto Mono', monospace; }
         .hidden { display: none !important; }
         
-        /* --- Layout Principal e Telas --- */
-        
-        /* CORREÇÃO APLICADA: Adicionado 'overflow-y: auto' para que a tela possa rolar verticalmente se o conteúdo for maior que a altura do dispositivo */
         .screen { 
             height: 100vh; 
             padding: 1.5rem 1rem; 
             display: flex; 
             flex-direction: column; 
             gap: 1rem;
-            overflow-y: auto; /* Permite rolagem vertical */
+            overflow-y: auto;
         }
 
         #home-screen { gap: 1rem; }
         
-        /* --- Componentes Comuns --- */
         .card { background-color: var(--bg-card); border-radius: 16px; padding: 1rem; border: 1px solid var(--border-color); }
         .btn { border: none; border-radius: 12px; padding: 0.75rem; font-weight: bold; cursor: pointer; transition: all 0.2s ease; font-family: 'Teko', sans-serif; font-size: 1.5rem; letter-spacing: 1px; }
         .btn:active { transform: scale(0.97); }
 
-        /* --- Tela Home --- */
         #home-screen .header { display: flex; justify-content: space-between; align-items: center; padding: 0 0.5rem; flex-shrink: 0; }
         #home-screen .header-block { text-align: center; flex: 1; }
         #home-screen .header-block.timer { flex: 1.5; }
@@ -87,7 +81,6 @@
         
         .credits-footer { text-align: center; margin-top: auto; padding-top: 1rem; color: var(--text-medium); font-size: 0.8rem; flex-shrink: 0; }
 
-        /* --- Telas Secundárias (Sub-screens) --- */
         .sub-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: var(--bg-dark); z-index: 100; display: flex; flex-direction: column; padding: 1.5rem 1rem; gap: 1rem; transform: translateX(100%); transition: transform 0.3s ease-in-out; }
         .sub-screen.active { transform: translateX(0); }
         
@@ -105,13 +98,11 @@
         .chip-area { margin-top: 1rem; flex-shrink: 0; }
         .chip-area-title { color: var(--text-medium); margin-bottom: 0.5rem; text-align: center; }
         
-        /* --- Visualizador de Fichas Empilhadas --- */
         .chip-stack-visualizer { display: flex; justify-content: space-around; align-items: flex-end; padding: 1rem; min-height: 100px; background-color: var(--bg-accent); border-radius: 12px;}
         .chip-stack { position: relative; width: 50px; cursor: pointer; display: flex; flex-direction: column; align-items: center; }
         .chip-in-stack { width: 50px; height: 10px; border-radius: 5px; border: 1px solid rgba(0,0,0,0.2); position: absolute; bottom: 0; }
         .chip-stack-count { margin-top: 5px; font-size: 0.9rem; font-weight: bold; }
         
-        /* --- Seletor de Fichas --- */
         .chip-selector { display: grid; grid-template-columns: repeat(auto-fit, minmax(80px, 1fr)); gap: 1rem; margin-top: 1rem; }
         .chip-btn { width: 100%; aspect-ratio: 1/1; border-radius: 50%; display: flex; flex-direction: column; justify-content: center; align-items: center; border: 4px solid; cursor: pointer; box-shadow: 0 4px 8px rgba(0,0,0,0.3), inset 0 2px 4px rgba(255,255,255,0.2); }
         .chip-btn .value { font-family: 'Teko', sans-serif; font-size: 2rem; font-weight: 700; line-height: 1; }
@@ -129,7 +120,6 @@
         .sub-screen-footer .main-action-btn { background-color: var(--primary); color: var(--text-dark); flex-grow: 1; }
         .sub-screen-footer .secondary-action-btn { background-color: var(--yellow); color: var(--text-dark); width: 100%; }
         
-        /* --- Tela de Configurações do Timer --- */
         #settings-screen .timer-config-card { display: flex; flex-direction: column; align-items: center; gap: 1.5rem; }
         #settings-screen .level-nav { display: flex; align-items: center; gap: 1rem; }
         #settings-screen .level-nav .btn { font-size: 2rem; padding: 0 1rem; }
@@ -144,6 +134,7 @@
 </head>
 <body>
 
+    <!-- Tela Home -->
     <div id="home-screen" class="screen">
         <header class="header">
             <div class="header-block">
@@ -175,6 +166,7 @@
         </div>
     </div>
 
+    <!-- Tela de Aposta -->
     <div id="bet-screen" class="sub-screen">
         <header class="sub-screen-header">
             <div id="bet-prev-player" class="nav-arrow">&lt;</div>
@@ -205,6 +197,7 @@
         </footer>
     </div>
 
+    <!-- Tela de Gerenciamento -->
     <div id="manage-screen" class="sub-screen">
         <header class="sub-screen-header">
             <div id="manage-prev-player" class="nav-arrow">&lt;</div>
@@ -232,6 +225,7 @@
         </footer>
     </div>
     
+    <!-- Tela de Configurações do Timer -->
     <div id="settings-screen" class="sub-screen">
         <header class="sub-screen-header">
             <div class="nav-arrow" style="visibility: hidden;">&lt;</div>
@@ -366,11 +360,14 @@
             switchScreen('bet');
         }
 
+        // MODIFIED: Function to render the bet screen visuals with updated logic
         function renderBetVisuals() {
             const player = state.players.find(p => p.id === state.activePlayerId);
+            if (!player) return;
+
             const roundBetValue = calculateRoundBetValue(player);
-            const currentBetValue = Object.entries(state.currentBet).reduce((sum, [type, count]) => sum + (CHIP_TYPES[type].value * count), 0);
-            document.getElementById('bet-total-value').textContent = (roundBetValue + currentBetValue).toLocaleString('pt-BR');
+            const currentBetChangeValue = Object.entries(state.currentBet).reduce((sum, [type, count]) => sum + (CHIP_TYPES[type].value * count), 0);
+            document.getElementById('bet-total-value').textContent = (roundBetValue + currentBetChangeValue).toLocaleString('pt-BR');
 
             const visualizerEl = document.getElementById('bet-stack-visualizer');
             visualizerEl.innerHTML = '';
@@ -407,12 +404,14 @@
             const selectorEl = document.getElementById('bet-chip-selector');
             selectorEl.innerHTML = '';
             Object.entries(CHIP_TYPES).forEach(([type, config]) => {
-                const remaining = player.chips[type] - (state.currentBet[type] || 0);
-                if (remaining > 0) {
+                const chipsTakenFromHand = Math.max(0, state.currentBet[type] || 0);
+                const remainingInHand = player.chips[type] - chipsTakenFromHand;
+                
+                if (remainingInHand > 0) {
                      const chipBtn = document.createElement('button');
                      chipBtn.className = `chip-btn ${config.class}`;
                      chipBtn.dataset.chipType = type;
-                     chipBtn.innerHTML = `<span class="value">${config.value}</span><span class="count">${remaining}</span>`;
+                     chipBtn.innerHTML = `<span class="value">${config.value}</span><span class="count">${remainingInHand}</span>`;
                      selectorEl.appendChild(chipBtn);
                 }
             });
@@ -605,7 +604,7 @@
                     if (winners.length === 1) {
                         const winner = winners[0];
                         Object.keys(state.pot).forEach(chipType => {
-                            winner.chips[chipType] += state.pot[chipType];
+                            winner.chips[chipType] = (winner.chips[chipType] || 0) + state.pot[chipType];
                         });
                     } else {
                         const totalPotValue = calculatePotValue();
@@ -617,7 +616,7 @@
                                 const chipValue = CHIP_TYPES[type].value;
                                 if (valueToDistribute >= chipValue) {
                                     const numChips = Math.floor(valueToDistribute / chipValue);
-                                    winner.chips[type] += numChips;
+                                    winner.chips[type] = (winner.chips[type] || 0) + numChips;
                                     valueToDistribute -= numChips * chipValue;
                                 }
                             });
@@ -644,34 +643,38 @@
                 const player = state.players.find(p => p.id === state.activePlayerId);
                 const betCount = state.currentBet[type] || 0;
                 if (player.chips[type] > betCount) { 
-                    state.currentBet[type] = betCount + 1; 
+                    state.currentBet[type] = (state.currentBet[type] || 0) + 1;
                     renderBetVisuals(); 
                 }
                 return;
             }
+            // MODIFIED: Logic to remove chips from the bet (including already bet ones)
             if (target.closest('#bet-stack-visualizer .chip-stack')) {
                 const type = target.closest('.chip-stack').dataset.chipType;
-                if (state.currentBet[type] > 0) { 
-                    state.currentBet[type]--; 
+                const player = state.players.find(p => p.id === state.activePlayerId);
+                const totalBetChips = (player.roundBet[type] || 0) + (state.currentBet[type] || 0);
+                if (totalBetChips > 0) {
+                    state.currentBet[type] = (state.currentBet[type] || 0) - 1;
                     renderBetVisuals(); 
                 }
                 return;
             }
+            // MODIFIED: Logic to confirm the bet, handling both additions and removals
             if (target.closest('#bet-confirm-btn')) {
                 const player = state.players.find(p => p.id === state.activePlayerId);
                 Object.entries(state.currentBet).forEach(([type, count]) => {
                     player.chips[type] -= count;
                     player.roundBet[type] += count;
                 });
-                state.currentBet = {}; // Limpa a aposta atual após confirmar
+                state.currentBet = {}; // Reset the temporary bet change
                 renderAll();
-                renderBetVisuals(); // Re-renderiza a tela de aposta para mostrar o estado atualizado
+                renderBetVisuals(); // Re-render the bet screen to show the new state
                 return;
             }
             if (target.closest('#end-betting-btn')) {
                 state.players.forEach(player => {
                     Object.entries(player.roundBet).forEach(([type, count]) => {
-                        state.pot[type] += count;
+                        state.pot[type] = (state.pot[type] || 0) + count;
                     });
                     player.roundBet = { white: 0, red: 0, green: 0, black: 0, blue: 0 };
                 });
@@ -743,6 +746,13 @@
             const savedState = localStorage.getItem('pokerMasterStateV12');
             if (savedState) {
                 state = JSON.parse(savedState);
+                // Ensure all nested objects exist
+                state.players.forEach(p => {
+                    p.chips = p.chips || {};
+                    p.roundBet = p.roundBet || { white: 0, red: 0, green: 0, black: 0, blue: 0 };
+                });
+                state.pot = state.pot || { white: 0, red: 0, green: 0, black: 0, blue: 0 };
+
                 if (state.timer.isRunning && state.timer.endTime) {
                     const now = Date.now();
                     const newTime = Math.round((state.timer.endTime - now) / 1000);
