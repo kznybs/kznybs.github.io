@@ -107,7 +107,7 @@
         .chip-blue { background-color: var(--blue-chip); border-color: #1d4ed8; color: white; }
 
         .sub-screen-footer { display: flex; gap: 1rem; margin-top: 1rem; padding-top: 1rem; flex-shrink: 0; }
-        .sub-screen-footer .home-btn { background-color: var(--bg-accent); color: var(--text-light); width: 60px; height: 60px; display: flex; justify-content: center; align-items: center; font-size: 1.5rem; border-radius: 12px; }
+        .sub-screen-footer .home-btn, .sub-screen-footer .prev-btn { background-color: var(--bg-accent); color: var(--text-light); width: 60px; height: 60px; display: flex; justify-content: center; align-items: center; font-size: 1.5rem; border-radius: 12px; }
         .sub-screen-footer .main-action-btn { background-color: var(--primary); color: var(--text-dark); flex-grow: 1; }
         .sub-screen-footer .secondary-action-btn { background-color: var(--bg-accent); color: var(--text-light); flex-grow: 1; }
         
@@ -183,9 +183,9 @@
             </div>
         </div>
         <footer class="sub-screen-footer">
+            <button class="prev-btn">&lt; Ant.</button>
             <button class="home-btn">🏠</button>
             <button id="bet-confirm-btn" class="btn main-action-btn">Apostar</button>
-            <button id="bet-next-action-btn" class="btn secondary-action-btn">Próx. &gt;</button>
         </footer>
     </div>
 
@@ -211,6 +211,7 @@
             </div>
         </div>
         <footer class="sub-screen-footer">
+             <button class="prev-btn">&lt; Ant.</button>
              <button class="home-btn">🏠</button>
              <button id="manage-save-btn" class="btn main-action-btn">Salvar</button>
         </footer>
@@ -630,7 +631,7 @@
                 return;
             }
             if (target.closest('#bet-next-action-btn') || target.closest('#bet-next-player')) { renderBetScreen(getNextPlayerId(state.activePlayerId)); return; }
-            if (target.closest('#bet-prev-player')) { renderBetScreen(getPrevPlayerId(state.activePlayerId)); return; }
+            if (target.closest('#bet-prev-player') || (target.closest('#bet-screen') && target.closest('.prev-btn'))) { renderBetScreen(getPrevPlayerId(state.activePlayerId)); return; }
 
             // Tela de Gerenciamento
             if (target.closest('#manage-player-name .edit-icon')) {
@@ -667,7 +668,7 @@
                 return;
             }
             if (target.closest('#manage-next-player')) { renderManageScreen(getNextPlayerId(state.activePlayerId)); return; }
-            if (target.closest('#manage-prev-player')) { renderManageScreen(getPrevPlayerId(state.activePlayerId)); return; }
+            if (target.closest('#manage-prev-player') || (target.closest('#manage-screen') && target.closest('.prev-btn'))) { renderManageScreen(getPrevPlayerId(state.activePlayerId)); return; }
 
             // Tela de Configurações do Timer
             if (target.closest('#timer-start-pause-btn')) { handleStartPause(); return; }
