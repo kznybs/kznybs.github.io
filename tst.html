@@ -704,14 +704,18 @@
                 return;
             }
             if (target.closest('#bet-confirm-btn')) {
-                const player = state.players.find(p => p.id === state.activePlayerId);
+                const currentPlayerId = state.activePlayerId;
+                const player = state.players.find(p => p.id === currentPlayerId);
+                
                 Object.entries(state.currentBet).forEach(([type, count]) => {
                     player.chips[type] -= count;
                     player.roundBet[type] += count;
                 });
-                state.currentBet = {}; 
-                renderAll();
-                renderBetVisuals(); 
+                
+                renderAll(); 
+
+                const nextPlayerId = getNextPlayerId(currentPlayerId);
+                renderBetScreen(nextPlayerId);
                 return;
             }
             if (target.closest('#end-betting-btn')) {
