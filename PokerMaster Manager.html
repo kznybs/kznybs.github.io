@@ -28,12 +28,27 @@
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        html, body { height: 100%; overflow: hidden; }
+        
+        /* CORREÇÃO APLICADA: Removido 'overflow: hidden' para permitir rolagem se necessário */
+        html, body { 
+            height: 100%; 
+        }
+        
         body { background-color: var(--bg-dark); color: var(--text-light); font-family: 'Roboto Mono', monospace; }
         .hidden { display: none !important; }
         
         /* --- Layout Principal e Telas --- */
-        .screen { height: 100vh; padding: 1.5rem 1rem; display: flex; flex-direction: column; gap: 1rem; }
+        
+        /* CORREÇÃO APLICADA: Adicionado 'overflow-y: auto' para que a tela possa rolar verticalmente se o conteúdo for maior que a altura do dispositivo */
+        .screen { 
+            height: 100vh; 
+            padding: 1.5rem 1rem; 
+            display: flex; 
+            flex-direction: column; 
+            gap: 1rem;
+            overflow-y: auto; /* Permite rolagem vertical */
+        }
+
         #home-screen { gap: 1rem; }
         
         /* --- Componentes Comuns --- */
@@ -129,7 +144,6 @@
 </head>
 <body>
 
-    <!-- Tela Home -->
     <div id="home-screen" class="screen">
         <header class="header">
             <div class="header-block">
@@ -161,7 +175,6 @@
         </div>
     </div>
 
-    <!-- Tela de Aposta -->
     <div id="bet-screen" class="sub-screen">
         <header class="sub-screen-header">
             <div id="bet-prev-player" class="nav-arrow">&lt;</div>
@@ -192,7 +205,6 @@
         </footer>
     </div>
 
-    <!-- Tela de Gerenciamento -->
     <div id="manage-screen" class="sub-screen">
         <header class="sub-screen-header">
             <div id="manage-prev-player" class="nav-arrow">&lt;</div>
@@ -220,7 +232,6 @@
         </footer>
     </div>
     
-    <!-- Tela de Configurações do Timer -->
     <div id="settings-screen" class="sub-screen">
         <header class="sub-screen-header">
             <div class="nav-arrow" style="visibility: hidden;">&lt;</div>
