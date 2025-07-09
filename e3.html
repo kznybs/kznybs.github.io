@@ -21,9 +21,10 @@
             --primary: #58a6ff;
             --green: #3fb950;
             --red: #f85149;
-            --white-chip: #E5E7EB;
+            --white-chip: #FFFFFF; /* Corrigido para branco puro */
             --black-chip: #374151;
             --blue-chip: #3b82f6;
+            --yellow: #fbbf24;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -60,10 +61,11 @@
         #home-screen .player-position { font-family: 'Teko', sans-serif; font-size: 1.5rem; color: var(--text-medium); width: 2rem; }
         #home-screen .player-stack { background-color: var(--primary); color: var(--text-dark); font-weight: bold; padding: 0.5rem; border-radius: 8px; flex-shrink: 0; cursor: pointer; }
         #home-screen .player-name { background-color: var(--bg-accent); color: var(--text-light); padding: 0.5rem; border-radius: 8px; flex-grow: 1; text-align: left; cursor: pointer; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        #home-screen .player-current-bet { font-size: 0.7rem; color: var(--yellow); }
         #home-screen .select-winner-btn { background-color: var(--bg-accent); color: var(--green); font-size: 1.5rem; border-radius: 8px; width: 40px; height: 40px; flex-shrink: 0; display: flex; justify-content: center; align-items: center; cursor: pointer; }
         #home-screen .select-winner-btn.selected { background-color: var(--green); color: var(--text-dark); }
         
-        #home-screen .actions { display: flex; gap: 1rem; margin-top: 1rem; flex-shrink: 0; }
+        #home-screen .actions { display: flex; flex-direction: column; gap: 1rem; margin-top: 1rem; flex-shrink: 0; }
         #home-screen .actions .btn { flex: 1; }
         #home-screen .btn-distribute { background-color: var(--primary); color: var(--text-dark); }
         #home-screen .btn-reset-all { background-color: var(--red); color: white; }
@@ -183,7 +185,7 @@
             </div>
         </div>
         <footer class="sub-screen-footer">
-            <button class="prev-btn">&lt; Ant.</button>
+            <button class="prev-btn" data-target="bet">&lt; Ant.</button>
             <button class="home-btn">🏠</button>
             <button id="bet-confirm-btn" class="btn main-action-btn">Apostar</button>
         </footer>
@@ -211,7 +213,7 @@
             </div>
         </div>
         <footer class="sub-screen-footer">
-             <button class="prev-btn">&lt; Ant.</button>
+             <button class="prev-btn" data-target="manage">&lt; Ant.</button>
              <button class="home-btn">🏠</button>
              <button id="manage-save-btn" class="btn main-action-btn">Salvar</button>
         </footer>
@@ -284,6 +286,11 @@
             if (!player || !player.chips) return 0;
             return Object.entries(player.chips).reduce((sum, [type, count]) => sum + (CHIP_TYPES[type].value * count), 0);
         }
+        
+        function calculateRoundBetValue(player) {
+            if (!player || !player.roundBet) return 0;
+            return Object.entries(player.roundBet).reduce((sum, [type, count]) => sum + (CHIP_TYPES[type].value * count), 0);
+        }
 
         function calculatePotValue() {
             if (!state.pot) return 0;
@@ -312,9 +319,15 @@
             state.players.forEach((player, index) => {
                 const playerEl = document.createElement('div');
                 playerEl.className = 'player-item';
+                const roundBetValue = calculateRoundBetValue(player);
+                const betDisplay = roundBetValue > 0 ? `<div class="player-current-bet">Aposta: ${roundBetValue}</div>` : '';
+
                 playerEl.innerHTML = `
                     <div class="player-position">${index + 1}º</div>
-                    <button class="player-stack" data-player-id="${player.id}">${calculateStack(player).toLocaleString('pt-BR')}</button>
+                    <div style="text-align: center;">
+                        <button class="player-stack" data-player-id="${player.id}">${calculateStack(player).toLocaleString('pt-BR')}</button>
+                        ${betDisplay}
+                    </div>
                     <button class="player-name" data-player-id="${player.id}">${player.name}</button>
                     <button class="select-winner-btn ${player.selectedForPot ? 'selected' : ''}" data-player-id="${player.id}">+</button>
                 `;
@@ -338,12 +351,19 @@
 
         function renderBetVisuals() {
             const player = state.players.find(p => p.id === state.activePlayerId);
-            const betValue = Object.entries(state.currentBet).reduce((sum, [type, count]) => sum + (CHIP_TYPES[type].value * count), 0);
-            document.getElementById('bet-total-value').textContent = betValue.toLocaleString('pt-BR');
+            const roundBetValue = calculateRoundBetValue(player);
+            const currentBetValue = Object.entries(state.currentBet).reduce((sum, [type, count]) => sum + (CHIP_TYPES[type].value * count), 0);
+            document.getElementById('bet-total-value').textContent = (roundBetValue + currentBetValue).toLocaleString('pt-BR');
 
             const visualizerEl = document.getElementById('bet-stack-visualizer');
             visualizerEl.innerHTML = '';
+            
+            const chipsToVisualize = {...player.roundBet};
             Object.entries(state.currentBet).forEach(([type, count]) => {
+                chipsToVisualize[type] = (chipsToVisualize[type] || 0) + count;
+            });
+
+            Object.entries(chipsToVisualize).forEach(([type, count]) => {
                 if (count > 0) {
                     const stackEl = document.createElement('div');
                     stackEl.className = 'chip-stack';
@@ -594,7 +614,7 @@
             }
             if (target.closest('#reset-btn')) {
                 if (confirm('Tem certeza que deseja resetar todas as fichas?')) {
-                    localStorage.removeItem('pokerMasterStateV11');
+                    localStorage.removeItem('pokerMasterStateV12');
                     init();
                 }
                 return;
@@ -624,13 +644,24 @@
                 const player = state.players.find(p => p.id === state.activePlayerId);
                 Object.entries(state.currentBet).forEach(([type, count]) => {
                     player.chips[type] -= count;
-                    state.pot[type] = (state.pot[type] || 0) + count;
+                    player.roundBet[type] += count;
                 });
                 renderAll();
-                renderBetScreen(getNextPlayerId(state.activePlayerId));
+                renderBetScreen(state.activePlayerId);
                 return;
             }
-            if (target.closest('#bet-next-action-btn') || target.closest('#bet-next-player')) { renderBetScreen(getNextPlayerId(state.activePlayerId)); return; }
+            if (target.closest('#end-betting-btn')) {
+                state.players.forEach(player => {
+                    Object.entries(player.roundBet).forEach(([type, count]) => {
+                        state.pot[type] += count;
+                    });
+                    player.roundBet = { white: 0, red: 0, green: 0, black: 0, blue: 0 };
+                });
+                renderAll();
+                switchScreen('home');
+                return;
+            }
+            if (target.closest('#bet-next-player')) { renderBetScreen(getNextPlayerId(state.activePlayerId)); return; }
             if (target.closest('#bet-prev-player') || (target.closest('#bet-screen') && target.closest('.prev-btn'))) { renderBetScreen(getPrevPlayerId(state.activePlayerId)); return; }
 
             // Tela de Gerenciamento
@@ -691,7 +722,7 @@
 
         // --- INICIALIZAÇÃO ---
         function init() {
-            const savedState = localStorage.getItem('pokerMasterStateV11');
+            const savedState = localStorage.getItem('pokerMasterStateV12');
             if (savedState) {
                 state = JSON.parse(savedState);
                 if (state.timer.isRunning && state.timer.endTime) {
@@ -719,7 +750,13 @@
                     timer: { round: 0, time: 15 * 60, isRunning: false, duration: 15, endTime: null }
                 };
                 for (let i = 1; i <= 6; i++) {
-                    state.players.push({ id: i, name: `Jogador ${i}`, chips: { ...INITIAL_CHIPS }, selectedForPot: false });
+                    state.players.push({ 
+                        id: i, 
+                        name: `Jogador ${i}`, 
+                        chips: { ...INITIAL_CHIPS }, 
+                        roundBet: { white: 0, red: 0, green: 0, black: 0, blue: 0 },
+                        selectedForPot: false 
+                    });
                 }
             }
             renderAll();
