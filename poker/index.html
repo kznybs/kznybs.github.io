@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0">
+    <title>PokerMaster Manager</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;700&family=Teko:wght@500;700&display=swap" rel="stylesheet">
+
+    <!-- External CSS -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- Tela Home -->
+    <div id="home-screen" class="screen">
+        <header class="header">
+            <div class="header-block">
+                <div class="header-label">RODADA</div>
+                <div id="home-round-num" class="header-value">1</div>
+            </div>
+            <div class="header-block timer">
+                <div class="header-label">TIMER</div>
+                <div id="home-timer-display" class="header-value">15:00</div>
+            </div>
+            <div class="header-block">
+                <div class="header-label">BLINDS</div>
+                <div id="home-blinds-display" class="header-value blinds">25/50</div>
+            </div>
+        </header>
+        <div id="settings-btn" class="settings-btn">⚙️</div>
+
+        <div class="card pot-card">
+            <div class="pot-label">Total no Pote</div>
+            <div id="home-pot-value" class="pot-value">0</div>
+        </div>
+        <div class="card ranking-card">
+            <h2 class="card-title">RANKING</h2>
+            <div id="player-list" class="player-list"></div>
+        </div>
+        <div class="actions">
+            <button id="distribute-btn" class="btn btn-distribute">Distribuir</button>
+            <button id="reset-btn" class="btn btn-reset-all">Resetar Fichas de Todos</button>
+        </div>
+    </div>
+
+    <!-- Tela de Aposta -->
+    <div id="bet-screen" class="sub-screen">
+        <header class="sub-screen-header">
+            <div id="bet-prev-player" class="nav-arrow">&lt;</div>
+            <div id="bet-player-name" class="player-name-display">JOGADOR 1</div>
+            <div id="bet-next-player" class="nav-arrow">&gt;</div>
+        </header>
+        <div class="sub-screen-main-content">
+            <div class="card total-display-card">
+                <div class="total-label">Apostado</div>
+                <div id="bet-total-value" class="total-value">0</div>
+            </div>
+            <div class="chip-area">
+                <div class="chip-area-title">Remover</div>
+                <div id="bet-stack-visualizer" class="chip-stack-visualizer"></div>
+            </div>
+            <div class="chip-area">
+                <div class="chip-area-title">Apostar</div>
+                <div id="bet-chip-selector" class="chip-selector"></div>
+            </div>
+        </div>
+        <footer class="sub-screen-footer">
+            <div class="footer-top-row">
+                <button class="prev-btn" data-target="bet">&lt; Ant.</button>
+                <button class="home-btn">🏠</button>
+                <button id="bet-confirm-btn" class="btn main-action-btn">Apostar</button>
+            </div>
+            <button id="end-betting-btn" class="btn secondary-action-btn">Encerrar Apostas</button>
+        </footer>
+    </div>
+
+    <!-- Tela de Gerenciamento -->
+    <div id="manage-screen" class="sub-screen">
+        <header class="sub-screen-header">
+            <div id="manage-prev-player" class="nav-arrow">&lt;</div>
+            <div id="manage-player-name" class="player-name-display">JOGADOR 1 <span class="edit-icon">✎</span></div>
+            <div id="manage-next-player" class="nav-arrow">&gt;</div>
+        </header>
+        <div class="sub-screen-main-content">
+            <div class="card total-display-card">
+                <div class="total-label">Stack Total</div>
+                <div id="manage-total-value" class="total-value">2400</div>
+            </div>
+            <div class="chip-area">
+                <div class="chip-area-title">Remover do Stack</div>
+                <div id="manage-stack-visualizer" class="chip-stack-visualizer"></div>
+            </div>
+            <div class="chip-area">
+                <div class="chip-area-title">Adicionar ao Stack</div>
+                <div id="manage-chip-selector" class="chip-selector"></div>
+            </div>
+        </div>
+        <footer class="sub-screen-footer">
+             <button class="prev-btn" data-target="manage">&lt; Ant.</button>
+             <button class="home-btn">🏠</button>
+             <button id="manage-save-btn" class="btn main-action-btn">Salvar</button>
+        </footer>
+    </div>
+    
+    <!-- Tela de Configurações do Timer -->
+    <div id="settings-screen" class="sub-screen">
+        <header class="sub-screen-header">
+            <div class="nav-arrow" style="visibility: hidden;">&lt;</div>
+            <div class="player-name-display">TIMER</div>
+            <div class="nav-arrow home-btn" style="font-size: 1.5rem;">✖</div>
+        </header>
+        <div class="card timer-config-card">
+            <div class="level-nav">
+                <button id="timer-prev-level-btn" class="btn">&lt;</button>
+                <div class="level-display">
+                    <div class="header-label">RODADA <span id="settings-round-num">1</span></div>
+                    <div id="settings-blinds-display" class="header-value blinds">25/50</div>
+                </div>
+                <button id="timer-next-level-btn" class="btn">&gt;</button>
+            </div>
+            <div class="input-group">
+                <label for="timer-input">Duração (min):</label>
+                <input type="number" id="timer-input" value="15">
+            </div>
+            <div class="main-controls">
+                <button id="timer-start-pause-btn" class="btn btn-start-pause paused">INICIAR</button>
+                <button id="timer-reset-btn" class="btn btn-reset-timer">RESETAR</button>
+            </div>
+        </div>
+        <footer class="credits-footer">
+            <p>Desenvolvido por Gabriel, Vinicius e Adilson @ 2025</p>
+        </footer>
+    </div>
+
+    <!-- External JavaScript -->
+    <script src="script.js" defer></script>
+</body>
+</html>
