@@ -108,10 +108,11 @@
         .chip-black { background-color: var(--black-chip); border-color: #111827; color: white; }
         .chip-blue { background-color: var(--blue-chip); border-color: #1d4ed8; color: white; }
 
-        .sub-screen-footer { display: flex; gap: 1rem; margin-top: 1rem; padding-top: 1rem; flex-shrink: 0; }
+        .sub-screen-footer { display: flex; flex-wrap: wrap; justify-content: center; gap: 1rem; margin-top: 1rem; padding-top: 1rem; flex-shrink: 0; }
+        .sub-screen-footer .footer-top-row { display: flex; width: 100%; gap: 1rem; }
         .sub-screen-footer .home-btn, .sub-screen-footer .prev-btn { background-color: var(--bg-accent); color: var(--text-light); width: 60px; height: 60px; display: flex; justify-content: center; align-items: center; font-size: 1.5rem; border-radius: 12px; }
         .sub-screen-footer .main-action-btn { background-color: var(--primary); color: var(--text-dark); flex-grow: 1; }
-        .sub-screen-footer .secondary-action-btn { background-color: var(--yellow); color: var(--text-dark); flex-grow: 1; }
+        .sub-screen-footer .secondary-action-btn { background-color: var(--yellow); color: var(--text-dark); width: 100%; }
         
         /* --- Tela de Configurações do Timer --- */
         #settings-screen .timer-config-card { display: flex; flex-direction: column; align-items: center; gap: 1.5rem; }
@@ -185,8 +186,11 @@
             </div>
         </div>
         <footer class="sub-screen-footer">
-            <button class="home-btn">🏠</button>
-            <button id="bet-confirm-btn" class="btn main-action-btn">Apostar</button>
+            <div class="footer-top-row">
+                <button class="prev-btn" data-target="bet">&lt; Ant.</button>
+                <button class="home-btn">🏠</button>
+                <button id="bet-confirm-btn" class="btn main-action-btn">Apostar</button>
+            </div>
             <button id="end-betting-btn" class="btn secondary-action-btn">Encerrar Apostas</button>
         </footer>
     </div>
