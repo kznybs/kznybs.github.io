@@ -97,12 +97,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
         document.getElementById('bet-player-name').textContent = player.name;
         
-        renderBetVisuals();
+        renderBetVisuals(playerId);
         switchScreen('bet');
     }
 
-    function renderBetVisuals() {
-        const player = state.players.find(p => p.id === state.activePlayerId);
+    function renderBetVisuals(playerId) {
+        const player = state.players.find(p => p.id === playerId);
         if (!player) return;
 
         const roundBetValue = calculateRoundBetValue(player);
@@ -119,25 +119,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
         Object.entries(chipsToVisualize).forEach(([type, count]) => {
             if (count > 0) {
-                const stackEl = document.createElement('div');
-                stackEl.className = 'chip-stack';
-                stackEl.dataset.chipType = type;
-                const chipContainer = document.createElement('div');
-                chipContainer.style.position = 'relative';
-                chipContainer.style.width = '50px';
-                chipContainer.style.height = `${10 + (count - 1) * 3}px`;
-                for (let i = 0; i < count; i++) {
-                    const chipEl = document.createElement('div');
-                    chipEl.className = `chip-in-stack ${CHIP_TYPES[type].class}`;
-                    chipEl.style.bottom = `${i * 3}px`;
-                    chipContainer.appendChild(chipEl);
-                }
-                const countEl = document.createElement('div');
-                countEl.className = 'chip-stack-count';
-                countEl.textContent = count;
-                stackEl.appendChild(chipContainer);
-                stackEl.appendChild(countEl);
-                visualizerEl.appendChild(stackEl);
+                const config = CHIP_TYPES[type];
+                const chipBtn = document.createElement('button');
+                chipBtn.className = `btn chip-btn ${config.class}`;
+                chipBtn.dataset.chipType = type;
+                chipBtn.innerHTML = `<div class="value">${config.value}</div><div class="count">${count}</div>`;
+                visualizerEl.appendChild(chipBtn);
             }
         });
 
@@ -149,9 +136,9 @@ document.addEventListener('DOMContentLoaded', () => {
             
             if (remainingInHand > 0) {
                  const chipBtn = document.createElement('button');
-                 chipBtn.className = `chip-btn ${config.class}`;
+                 chipBtn.className = `btn chip-btn ${config.class}`;
                  chipBtn.dataset.chipType = type;
-                 chipBtn.innerHTML = `<span class="value">${config.value}</span><span class="count">${remainingInHand}</span>`;
+                 chipBtn.innerHTML = `<div class="value">${config.value}</div><div class="count">${remainingInHand}</div>`;
                  selectorEl.appendChild(chipBtn);
             }
         });
@@ -170,17 +157,18 @@ document.addEventListener('DOMContentLoaded', () => {
         selectorEl.innerHTML = '';
         Object.entries(CHIP_TYPES).forEach(([type, config]) => {
              const chipBtn = document.createElement('button');
-             chipBtn.className = `chip-btn ${config.class}`;
+             chipBtn.className = `btn chip-btn ${config.class}`;
              chipBtn.dataset.chipType = type;
-             chipBtn.innerHTML = `<span class="value">${config.value}</span><span class="count">∞</span>`;
+             chipBtn.innerHTML = `<div class="value">${config.value}</div><div class="count">∞</div>`;
              selectorEl.appendChild(chipBtn);
         });
-        renderManageVisuals();
+        renderManageVisuals(playerId);
         switchScreen('manage');
     }
 
-    function renderManageVisuals() {
-        const player = state.players.find(p => p.id === state.activePlayerId);
+    function renderManageVisuals(playerId) {
+        const player = state.players.find(p => p.id === playerId);
+        if (!player) return;
         let currentStack = calculateStack(player);
         let changeValue = 0;
         
@@ -189,35 +177,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const tempChips = { ...player.chips };
         Object.entries(state.manageChips).forEach(([type, count]) => {
-            tempChips[type] += count;
+            tempChips[type] = (tempChips[type] || 0) + count;
             changeValue += CHIP_TYPES[type].value * count;
         });
 
         Object.entries(tempChips).forEach(([type, count]) => {
             if(count > 0) {
-                const stackEl = document.createElement('div');
-                stackEl.className = 'chip-stack';
-                stackEl.dataset.chipType = type;
-                
-                const chipContainer = document.createElement('div');
-                chipContainer.style.position = 'relative';
-                chipContainer.style.width = '50px';
-                chipContainer.style.height = `${10 + (count - 1) * 3}px`;
-                
-                for(let i = 0; i < count; i++) {
-                    const chipEl = document.createElement('div');
-                    chipEl.className = `chip-in-stack ${CHIP_TYPES[type].class}`;
-                    chipEl.style.bottom = `${i * 3}px`;
-                    chipContainer.appendChild(chipEl);
-                }
-                
-                const countEl = document.createElement('div');
-                countEl.className = 'chip-stack-count';
-                countEl.textContent = count;
-
-                stackEl.appendChild(chipContainer);
-                stackEl.appendChild(countEl);
-                visualizerEl.appendChild(stackEl);
+                const config = CHIP_TYPES[type];
+                const chipBtn = document.createElement('button');
+                chipBtn.className = `btn chip-btn ${config.class}`;
+                chipBtn.dataset.chipType = type;
+                chipBtn.innerHTML = `<div class="value">${config.value}</div><div class="count">${count}</div>`;
+                visualizerEl.appendChild(chipBtn);
             }
         });
         
@@ -384,17 +355,17 @@ document.addEventListener('DOMContentLoaded', () => {
             const betCount = state.currentBet[type] || 0;
             if (player.chips[type] > betCount) { 
                 state.currentBet[type] = (state.currentBet[type] || 0) + 1;
-                renderBetVisuals(); 
+                renderBetVisuals(state.activePlayerId); 
             }
             return;
         }
-        if (target.closest('#bet-stack-visualizer .chip-stack')) {
-            const type = target.closest('.chip-stack').dataset.chipType;
+        if (target.closest('#bet-stack-visualizer .chip-btn')) {
+            const type = target.closest('.chip-btn').dataset.chipType;
             const player = state.players.find(p => p.id === state.activePlayerId);
             const totalBetChips = (player.roundBet[type] || 0) + (state.currentBet[type] || 0);
             if (totalBetChips > 0) {
                 state.currentBet[type] = (state.currentBet[type] || 0) - 1;
-                renderBetVisuals(); 
+                renderBetVisuals(state.activePlayerId); 
             }
             return;
         }
@@ -425,7 +396,18 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
         if (target.closest('#bet-next-player')) { renderBetScreen(getNextPlayerId(state.activePlayerId)); return; }
-        if (target.closest('#bet-prev-player') || (target.closest('#bet-screen') && target.closest('.prev-btn'))) { renderBetScreen(getPrevPlayerId(state.activePlayerId)); return; }
+        
+        // Botão "Anterior"
+        if (target.closest('.prev-btn')) {
+            const button = target.closest('.prev-btn');
+            const targetScreen = button.dataset.target;
+            if (targetScreen === 'bet') {
+                renderBetScreen(getPrevPlayerId(state.activePlayerId));
+            } else if (targetScreen === 'manage') {
+                renderManageScreen(getPrevPlayerId(state.activePlayerId));
+            }
+            return;
+        }
 
         // Tela de Gerenciamento
         if (target.closest('#manage-player-name .edit-icon')) {
@@ -442,15 +424,15 @@ document.addEventListener('DOMContentLoaded', () => {
         if (target.closest('#manage-chip-selector .chip-btn')) {
             const type = target.closest('.chip-btn').dataset.chipType;
             state.manageChips[type] = (state.manageChips[type] || 0) + 1;
-            renderManageVisuals();
+            renderManageVisuals(state.activePlayerId);
             return;
         }
-        if (target.closest('#manage-stack-visualizer .chip-stack')) {
-            const type = target.closest('.chip-stack').dataset.chipType;
+        if (target.closest('#manage-stack-visualizer .chip-btn')) {
+            const type = target.closest('.chip-btn').dataset.chipType;
             const player = state.players.find(p => p.id === state.activePlayerId);
             if(player.chips[type] + (state.manageChips[type] || 0) > 0) {
                 state.manageChips[type] = (state.manageChips[type] || 0) - 1;
-                renderManageVisuals();
+                renderManageVisuals(state.activePlayerId);
             }
             return;
         }
@@ -462,8 +444,7 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
         if (target.closest('#manage-next-player')) { renderManageScreen(getNextPlayerId(state.activePlayerId)); return; }
-        if (target.closest('#manage-prev-player') || (target.closest('#manage-screen') && target.closest('.prev-btn'))) { renderManageScreen(getPrevPlayerId(state.activePlayerId)); return; }
-
+        
         // Tela de Configurações do Timer
         if (target.closest('#timer-start-pause-btn')) { handleStartPause(); return; }
         if (target.closest('#timer-reset-btn')) { resetTimer(); return; }
@@ -471,7 +452,10 @@ document.addEventListener('DOMContentLoaded', () => {
         if (target.closest('#timer-prev-level-btn')) { levelDown(); renderTimer(); saveState(); return; }
 
         // Ações genéricas de cancelar/voltar
-        if(target.closest('.home-btn')) { switchScreen('home'); return; }
+        if(target.closest('.home-btn')) { 
+            switchScreen('home'); 
+            return; 
+        }
     });
 
     document.getElementById('timer-input').addEventListener('change', (e) => {
