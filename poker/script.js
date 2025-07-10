@@ -98,7 +98,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function renderHomeScreen() {
-        // Cria uma cópia ordenada para o ranking, sem alterar a ordem de jogo original
         const rankedPlayers = [...state.players].sort((a, b) => calculateStack(b) - calculateStack(a));
         
         const playerListEl = document.getElementById('player-list');
@@ -461,9 +460,17 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
         if (target.closest('#reset-btn')) {
-            if (confirm('Tem certeza que deseja resetar todas as fichas?')) {
-                localStorage.removeItem('pokerMasterStateV12');
-                init();
+            if (confirm('Tem certeza que deseja limpar todos os jogadores e reiniciar o jogo?')) {
+                state.players = [];
+                state.pot = { white: 0, red: 0, green: 0, black: 0, blue: 0 };
+                state.timer = { round: 0, time: 15 * 60, isRunning: false, duration: 15, endTime: null };
+                if (timerInterval) {
+                    clearInterval(timerInterval);
+                    timerInterval = null;
+                }
+                renderAll();
+                renderOrderScreen();
+                saveState();
             }
             return;
         }
