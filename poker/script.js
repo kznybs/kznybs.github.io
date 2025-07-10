@@ -20,6 +20,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- ESTADO DO JOGO ---
     let state = {};
     let timerInterval = null;
+    let audioCtx;
 
     // --- ELEMENTOS DO DOM ---
     const screens = {
@@ -29,6 +30,31 @@ document.addEventListener('DOMContentLoaded', () => {
         settings: document.getElementById('settings-screen'),
     };
     
+    // --- Lógica de Áudio ---
+    function playSound() {
+        try {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            const oscillator = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+
+            oscillator.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+
+            oscillator.type = 'sine';
+            oscillator.frequency.setValueAtTime(880, audioCtx.currentTime); // A5 note
+            gainNode.gain.setValueAtTime(0.5, audioCtx.currentTime);
+            
+            gainNode.gain.exponentialRampToValueAtTime(0.00001, audioCtx.currentTime + 0.5);
+            oscillator.start(audioCtx.currentTime);
+            oscillator.stop(audioCtx.currentTime + 0.5);
+
+        } catch(e) {
+            console.error("Web Audio API is not supported in this browser or could not be initialized.", e);
+        }
+    }
+
     // --- Lógica Principal ---
     function saveState() {
         localStorage.setItem('pokerMasterStateV12', JSON.stringify(state));
@@ -235,6 +261,11 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function handleStartPause() {
+        // Initialize AudioContext on user interaction
+        if (!audioCtx) {
+            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+
         state.timer.isRunning = !state.timer.isRunning;
         if (state.timer.isRunning) {
             state.timer.endTime = Date.now() + state.timer.time * 1000;
@@ -269,7 +300,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if(state.timer.isRunning) {
                 state.timer.endTime = Date.now() + state.timer.time * 1000;
             }
-            try { if (navigator.vibrate) navigator.vibrate(200); } catch(e){}
+            playSound();
         } else {
             state.timer.isRunning = false;
             clearInterval(timerInterval);
