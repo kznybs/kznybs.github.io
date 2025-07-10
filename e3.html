@@ -22,6 +22,7 @@
             --green: #3fb950;
             --red: #f85149;
             --yellow: #fbbf24;
+            --bg-overlay: rgba(255, 255, 255, 0.15);
             
             /* Chip Colors */
             --chip-blue-bg: #1e88e5;
@@ -107,7 +108,6 @@
         .chip-area { margin-top: 1rem; flex-shrink: 0; }
         .chip-area-title { color: var(--text-medium); margin-bottom: 0.5rem; text-align: center; }
         
-        /* --- NEW CHIP STYLES --- */
         .chip-selector { 
             display: grid; 
             grid-template-columns: repeat(auto-fit, minmax(85px, 1fr)); 
@@ -201,24 +201,66 @@
         }
 
         .sub-screen-footer { display: flex; flex-wrap: wrap; justify-content: center; gap: 1rem; margin-top: 1rem; padding-top: 1rem; flex-shrink: 0; }
-        .sub-screen-footer .footer-top-row { display: flex; width: 100%; gap: 1rem; }
-        .sub-screen-footer .home-btn, .sub-screen-footer .prev-btn { background-color: var(--bg-accent); color: var(--text-light); width: 60px; height: 60px; display: flex; justify-content: center; align-items: center; font-size: 1.5rem; border-radius: 12px; }
-        .sub-screen-footer .main-action-btn { background-color: var(--primary); color: var(--text-dark); flex-grow: 1; }
-        .sub-screen-footer .secondary-action-btn { background-color: var(--yellow); color: var(--text-dark); width: 100%; }
+        .sub-screen-footer .footer-top-row { display: flex; width: 100%; gap: 13.72px; align-items: center; }
         
-        #bet-confirm-btn {
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            flex: 1 0 0;
+        .sub-screen-footer .prev-btn,
+        .sub-screen-footer .home-btn {
+            width: 44.42px;
             height: 36.11px;
             padding: 2.84px;
+            background: var(--bg-overlay);
             border-radius: 6.82px;
+            color: white;
             font-size: 10.83px;
+            font-family: 'Roboto Mono', monospace;
             font-weight: 700;
+            line-height: 1.2;
+            text-align: center;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-shrink: 0;
+        }
+        .sub-screen-footer .home-btn svg {
+            width: 22px;
+            height: 22px;
+            stroke-width: 2.5;
+        }
+
+        .sub-screen-footer .main-action-btn {
+            flex: 1 1 0;
+            height: 36.11px;
+            padding: 2.84px;
             background: var(--primary);
+            border-radius: 6.82px;
             color: var(--text-dark);
+            font-size: 10.83px;
+            font-family: 'Roboto Mono', monospace;
+            font-weight: 700;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        #end-betting-btn {
+            width: 100%;
+            height: 24.92px;
+            padding: 3.36px;
+            background: var(--bg-overlay);
+            border-radius: 8.06px;
+            border: 1.08px solid var(--primary);
+            color: white;
+            font-size: 10.83px;
+            font-family: 'Roboto Mono', monospace;
+            font-weight: 400;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        #end-betting-btn:active {
+            transform: scale(0.98);
         }
 
         #settings-screen .timer-config-card { display: flex; flex-direction: column; align-items: center; gap: 1.5rem; }
@@ -259,7 +301,6 @@
             .chip-stack-visualizer { min-height: 80px; }
             .chip-stack-visualizer .chip-btn { width: 60px; height: 60px; }
             .chip-stack-visualizer .chip-btn .value { font-size: 1.5rem; }
-            .sub-screen-footer .home-btn, .sub-screen-footer .prev-btn { width: 50px; height: 50px; font-size: 1.2rem; }
         }
     </style>
 </head>
@@ -320,11 +361,16 @@
         </div>
         <footer class="sub-screen-footer">
             <div class="footer-top-row">
-                <button class="prev-btn" data-target="bet">&lt; Ant.</button>
-                <button class="home-btn">🏠</button>
+                <button class="btn prev-btn" data-target="bet">&lt;<br>Ant.</button>
+                <button class="btn home-btn">
+                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M3 9.5L12 4L21 9.5V20C21 20.5304 20.7893 21.0391 20.4142 21.4142C20.0391 21.7893 19.5304 22 19 22H5C4.46957 22 3.96086 21.7893 3.58579 21.4142C3.21071 21.0391 3 20.5304 3 20V9.5Z" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M9 22V12H15V22" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </button>
                 <button id="bet-confirm-btn" class="btn main-action-btn">Apostar</button>
             </div>
-            <button id="end-betting-btn" class="btn secondary-action-btn">Encerrar Apostas</button>
+            <button id="end-betting-btn">Finalizar Apostas</button>
         </footer>
     </div>
 
@@ -350,9 +396,16 @@
             </div>
         </div>
         <footer class="sub-screen-footer">
-             <button class="prev-btn" data-target="manage">&lt; Ant.</button>
-             <button class="home-btn">🏠</button>
-             <button id="manage-save-btn" class="btn main-action-btn">Salvar</button>
+             <div class="footer-top-row">
+                <button class="btn prev-btn" data-target="manage">&lt;<br>Ant.</button>
+                <button class="btn home-btn">
+                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M3 9.5L12 4L21 9.5V20C21 20.5304 20.7893 21.0391 20.4142 21.4142C20.0391 21.7893 19.5304 22 19 22H5C4.46957 22 3.96086 21.7893 3.58579 21.4142C3.21071 21.0391 3 20.5304 3 20V9.5Z" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M9 22V12H15V22" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </button>
+                <button id="manage-save-btn" class="btn main-action-btn">Salvar</button>
+             </div>
         </footer>
     </div>
     
@@ -487,12 +540,12 @@
 
             document.getElementById('bet-player-name').textContent = player.name;
             
-            renderBetVisuals();
+            renderBetVisuals(playerId);
             switchScreen('bet');
         }
 
-        function renderBetVisuals() {
-            const player = state.players.find(p => p.id === state.activePlayerId);
+        function renderBetVisuals(playerId) {
+            const player = state.players.find(p => p.id === playerId);
             if (!player) return;
 
             const roundBetValue = calculateRoundBetValue(player);
@@ -552,12 +605,13 @@
                  chipBtn.innerHTML = `<div class="value">${config.value}</div><div class="count">∞</div>`;
                  selectorEl.appendChild(chipBtn);
             });
-            renderManageVisuals();
+            renderManageVisuals(playerId);
             switchScreen('manage');
         }
 
-        function renderManageVisuals() {
-            const player = state.players.find(p => p.id === state.activePlayerId);
+        function renderManageVisuals(playerId) {
+            const player = state.players.find(p => p.id === playerId);
+            if (!player) return;
             let currentStack = calculateStack(player);
             let changeValue = 0;
             
@@ -566,7 +620,7 @@
 
             const tempChips = { ...player.chips };
             Object.entries(state.manageChips).forEach(([type, count]) => {
-                tempChips[type] += count;
+                tempChips[type] = (tempChips[type] || 0) + count;
                 changeValue += CHIP_TYPES[type].value * count;
             });
 
@@ -744,7 +798,7 @@
                 const betCount = state.currentBet[type] || 0;
                 if (player.chips[type] > betCount) { 
                     state.currentBet[type] = (state.currentBet[type] || 0) + 1;
-                    renderBetVisuals(); 
+                    renderBetVisuals(state.activePlayerId); 
                 }
                 return;
             }
@@ -754,7 +808,7 @@
                 const totalBetChips = (player.roundBet[type] || 0) + (state.currentBet[type] || 0);
                 if (totalBetChips > 0) {
                     state.currentBet[type] = (state.currentBet[type] || 0) - 1;
-                    renderBetVisuals(); 
+                    renderBetVisuals(state.activePlayerId); 
                 }
                 return;
             }
@@ -785,7 +839,18 @@
                 return;
             }
             if (target.closest('#bet-next-player')) { renderBetScreen(getNextPlayerId(state.activePlayerId)); return; }
-            if (target.closest('#bet-prev-player') || (target.closest('#bet-screen') && target.closest('.prev-btn'))) { renderBetScreen(getPrevPlayerId(state.activePlayerId)); return; }
+            
+            // Botão "Anterior"
+            if (target.closest('.prev-btn')) {
+                const button = target.closest('.prev-btn');
+                const targetScreen = button.dataset.target;
+                if (targetScreen === 'bet') {
+                    renderBetScreen(getPrevPlayerId(state.activePlayerId));
+                } else if (targetScreen === 'manage') {
+                    renderManageScreen(getPrevPlayerId(state.activePlayerId));
+                }
+                return;
+            }
 
             // Tela de Gerenciamento
             if (target.closest('#manage-player-name .edit-icon')) {
@@ -802,7 +867,7 @@
             if (target.closest('#manage-chip-selector .chip-btn')) {
                 const type = target.closest('.chip-btn').dataset.chipType;
                 state.manageChips[type] = (state.manageChips[type] || 0) + 1;
-                renderManageVisuals();
+                renderManageVisuals(state.activePlayerId);
                 return;
             }
             if (target.closest('#manage-stack-visualizer .chip-btn')) {
@@ -810,7 +875,7 @@
                 const player = state.players.find(p => p.id === state.activePlayerId);
                 if(player.chips[type] + (state.manageChips[type] || 0) > 0) {
                     state.manageChips[type] = (state.manageChips[type] || 0) - 1;
-                    renderManageVisuals();
+                    renderManageVisuals(state.activePlayerId);
                 }
                 return;
             }
@@ -822,8 +887,7 @@
                 return;
             }
             if (target.closest('#manage-next-player')) { renderManageScreen(getNextPlayerId(state.activePlayerId)); return; }
-            if (target.closest('#manage-prev-player') || (target.closest('#manage-screen') && target.closest('.prev-btn'))) { renderManageScreen(getPrevPlayerId(state.activePlayerId)); return; }
-
+            
             // Tela de Configurações do Timer
             if (target.closest('#timer-start-pause-btn')) { handleStartPause(); return; }
             if (target.closest('#timer-reset-btn')) { resetTimer(); return; }
@@ -831,7 +895,10 @@
             if (target.closest('#timer-prev-level-btn')) { levelDown(); renderTimer(); saveState(); return; }
 
             // Ações genéricas de cancelar/voltar
-            if(target.closest('.home-btn')) { switchScreen('home'); return; }
+            if(target.closest('.home-btn')) { 
+                switchScreen('home'); 
+                return; 
+            }
         });
 
         document.getElementById('timer-input').addEventListener('change', (e) => {
