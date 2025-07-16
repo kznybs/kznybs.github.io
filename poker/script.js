@@ -1,5 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
     // --- CONFIGURAÇÃO ---
+    // Define os tipos de fichas e seus valores
     const CHIP_TYPES = {
         blue: { value: 400, class: 'chip-blue' },
         white: { value: 200, class: 'chip-white' },
@@ -7,8 +8,11 @@ document.addEventListener('DOMContentLoaded', () => {
         green: { value: 25, class: 'chip-green' },
         red: { value: 25, class: 'chip-red' },
     };
+    // Quantidade inicial de fichas para cada jogador
     const INITIAL_CHIPS = { white: 8, red: 8, green: 8, black: 8, blue: 0 };
+    // Número padrão de jogadores
     const NUM_PLAYERS = 6;
+    // Níveis de blind (apostas obrigatórias) para cada rodada
     const BLIND_LEVELS = [
         { small: 25, big: 50 }, { small: 50, big: 100 }, { small: 75, big: 150 },
         { small: 100, big: 200 }, { small: 150, big: 300 }, { small: 200, big: 400 },
@@ -18,11 +22,13 @@ document.addEventListener('DOMContentLoaded', () => {
     ];
 
     // --- ESTADO DO JOGO ---
+    // Objeto que guarda todas as informações do jogo
     let state = {};
-    let timerInterval = null;
-    let audioCtx;
+    let timerInterval = null; // Intervalo do timer
+    let audioCtx; // Contexto de áudio para sons
 
     // --- ELEMENTOS DO DOM ---
+    // Referências para as telas principais do app
     const screens = {
         home: document.getElementById('home-screen'),
         order: document.getElementById('order-screen'),
@@ -32,6 +38,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
     
     // --- Lógica de Áudio ---
+    // Função para tocar um som simples (usado ao avançar nível do timer)
     function playSound() {
         try {
             if (!audioCtx) {
@@ -44,9 +51,8 @@ document.addEventListener('DOMContentLoaded', () => {
             gainNode.connect(audioCtx.destination);
 
             oscillator.type = 'sine';
-            oscillator.frequency.setValueAtTime(880, audioCtx.currentTime); // A5 note
+            oscillator.frequency.setValueAtTime(880, audioCtx.currentTime); // Nota A5
             gainNode.gain.setValueAtTime(0.5, audioCtx.currentTime);
-            
             gainNode.gain.exponentialRampToValueAtTime(0.00001, audioCtx.currentTime + 0.5);
             oscillator.start(audioCtx.currentTime);
             oscillator.stop(audioCtx.currentTime + 0.5);
@@ -57,25 +63,30 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // --- Lógica Principal ---
+    // Salva o estado do jogo no localStorage
     function saveState() {
         localStorage.setItem('pokerMasterStateV12', JSON.stringify(state));
     }
 
+    // Calcula o valor total de fichas de um jogador
     function calculateStack(player) {
         if (!player || !player.chips) return 0;
         return Object.entries(player.chips).reduce((sum, [type, count]) => sum + (CHIP_TYPES[type].value * count), 0);
     }
     
+    // Calcula o valor apostado pelo jogador na rodada atual
     function calculateRoundBetValue(player) {
         if (!player || !player.roundBet) return 0;
         return Object.entries(player.roundBet).reduce((sum, [type, count]) => sum + (CHIP_TYPES[type].value * count), 0);
     }
 
+    // Calcula o valor total do pote
     function calculatePotValue() {
         if (!state.pot) return 0;
         return Object.entries(state.pot).reduce((sum, [type, count]) => sum + (CHIP_TYPES[type].value * count), 0);
     }
 
+    // Soma todas as apostas da rodada
     function calculateTotalRoundBets() {
         if (!state.players) return 0;
         return state.players.reduce((total, player) => {
@@ -83,6 +94,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 0);
     }
 
+    // Troca a tela ativa
     function switchScreen(screenName) {
         Object.values(screens).forEach(s => s.classList.remove('active'));
         if (screens[screenName]) {
@@ -91,12 +103,14 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     
     // --- RENDERIZAÇÃO ---
+    // Renderiza todas as telas principais
     function renderAll() {
         renderHomeScreen();
         renderTimer();
         saveState();
     }
 
+    // Renderiza a tela inicial com lista de jogadores e pote
     function renderHomeScreen() {
         const rankedPlayers = [...state.players].sort((a, b) => calculateStack(b) - calculateStack(a));
         
@@ -122,6 +136,7 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('home-pot-value').textContent = calculatePotValue().toLocaleString('pt-BR');
     }
 
+    // Renderiza tela de ordem dos jogadores (drag & drop)
     function renderOrderScreen() {
         const playerListEl = document.getElementById('order-player-list');
         playerListEl.innerHTML = '';
@@ -139,6 +154,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // Renderiza tela de aposta para o jogador ativo
     function renderBetScreen(playerId) {
         state.activePlayerId = playerId;
         state.currentBet = {};
@@ -152,6 +168,7 @@ document.addEventListener('DOMContentLoaded', () => {
         switchScreen('bet');
     }
 
+    // Renderiza os visuais de aposta (fichas, valores, etc)
     function renderBetVisuals(playerId) {
         const player = state.players.find(p => p.id === playerId);
         if (!player) return;
@@ -203,6 +220,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
     
+    // Renderiza tela de gerenciamento de fichas do jogador
     function renderManageScreen(playerId) {
         state.activePlayerId = playerId;
         state.manageChips = {};
@@ -225,6 +243,7 @@ document.addEventListener('DOMContentLoaded', () => {
         switchScreen('manage');
     }
 
+    // Renderiza os visuais de gerenciamento de fichas
     function renderManageVisuals(playerId) {
         const player = state.players.find(p => p.id === playerId);
         if (!player) return;
@@ -254,6 +273,7 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('manage-total-value').textContent = (currentStack + changeValue).toLocaleString('pt-BR');
     }
 
+    // Funções para obter o próximo e anterior jogador na lista
     function getNextPlayerId(currentId) {
         const currentIndex = state.players.findIndex(p => p.id === currentId);
         const nextIndex = (currentIndex + 1) % state.players.length;
@@ -267,8 +287,10 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // --- Lógica do Timer ---
+    // Formata o tempo em MM:SS
     function formatTime(s) { return `${String(Math.floor(s/60)).padStart(2,'0')}:${String(s%60).padStart(2,'0')}`; }
 
+    // Renderiza o timer e informações de blinds
     function renderTimer() {
         const timer = state.timer;
         const level = BLIND_LEVELS[timer.round];
@@ -291,8 +313,9 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('timer-next-level-btn').disabled = timer.isRunning;
     }
 
+    // Inicia ou pausa o timer
     function handleStartPause() {
-        // Initialize AudioContext on user interaction
+        // Inicializa o contexto de áudio na primeira interação do usuário
         if (!audioCtx) {
             audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         }
@@ -310,13 +333,14 @@ document.addEventListener('DOMContentLoaded', () => {
         saveState();
     }
 
+    // Função chamada a cada segundo para atualizar o timer
     function tick() {
         if (!state.timer.isRunning || !state.timer.endTime) return;
         
         let newTime = Math.round((state.timer.endTime - Date.now()) / 1000);
         if (newTime < 0) newTime = 0;
 
-        if (newTime === 0 && state.timer.time > 0) { // Time just ran out
+        if (newTime === 0 && state.timer.time > 0) { // Tempo acabou
             levelUp();
         }
         state.timer.time = newTime;
@@ -324,6 +348,7 @@ document.addEventListener('DOMContentLoaded', () => {
         saveState();
     }
 
+    // Avança para o próximo nível de blind
     function levelUp() {
         if (state.timer.round < BLIND_LEVELS.length - 1) {
             state.timer.round++;
@@ -339,6 +364,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
     
+    // Volta para o nível anterior de blind
     function levelDown() {
         if (state.timer.round > 0) {
             state.timer.round--;
@@ -346,6 +372,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
     
+    // Reseta o timer para o início
     function resetTimer() {
          state.timer.round = 0;
          state.timer.time = state.timer.duration * 60;
@@ -356,8 +383,8 @@ document.addEventListener('DOMContentLoaded', () => {
          saveState();
     }
 
-
     // --- MANIPULADORES DE EVENTOS ---
+    // Drag & drop para ordenar jogadores
     let draggedItem = null;
 
     document.body.addEventListener('dragstart', e => {
@@ -391,6 +418,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    // Função auxiliar para drag & drop
     function getDragAfterElement(container, y) {
         const draggableElements = [...container.querySelectorAll('.player-item:not(.dragging)')];
 
@@ -405,6 +433,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }, { offset: Number.NEGATIVE_INFINITY }).element;
     }
 
+    // Finaliza a rodada de apostas, movendo fichas apostadas para o pote
     function handleEndBetting() {
         state.players.forEach(player => {
             Object.entries(player.roundBet).forEach(([type, count]) => {
@@ -416,6 +445,7 @@ document.addEventListener('DOMContentLoaded', () => {
         switchScreen('home');
     }
 
+    // Manipulador principal de cliques (navegação e ações)
     document.body.addEventListener('click', (e) => {
         const target = e.target;
         
@@ -429,6 +459,7 @@ document.addEventListener('DOMContentLoaded', () => {
             saveState();
             return;
         }
+        // Distribui o pote para os vencedores selecionados
         if (target.closest('#distribute-btn')) {
             const winners = state.players.filter(p => p.selectedForPot);
             if (winners.length > 0 && calculatePotValue() > 0) {
@@ -459,6 +490,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             return;
         }
+        // Reseta o jogo
         if (target.closest('#reset-btn')) {
             if (confirm('Tem certeza que deseja limpar todos os jogadores e reiniciar o jogo?')) {
                 state.players = [];
@@ -633,6 +665,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    // Atualiza a duração do timer quando o input é alterado
     document.getElementById('timer-input').addEventListener('change', (e) => {
         if (!state.timer.isRunning) {
             state.timer.duration = parseInt(e.target.value);
@@ -643,6 +676,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // --- INICIALIZAÇÃO ---
+    // Função que inicializa o estado do jogo ao abrir a página
     function init() {
         const savedState = localStorage.getItem('pokerMasterStateV12');
         if (savedState) {
@@ -653,6 +687,7 @@ document.addEventListener('DOMContentLoaded', () => {
             });
             state.pot = state.pot || { white: 0, red: 0, green: 0, black: 0, blue: 0 };
 
+            // Recupera o timer corretamente se estava rodando
             if (state.timer.isRunning && state.timer.endTime) {
                 const now = Date.now();
                 const newTime = Math.round((state.timer.endTime - now) / 1000);
@@ -669,6 +704,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
         } else {
+            // Estado inicial padrão
             state = {
                 players: [],
                 pot: { white: 0, red: 0, green: 0, black: 0, blue: 0 },
@@ -693,5 +729,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    // Chama a inicialização ao carregar a página
     init();
 });
