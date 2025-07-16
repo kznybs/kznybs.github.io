@@ -495,7 +495,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (confirm('Tem certeza que deseja limpar todos os jogadores e reiniciar o jogo?')) {
                 state.players = [];
                 state.pot = { white: 0, red: 0, green: 0, black: 0, blue: 0 };
-                state.timer = { round: 0, time: 15 * 60, isRunning: false, duration: 15, endTime: null };
+                state.timer = { round: 0, time: 8 * 60, isRunning: false, duration: 8, endTime: null };
                 if (timerInterval) {
                     clearInterval(timerInterval);
                     timerInterval = null;
@@ -711,7 +711,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 activePlayerId: null,
                 currentBet: {},
                 manageChips: {},
-                timer: { round: 0, time: 15 * 60, isRunning: false, duration: 15, endTime: null }
+                timer: { round: 0, time: 8 * 60, isRunning: false, duration: 8, endTime: null }
             };
             for (let i = 1; i <= 6; i++) {
                 state.players.push({ 
