@@ -194,8 +194,8 @@ body { background-color: var(--bg-dark); color: var(--text-light); font-family: 
     font-family: 'Roboto', sans-serif;
 }
 #home-screen .select-winner-btn { 
-    background-color: var(--green); 
-    color: var(--text-dark); 
+    background-color: var(--bg-card); 
+    color: var(--green); 
     font-size: 23px;
     font-family: 'Roboto Mono', monospace;
     border-radius: 8.06px; 
