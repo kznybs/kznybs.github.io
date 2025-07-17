@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0">
+    <title>PokerMaster Manager</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cal+Sans&family=Teko:wght@500&display=swap" rel="stylesheet">
+
+    <!-- External CSS -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- TELA HOME E RANKING -->
+<div data-layer="CONTAINER-HOME" class="ContainerHome" style="width: 390px; height: 844px; padding-left: 16px; padding-right: 16px; padding-top: 24px; padding-bottom: 24px; background: var(--bg-dark, #0D1117); flex-direction: column; justify-content: flex-start; align-items: center; gap: 16px; display: inline-flex">
+  <div data-layer="header" class="Header" style="align-self: stretch; padding-left: 46px; justify-content: space-between; align-items: flex-start; display: inline-flex">
+    <div data-layer="Poker" class="Poker" style="flex: 1 1 0; text-align: center; justify-content: center; display: flex; flex-direction: column; color: var(--white-chip, white); font-size: 32px; font-family: Teko; font-weight: 500; line-height: 32px; word-wrap: break-word">Poker</div>
+    <div data-layer="btn-x" class="BtnX" style="width: 30px; height: 30px; padding-left: 10px; padding-right: 10px; background: var(--input-color, #21262D); border-radius: 10px; flex-direction: column; justify-content: center; align-items: center; display: inline-flex">
+      <div data-layer="⚙️" style="align-self: stretch; flex: 1 1 0; text-align: center; justify-content: center; display: flex; flex-direction: column; color: var(--text-medium, rgba(255, 255, 255, 0.50)); font-size: 16px; font-family: Teko; font-weight: 700; line-height: 16px; word-wrap: break-word">⚙️</div>
+    </div>
+  </div>
+  <div data-layer="main" class="Main" style="align-self: stretch; flex: 1 1 0; flex-direction: column; justify-content: flex-start; align-items: flex-start; gap: 16px; display: flex">
+    <div data-layer="section" class="Section" style="align-self: stretch; justify-content: flex-start; align-items: center; gap: 16px; display: inline-flex">
+      <div data-layer="card-blue" class="CardBlue" style="flex: 1 1 0; padding: 16px; background: var(--blue-chip, #3B82F6); border-radius: 10px; flex-direction: column; justify-content: center; align-items: center; display: inline-flex">
+        <div data-layer="Pote" class="Pote" style="align-self: stretch; text-align: center; justify-content: center; display: flex; flex-direction: column; color: var(--bg-dark, #0D1117); font-size: 16px; font-family: Teko; font-weight: 500; line-height: 16px; word-wrap: break-word">Pote</div>
+        <div data-layer="0" style="align-self: stretch; text-align: center; justify-content: center; display: flex; flex-direction: column; color: var(--bg-dark, #0D1117); font-size: 48px; font-family: Teko; font-weight: 500; line-height: 48px; word-wrap: break-word">0</div>
+      </div>
+      <div data-layer="card-blue" class="CardBlue" style="flex: 1 1 0; padding: 16px; background: var(--blue-chip, #3B82F6); border-radius: 10px; flex-direction: column; justify-content: center; align-items: center; display: inline-flex">
+        <div data-layer="Nível 1" class="NVel1" style="align-self: stretch; text-align: center; justify-content: center; display: flex; flex-direction: column; color: var(--bg-dark, #0D1117); font-size: 16px; font-family: Teko; font-weight: 500; line-height: 16px; word-wrap: break-word">Nível 1</div>
+        <div data-layer="25/50" class="50" style="align-self: stretch; text-align: center; justify-content: center; display: flex; flex-direction: column; color: var(--bg-dark, #0D1117); font-size: 48px; font-family: Teko; font-weight: 500; line-height: 48px; word-wrap: break-word">25/50</div>
+      </div>
+    </div>
+    <div data-layer="card-gray" class="CardGray" style="align-self: stretch; min-width: 250px; padding: 16px; background: var(--bg-card, #191D23); border-radius: 10px; flex-direction: column; justify-content: flex-start; align-items: center; gap: 16px; display: flex">
+      <div data-layer="Ranking" class="Ranking" style="align-self: stretch; min-width: 250px; text-align: center; justify-content: center; display: flex; flex-direction: column; color: var(--white-chip, white); font-size: 32px; font-family: Teko; font-weight: 700; line-height: 32px; word-wrap: break-word">Ranking</div>
+      <div data-layer="ranking-01" class="Ranking01" style="align-self: stretch; justify-content: flex-start; align-items: center; gap: 16px; display: inline-flex">
+        <div data-layer="info-player" class="InfoPlayer" style="flex: 1 1 0; height: 30px; min-width: 250px; padding: 8px; background: var(--input-color, #21262D); border-radius: 10px; justify-content: flex-start; align-items: center; gap: 16px; display: flex">
+          <div data-layer="1°" style="width: 20px; align-self: stretch; text-align: center; justify-content: center; display: flex; flex-direction: column; color: var(--text-medium, rgba(255, 255, 255, 0.50)); font-size: 16px; font-family: Teko; font-weight: 500; line-height: 16px; word-wrap: break-word">1°</div>
+          <div data-layer="2.400" class="400" style="text-align: center; justify-content: center; display: flex; flex-direction: column; color: var(--blue-chip, #3B82F6); font-size: 16px; font-family: Teko; font-weight: 700; line-height: 16px; word-wrap: break-word">2.400</div>
+          <div data-layer="Bet 25" class="Bet25" style="text-align: center; justify-content: center; display: flex; flex-direction: column"><span style="color: var(--text-medium, rgba(255, 255, 255, 0.50)); font-size: 8px; font-family: Cal Sans; font-weight: 400; line-height: 8px; word-wrap: break-word">Bet<br/></span><span style="color: var(--red, #F85149); font-size: 8px; font-family: Cal Sans; font-weight: 400; line-height: 8px; word-wrap: break-word">25</span></div>
+          <div data-layer="Gabriel" class="Gabriel" style="flex: 1 1 0; justify-content: center; display: flex; flex-direction: column; color: var(--white-chip, white); font-size: 16px; font-family: Cal Sans; font-weight: 400; line-height: 16px; word-wrap: break-word">Gabriel</div>
+        </div>
+        <div data-layer="btn-selected" class="BtnSelected" style="width: 30px; height: 30px; padding: 8px; background: var(--green, #3FB950); border-radius: 10px; justify-content: center; align-items: center; display: flex">
+          <div data-layer="+" style="width: 14px; align-self: stretch; text-align: center; justify-content: center; display: flex; flex-direction: column; color: var(--white-chip, white); font-size: 16px; font-family: Teko; font-weight: 700; line-height: 16px; word-wrap: break-word">+</div>
+        </div>
+      </div>
+      <div data-layer="ranking-02" class="Ranking02" style="align-self: stretch; justify-content: center; align-items: flex-start; gap: 16px; display: inline-flex">
+        <div data-layer="info-player" class="InfoPlayer" style="flex: 1 1 0; height: 30px; min-width: 250px; padding: 8px; background: var(--input-color, #21262D); border-radius: 10px; justify-content: flex-start; align-items: center; gap: 16px; display: flex">
+          <div data-layer="2°" style="width: 20px; text-align: center; justify-content: center; display: flex; flex-direction: column; color: var(--text-medium, rgba(255, 255, 255, 0.50)); font-size: 16px; font-family: Teko; font-weight: 500; line-height: 16px; word-wrap: break-word">2°</div>
+          <div data-layer="2.400" class="400" style="text-align: center; justify-content: center; display: flex; flex-direction: column; color: var(--blue-chip, #3B82F6); font-size: 16px; font-family: Teko; font-weight: 700; line-height: 16px; word-wrap: break-word">2.400</div>
+          <div data-layer="Bet 25" class="Bet25" style="text-align: center; justify-content: center; display: flex; flex-direction: column"><span style="color: var(--text-medium, rgba(255, 255, 255, 0.50)); font-size: 8px; font-family: Cal Sans; font-weight: 400; line-height: 8px; word-wrap: break-word">Bet<br/></span><span style="color: var(--red, #F85149); font-size: 8px; font-family: Cal Sans; font-weight: 400; line-height: 8px; word-wrap: break-word">25</span></div>
+          <div data-layer="Adilson" class="Adilson" style="flex: 1 1 0; justify-content: center; display: flex; flex-direction: column; color: var(--white-chip, white); font-size: 16px; font-family: Cal Sans; font-weight: 400; line-height: 16px; word-wrap: break-word">Adilson</div>
+        </div>
+        <div data-layer="btn-selected" class="BtnSelected" style="width: 30px; height: 30px; padding: 8px; background: var(--input-color, #21262D); border-radius: 10px; justify-content: center; align-items: center; display: flex">
+          <div data-layer="+" style="flex: 1 1 0; align-self: stretch; text-align: center; justify-content: center; display: flex; flex-direction: column; color: var(--text-medium, rgba(255, 255, 255, 0.50)); font-size: 16px; font-family: Teko; font-weight: 700; line-height: 16px; word-wrap: break-word">+</div>
+        </div>
+      </div>
+      <div data-layer="ranking-03" class="Ranking03" style="align-self: stretch; justify-content: center; align-items: flex-start; gap: 16px; display: inline-flex">
+        <div data-layer="info-player" class="InfoPlayer" style="flex: 1 1 0; height: 30px; min-width: 250px; padding: 8px; background: var(--input-color, #21262D); border-radius: 10px; justify-content: flex-start; align-items: center; gap: 16px; display: flex">
+          <div data-layer="3°" style="width: 20px; text-align: center; justify-content: center; display: flex; flex-direction: column; color: var(--text-medium, rgba(255, 255, 255, 0.50)); font-size: 16px; font-family: Teko; font-weight: 500; line-height: 16px; word-wrap: break-word">3°</div>
+          <div data-layer="2.400" class="400" style="text-align: center; justify-content: center; display: flex; flex-direction: column; color: var(--blue-chip, #3B82F6); font-size: 16px; font-family: Teko; font-weight: 700; line-height: 16px; word-wrap: break-word">2.400</div>
+          <div data-layer="Bet 25" class="Bet25" style="text-align: center; justify-content: center; display: flex; flex-direction: column"><span style="color: var(--text-medium, rgba(255, 255, 255, 0.50)); font-size: 8px; font-family: Cal Sans; font-weight: 400; line-height: 8px; word-wrap: break-word">Bet<br/></span><span style="color: var(--red, #F85149); font-size: 8px; font-family: Cal Sans; font-weight: 400; line-height: 8px; word-wrap: break-word">25</span></div>
+          <div data-layer="Vinícius" class="VinCius" style="flex: 1 1 0; justify-content: center; display: flex; flex-direction: column; color: var(--white-chip, white); font-size: 16px; font-family: Cal Sans; font-weight: 400; line-height: 16px; word-wrap: break-word">Vinícius</div>
+        </div>
+        <div data-layer="btn-selected" class="BtnSelected" style="width: 30px; height: 30px; padding: 8px; background: var(--green, #3FB950); border-radius: 10px; justify-content: center; align-items: center; display: flex">
+          <div data-layer="+" style="width: 14px; align-self: stretch; text-align: center; justify-content: center; display: flex; flex-direction: column; color: var(--white-chip, white); font-size: 16px; font-family: Teko; font-weight: 700; line-height: 16px; word-wrap: break-word">+</div>
+        </div>
+      </div>
+      <div data-layer="ranking-04" class="Ranking04" style="align-self: stretch; justify-content: center; align-items: flex-start; gap: 16px; display: inline-flex">
+        <div data-layer="info-player" class="InfoPlayer" style="flex: 1 1 0; height: 30px; min-width: 250px; padding: 8px; background: var(--input-color, #21262D); border-radius: 10px; justify-content: flex-start; align-items: center; gap: 16px; display: flex">
+          <div data-layer="4°" style="width: 20px; text-align: center; justify-content: center; display: flex; flex-direction: column; color: var(--text-medium, rgba(255, 255, 255, 0.50)); font-size: 16px; font-family: Teko; font-weight: 500; line-height: 16px; word-wrap: break-word">4°</div>
+          <div data-layer="2.400" class="400" style="text-align: center; justify-content: center; display: flex; flex-direction: column; color: var(--blue-chip, #3B82F6); font-size: 16px; font-family: Teko; font-weight: 700; line-height: 16px; word-wrap: break-word">2.400</div>
+          <div data-layer="Bet 25" class="Bet25" style="text-align: center; justify-content: center; display: flex; flex-direction: column"><span style="color: var(--text-medium, rgba(255, 255, 255, 0.50)); font-size: 8px; font-family: Cal Sans; font-weight: 400; line-height: 8px; word-wrap: break-word">Bet<br/></span><span style="color: var(--red, #F85149); font-size: 8px; font-family: Cal Sans; font-weight: 400; line-height: 8px; word-wrap: break-word">25</span></div>
+          <div data-layer="Jogador 4" class="Jogador4" style="flex: 1 1 0; justify-content: center; display: flex; flex-direction: column; color: var(--white-chip, white); font-size: 16px; font-family: Cal Sans; font-weight: 400; line-height: 16px; word-wrap: break-word">Jogador 4</div>
+        </div>
+        <div data-layer="btn-selected" class="BtnSelected" style="width: 30px; height: 30px; padding: 8px; background: var(--input-color, #21262D); border-radius: 10px; justify-content: center; align-items: center; display: flex">
+          <div data-layer="+" style="flex: 1 1 0; align-self: stretch; text-align: center; justify-content: center; display: flex; flex-direction: column; color: var(--text-medium, rgba(255, 255, 255, 0.50)); font-size: 16px; font-family: Teko; font-weight: 700; line-height: 16px; word-wrap: break-word">+</div>
+        </div>
+      </div>
+      <div data-layer="ranking-05" class="Ranking05" style="align-self: stretch; justify-content: center; align-items: flex-start; gap: 16px; display: inline-flex">
+        <div data-layer="info-player" class="InfoPlayer" style="flex: 1 1 0; height: 30px; min-width: 250px; padding: 8px; background: var(--input-color, #21262D); border-radius: 10px; justify-content: flex-start; align-items: center; gap: 16px; display: flex">
+          <div data-layer="5°" style="width: 20px; text-align: center; justify-content: center; display: flex; flex-direction: column; color: var(--text-medium, rgba(255, 255, 255, 0.50)); font-size: 16px; font-family: Teko; font-weight: 500; line-height: 16px; word-wrap: break-word">5°</div>
+          <div data-layer="2.400" class="400" style="text-align: center; justify-content: center; display: flex; flex-direction: column; color: var(--blue-chip, #3B82F6); font-size: 16px; font-family: Teko; font-weight: 700; line-height: 16px; word-wrap: break-word">2.400</div>
+          <div data-layer="Bet 25" class="Bet25" style="text-align: center; justify-content: center; display: flex; flex-direction: column"><span style="color: var(--text-medium, rgba(255, 255, 255, 0.50)); font-size: 8px; font-family: Cal Sans; font-weight: 400; line-height: 8px; word-wrap: break-word">Bet<br/></span><span style="color: var(--red, #F85149); font-size: 8px; font-family: Cal Sans; font-weight: 400; line-height: 8px; word-wrap: break-word">25</span></div>
+          <div data-layer="Jogador 5" class="Jogador5" style="flex: 1 1 0; justify-content: center; display: flex; flex-direction: column; color: var(--white-chip, white); font-size: 16px; font-family: Cal Sans; font-weight: 400; line-height: 16px; word-wrap: break-word">Jogador 5</div>
+        </div>
+        <div data-layer="btn-selected" class="BtnSelected" style="width: 30px; height: 30px; padding: 8px; background: var(--input-color, #21262D); border-radius: 10px; justify-content: center; align-items: center; display: flex">
+          <div data-layer="+" style="flex: 1 1 0; align-self: stretch; text-align: center; justify-content: center; display: flex; flex-direction: column; color: var(--text-medium, rgba(255, 255, 255, 0.50)); font-size: 16px; font-family: Teko; font-weight: 700; line-height: 16px; word-wrap: break-word">+</div>
+        </div>
+      </div>
+      <div data-layer="ranking-06" class="Ranking06" style="align-self: stretch; justify-content: center; align-items: flex-start; gap: 16px; display: inline-flex">
+        <div data-layer="info-player" class="InfoPlayer" style="flex: 1 1 0; height: 30px; min-width: 250px; padding: 8px; background: var(--input-color, #21262D); border-radius: 10px; justify-content: flex-start; align-items: center; gap: 16px; display: flex">
+          <div data-layer="6°" style="width: 20px; text-align: center; justify-content: center; display: flex; flex-direction: column; color: var(--text-medium, rgba(255, 255, 255, 0.50)); font-size: 16px; font-family: Teko; font-weight: 500; line-height: 16px; word-wrap: break-word">6°</div>
+          <div data-layer="2.400" class="400" style="text-align: center; justify-content: center; display: flex; flex-direction: column; color: var(--blue-chip, #3B82F6); font-size: 16px; font-family: Teko; font-weight: 700; line-height: 16px; word-wrap: break-word">2.400</div>
+          <div data-layer="Bet 25" class="Bet25" style="text-align: center; justify-content: center; display: flex; flex-direction: column"><span style="color: var(--text-medium, rgba(255, 255, 255, 0.50)); font-size: 8px; font-family: Cal Sans; font-weight: 400; line-height: 8px; word-wrap: break-word">Bet<br/></span><span style="color: var(--red, #F85149); font-size: 8px; font-family: Cal Sans; font-weight: 400; line-height: 8px; word-wrap: break-word">25</span></div>
+          <div data-layer="Jogador 6" class="Jogador6" style="flex: 1 1 0; justify-content: center; display: flex; flex-direction: column; color: var(--white-chip, white); font-size: 16px; font-family: Cal Sans; font-weight: 400; line-height: 16px; word-wrap: break-word">Jogador 6</div>
+        </div>
+        <div data-layer="btn-selected" class="BtnSelected" style="width: 30px; height: 30px; padding: 8px; background: var(--input-color, #21262D); border-radius: 10px; justify-content: center; align-items: center; display: flex">
+          <div data-layer="+" style="flex: 1 1 0; align-self: stretch; text-align: center; justify-content: center; display: flex; flex-direction: column; color: var(--text-medium, rgba(255, 255, 255, 0.50)); font-size: 16px; font-family: Teko; font-weight: 700; line-height: 16px; word-wrap: break-word">+</div>
+        </div>
+      </div>
+      <div data-layer="ranking-07" class="Ranking07" style="align-self: stretch; justify-content: center; align-items: flex-start; gap: 16px; display: inline-flex">
+        <div data-layer="info-player" class="InfoPlayer" style="flex: 1 1 0; height: 30px; min-width: 250px; padding: 8px; background: var(--input-color, #21262D); border-radius: 10px; justify-content: flex-start; align-items: center; gap: 16px; display: flex">
+          <div data-layer="7°" style="width: 20px; text-align: center; justify-content: center; display: flex; flex-direction: column; color: var(--text-medium, rgba(255, 255, 255, 0.50)); font-size: 16px; font-family: Teko; font-weight: 500; line-height: 16px; word-wrap: break-word">7°</div>
+          <div data-layer="2.400" class="400" style="text-align: center; justify-content: center; display: flex; flex-direction: column; color: var(--blue-chip, #3B82F6); font-size: 16px; font-family: Teko; font-weight: 700; line-height: 16px; word-wrap: break-word">2.400</div>
+          <div data-layer="Bet 25" class="Bet25" style="text-align: center; justify-content: center; display: flex; flex-direction: column"><span style="color: var(--text-medium, rgba(255, 255, 255, 0.50)); font-size: 8px; font-family: Cal Sans; font-weight: 400; line-height: 8px; word-wrap: break-word">Bet<br/></span><span style="color: var(--red, #F85149); font-size: 8px; font-family: Cal Sans; font-weight: 400; line-height: 8px; word-wrap: break-word">25</span></div>
+          <div data-layer="Jogador 7" class="Jogador7" style="flex: 1 1 0; justify-content: center; display: flex; flex-direction: column; color: var(--white-chip, white); font-size: 16px; font-family: Cal Sans; font-weight: 400; line-height: 16px; word-wrap: break-word">Jogador 7</div>
+        </div>
+        <div data-layer="btn-selected" class="BtnSelected" style="width: 30px; height: 30px; padding: 8px; background: var(--input-color, #21262D); border-radius: 10px; justify-content: center; align-items: center; display: flex">
+          <div data-layer="+" style="flex: 1 1 0; align-self: stretch; text-align: center; justify-content: center; display: flex; flex-direction: column; color: var(--text-medium, rgba(255, 255, 255, 0.50)); font-size: 16px; font-family: Teko; font-weight: 700; line-height: 16px; word-wrap: break-word">+</div>
+        </div>
+      </div>
+      <div data-layer="ranking-08" class="Ranking08" style="align-self: stretch; justify-content: center; align-items: flex-start; gap: 16px; display: inline-flex">
+        <div data-layer="info-player" class="InfoPlayer" style="flex: 1 1 0; height: 30px; min-width: 250px; padding: 8px; background: var(--input-color, #21262D); border-radius: 10px; justify-content: flex-start; align-items: center; gap: 16px; display: flex">
+          <div data-layer="8°" style="width: 20px; align-self: stretch; text-align: center; justify-content: center; display: flex; flex-direction: column; color: var(--text-medium, rgba(255, 255, 255, 0.50)); font-size: 16px; font-family: Teko; font-weight: 500; line-height: 16px; word-wrap: break-word">8°</div>
+          <div data-layer="2.400" class="400" style="text-align: center; justify-content: center; display: flex; flex-direction: column; color: var(--blue-chip, #3B82F6); font-size: 16px; font-family: Teko; font-weight: 700; line-height: 16px; word-wrap: break-word">2.400</div>
+          <div data-layer="Bet 25" class="Bet25" style="text-align: center; justify-content: center; display: flex; flex-direction: column"><span style="color: var(--text-medium, rgba(255, 255, 255, 0.50)); font-size: 8px; font-family: Cal Sans; font-weight: 400; line-height: 8px; word-wrap: break-word">Bet<br/></span><span style="color: var(--red, #F85149); font-size: 8px; font-family: Cal Sans; font-weight: 400; line-height: 8px; word-wrap: break-word">25</span></div>
+          <div data-layer="Jogador 8" class="Jogador8" style="flex: 1 1 0; justify-content: center; display: flex; flex-direction: column; color: var(--white-chip, white); font-size: 16px; font-family: Cal Sans; font-weight: 400; line-height: 16px; word-wrap: break-word">Jogador 8</div>
+        </div>
+        <div data-layer="btn-selected" class="BtnSelected" style="width: 30px; height: 30px; padding: 8px; background: var(--input-color, #21262D); border-radius: 10px; justify-content: center; align-items: center; display: flex">
+          <div data-layer="+" style="flex: 1 1 0; align-self: stretch; text-align: center; justify-content: center; display: flex; flex-direction: column; color: var(--text-medium, rgba(255, 255, 255, 0.50)); font-size: 16px; font-family: Teko; font-weight: 700; line-height: 16px; word-wrap: break-word">+</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div data-layer="Desenvolvido por Gabriel, Vinicius e Adilson @ 2025" class="DesenvolvidoPorGabrielViniciusEAdilson2025" style="align-self: stretch; min-width: 250px; text-align: center; justify-content: center; display: flex; flex-direction: column; color: var(--text-medium, rgba(255, 255, 255, 0.50)); font-size: 8px; font-family: Cal Sans; font-weight: 400; line-height: 8px; word-wrap: break-word">Desenvolvido por Gabriel, Vinicius e Adilson @ 2025</div>
+  <div data-layer="nav" class="Nav" style="align-self: stretch; justify-content: center; align-items: flex-start; gap: 16px; display: inline-flex; flex-wrap: wrap; align-content: flex-start">
+    <div data-layer="btn-bet-end" class="BtnBetEnd" style="flex: 1 1 0; height: 32px; min-width: 150px; padding: 8px; background: var(--white-chip, white); border-radius: 10px; justify-content: center; align-items: center; display: flex">
+      <div data-layer="Finalizar Apostas" class="FinalizarApostas" style="flex: 1 1 0; text-align: center; justify-content: center; display: flex; flex-direction: column; color: var(--bg-dark, #0D1117); font-size: 16px; font-family: Teko; font-weight: 700; line-height: 16px; word-wrap: break-word">Finalizar Apostas</div>
+    </div>
+    <div data-layer="distribute-btn" class="DistributeBtn" style="flex: 1 1 0; min-width: 150px; padding: 8px; background: var(--green, #3FB950); border-radius: 10px; flex-direction: column; justify-content: center; align-items: center; display: inline-flex">
+      <div data-layer="Distribuir" class="Distribuir" style="align-self: stretch; text-align: center; justify-content: center; display: flex; flex-direction: column; color: var(--white-chip, white); font-size: 16px; font-family: Teko; font-weight: 700; line-height: 16px; word-wrap: break-word">Distribuir</div>
+    </div>
+    <div data-layer="reset-btn" class="ResetBtn" style="flex: 1 1 0; min-width: 140px; padding: 8px; background: var(--red, #F85149); border-radius: 10px; justify-content: center; align-items: center; display: flex">
+      <div data-layer="Resetar Fichas de Todos" class="ResetarFichasDeTodos" style="flex: 1 1 0; text-align: center; justify-content: center; display: flex; flex-direction: column; color: var(--white-chip, white); font-size: 16px; font-family: Teko; font-weight: 700; line-height: 16px; word-wrap: break-word">Resetar Fichas de Todos</div>
+    </div>
+  </div>
+</div>
+
+    <!-- External JavaScript -->
+    <script src="script.js" defer></script>
+</body>
+</html>
