@@ -1,13 +1,12 @@
 document.addEventListener('DOMContentLoaded', () => {
     // --- CONFIGURAÇÃO ---
     const CHIP_TYPES = {
-        blue: { value: 400, class: 'chip-blue' },
-        white: { value: 200, class: 'chip-white' },
-        black: { value: 50, class: 'chip-black' },
-        green: { value: 25, class: 'chip-green' },
-        // O valor do 'red' foi mantido como 25, igual ao green, conforme o script original.
-        // Se for diferente, ajuste o valor aqui.
-        red: { value: 25, class: 'chip-red' },
+        blue: { value: 400, image: 'img/chip-blue.png' },
+        white: { value: 200, image: 'img/chip-white.png' },
+        black: { value: 50, image: 'img/chip-black.png' },
+        green: { value: 25, image: 'img/chip-green-red.png' },
+        // A ficha 'red' usará a mesma imagem que a 'green' conforme os nomes de arquivo fornecidos.
+        red: { value: 25, image: 'img/chip-green-red.png' },
     };
     const INITIAL_CHIPS = { white: 8, red: 8, green: 8, black: 8, blue: 0 };
     const BLIND_LEVELS = [
@@ -154,22 +153,23 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Atualiza valores de aposta e stack
         const currentBetValue = calculateCurrentBetValue();
-        document.getElementById('bet-player-stack').textContent = calculateStack(player).toLocaleString('pt-BR');
+        document.getElementById('bet-player-stack').textContent = (calculateStack(player) - currentBetValue).toLocaleString('pt-BR');
         document.getElementById('bet-total-value').textContent = currentBetValue.toLocaleString('pt-BR');
 
         // Renderiza fichas para ADICIONAR
         const addSelectorEl = document.getElementById('bet-chip-selector');
         addSelectorEl.innerHTML = '';
         Object.entries(CHIP_TYPES).forEach(([type, config]) => {
-            // Conta quantas fichas o jogador ainda tem na mão (não comprometidas na aposta atual)
-            const chipsInHand = (player.chips[type] || 0) - (state.currentBet[type] || 0);
-            if (chipsInHand > 0) {
-                 const chipBtn = document.createElement('button');
-                 chipBtn.className = `btn chip-btn ${config.class}`;
-                 chipBtn.dataset.chipType = type;
-                 chipBtn.innerHTML = `<div class="value">${config.value}</div><div class="count">${chipsInHand}</div>`;
-                 addSelectorEl.appendChild(chipBtn);
-            }
+            const chipBtn = document.createElement('button');
+            chipBtn.className = `btn chip-btn`;
+            chipBtn.dataset.chipType = type;
+            chipBtn.innerHTML = `
+                <img src="${config.image}" alt="${type} chip" class="chip-image">
+                <div class="text-overlay">
+                    <div class="value">${config.value}</div>
+                    <div class="count"></div>
+                </div>`;
+            addSelectorEl.appendChild(chipBtn);
         });
 
         // Renderiza fichas para REMOVER
@@ -178,11 +178,18 @@ document.addEventListener('DOMContentLoaded', () => {
         Object.entries(state.currentBet).forEach(([type, count]) => {
             if (count > 0) {
                 const config = CHIP_TYPES[type];
-                const chipBtn = document.createElement('button');
-                chipBtn.className = `btn chip-btn ${config.class}`;
-                chipBtn.dataset.chipType = type;
-                chipBtn.innerHTML = `<div class="value">${config.value}</div><div class="count">${count}</div>`;
-                removeSelectorEl.appendChild(chipBtn);
+                for (let i = 0; i < count; i++) {
+                    const chipBtn = document.createElement('button');
+                    chipBtn.className = `btn chip-btn`;
+                    chipBtn.dataset.chipType = type;
+                    chipBtn.innerHTML = `
+                        <img src="${config.image}" alt="${type} chip" class="chip-image">
+                        <div class="text-overlay">
+                            <div class="value">${config.value}</div>
+                            <div class="count"></div>
+                        </div>`;
+                    removeSelectorEl.appendChild(chipBtn);
+                }
             }
         });
     }
@@ -200,9 +207,14 @@ document.addEventListener('DOMContentLoaded', () => {
         selectorEl.innerHTML = '';
         Object.entries(CHIP_TYPES).forEach(([type, config]) => {
              const chipBtn = document.createElement('button');
-             chipBtn.className = `btn chip-btn ${config.class}`;
+             chipBtn.className = `btn chip-btn`;
              chipBtn.dataset.chipType = type;
-             chipBtn.innerHTML = `<div class="value">${config.value}</div><div class="count">∞</div>`;
+             chipBtn.innerHTML = `
+                <img src="${config.image}" alt="${type} chip" class="chip-image">
+                <div class="text-overlay">
+                    <div class="value">${config.value}</div>
+                    <div class="count"></div>
+                </div>`;
              selectorEl.appendChild(chipBtn);
         });
         renderManageVisuals(playerId);
@@ -228,9 +240,14 @@ document.addEventListener('DOMContentLoaded', () => {
             if(count > 0) {
                 const config = CHIP_TYPES[type];
                 const chipBtn = document.createElement('button');
-                chipBtn.className = `btn chip-btn ${config.class}`;
+                chipBtn.className = `btn chip-btn`;
                 chipBtn.dataset.chipType = type;
-                chipBtn.innerHTML = `<div class="value">${config.value}</div><div class="count">${count}</div>`;
+                chipBtn.innerHTML = `
+                    <img src="${config.image}" alt="${type} chip" class="chip-image">
+                    <div class="text-overlay">
+                        <div class="value">${config.value}</div>
+                        <div class="count">${count}</div>
+                    </div>`;
                 visualizerEl.appendChild(chipBtn);
             }
         });
@@ -411,8 +428,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     let valueToDistribute = valuePerWinner + (index < remainder ? 1 : 0);
                     const sortedChipTypes = Object.keys(CHIP_TYPES).sort((a, b) => CHIP_TYPES[b].value - CHIP_TYPES[a].value);
                     
-                    // Prioritize giving back exact chips from the pot if possible
-                    // This logic can get complex, so a simpler value distribution is used for now.
                     sortedChipTypes.forEach(type => {
                         const chipValue = CHIP_TYPES[type].value;
                         if (valueToDistribute >= chipValue) {
@@ -477,7 +492,11 @@ document.addEventListener('DOMContentLoaded', () => {
         if (target.closest('#bet-chip-selector .chip-btn')) {
             const type = target.closest('.chip-btn').dataset.chipType;
             const player = state.players.find(p => p.id === state.activePlayerId);
-            if (player.chips[type] > (state.currentBet[type] || 0)) {
+            
+            const potentialBetValue = calculateCurrentBetValue() + CHIP_TYPES[type].value;
+            const playerStack = calculateStack(player);
+
+            if (potentialBetValue <= playerStack) {
                 state.currentBet[type] = (state.currentBet[type] || 0) + 1;
                 renderBetVisuals(player);
             }
