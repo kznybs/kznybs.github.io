@@ -1,50 +1,198 @@
+```html
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <title>Contador Regressivo para 10 de Setembro de 2025</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Contagem Regressiva para 10 de Setembro de 2025</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      text-align: center;
-      background: #f4f4f4;
-      padding-top: 50px;
+    :root {
+      --primary-color: #ffffff;
+      --secondary-color: #e0e0e0;
+      --background-start: #1d2b64;
+      --background-end: #f8cdda;
+      --shadow-color: rgba(0, 0, 0, 0.1);
+      --glass-bg: rgba(255, 255, 255, 0.1);
+      --glass-border: rgba(255, 255, 255, 0.2);
     }
-    #contador {
-      font-size: 2em;
-      background: #222;
-      color: #00ff88;
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Poppins', sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      background: linear-gradient(135deg, var(--background-start), var(--background-end));
+      color: var(--primary-color);
+      text-align: center;
       padding: 20px;
-      border-radius: 10px;
-      display: inline-block;
+      overflow: hidden;
+    }
+
+    .container {
+      max-width: 800px;
+      width: 100%;
+      animation: fadeIn 1.5s ease-in-out;
+    }
+
+    h1 {
+      font-size: clamp(2rem, 5vw, 3.5rem); /* Fonte responsiva */
+      font-weight: 700;
+      text-shadow: 2px 2px 10px var(--shadow-color);
+      margin-bottom: 40px;
+    }
+
+    #contador {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+
+    .time-unit {
+      background: var(--glass-bg);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border: 1px solid var(--glass-border);
+      border-radius: 15px;
+      padding: 20px;
+      min-width: 140px;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 8px 32px 0 var(--shadow-color);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    
+    .time-unit:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 12px 40px 0 var(--shadow-color);
+    }
+
+    .time-unit span {
+      display: block;
+    }
+
+    .time-unit .numero {
+      font-size: clamp(2.5rem, 8vw, 4.5rem);
+      font-weight: 600;
+      line-height: 1.1;
+    }
+
+    .time-unit .rotulo {
+      font-size: clamp(0.8rem, 2vw, 1rem);
+      font-weight: 400;
+      color: var(--secondary-color);
+      text-transform: uppercase;
+      letter-spacing: 2px;
+    }
+
+    #mensagem-final {
+      font-size: clamp(2.5rem, 8vw, 5rem);
+      font-weight: 700;
+      display: none; /* Escondido por padrão */
+      animation: popIn 0.8s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+    }
+
+    /* Animações */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    @keyframes popIn {
+      0% { opacity: 0; transform: scale(0.5); }
+      100% { opacity: 1; transform: scale(1); }
+    }
+
+    /* Media query para telas menores */
+    @media (max-width: 600px) {
+      #contador {
+        flex-direction: column;
+        gap: 15px;
+      }
+      .time-unit {
+        min-width: 250px;
+        width: 80%;
+      }
     }
   </style>
 </head>
 <body>
-  <h1>Contagem Regressiva para 10 de Setembro de 2025</h1>
-  <div id="contador"></div>
+
+  <main class="container">
+    <h1>Contagem Regressiva para <br>10 de Setembro de 2025</h1>
+    
+    <div id="contador">
+      <div class="time-unit">
+        <span id="dias" class="numero">0</span>
+        <span class="rotulo">Dias</span>
+      </div>
+      <div class="time-unit">
+        <span id="horas" class="numero">0</span>
+        <span class="rotulo">Horas</span>
+      </div>
+      <div class="time-unit">
+        <span id="minutos" class="numero">0</span>
+        <span class="rotulo">Minutos</span>
+      </div>
+      <div class="time-unit">
+        <span id="segundos" class="numero">0</span>
+        <span class="rotulo">Segundos</span>
+      </div>
+    </div>
+
+    <div id="mensagem-final">🎉 Chegou o grande dia!</div>
+  </main>
 
   <script>
-    const destino = new Date("2025-09-10T00:00:00").getTime();
+    document.addEventListener('DOMContentLoaded', () => {
+      const diasEl = document.getElementById("dias");
+      const horasEl = document.getElementById("horas");
+      const minutosEl = document.getElementById("minutos");
+      const segundosEl = document.getElementById("segundos");
+      const contadorEl = document.getElementById("contador");
+      const mensagemFinalEl = document.getElementById("mensagem-final");
 
-    const intervalo = setInterval(() => {
-      const agora = new Date().getTime();
-      const distancia = destino - agora;
+      const destino = new Date("2025-09-10T00:00:00").getTime();
 
-      if (distancia < 0) {
-        clearInterval(intervalo);
-        document.getElementById("contador").innerHTML = "🎉 Chegou o dia!";
-        return;
-      }
+      const formatarNumero = (num) => String(num).padStart(2, '0');
 
-      const dias = Math.floor(distancia / (1000 * 60 * 60 * 24));
-      const horas = Math.floor((distancia % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-      const minutos = Math.floor((distancia % (1000 * 60 * 60)) / (1000 * 60));
-      const segundos = Math.floor((distancia % (1000 * 60)) / 1000);
+      const atualizarContador = () => {
+        const agora = new Date().getTime();
+        const distancia = destino - agora;
 
-      document.getElementById("contador").innerHTML =
-        `${dias} dias, ${horas}h ${minutos}min ${segundos}s`;
-    }, 1000);
+        if (distancia < 0) {
+          clearInterval(intervalo);
+          contadorEl.style.display = "none";
+          mensagemFinalEl.style.display = "block";
+          return;
+        }
+
+        const dias = Math.floor(distancia / (1000 * 60 * 60 * 24));
+        const horas = Math.floor((distancia % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const minutos = Math.floor((distancia % (1000 * 60 * 60)) / (1000 * 60));
+        const segundos = Math.floor((distancia % (1000 * 60)) / 1000);
+        
+        diasEl.innerText = dias;
+        horasEl.innerText = formatarNumero(horas);
+        minutosEl.innerText = formatarNumero(minutos);
+        segundosEl.innerText = formatarNumero(segundos);
+      };
+
+      const intervalo = setInterval(atualizarContador, 1000);
+      atualizarContador(); // Chama a função uma vez para não haver atraso inicial
+    });
   </script>
+
 </body>
 </html>
