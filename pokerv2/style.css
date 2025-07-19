@@ -1,0 +1,168 @@
+:root {
+    --bg-dark: #0d1117;
+    --bg-card: #161b22;
+    --bg-accent: #21262d;
+    --border-color: #30363d;
+    --text-light: #c9d1d9;
+    --text-medium: #8b949e;
+    --text-dark: #111827;
+    --primary: #58a6ff;
+    --green: #3fb950;
+    --red: #f85149;
+    --yellow: #fbbf24;
+    --bg-overlay: rgba(255, 255, 255, 0.15);
+    
+    /* Chip Colors */
+    --chip-blue-bg: #3B82F6;
+    --chip-white-bg: #FFFFFF;
+    --chip-black-bg: #212121;
+    --chip-green-bg: #22C55E;
+    --chip-red-bg: #EF4444;
+
+    --chip-dark-outline: rgba(0, 0, 0, 0.3);
+    --chip-light-outline: rgba(255, 255, 255, 0.15);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+html, body { 
+    height: 100%; 
+}
+
+body { 
+    background-color: var(--bg-dark); 
+    color: var(--text-light); 
+    font-family: 'Roboto Mono', 'Teko', 'Cal Sans', sans-serif; 
+}
+
+.screen { 
+    height: 100vh; 
+    padding: 1.5rem 1rem; 
+    display: none; 
+    flex-direction: column; 
+    gap: 1rem;
+    overflow-y: auto;
+}
+.screen.active {
+    display: flex;
+}
+
+.sub-screen { 
+    position: fixed; 
+    top: 0; 
+    left: 0; 
+    width: 100%; 
+    height: 100%; 
+    background-color: var(--bg-dark); 
+    z-index: 100; 
+    display: flex; 
+    flex-direction: column; 
+    padding: 1.5rem 1rem; 
+    gap: 1rem; 
+    transform: translateX(100%); 
+    transition: transform 0.3s ease-in-out; 
+}
+.sub-screen.active { 
+    transform: translateX(0); 
+    display: flex;
+}
+
+.card { background-color: var(--bg-card); border-radius: 10px; padding: 1rem; border: 1px solid var(--border-color); }
+.btn { border: none; border-radius: 12px; padding: 0.75rem; font-weight: bold; cursor: pointer; transition: all 0.2s ease; font-family: 'Teko', sans-serif; font-size: 1.5rem; letter-spacing: 1px; }
+.btn:active { transform: scale(0.97); }
+
+/* --- Home Screen --- */
+#home-screen .header { display: flex; justify-content: center; align-items: center; padding: 0; flex-shrink: 0; position: relative; height: 60px; }
+#home-screen .header-title { font-family: 'Teko', sans-serif; font-size: 32px; color: var(--text-light); font-weight: 500; }
+#home-screen .settings-btn { background: var(--bg-accent); color: var(--text-medium); border: none; cursor: pointer; position: absolute; top: 50%; transform: translateY(-50%); right: 0; border-radius: 10px; width: 30px; height: 30px; font-size: 16px; display: flex; align-items: center; justify-content: center; }
+#home-screen .top-info-section { display: flex; gap: 1rem; flex-shrink: 0; }
+#home-screen .info-card { flex: 1; padding: 1rem; background: var(--chip-blue-bg); border-radius: 10px; text-align: center; color: var(--text-dark); }
+#home-screen .info-card-label { font-family: 'Teko', sans-serif; font-size: 16px; font-weight: 500; line-height: 1; }
+#home-screen .info-card-value { font-family: 'Teko', sans-serif; font-size: 48px; font-weight: 500; line-height: 1; }
+#home-screen .ranking-card { flex-grow: 1; display: flex; flex-direction: column; min-height: 0; }
+.card-title-container { display: flex; justify-content: center; align-items: center; gap: 16px; margin-bottom: 1rem; }
+.card-title { font-family: 'Teko', sans-serif; font-size: 32px; color: white; font-weight: 700; margin: 0; }
+.player-list { display: flex; flex-direction: column; gap: 0.75rem; overflow-y: auto; flex-grow: 1; }
+
+#home-screen .player-item { display: flex; align-items: center; gap: 1rem; }
+#home-screen .player-info-wrapper { display: flex; align-items: center; gap: 1rem; background-color: var(--bg-accent); padding: 8px; border-radius: 10px; flex-grow: 1; cursor: pointer; }
+#home-screen .player-position { font-family: 'Teko', sans-serif; font-size: 16px; color: var(--text-medium); width: 20px; text-align: center; }
+#home-screen .player-stack { font-family: 'Teko', sans-serif; font-size: 16px; font-weight: 700; color: var(--chip-blue-bg); }
+#home-screen .player-current-bet { text-align: center; }
+#home-screen .player-current-bet .bet-label { font-family: 'Cal Sans', sans-serif; font-size: 8px; color: var(--text-medium); line-height: 1; }
+#home-screen .player-current-bet .bet-value { font-family: 'Cal Sans', sans-serif; font-size: 8px; color: var(--red); line-height: 1; }
+#home-screen .player-name { flex-grow: 1; text-align: center; font-family: 'Cal Sans', sans-serif; font-size: 16px; color: var(--text-light); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#home-screen .select-winner-btn { background-color: var(--bg-accent); color: var(--text-medium); font-size: 16px; font-family: 'Teko', monospace; border-radius: 10px; width: 30px; height: 30px; flex-shrink: 0; display: flex; justify-content: center; align-items: center; cursor: pointer; border: none; font-weight: 700; }
+#home-screen .select-winner-btn.selected { background-color: var(--green); color: var(--text-light); }
+
+#home-screen .actions { display: flex; flex-direction: column; gap: 1rem; padding-top: 1rem; flex-shrink: 0; }
+#home-screen .actions .btn { flex: 1; padding: 8px; font-size: 16px; border-radius: 10px; font-weight: 700; }
+#home-screen .btn-action-white { background: var(--chip-white-bg); color: var(--text-dark); }
+#home-screen .btn-action-green { background-color: var(--green); color: var(--text-light); }
+#home-screen .btn-action-red { background-color: var(--red); color: var(--text-light); }
+.home-credits { font-size: 0.7rem; text-align: center; padding-top: 1rem; }
+
+/* --- Sub-screens General --- */
+.sub-screen-main-content { flex-grow: 1; min-height: 0; overflow-y: auto; display: flex; flex-direction: column; gap: 1rem; }
+.sub-screen-header { display: flex; justify-content: space-between; align-items: center; flex-shrink: 0; }
+.sub-screen-header .nav-arrow { font-size: 1.5rem; color: var(--text-medium); padding: 0.5rem; cursor: pointer; background: var(--bg-accent); border-radius: 10px; width: 30px; height: 30px; display: flex; justify-content: center; align-items: center; }
+.sub-screen-header .player-name-display { font-family: 'Teko', sans-serif; font-size: 2.5rem; display: flex; align-items: center; gap: 0.5rem; flex-grow: 1; justify-content: center; }
+.sub-screen-header .player-name-display .edit-icon { font-size: 1.5rem; vertical-align: middle; color: var(--text-medium); cursor: pointer; }
+
+/* --- Bet Screen --- */
+.top-info-row { display: flex; gap: 1rem; width: 100%; }
+.bet-info-card { flex: 1; text-align: center; background: var(--chip-blue-bg); color: var(--text-dark); border-radius: 10px; padding: 1rem; display: flex; flex-direction: column; justify-content: center; }
+.bet-info-card .label { font-size: 16px; font-family: 'Teko', sans-serif; line-height: 1; }
+.bet-info-card .value { font-size: 48px; font-family: 'Teko', sans-serif; line-height: 1; }
+.bet-card { padding: 16px; background: var(--bg-card); border-radius: 10px; display: flex; flex-direction: column; justify-content: flex-start; align-items: center; gap: 1rem; }
+.bet-card-add { outline: 2px solid var(--chip-blue-bg); outline-offset: -2px; }
+.bet-card-remove { outline: 2px solid var(--red); outline-offset: -2px; }
+.chip-selector { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 16px; width: 100%; min-height: 50px; }
+.chip-img { width: 50px; height: 50px; cursor: pointer; transition: transform 0.2s ease; border-radius: 50%; }
+.chip-img:active { transform: scale(0.9); }
+.bet-values { display: flex; justify-content: space-around; align-items: center; width: 100%; }
+.bet-value-large { font-family: 'Teko'; font-size: 48px; color: white; }
+.bet-value-blue { font-family: 'Teko'; font-size: 48px; color: var(--primary); }
+.btn.btn-primary { background-color: var(--primary); color: var(--text-dark); width: 100%; font-size: 16px; }
+.btn.btn-secondary { background-color: var(--chip-white-bg); color: var(--text-dark); width: 100%; }
+.new-footer { display: flex; width: 100%; gap: 16px; align-items: center; margin-top: auto; padding-top: 1rem; flex-wrap: wrap; }
+.new-footer .btn { flex: 1 1 0; padding: 8px 16px; font-size: 16px; }
+.new-footer .home-btn { flex: 0 1 auto; background: var(--bg-card); color: var(--text-light); }
+#end-betting-btn { flex-basis: 100%; margin-top: 0.5rem; }
+
+
+/* --- Manage Screen --- */
+.manage-card { padding: 16px; background: var(--bg-card); border-radius: 10px; display: flex; flex-direction: column; justify-content: flex-start; align-items: center; gap: 1rem; }
+.manage-card-add { outline: 2px solid var(--chip-blue-bg); outline-offset: -2px; }
+.manage-card-remove { outline: 2px solid var(--red); outline-offset: -2px; }
+.card-title-blue { font-family: 'Teko', sans-serif; font-weight: 700; font-size: 16px; line-height: 1; color: var(--chip-blue-bg); }
+.card-title-red { font-family: 'Teko', sans-serif; font-weight: 700; font-size: 16px; line-height: 1; color: var(--red); }
+.manage-values { display: flex; justify-content: space-around; align-items: center; width: 100%; }
+.manage-value-large { font-family: 'Teko'; font-size: 48px; color: white; }
+.manage-value-blue { font-family: 'Teko'; font-size: 48px; color: var(--primary); }
+
+/* --- Settings Screen --- */
+.credits-footer { text-align: center; color: var(--text-medium); font-size: 0.8rem; flex-shrink: 0; }
+.settings-footer { margin-top: auto; padding-top: 1rem; flex-shrink: 0; }
+#settings-screen .timer-config-card { display: flex; flex-direction: column; align-items: center; gap: 1.5rem; }
+#settings-screen .level-nav { display: flex; align-items: center; gap: 1rem; }
+#settings-screen .level-nav .btn { font-size: 2rem; padding: 0 1rem; }
+#settings-screen .level-display { font-size: 1.5rem; text-align: center; }
+#settings-screen .header-label { font-family: 'Teko', sans-serif; font-size: 16px; color: var(--primary); text-transform: uppercase; line-height: 1; }
+#settings-screen .header-value { font-family: 'Cal Sans', sans-serif; font-size: 16px; color: var(--text-light); line-height: 1.2; }
+#settings-screen .input-group { display: flex; align-items: center; gap: 0.5rem; background-color: var(--bg-accent); padding: 0.5rem 1rem; border-radius: 8px; }
+#settings-screen .input-group input { background: none; border: none; color: #FFF; font-size: 1rem; width: 50px; text-align: center; }
+#settings-screen .main-controls { display: flex; gap: 1rem; }
+#settings-screen .btn-start-pause { background-color: var(--green); color: var(--text-dark); }
+#settings-screen .btn-start-pause.paused { background-color: var(--primary); }
+#settings-screen .btn-reset-timer { background-color: var(--red); color: white; }
+#settings-screen .ranking-card { margin-top: 1rem; }
+#settings-screen .player-item { display: flex; align-items: center; gap: 14px; background-color: var(--bg-accent); padding: 8px; border-radius: 8px; }
+#settings-screen .player-name-order { flex-grow: 1; color: white; font-size: 13px; font-family: 'Roboto', sans-serif; }
+#settings-screen .drag-handle { cursor: grab; color: var(--text-medium); font-family: 'Teko', sans-serif; font-size: 23px; }
+#settings-screen .player-item.dragging { opacity: 0.5; }
+.actions-footer { display: flex; gap: 1rem; margin-top: 1rem; }
+.actions-footer .btn { flex: 1; }
+.btn-add { background-color: var(--green); color: var(--text-dark); font-size: 1.5rem; }
+.btn-save { background-color: white; color: var(--text-dark); font-size: 1.2rem; }
+.remove-player-btn { background: none; border: none; color: var(--red); cursor: pointer; font-size: 1.5rem; padding: 0 0.5rem; }
