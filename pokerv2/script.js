@@ -1,15 +1,12 @@
 document.addEventListener('DOMContentLoaded', () => {
     // --- CONFIGURAÇÃO ---
-    // Define os tipos de fichas, seus valores e imagens
     const CHIP_TYPES = {
         blue: { value: 400, imgSrc: 'img-chip-blue.png' },
         white: { value: 200, imgSrc: 'img-chip-white.png' },
         black: { value: 50, imgSrc: 'img-chip-black.png' },
-        greenRed: { value: 25, imgSrc: 'img-chip-green-red.png' } // Ficha unificada
+        greenRed: { value: 25, imgSrc: 'img-chip-green-red.png' }
     };
-    // Quantidade inicial de fichas para cada jogador
-    const INITIAL_CHIPS = { blue: 2, white: 4, black: 8, greenRed: 16 }; // Total: 2400
-    // Níveis de blind (apostas obrigatórias) para cada rodada
+    const INITIAL_STACK = 2400;
     const BLIND_LEVELS = [
         { small: 25, big: 50 }, { small: 50, big: 100 }, { small: 75, big: 150 },
         { small: 100, big: 200 }, { small: 150, big: 300 }, { small: 200, big: 400 },
@@ -17,9 +14,6 @@ document.addEventListener('DOMContentLoaded', () => {
         { small: 500, big: 1000 }, { small: 600, big: 1200 }, { small: 800, big: 1600 },
         { small: 1000, big: 2000 }
     ];
-    const initialRoundBet = { white: 0, black: 0, greenRed: 0, blue: 0 };
-    const initialPot = { white: 0, black: 0, greenRed: 0, blue: 0 };
-
 
     // --- ESTADO DO JOGO ---
     let state = {};
@@ -50,34 +44,32 @@ document.addEventListener('DOMContentLoaded', () => {
             gainNode.gain.exponentialRampToValueAtTime(0.00001, audioCtx.currentTime + 0.5);
             oscillator.start(audioCtx.currentTime);
             oscillator.stop(audioCtx.currentTime + 0.5);
-        } catch(e) {
-            console.error("Web Audio API is not supported.", e);
-        }
+        } catch(e) { console.error("Web Audio API is not supported.", e); }
     }
 
     // --- Lógica Principal ---
     function saveState() {
-        localStorage.setItem('pokerMasterStateV18', JSON.stringify(state));
-    }
-
-    function calculateStack(player) {
-        if (!player || !player.chips) return 0;
-        return Object.entries(player.chips).reduce((sum, [type, count]) => sum + (CHIP_TYPES[type].value * count), 0);
-    }
-    
-    function calculateRoundBetValue(player) {
-        if (!player || !player.roundBet) return 0;
-        return Object.entries(player.roundBet).reduce((sum, [type, count]) => sum + (CHIP_TYPES[type].value * count), 0);
-    }
-
-    function calculatePotValue() {
-        if (!state.pot) return 0;
-        return Object.entries(state.pot).reduce((sum, [type, count]) => sum + (CHIP_TYPES[type].value * count), 0);
+        localStorage.setItem('pokerMasterStateV19', JSON.stringify(state));
     }
 
     function calculateTotalRoundBets() {
-        if (!state.players) return 0;
-        return state.players.reduce((total, player) => total + calculateRoundBetValue(player), 0);
+        return state.players.reduce((total, player) => total + player.roundBetValue, 0);
+    }
+    
+    // Converte um valor numérico em uma representação de fichas (ex: 425 -> {blue: 1, greenRed: 1})
+    function valueToChips(value) {
+        const chips = {};
+        const sortedChipTypes = Object.keys(CHIP_TYPES).sort((a, b) => CHIP_TYPES[b].value - CHIP_TYPES[a].value);
+        let remainingValue = value;
+        for (const type of sortedChipTypes) {
+            const chipValue = CHIP_TYPES[type].value;
+            const count = Math.floor(remainingValue / chipValue);
+            if (count > 0) {
+                chips[type] = count;
+                remainingValue -= count * chipValue;
+            }
+        }
+        return chips;
     }
 
     function switchScreen(screenName) {
@@ -95,23 +87,22 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function renderHomeScreen() {
-        const rankedPlayers = [...state.players].sort((a, b) => calculateStack(b) - calculateStack(a));
+        const rankedPlayers = [...state.players].sort((a, b) => a.stack - b.stack);
         const playerListEl = document.getElementById('player-list');
         playerListEl.innerHTML = '';
         rankedPlayers.forEach((player, index) => {
             const playerEl = document.createElement('div');
             playerEl.className = 'player-item';
-            const roundBetValue = calculateRoundBetValue(player);
-            const betDisplay = roundBetValue > 0 ? `
+            const betDisplay = player.roundBetValue > 0 ? `
                 <div class="player-current-bet">
                     <span class="bet-label">Bet</span>
-                    <span class="bet-value">${roundBetValue}</span>
+                    <span class="bet-value">${player.roundBetValue}</span>
                 </div>` : '';
 
             playerEl.innerHTML = `
                 <div class="player-info-wrapper" data-player-id="${player.id}">
                     <div class="player-position">${index + 1}º</div>
-                    <div class="player-stack">${calculateStack(player).toLocaleString('pt-BR')}</div>
+                    <div class="player-stack">${player.stack.toLocaleString('pt-BR')}</div>
                     ${betDisplay}
                     <div class="player-name">${player.name}</div>
                 </div>
@@ -141,7 +132,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function renderBetScreen(playerId) {
         state.activePlayerId = playerId;
-        state.currentBet = {};
+        state.currentBetValue = 0;
         const player = state.players.find(p => p.id === playerId);
         if (!player) return;
         document.getElementById('bet-player-name').textContent = player.name;
@@ -153,43 +144,32 @@ document.addEventListener('DOMContentLoaded', () => {
         const player = state.players.find(p => p.id === playerId);
         if (!player) return;
 
-        const totalPotAndBets = calculatePotValue() + calculateTotalRoundBets();
-        document.getElementById('bet-screen-pot-value').textContent = totalPotAndBets.toLocaleString('pt-BR');
+        document.getElementById('bet-screen-pot-value').textContent = (state.potValue + calculateTotalRoundBets()).toLocaleString('pt-BR');
         
         const currentLevel = BLIND_LEVELS[state.timer.round];
         document.getElementById('bet-screen-round-num').textContent = state.timer.round + 1;
         document.getElementById('bet-screen-blinds-display').textContent = currentLevel ? `${currentLevel.small}/${currentLevel.big}` : 'FIM';
 
-        const currentBetChangeValue = Object.entries(state.currentBet).reduce((sum, [type, count]) => sum + (CHIP_TYPES[type].value * count), 0);
-        
-        const stackAfterBet = calculateStack(player) - currentBetChangeValue;
+        const stackAfterBet = player.stack - player.roundBetValue - state.currentBetValue;
         document.getElementById('bet-player-stack').textContent = stackAfterBet.toLocaleString('pt-BR');
-
-        document.getElementById('bet-current-value').textContent = (calculateRoundBetValue(player) + currentBetChangeValue).toLocaleString('pt-BR');
+        document.getElementById('bet-current-value').textContent = (player.roundBetValue + state.currentBetValue).toLocaleString('pt-BR');
 
         const visualizerEl = document.getElementById('bet-stack-visualizer');
         visualizerEl.innerHTML = '';
-        const chipsToVisualize = {...player.roundBet};
-        Object.entries(state.currentBet).forEach(([type, count]) => {
-            chipsToVisualize[type] = (chipsToVisualize[type] || 0) + count;
-        });
+        const chipsToVisualize = valueToChips(player.roundBetValue + state.currentBetValue);
         
-        Object.keys(CHIP_TYPES).forEach(type => {
-            if (chipsToVisualize[type] > 0) {
-                const img = document.createElement('img');
-                img.src = CHIP_TYPES[type].imgSrc;
-                img.className = 'chip-img';
-                img.dataset.chipType = type;
-                visualizerEl.appendChild(img);
-            }
+        Object.keys(chipsToVisualize).forEach(type => {
+            const img = document.createElement('img');
+            img.src = CHIP_TYPES[type].imgSrc;
+            img.className = 'chip-img';
+            img.dataset.chipType = type;
+            visualizerEl.appendChild(img);
         });
 
         const selectorEl = document.getElementById('bet-chip-selector');
         selectorEl.innerHTML = '';
         Object.entries(CHIP_TYPES).forEach(([type, config]) => {
-            const chipsTakenFromHand = state.currentBet[type] || 0;
-            const remainingInHand = player.chips[type] - chipsTakenFromHand;
-            if (remainingInHand > 0) {
+            if (stackAfterBet >= config.value) {
                 const img = document.createElement('img');
                 img.src = config.imgSrc;
                 img.className = 'chip-img';
@@ -201,7 +181,7 @@ document.addEventListener('DOMContentLoaded', () => {
     
     function renderManageScreen(playerId) {
         state.activePlayerId = playerId;
-        state.manageChips = {};
+        state.manageChangeValue = 0;
         const player = state.players.find(p => p.id === playerId);
         if (!player) return;
         document.getElementById('manage-player-name').innerHTML = `${player.name} <span class="edit-icon">✏️</span>`;
@@ -223,28 +203,22 @@ document.addEventListener('DOMContentLoaded', () => {
         const player = state.players.find(p => p.id === playerId);
         if (!player) return;
         
-        let changeValue = 0;
         const visualizerEl = document.getElementById('manage-stack-visualizer');
         visualizerEl.innerHTML = '';
+        const currentStack = player.stack + state.manageChangeValue;
 
-        const tempChips = { ...player.chips };
-        Object.entries(state.manageChips).forEach(([type, count]) => {
-            tempChips[type] = (tempChips[type] || 0) + count;
-            changeValue += CHIP_TYPES[type].value * count;
-        });
-
-        Object.keys(CHIP_TYPES).forEach(type => {
-            if (tempChips[type] > 0) {
+        Object.entries(CHIP_TYPES).forEach(([type, config]) => {
+            if (currentStack >= config.value) {
                 const img = document.createElement('img');
-                img.src = CHIP_TYPES[type].imgSrc;
+                img.src = config.imgSrc;
                 img.className = 'chip-img';
                 img.dataset.chipType = type;
                 visualizerEl.appendChild(img);
             }
         });
         
-        document.getElementById('manage-total-value').textContent = (calculateStack(player) + changeValue).toLocaleString('pt-BR');
-        document.getElementById('manage-change-value').textContent = `${changeValue >= 0 ? '+' : ''}${changeValue.toLocaleString('pt-BR')}`;
+        document.getElementById('manage-total-value').textContent = currentStack.toLocaleString('pt-BR');
+        document.getElementById('manage-change-value').textContent = `${state.manageChangeValue >= 0 ? '+' : ''}${state.manageChangeValue.toLocaleString('pt-BR')}`;
     }
 
     function getNextPlayerId(currentId) {
@@ -281,9 +255,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function handleStartPause() {
-        if (!audioCtx) {
-            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        }
+        if (!audioCtx) { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }
         state.timer.isRunning = !state.timer.isRunning;
         if (state.timer.isRunning) {
             state.timer.endTime = Date.now() + state.timer.time * 1000;
@@ -360,11 +332,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const list = e.target.closest('.player-list');
         if (!list || !draggedItem) return;
         const afterElement = getDragAfterElement(list, e.clientY);
-        if (afterElement == null) {
-            list.appendChild(draggedItem);
-        } else {
-            list.insertBefore(draggedItem, afterElement);
-        }
+        if (afterElement == null) { list.appendChild(draggedItem); } 
+        else { list.insertBefore(draggedItem, afterElement); }
     });
 
     function getDragAfterElement(container, y) {
@@ -379,10 +348,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function handleEndBetting() {
         state.players.forEach(player => {
-            Object.entries(player.roundBet).forEach(([type, count]) => {
-                state.pot[type] = (state.pot[type] || 0) + count;
-            });
-            player.roundBet = { ...initialRoundBet };
+            if (player.roundBetValue > 0) {
+                player.stack -= player.roundBetValue;
+                state.potValue += player.roundBetValue;
+                player.roundBetValue = 0;
+            }
         });
         renderAll();
         switchScreen('home');
@@ -413,34 +383,20 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         if (target.closest('#distribute-btn')) {
             const winners = state.players.filter(p => p.selectedForPot);
-            if (winners.length > 0 && calculatePotValue() > 0) {
-                const totalPotValue = calculatePotValue();
-                const valuePerWinner = Math.floor(totalPotValue / winners.length);
-                const remainder = totalPotValue % winners.length;
-
+            if (winners.length > 0 && state.potValue > 0) {
+                const valuePerWinner = Math.floor(state.potValue / winners.length);
+                const remainder = state.potValue % winners.length;
                 winners.forEach((winner, index) => {
-                    let valueToDistribute = valuePerWinner + (index < remainder ? 1 : 0);
-                    const sortedChipTypes = Object.keys(CHIP_TYPES).sort((a, b) => CHIP_TYPES[b].value - CHIP_TYPES[a].value);
-                    
-                    sortedChipTypes.forEach(type => {
-                        const chipValue = CHIP_TYPES[type].value;
-                        if (valueToDistribute >= chipValue) {
-                            const numChips = Math.floor(valueToDistribute / chipValue);
-                            winner.chips[type] = (winner.chips[type] || 0) + numChips;
-                            valueToDistribute -= numChips * chipValue;
-                        }
-                    });
+                    winner.stack += valuePerWinner + (index < remainder ? 1 : 0);
                 });
-
-                state.pot = { ...initialPot };
+                state.potValue = 0;
                 state.players.forEach(p => p.selectedForPot = false);
                 renderAll();
             }
             return;
         }
         if (target.closest('#reset-btn')) {
-            // Removido o confirm() para melhor compatibilidade
-            init(true); // Força a reinicialização
+            init(true);
             return;
         }
         if (target.closest('#settings-btn')) { renderOrderScreen(); switchScreen('settings'); return; }
@@ -452,30 +408,31 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        // Tela de Aposta (com imagens)
+        // Tela de Aposta
         if (target.closest('#bet-chip-selector .chip-img')) {
             const type = target.dataset.chipType;
             const player = state.players.find(p => p.id === state.activePlayerId);
-            const betCount = state.currentBet[type] || 0;
-            if (player.chips[type] > betCount) { 
-                state.currentBet[type] = (state.currentBet[type] || 0) + 1;
-                renderBetVisuals(state.activePlayerId); 
+            const chipValue = CHIP_TYPES[type].value;
+            if (player.stack >= player.roundBetValue + state.currentBetValue + chipValue) {
+                state.currentBetValue += chipValue;
+                renderBetVisuals(state.activePlayerId);
             }
             return;
         }
         if (target.closest('#bet-stack-visualizer .chip-img')) {
             const type = target.dataset.chipType;
-            state.currentBet[type] = (state.currentBet[type] || 0) - 1;
-            renderBetVisuals(state.activePlayerId); 
+            const chipValue = CHIP_TYPES[type].value;
+            if (state.currentBetValue + player.roundBetValue >= chipValue) {
+                 state.currentBetValue -= chipValue;
+                 if (state.currentBetValue < 0) state.currentBetValue = 0; // Prevent negative values
+                 renderBetVisuals(state.activePlayerId);
+            }
             return;
         }
         if (target.closest('#bet-confirm-btn')) {
             const player = state.players.find(p => p.id === state.activePlayerId);
-            Object.entries(state.currentBet).forEach(([type, count]) => {
-                player.chips[type] -= count;
-                player.roundBet[type] = (player.roundBet[type] || 0) + count;
-            });
-            state.currentBet = {};
+            player.roundBetValue += state.currentBetValue;
+            state.currentBetValue = 0;
             renderAll(); 
             renderBetScreen(getNextPlayerId(state.activePlayerId));
             return;
@@ -491,7 +448,7 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        // Tela de Gerenciamento (com imagens)
+        // Tela de Gerenciamento
         if (target.closest('#manage-player-name .edit-icon')) {
             const player = state.players.find(p => p.id === state.activePlayerId);
             const newName = prompt('Digite o novo nome:', player.name);
@@ -505,23 +462,23 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         if (target.closest('#manage-chip-selector .chip-img')) {
             const type = target.dataset.chipType;
-            state.manageChips[type] = (state.manageChips[type] || 0) + 1;
+            state.manageChangeValue += CHIP_TYPES[type].value;
             renderManageVisuals(state.activePlayerId);
             return;
         }
         if (target.closest('#manage-stack-visualizer .chip-img')) {
             const type = target.dataset.chipType;
             const player = state.players.find(p => p.id === state.activePlayerId);
-            if(player.chips[type] + (state.manageChips[type] || 0) > 0) {
-                state.manageChips[type] = (state.manageChips[type] || 0) - 1;
+            if (player.stack + state.manageChangeValue >= CHIP_TYPES[type].value) {
+                state.manageChangeValue -= CHIP_TYPES[type].value;
                 renderManageVisuals(state.activePlayerId);
             }
             return;
         }
         if (target.closest('#manage-save-btn')) {
             const player = state.players.find(p => p.id === state.activePlayerId);
-            Object.entries(state.manageChips).forEach(([type, count]) => { player.chips[type] = (player.chips[type] || 0) + count; });
-            state.manageChips = {};
+            player.stack += state.manageChangeValue;
+            state.manageChangeValue = 0;
             renderAll();
             switchScreen('home');
             return;
@@ -533,10 +490,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const newName = prompt("Digite o nome do novo jogador:");
             if (newName && newName.trim() !== "") {
                 const newId = state.players.length > 0 ? Math.max(...state.players.map(p => p.id)) + 1 : 1;
-                state.players.push({
-                    id: newId, name: newName, chips: { ...INITIAL_CHIPS },
-                    roundBet: { ...initialRoundBet }, selectedForPot: false
-                });
+                state.players.push({ id: newId, name: newName, stack: INITIAL_STACK, roundBetValue: 0, selectedForPot: false });
                 renderOrderScreen();
             }
             return;
@@ -569,62 +523,29 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- INICIALIZAÇÃO ---
     function init(forceReset = false) {
-        const savedState = localStorage.getItem('pokerMasterStateV18');
+        const savedState = localStorage.getItem('pokerMasterStateV19');
         if (savedState && !forceReset) {
             state = JSON.parse(savedState);
-            // Garantir que a estrutura de dados está correta após a atualização
-            state.players.forEach(p => {
-                p.chips = p.chips || {};
-                p.roundBet = p.roundBet || { ...initialRoundBet };
-                if (p.chips.green || p.chips.red) {
-                    p.chips.greenRed = (p.chips.greenRed || 0) + (p.chips.green || 0) + (p.chips.red || 0);
-                    delete p.chips.green;
-                    delete p.chips.red;
-                }
-            });
-            state.pot = state.pot || { ...initialPot };
-            if (state.pot.green || state.pot.red) {
-                state.pot.greenRed = (state.pot.greenRed || 0) + (state.pot.green || 0) + (state.pot.red || 0);
-                delete state.pot.green;
-                delete state.pot.red;
-            }
-
-            if (state.timer.isRunning && state.timer.endTime) {
-                const now = Date.now();
-                const newTime = Math.round((state.timer.endTime - now) / 1000);
-                if (newTime <= 0) {
-                    let timePassed = (now - state.timer.endTime) / 1000;
-                    while(timePassed > 0 && state.timer.round < BLIND_LEVELS.length - 1) {
-                        levelUp();
-                        timePassed -= state.timer.duration * 60;
-                    }
-                    state.timer.time = Math.max(0, state.timer.time + timePassed);
-                } else {
-                    state.timer.time = newTime;
-                }
-            }
         } else {
-            // Se não houver estado salvo ou se for um reset forçado
             state = {
-                players: [], // Começa com jogadores vazios
-                pot: { ...initialPot },
+                players: [],
+                potValue: 0,
                 activePlayerId: null,
-                currentBet: {},
-                manageChips: {},
+                currentBetValue: 0,
+                manageChangeValue: 0,
                 timer: { round: 0, time: 15 * 60, isRunning: false, duration: 15, endTime: null }
             };
-            // Adiciona jogadores padrão apenas na primeira vez que o app é carregado
-            if (!savedState) {
+            if (!forceReset) {
                 for (let i = 1; i <= 6; i++) {
                     state.players.push({ 
-                        id: i, name: `Jogador ${i}`, chips: { ...INITIAL_CHIPS }, 
-                        roundBet: { ...initialRoundBet }, selectedForPot: false 
+                        id: i, name: `Jogador ${i}`, stack: INITIAL_STACK, 
+                        roundBetValue: 0, selectedForPot: false 
                     });
                 }
             }
         }
         renderAll();
-        if (state.timer.isRunning) {
+        if (state.timer?.isRunning) {
             timerInterval = setInterval(tick, 1000);
         }
     }
