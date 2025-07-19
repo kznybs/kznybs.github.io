@@ -87,7 +87,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function renderHomeScreen() {
-        const rankedPlayers = [...state.players].sort((a, b) => a.stack - b.stack);
+        const rankedPlayers = [...state.players].sort((a, b) => b.stack - a.stack);
         const playerListEl = document.getElementById('player-list');
         playerListEl.innerHTML = '';
         rankedPlayers.forEach((player, index) => {
@@ -132,9 +132,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function renderBetScreen(playerId) {
         state.activePlayerId = playerId;
-        state.currentBetValue = 0;
         const player = state.players.find(p => p.id === playerId);
         if (!player) return;
+        state.editableBetValue = player.roundBetValue; 
         document.getElementById('bet-player-name').textContent = player.name;
         renderBetVisuals(playerId);
         switchScreen('bet');
@@ -150,14 +150,15 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('bet-screen-round-num').textContent = state.timer.round + 1;
         document.getElementById('bet-screen-blinds-display').textContent = currentLevel ? `${currentLevel.small}/${currentLevel.big}` : 'FIM';
 
-        const stackAfterBet = player.stack - player.roundBetValue - state.currentBetValue;
+        const stackAfterBet = player.stack - state.editableBetValue;
         document.getElementById('bet-player-stack').textContent = stackAfterBet.toLocaleString('pt-BR');
-        document.getElementById('bet-current-value').textContent = (player.roundBetValue + state.currentBetValue).toLocaleString('pt-BR');
+        document.getElementById('bet-current-value').textContent = state.editableBetValue.toLocaleString('pt-BR');
 
         const visualizerEl = document.getElementById('bet-stack-visualizer');
         visualizerEl.innerHTML = '';
-        const chipsToVisualize = valueToChips(player.roundBetValue + state.currentBetValue);
+        const chipsToVisualize = valueToChips(state.editableBetValue);
         
+        // CORREÇÃO: Mostra uma ficha estática para cada tipo na aposta.
         Object.keys(chipsToVisualize).forEach(type => {
             const img = document.createElement('img');
             img.src = CHIP_TYPES[type].imgSrc;
@@ -205,10 +206,11 @@ document.addEventListener('DOMContentLoaded', () => {
         
         const visualizerEl = document.getElementById('manage-stack-visualizer');
         visualizerEl.innerHTML = '';
-        const currentStack = player.stack + state.manageChangeValue;
-
+        const currentStackValue = player.stack + state.manageChangeValue;
+        
+        // CORREÇÃO: Mostra uma ficha estática para cada tipo que o jogador possui.
         Object.entries(CHIP_TYPES).forEach(([type, config]) => {
-            if (currentStack >= config.value) {
+            if (currentStackValue >= config.value) {
                 const img = document.createElement('img');
                 img.src = config.imgSrc;
                 img.className = 'chip-img';
@@ -217,7 +219,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
         
-        document.getElementById('manage-total-value').textContent = currentStack.toLocaleString('pt-BR');
+        document.getElementById('manage-total-value').textContent = currentStackValue.toLocaleString('pt-BR');
         document.getElementById('manage-change-value').textContent = `${state.manageChangeValue >= 0 ? '+' : ''}${state.manageChangeValue.toLocaleString('pt-BR')}`;
     }
 
@@ -413,8 +415,8 @@ document.addEventListener('DOMContentLoaded', () => {
             const type = target.dataset.chipType;
             const player = state.players.find(p => p.id === state.activePlayerId);
             const chipValue = CHIP_TYPES[type].value;
-            if (player.stack >= player.roundBetValue + state.currentBetValue + chipValue) {
-                state.currentBetValue += chipValue;
+            if (player.stack >= state.editableBetValue + chipValue) {
+                state.editableBetValue += chipValue;
                 renderBetVisuals(state.activePlayerId);
             }
             return;
@@ -422,17 +424,15 @@ document.addEventListener('DOMContentLoaded', () => {
         if (target.closest('#bet-stack-visualizer .chip-img')) {
             const type = target.dataset.chipType;
             const chipValue = CHIP_TYPES[type].value;
-            if (state.currentBetValue + player.roundBetValue >= chipValue) {
-                 state.currentBetValue -= chipValue;
-                 if (state.currentBetValue < 0) state.currentBetValue = 0; // Prevent negative values
+            if (state.editableBetValue >= chipValue) {
+                 state.editableBetValue -= chipValue;
                  renderBetVisuals(state.activePlayerId);
             }
             return;
         }
         if (target.closest('#bet-confirm-btn')) {
             const player = state.players.find(p => p.id === state.activePlayerId);
-            player.roundBetValue += state.currentBetValue;
-            state.currentBetValue = 0;
+            player.roundBetValue = state.editableBetValue;
             renderAll(); 
             renderBetScreen(getNextPlayerId(state.activePlayerId));
             return;
@@ -531,7 +531,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 players: [],
                 potValue: 0,
                 activePlayerId: null,
-                currentBetValue: 0,
+                editableBetValue: 0,
                 manageChangeValue: 0,
                 timer: { round: 0, time: 15 * 60, isRunning: false, duration: 15, endTime: null }
             };
