@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Agenda da Alice</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* Estilo focado em mobile-first */
+        body {
+            font-family: 'Inter', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+        /* Transições suaves */
+        body, .bg-transition {
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+        .progress-bar-inner {
+            transition: width 1.5s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.5s ease;
+        }
+        /* Animações para o Modal */
+        .modal-enter {
+            animation: modal-in 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+        }
+        .modal-leave {
+            animation: modal-out 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+        }
+        @keyframes modal-in {
+            from { opacity: 0; transform: translateY(30px) scale(0.95); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        @keyframes modal-out {
+            from { opacity: 1; transform: translateY(0) scale(1); }
+            to { opacity: 0; transform: translateY(30px) scale(0.95); }
+        }
+        /* Ícones de tema */
+        #theme-toggle-sun-icon, .dark #theme-toggle-moon-icon { display: block; }
+        #theme-toggle-moon-icon, .dark #theme-toggle-sun-icon { display: none; }
+    </style>
+</head>
+<body class="bg-gray-50 dark:bg-gray-900">
+
+    <div class="relative min-h-screen">
+        <!-- Cabeçalho Principal -->
+        <header class="p-5 flex justify-between items-center sticky top-0 bg-gray-50/80 dark:bg-gray-900/80 backdrop-blur-sm z-10">
+            <div>
+                <h1 class="text-2xl font-bold text-gray-800 dark:text-white">Agenda da Alice</h1>
+                <p id="greeting" class="text-sm text-gray-500 dark:text-gray-400">O que temos para hoje?</p>
+            </div>
+            <button id="theme-toggle" type="button" class="text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 focus:outline-none rounded-lg text-sm p-2.5">
+                <svg id="theme-toggle-sun-icon" class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 5.05A1 1 0 003.636 6.464l.707.707a1 1 0 001.414-1.414l-.707-.707zM3 11a1 1 0 100-2H2a1 1 0 100 2h1z"></path></svg>
+                <svg id="theme-toggle-moon-icon" class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path></svg>
+            </button>
+        </header>
+
+        <!-- Lista de Tarefas -->
+        <main class="px-5 pt-4 pb-28">
+            <div id="task-list" class="space-y-4">
+                <!-- Cards de tarefas são inseridos aqui -->
+            </div>
+            <div id="no-tasks-message" class="text-center py-16 px-6 hidden">
+                <img src="https://placehold.co/120x120/E2E8F0/A0AEC0?text=:)&font=inter" class="mx-auto rounded-full mb-4 opacity-70" alt="Ícone de rosto sorrindo">
+                <h3 class="text-lg font-semibold text-gray-700 dark:text-gray-300">Tudo em ordem!</h3>
+                <p class="text-gray-500 dark:text-gray-400 max-w-xs mx-auto">Nenhuma tarefa por aqui. Adicione uma nova clicando no botão '+' abaixo.</p>
+            </div>
+        </main>
+
+        <!-- Botão Flutuante para Adicionar Tarefa -->
+        <button id="add-task-btn" class="fixed bottom-6 right-6 bg-blue-600 hover:bg-blue-700 text-white font-bold w-14 h-14 rounded-full flex items-center justify-center shadow-lg transform hover:scale-110 transition-transform">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+            </svg>
+        </button>
+    </div>
+
+    <!-- Modal para Adicionar/Editar Tarefa -->
+    <div id="task-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 hidden">
+        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl w-full max-w-md mx-auto modal-content">
+            <form id="task-form" class="p-5">
+                <h2 id="modal-title" class="text-2xl font-bold mb-6 text-gray-800 dark:text-white">Nova Tarefa</h2>
+                <input type="hidden" id="task-id">
+                <div class="space-y-5">
+                    <div>
+                        <label for="task-description" class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">O que você precisa fazer?</label>
+                        <textarea id="task-description" placeholder="Ex: Comprar café e pão de queijo" class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 transition" required rows="3"></textarea>
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label for="start-date" class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">Início</label>
+                            <input type="date" id="start-date" class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 transition" required>
+                        </div>
+                        <div>
+                            <label for="end-date" class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">Prazo Final</label>
+                            <input type="date" id="end-date" class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 transition" required>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-8 flex justify-end space-x-3">
+                    <button type="button" id="cancel-btn" class="px-5 py-2.5 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600 rounded-lg transition">Cancelar</button>
+                    <button type="submit" class="px-5 py-2.5 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition">Salvar Tarefa</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        // --- Seletores de Elementos ---
+        const themeToggleButton = document.getElementById('theme-toggle');
+        const taskList = document.getElementById('task-list');
+        const noTasksMessage = document.getElementById('no-tasks-message');
+        const addTaskBtn = document.getElementById('add-task-btn');
+        const taskModal = document.getElementById('task-modal');
+        const taskForm = document.getElementById('task-form');
+        const cancelBtn = document.getElementById('cancel-btn');
+        const modalTitle = document.getElementById('modal-title');
+        const taskIdInput = document.getElementById('task-id');
+        const taskDescriptionInput = document.getElementById('task-description');
+        const startDateInput = document.getElementById('start-date');
+        const endDateInput = document.getElementById('end-date');
+
+        // --- LÓGICA DO TEMA ---
+        const applyTheme = () => {
+            if (localStorage.getItem('color-theme') === 'dark' || (!('color-theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                document.documentElement.classList.add('dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+            }
+        };
+        themeToggleButton.addEventListener('click', () => {
+            document.documentElement.classList.toggle('dark');
+            localStorage.setItem('color-theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
+        });
+
+        // --- LÓGICA DO MODAL ---
+        const openModal = () => {
+            taskModal.classList.remove('hidden');
+            taskModal.querySelector('.modal-content').classList.remove('modal-leave');
+            taskModal.querySelector('.modal-content').classList.add('modal-enter');
+        };
+        const closeModal = () => {
+            taskModal.querySelector('.modal-content').classList.remove('modal-enter');
+            taskModal.querySelector('.modal-content').classList.add('modal-leave');
+            setTimeout(() => taskModal.classList.add('hidden'), 300);
+        };
+
+        addTaskBtn.addEventListener('click', () => {
+            taskForm.reset();
+            taskIdInput.value = '';
+            modalTitle.textContent = 'Nova Tarefa';
+            startDateInput.disabled = false;
+            endDateInput.disabled = false;
+            openModal();
+        });
+        cancelBtn.addEventListener('click', closeModal);
+        taskModal.addEventListener('click', (e) => {
+            if (e.target === taskModal) closeModal();
+        });
+
+        // --- LÓGICA DAS TAREFAS ---
+        const getTasks = () => JSON.parse(localStorage.getItem('tasks')) || [];
+        const saveTasks = (tasks) => localStorage.setItem('tasks', JSON.stringify(tasks));
+
+        const getProgress = (startDateStr, endDateStr) => {
+            const now = new Date().getTime();
+            // Considera o início do dia para a data de início e o fim do dia para o prazo final
+            const startDate = new Date(`${startDateStr}T00:00:00`).getTime();
+            const endDate = new Date(`${endDateStr}T23:59:59`).getTime();
+
+            const isOverdue = now > endDate;
+            const totalDuration = Math.max(1, endDate - startDate);
+            const timeElapsed = now - startDate;
+            const percentage = Math.min(100, Math.max(0, (timeElapsed / totalDuration) * 100));
+            
+            let colorClass = 'bg-green-500';
+            if (isOverdue || percentage >= 100) colorClass = 'bg-red-500';
+            else if (percentage >= 75) colorClass = 'bg-yellow-500';
+            
+            return { percentage: isOverdue ? 100 : percentage, colorClass, isOverdue };
+        };
+
+        const formatDate = (dateStr) => {
+            const date = new Date(`${dateStr}T00:00:00`);
+            return date.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' });
+        };
+
+        const renderTasks = () => {
+            const tasks = getTasks();
+            taskList.innerHTML = '';
+            noTasksMessage.classList.toggle('hidden', tasks.length > 0);
+
+            tasks.forEach(task => {
+                const { percentage, colorClass, isOverdue } = getProgress(task.startDate, task.endDate);
+                const card = document.createElement('div');
+                // Adicionada a classe 'task-item' para a atualização em tempo real
+                card.className = 'task-item bg-white dark:bg-gray-800 rounded-xl shadow-md p-4 space-y-3 bg-transition';
+                card.dataset.id = task.id;
+                card.dataset.startDate = task.startDate;
+                card.dataset.endDate = task.endDate;
+
+                let deadlineText = `Prazo: ${formatDate(task.endDate)}`;
+                let deadlineColor = 'text-gray-500 dark:text-gray-400';
+                if (isOverdue) {
+                    deadlineText = `Atrasada! Prazo era ${formatDate(task.endDate)}`;
+                    deadlineColor = 'text-red-500 font-semibold';
+                }
+
+                card.innerHTML = `
+                    <div class="flex justify-between items-start">
+                        <p class="font-semibold text-gray-800 dark:text-gray-100 break-words pr-2">${task.description}</p>
+                        <div class="flex-shrink-0 flex items-center">
+                            <button class="edit-btn p-2 text-gray-400 hover:text-blue-500 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.5L16.732 3.732z"></path></svg>
+                            </button>
+                             <button class="delete-btn p-2 text-gray-400 hover:text-red-500 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                            </button>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                            <div class="progress-bar-inner h-2 rounded-full ${colorClass}" style="width: ${percentage}%"></div>
+                        </div>
+                        <div class="flex justify-between text-xs mt-1.5">
+                            <span class="text-gray-500 dark:text-gray-400">Início: ${formatDate(task.startDate)}</span>
+                            <span class="${deadlineColor}">${deadlineText}</span>
+                        </div>
+                    </div>
+                `;
+                taskList.appendChild(card);
+            });
+        };
+        
+        // Função para atualizar apenas as barras de progresso
+        const updateProgressBars = () => {
+            document.querySelectorAll('.task-item').forEach(card => {
+                const { percentage, colorClass } = getProgress(card.dataset.startDate, card.dataset.endDate);
+                const progressBar = card.querySelector('.progress-bar-inner');
+                if (progressBar) {
+                    progressBar.style.width = `${percentage}%`;
+                    progressBar.classList.remove('bg-green-500', 'bg-yellow-500', 'bg-red-500');
+                    progressBar.classList.add(colorClass);
+                }
+            });
+        };
+
+        taskForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const id = taskIdInput.value;
+            const description = taskDescriptionInput.value.trim();
+            const startDate = startDateInput.value;
+            const endDate = endDateInput.value;
+
+            if (!description || !startDate || !endDate) return alert('Por favor, preencha todos os campos.');
+            if (new Date(startDate) > new Date(endDate)) return alert('A data de início não pode ser posterior ao prazo final.');
+
+            let tasks = getTasks();
+            if (id) { // Editando
+                tasks = tasks.map(task => task.id == id ? { ...task, description } : task);
+            } else { // Criando
+                tasks.push({ id: Date.now(), description, startDate, endDate });
+            }
+            saveTasks(tasks);
+            renderTasks();
+            closeModal();
+        });
+
+        taskList.addEventListener('click', (e) => {
+            const editBtn = e.target.closest('.edit-btn');
+            const deleteBtn = e.target.closest('.delete-btn');
+            const card = e.target.closest('.task-item');
+            if (!card) return;
+            const taskId = card.dataset.id;
+            const tasks = getTasks();
+            const task = tasks.find(t => t.id == taskId);
+
+            if (editBtn) {
+                modalTitle.textContent = 'Editar Tarefa';
+                taskIdInput.value = task.id;
+                taskDescriptionInput.value = task.description;
+                startDateInput.value = task.startDate;
+                endDateInput.value = task.endDate;
+                startDateInput.disabled = true;
+                endDateInput.disabled = true;
+                openModal();
+            }
+
+            if (deleteBtn) {
+                if (confirm('Tem certeza que deseja excluir esta tarefa?')) {
+                    const updatedTasks = tasks.filter(t => t.id != taskId);
+                    saveTasks(updatedTasks);
+                    renderTasks();
+                }
+            }
+        });
+
+        // --- INICIALIZAÇÃO ---
+        applyTheme();
+        renderTasks();
+        // Atualiza as barras a cada 2 segundos para uma animação fluida
+        setInterval(updateProgressBars, 2000);
+    });
+    </script>
+</body>
+</html>
