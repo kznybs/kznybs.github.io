@@ -50,7 +50,7 @@
         <header class="p-5 flex justify-between items-center sticky top-0 bg-gray-50/80 dark:bg-gray-900/80 backdrop-blur-sm z-10">
             <div>
                 <h1 class="text-2xl font-bold text-gray-800 dark:text-white">Agenda da Alice</h1>
-                <p id="greeting" class="text-sm text-gray-500 dark:text-gray-400">O que temos para hoje?</p>
+                <p id="greeting" class="text-sm text-gray-500 dark:text-gray-400">Carregando uma frase especial...</p>
             </div>
             <button id="theme-toggle" type="button" class="text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 focus:outline-none rounded-lg text-sm p-2.5">
                 <svg id="theme-toggle-sun-icon" class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 5.05A1 1 0 003.636 6.464l.707.707a1 1 0 001.414-1.414l-.707-.707zM3 11a1 1 0 100-2H2a1 1 0 100 2h1z"></path></svg>
@@ -112,6 +112,7 @@
     document.addEventListener('DOMContentLoaded', () => {
         // --- Seletores de Elementos ---
         const themeToggleButton = document.getElementById('theme-toggle');
+        const greetingElement = document.getElementById('greeting');
         const taskList = document.getElementById('task-list');
         const noTasksMessage = document.getElementById('no-tasks-message');
         const addTaskBtn = document.getElementById('add-task-btn');
@@ -123,6 +124,25 @@
         const taskDescriptionInput = document.getElementById('task-description');
         const startDateInput = document.getElementById('start-date');
         const endDateInput = document.getElementById('end-date');
+
+        // --- LÓGICA DAS FRASES ---
+        const setGreeting = () => {
+            const hour = new Date().getHours();
+            const greetings = {
+                morning: ["Um novo dia, novas conquistas!", "Bom dia! Que seu dia seja produtivo."],
+                afternoon: ["Continue com o ótimo trabalho!", "A tarde é sua para brilhar."],
+                night: ["Finalizando o dia com sucesso!", "Bom descanso, você merece."]
+            };
+            let phrase;
+            if (hour >= 5 && hour < 12) {
+                phrase = greetings.morning[Math.floor(Math.random() * greetings.morning.length)];
+            } else if (hour >= 12 && hour < 18) {
+                phrase = greetings.afternoon[Math.floor(Math.random() * greetings.afternoon.length)];
+            } else {
+                phrase = greetings.night[Math.floor(Math.random() * greetings.night.length)];
+            }
+            greetingElement.textContent = phrase;
+        };
 
         // --- LÓGICA DO TEMA ---
         const applyTheme = () => {
@@ -168,19 +188,15 @@
 
         const getProgress = (startDateStr, endDateStr) => {
             const now = new Date().getTime();
-            // Considera o início do dia para a data de início e o fim do dia para o prazo final
             const startDate = new Date(`${startDateStr}T00:00:00`).getTime();
             const endDate = new Date(`${endDateStr}T23:59:59`).getTime();
-
             const isOverdue = now > endDate;
             const totalDuration = Math.max(1, endDate - startDate);
             const timeElapsed = now - startDate;
             const percentage = Math.min(100, Math.max(0, (timeElapsed / totalDuration) * 100));
-            
             let colorClass = 'bg-green-500';
             if (isOverdue || percentage >= 100) colorClass = 'bg-red-500';
             else if (percentage >= 75) colorClass = 'bg-yellow-500';
-            
             return { percentage: isOverdue ? 100 : percentage, colorClass, isOverdue };
         };
 
@@ -197,19 +213,16 @@
             tasks.forEach(task => {
                 const { percentage, colorClass, isOverdue } = getProgress(task.startDate, task.endDate);
                 const card = document.createElement('div');
-                // Adicionada a classe 'task-item' para a atualização em tempo real
                 card.className = 'task-item bg-white dark:bg-gray-800 rounded-xl shadow-md p-4 space-y-3 bg-transition';
                 card.dataset.id = task.id;
                 card.dataset.startDate = task.startDate;
                 card.dataset.endDate = task.endDate;
-
                 let deadlineText = `Prazo: ${formatDate(task.endDate)}`;
                 let deadlineColor = 'text-gray-500 dark:text-gray-400';
                 if (isOverdue) {
                     deadlineText = `Atrasada! Prazo era ${formatDate(task.endDate)}`;
                     deadlineColor = 'text-red-500 font-semibold';
                 }
-
                 card.innerHTML = `
                     <div class="flex justify-between items-start">
                         <p class="font-semibold text-gray-800 dark:text-gray-100 break-words pr-2">${task.description}</p>
@@ -236,7 +249,6 @@
             });
         };
         
-        // Função para atualizar apenas as barras de progresso
         const updateProgressBars = () => {
             document.querySelectorAll('.task-item').forEach(card => {
                 const { percentage, colorClass } = getProgress(card.dataset.startDate, card.dataset.endDate);
@@ -255,14 +267,12 @@
             const description = taskDescriptionInput.value.trim();
             const startDate = startDateInput.value;
             const endDate = endDateInput.value;
-
             if (!description || !startDate || !endDate) return alert('Por favor, preencha todos os campos.');
             if (new Date(startDate) > new Date(endDate)) return alert('A data de início não pode ser posterior ao prazo final.');
-
             let tasks = getTasks();
-            if (id) { // Editando
-                tasks = tasks.map(task => task.id == id ? { ...task, description } : task);
-            } else { // Criando
+            if (id) {
+                tasks = tasks.map(task => task.id == id ? { ...task, description, startDate, endDate } : task);
+            } else {
                 tasks.push({ id: Date.now(), description, startDate, endDate });
             }
             saveTasks(tasks);
@@ -278,31 +288,27 @@
             const taskId = card.dataset.id;
             const tasks = getTasks();
             const task = tasks.find(t => t.id == taskId);
-
             if (editBtn) {
                 modalTitle.textContent = 'Editar Tarefa';
                 taskIdInput.value = task.id;
                 taskDescriptionInput.value = task.description;
                 startDateInput.value = task.startDate;
                 endDateInput.value = task.endDate;
-                startDateInput.disabled = true;
-                endDateInput.disabled = true;
+                startDateInput.disabled = false;
+                endDateInput.disabled = false;
                 openModal();
             }
-
             if (deleteBtn) {
-                if (confirm('Tem certeza que deseja excluir esta tarefa?')) {
-                    const updatedTasks = tasks.filter(t => t.id != taskId);
-                    saveTasks(updatedTasks);
-                    renderTasks();
-                }
+                const updatedTasks = tasks.filter(t => t.id != taskId);
+                saveTasks(updatedTasks);
+                renderTasks();
             }
         });
 
         // --- INICIALIZAÇÃO ---
         applyTheme();
+        setGreeting();
         renderTasks();
-        // Atualiza as barras a cada 2 segundos para uma animação fluida
         setInterval(updateProgressBars, 2000);
     });
     </script>
