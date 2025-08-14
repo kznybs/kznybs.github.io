@@ -89,14 +89,15 @@
                         <label for="task-description" class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">O que você precisa fazer?</label>
                         <textarea id="task-description" placeholder="Ex: Comprar café e pão de queijo" class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 transition" required rows="3"></textarea>
                     </div>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div>
-                            <label for="start-date" class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">Início</label>
-                            <input type="date" id="start-date" class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 transition" required>
-                        </div>
-                        <div>
-                            <label for="end-date" class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">Prazo Final</label>
+                    <div>
+                        <label for="start-date" class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">Data de Início</label>
+                        <input type="date" id="start-date" class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 transition" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">Prazo Final</label>
+                        <div class="grid grid-cols-2 gap-4">
                             <input type="date" id="end-date" class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 transition" required>
+                            <input type="time" id="end-time" class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 transition" required>
                         </div>
                     </div>
                 </div>
@@ -124,6 +125,7 @@
         const taskDescriptionInput = document.getElementById('task-description');
         const startDateInput = document.getElementById('start-date');
         const endDateInput = document.getElementById('end-date');
+        const endTimeInput = document.getElementById('end-time');
 
         // --- LÓGICA DAS FRASES ---
         const setGreeting = () => {
@@ -134,13 +136,9 @@
                 night: ["Finalizando o dia com sucesso!", "Bom descanso, você merece."]
             };
             let phrase;
-            if (hour >= 5 && hour < 12) {
-                phrase = greetings.morning[Math.floor(Math.random() * greetings.morning.length)];
-            } else if (hour >= 12 && hour < 18) {
-                phrase = greetings.afternoon[Math.floor(Math.random() * greetings.afternoon.length)];
-            } else {
-                phrase = greetings.night[Math.floor(Math.random() * greetings.night.length)];
-            }
+            if (hour >= 5 && hour < 12) phrase = greetings.morning[Math.floor(Math.random() * greetings.morning.length)];
+            else if (hour >= 12 && hour < 18) phrase = greetings.afternoon[Math.floor(Math.random() * greetings.afternoon.length)];
+            else phrase = greetings.night[Math.floor(Math.random() * greetings.night.length)];
             greetingElement.textContent = phrase;
         };
 
@@ -173,8 +171,6 @@
             taskForm.reset();
             taskIdInput.value = '';
             modalTitle.textContent = 'Nova Tarefa';
-            startDateInput.disabled = false;
-            endDateInput.disabled = false;
             openModal();
         });
         cancelBtn.addEventListener('click', closeModal);
@@ -186,10 +182,11 @@
         const getTasks = () => JSON.parse(localStorage.getItem('tasks')) || [];
         const saveTasks = (tasks) => localStorage.setItem('tasks', JSON.stringify(tasks));
 
-        const getProgress = (startDateStr, endDateStr) => {
+        const getProgress = (startDateStr, endDateStr, endTimeStr) => {
+            if (!endTimeStr) return { percentage: 0, colorClass: 'bg-green-500', isOverdue: false };
             const now = new Date().getTime();
             const startDate = new Date(`${startDateStr}T00:00:00`).getTime();
-            const endDate = new Date(`${endDateStr}T23:59:59`).getTime();
+            const endDate = new Date(`${endDateStr}T${endTimeStr}`).getTime();
             const isOverdue = now > endDate;
             const totalDuration = Math.max(1, endDate - startDate);
             const timeElapsed = now - startDate;
@@ -211,16 +208,17 @@
             noTasksMessage.classList.toggle('hidden', tasks.length > 0);
 
             tasks.forEach(task => {
-                const { percentage, colorClass, isOverdue } = getProgress(task.startDate, task.endDate);
+                const { percentage, colorClass, isOverdue } = getProgress(task.startDate, task.endDate, task.endTime);
                 const card = document.createElement('div');
                 card.className = 'task-item bg-white dark:bg-gray-800 rounded-xl shadow-md p-4 space-y-3 bg-transition';
                 card.dataset.id = task.id;
                 card.dataset.startDate = task.startDate;
                 card.dataset.endDate = task.endDate;
-                let deadlineText = `Prazo: ${formatDate(task.endDate)}`;
+                card.dataset.endTime = task.endTime;
+                let deadlineText = `Prazo: ${formatDate(task.endDate)} às ${task.endTime}`;
                 let deadlineColor = 'text-gray-500 dark:text-gray-400';
                 if (isOverdue) {
-                    deadlineText = `Atrasada! Prazo era ${formatDate(task.endDate)}`;
+                    deadlineText = `Atrasada! Prazo era ${formatDate(task.endDate)} às ${task.endTime}`;
                     deadlineColor = 'text-red-500 font-semibold';
                 }
                 card.innerHTML = `
@@ -251,7 +249,7 @@
         
         const updateProgressBars = () => {
             document.querySelectorAll('.task-item').forEach(card => {
-                const { percentage, colorClass } = getProgress(card.dataset.startDate, card.dataset.endDate);
+                const { percentage, colorClass } = getProgress(card.dataset.startDate, card.dataset.endDate, card.dataset.endTime);
                 const progressBar = card.querySelector('.progress-bar-inner');
                 if (progressBar) {
                     progressBar.style.width = `${percentage}%`;
@@ -267,13 +265,14 @@
             const description = taskDescriptionInput.value.trim();
             const startDate = startDateInput.value;
             const endDate = endDateInput.value;
-            if (!description || !startDate || !endDate) return alert('Por favor, preencha todos os campos.');
-            if (new Date(startDate) > new Date(endDate)) return alert('A data de início não pode ser posterior ao prazo final.');
+            const endTime = endTimeInput.value;
+            if (!description || !startDate || !endDate || !endTime) return alert('Por favor, preencha todos os campos, incluindo a hora final.');
+            if (new Date(`${startDate}T00:00`) > new Date(`${endDate}T${endTime}`)) return alert('A data/hora de início não pode ser posterior ao prazo final.');
             let tasks = getTasks();
             if (id) {
-                tasks = tasks.map(task => task.id == id ? { ...task, description, startDate, endDate } : task);
+                tasks = tasks.map(task => task.id == id ? { ...task, description, startDate, endDate, endTime } : task);
             } else {
-                tasks.push({ id: Date.now(), description, startDate, endDate });
+                tasks.push({ id: Date.now(), description, startDate, endDate, endTime });
             }
             saveTasks(tasks);
             renderTasks();
@@ -294,8 +293,7 @@
                 taskDescriptionInput.value = task.description;
                 startDateInput.value = task.startDate;
                 endDateInput.value = task.endDate;
-                startDateInput.disabled = false;
-                endDateInput.disabled = false;
+                endTimeInput.value = task.endTime;
                 openModal();
             }
             if (deleteBtn) {
