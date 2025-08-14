@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agenda Administrativa Híbrida</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .transition-all {
+            transition: all 0.3s ease-in-out;
+        }
+        .modal-enter { animation: modal-in 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards; }
+        .modal-leave { animation: modal-out 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards; }
+        @keyframes modal-in {
+            from { opacity: 0; transform: translateY(30px) scale(0.95); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        @keyframes modal-out {
+            from { opacity: 1; transform: translateY(0) scale(1); }
+            to { opacity: 0; transform: translateY(30px) scale(0.95); }
+        }
+        #theme-toggle-sun-icon, .dark #theme-toggle-moon-icon { display: block; }
+        #theme-toggle-moon-icon, .dark #theme-toggle-sun-icon { display: none; }
+        .sidebar-link-active {
+            background-color: #059669; /* green-600 */
+            color: white;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+        }
+    </style>
+</head>
+<body class="bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200">
+
+    <div class="flex h-screen">
+        <!-- Sidebar -->
+        <aside class="w-64 bg-gray-800 dark:bg-gray-900 text-white flex-col hidden sm:flex">
+            <div class="h-20 flex items-center justify-center bg-gray-900/50">
+                <svg class="w-8 h-8 text-green-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0h18M-4.5 12h22.5" /></svg>
+                <h1 class="text-xl font-bold ml-2">Agenda ERP</h1>
+            </div>
+            <nav class="flex-1 px-4 py-6 space-y-2">
+                <a href="#" class="flex items-center px-4 py-2.5 rounded-lg transition-all sidebar-link-active">
+                    <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z" /></svg>
+                    <span class="ml-4 font-medium">Minhas Tarefas</span>
+                </a>
+                <a href="#" class="flex items-center px-4 py-2.5 rounded-lg hover:bg-gray-700 transition-all text-gray-300">
+                    <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9.594 3.94c.09-.542.56-1.007 1.11-1.226.554-.22 1.197-.22 1.752 0 .549.219 1.016.684 1.11 1.226l.094.542c.063.375.313.686.645.87.074.04.147.083.22.127.324.196.72.257 1.075.124l.217-.065c.487-.147 1.002.056 1.353.448.35.393.462.95.295 1.428l-.13.288c-.095.21-.15.44-.15.682 0 .242.055.472.15.682l.13.288c.167.478.055 1.035-.295 1.428a1.023 1.023 0 01-1.353.448l-.217-.065a1.125 1.125 0 00-1.075.124c-.073.044-.146.087-.22.127-.332.184-.582.495-.645.87l-.094.542c-.09.542-.56 1.007-1.11 1.226-.554-.22-1.197-.22-1.752 0-.549-.219-1.016-.684-1.11-1.226l-.094-.542a1.125 1.125 0 00-.645-.87c-.074-.04-.147-.083-.22-.127a1.125 1.125 0 00-1.075-.124l-.217.065c-.487.147-1.002-.056-1.353-.448-.35-.393-.462-.95-.295-1.428l.13-.288c.095-.21.15-.44.15-.682 0-.242-.055-.472-.15-.682l-.13-.288c-.167-.478-.055-1.035.295-1.428.351-.393.866-.595 1.353-.448l.217.065c.355.133.75.072 1.075-.124.073-.044.146-.087-.22-.127.332-.184.582.495-.645-.87l.094.542zM12 15a3 3 0 100-6 3 3 0 000 6z" /></svg>
+                    <span class="ml-4 font-medium">Configurações</span>
+                </a>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <div class="flex-1 flex flex-col overflow-hidden">
+            <header class="h-20 bg-white dark:bg-gray-800/50 backdrop-blur-sm shadow-sm flex items-center justify-between px-6 flex-shrink-0">
+                <h2 class="text-2xl font-bold text-gray-800 dark:text-white">Minhas Tarefas</h2>
+                <div class="flex items-center space-x-4">
+                    <div id="cuiaba-clock" class="text-right"></div>
+                    <div class="w-px h-10 bg-gray-200 dark:bg-gray-700"></div>
+                    <button id="theme-toggle" type="button" class="text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 focus:outline-none rounded-lg text-sm p-2.5">
+                        <svg id="theme-toggle-sun-icon" class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"></svg>
+                        <svg id="theme-toggle-moon-icon" class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"></svg>
+                    </button>
+                    <img class="w-10 h-10 rounded-full object-cover" src="https://placehold.co/100x100/059669/FFFFFF?text=A" alt="Avatar do usuário">
+                </div>
+            </header>
+
+            <main class="flex-1 overflow-y-auto p-6 relative">
+                <div id="task-list" class="space-y-4"></div>
+                <div id="no-tasks-message" class="text-center py-16 px-6 hidden">
+                    <svg class="mx-auto h-16 w-16 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path vector-effect="non-scaling-stroke" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                    <h3 class="mt-2 text-lg font-semibold">Nenhuma tarefa encontrada</h3>
+                    <p class="mt-1 text-sm text-gray-500">Comece adicionando uma nova tarefa.</p>
+                </div>
+                <button id="add-task-btn" class="fixed bottom-8 right-8 bg-green-600 hover:bg-green-700 text-white font-bold w-14 h-14 rounded-full flex items-center justify-center shadow-lg transform hover:scale-110 transition-transform z-20">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" /></svg>
+                </button>
+            </main>
+        </div>
+    </div>
+
+    <!-- Modal -->
+    <div id="task-modal" class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4 z-50 hidden">
+        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl w-full max-w-lg mx-auto modal-content">
+            <form id="task-form" class="p-6">
+                <h2 id="modal-title" class="text-2xl font-bold mb-6">Nova Tarefa</h2>
+                <input type="hidden" id="task-id">
+                <div class="space-y-5">
+                    <div>
+                        <label for="task-description" class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">Descrição</label>
+                        <textarea id="task-description" placeholder="Ex: Preparar relatório de vendas" class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 rounded-lg focus:ring-2 focus:ring-green-500 transition" required rows="3"></textarea>
+                    </div>
+                    <div>
+                        <label for="attachment-type" class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">Tipo de Anexo</label>
+                        <select id="attachment-type" class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 rounded-lg focus:ring-2 focus:ring-green-500 transition">
+                            <option value="none">Nenhum</option>
+                            <option value="file">Arquivo PDF</option>
+                            <option value="url">Link da Web (URL)</option>
+                        </select>
+                    </div>
+                    <div id="file-input-container" class="hidden">
+                        <label for="task-file" class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">Anexar PDF</label>
+                        <input type="file" id="task-file" accept=".pdf" class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-green-50 dark:file:bg-green-900/50 file:text-green-700 dark:file:text-green-300 hover:file:bg-green-100 dark:hover:file:bg-green-900">
+                        <p id="file-info" class="text-xs text-gray-500 mt-1">Limite de 2MB. O arquivo é salvo no navegador.</p>
+                    </div>
+                    <div id="url-input-container" class="hidden">
+                        <label for="task-url" class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">URL do Link</label>
+                        <input type="url" id="task-url" placeholder="https://outlook.live.com/..." class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 rounded-lg focus:ring-2 focus:ring-green-500 transition">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">Prazo Final</label>
+                        <div class="grid grid-cols-2 gap-4">
+                            <input type="date" id="end-date" class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 rounded-lg focus:ring-2 focus:ring-green-500 transition" required>
+                            <input type="time" id="end-time" class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 rounded-lg focus:ring-2 focus:ring-green-500 transition" required>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-8 flex justify-end space-x-3">
+                    <button type="button" id="cancel-btn" class="px-5 py-2.5 text-sm font-medium rounded-lg transition">Cancelar</button>
+                    <button type="submit" class="px-5 py-2.5 text-sm font-medium text-white bg-green-600 hover:bg-green-700 rounded-lg transition">Salvar Tarefa</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        // --- Element Selectors ---
+        const themeToggleButton = document.getElementById('theme-toggle');
+        const clockElement = document.getElementById('cuiaba-clock');
+        const taskList = document.getElementById('task-list');
+        const noTasksMessage = document.getElementById('no-tasks-message');
+        const addTaskBtn = document.getElementById('add-task-btn');
+        const taskModal = document.getElementById('task-modal');
+        const taskForm = document.getElementById('task-form');
+        const cancelBtn = document.getElementById('cancel-btn');
+        const modalTitle = document.getElementById('modal-title');
+        const taskIdInput = document.getElementById('task-id');
+        const taskDescriptionInput = document.getElementById('task-description');
+        const attachmentTypeSelect = document.getElementById('attachment-type');
+        const fileInputContainer = document.getElementById('file-input-container');
+        const urlInputContainer = document.getElementById('url-input-container');
+        const taskFileInput = document.getElementById('task-file');
+        const fileInfo = document.getElementById('file-info');
+        const taskUrlInput = document.getElementById('task-url');
+        const endDateInput = document.getElementById('end-date');
+        const endTimeInput = document.getElementById('end-time');
+
+        const FILE_SIZE_LIMIT = 2 * 1024 * 1024; // 2MB
+        const DB_NAME = 'tasks-erp-hybrid';
+
+        // --- Clock Logic ---
+        const updateClock = () => {
+            const now = new Date();
+            const timeZone = 'America/Cuiaba';
+            const timeString = now.toLocaleTimeString('pt-BR', { timeZone, hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            const dateString = now.toLocaleDateString('pt-BR', { timeZone, weekday: 'long', month: 'long', day: 'numeric' });
+            clockElement.innerHTML = `<p class="font-semibold text-sm text-green-600 dark:text-green-400">${timeString}</p><p class="text-xs text-gray-500 dark:text-gray-400 capitalize">${dateString}</p>`;
+        };
+        setInterval(updateClock, 1000);
+        updateClock();
+
+        // --- Theme Logic ---
+        const applyTheme = () => {
+            if (localStorage.getItem('color-theme') === 'dark' || (!('color-theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                document.documentElement.classList.add('dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+            }
+            // Add icons
+            document.getElementById('theme-toggle-sun-icon').innerHTML = `<path d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 5.05A1 1 0 003.636 6.464l.707.707a1 1 0 001.414-1.414l-.707-.707zM3 11a1 1 0 100-2H2a1 1 0 100 2h1z"></path>`;
+            document.getElementById('theme-toggle-moon-icon').innerHTML = `<path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path>`;
+            cancelBtn.classList.add('bg-gray-100', 'dark:bg-gray-700', 'dark:text-gray-300', 'hover:bg-gray-200', 'dark:hover:bg-gray-600');
+        };
+        themeToggleButton.addEventListener('click', () => {
+            document.documentElement.classList.toggle('dark');
+            localStorage.setItem('color-theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
+        });
+
+        // --- Modal Logic ---
+        const openModal = () => {
+            taskModal.classList.remove('hidden');
+            taskModal.querySelector('.modal-content').classList.add('modal-enter');
+        };
+        const closeModal = () => {
+            taskModal.querySelector('.modal-content').classList.remove('modal-leave');
+            taskModal.querySelector('.modal-content').classList.add('modal-enter');
+            setTimeout(() => taskModal.classList.add('hidden'), 300);
+        };
+        
+        attachmentTypeSelect.addEventListener('change', (e) => {
+            fileInputContainer.classList.toggle('hidden', e.target.value !== 'file');
+            urlInputContainer.classList.toggle('hidden', e.target.value !== 'url');
+        });
+
+        addTaskBtn.addEventListener('click', () => {
+            taskForm.reset();
+            taskIdInput.value = '';
+            modalTitle.textContent = 'Nova Tarefa';
+            fileInfo.textContent = 'Limite de 2MB. O arquivo é salvo no navegador.';
+            fileInfo.classList.remove('text-red-500');
+            attachmentTypeSelect.value = 'none';
+            attachmentTypeSelect.dispatchEvent(new Event('change'));
+            const today = new Date().toISOString().split('T')[0];
+            endDateInput.value = today;
+            openModal();
+        });
+        cancelBtn.addEventListener('click', closeModal);
+        taskModal.addEventListener('click', (e) => { if (e.target === taskModal) closeModal(); });
+
+        // --- Task Logic ---
+        const getTasks = () => JSON.parse(localStorage.getItem(DB_NAME)) || [];
+        const saveTasks = (tasks) => localStorage.setItem(DB_NAME, JSON.stringify(tasks));
+
+        const renderTasks = () => {
+            const tasks = getTasks();
+            taskList.innerHTML = '';
+            noTasksMessage.classList.toggle('hidden', tasks.length > 0);
+            tasks.sort((a, b) => new Date(`${a.endDate}T${a.endTime}`) - new Date(`${b.endDate}T${b.endTime}`));
+
+            tasks.forEach(task => {
+                const isOverdue = new Date() > new Date(`${task.endDate}T${task.endTime}`);
+                const deadlineColor = isOverdue ? 'text-red-500 font-semibold' : 'text-gray-500 dark:text-gray-400';
+                const deadlineText = isOverdue ? `Atrasada! Prazo era ${new Date(task.endDate+'T00:00:00').toLocaleDateString('pt-BR')}` : `Prazo: ${new Date(task.endDate+'T00:00:00').toLocaleDateString('pt-BR')} às ${task.endTime}`;
+
+                const card = document.createElement('div');
+                card.className = 'task-item bg-white dark:bg-gray-800 rounded-xl shadow-md p-4 space-y-3 transition-all';
+                card.dataset.id = task.id;
+
+                let attachmentButton = '';
+                if (task.attachmentType === 'file' && task.fileData) {
+                    attachmentButton = `
+                        <button class="attachment-btn flex items-center gap-2 text-sm text-green-600 hover:text-green-800 dark:text-green-400 dark:hover:text-green-300 font-medium" data-type="file">
+                            <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M18.375 12.739l-7.693 7.693a4.5 4.5 0 01-6.364-6.364l10.94-10.94A3.375 3.375 0 1118.375 7.21l-4.242 4.242a1.125 1.125 0 01-1.59-1.59l4.242-4.242a3.375 3.375 0 014.773 4.773l-10.94 10.94a4.5 4.5 0 11-6.364-6.364l7.693-7.693a1.125 1.125 0 011.59 1.59z" /></svg>
+                            ${task.fileName}
+                        </button>`;
+                } else if (task.attachmentType === 'url' && task.url) {
+                    attachmentButton = `
+                        <a href="${task.url}" target="_blank" rel="noopener noreferrer" class="attachment-btn flex items-center gap-2 text-sm text-green-600 hover:text-green-800 dark:text-green-400 dark:hover:text-green-300 font-medium" data-type="url">
+                            <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244" /></svg>
+                            Abrir Link
+                        </a>`;
+                }
+
+                card.innerHTML = `
+                    <div class="flex justify-between items-start">
+                        <p class="font-semibold text-gray-800 dark:text-gray-100 break-words pr-2">${task.description}</p>
+                        <div class="flex-shrink-0 flex items-center">
+                            <button class="edit-btn p-2 text-gray-400 hover:text-blue-500 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition" title="Editar"></button>
+                            <button class="delete-btn p-2 text-gray-400 hover:text-red-500 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition" title="Excluir"></button>
+                        </div>
+                    </div>
+                    <div class="flex justify-between items-center text-sm pt-2 border-t border-gray-100 dark:border-gray-700">
+                         <span class="${deadlineColor}">${deadlineText}</span>
+                         ${attachmentButton}
+                    </div>
+                `;
+                card.querySelector('.edit-btn').innerHTML = `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.5L16.732 3.732z"></path></svg>`;
+                card.querySelector('.delete-btn').innerHTML = `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>`;
+                taskList.appendChild(card);
+            });
+        };
+        
+        taskForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const attachmentType = attachmentTypeSelect.value;
+            const taskData = {
+                id: taskIdInput.value || Date.now(),
+                description: taskDescriptionInput.value.trim(),
+                endDate: endDateInput.value,
+                endTime: endTimeInput.value,
+                attachmentType: attachmentType,
+                fileData: null, fileName: null, url: null
+            };
+
+            if (attachmentType === 'file') {
+                const file = taskFileInput.files[0];
+                const existingTask = getTasks().find(t => t.id == taskData.id);
+
+                if (file) {
+                    if (file.size > FILE_SIZE_LIMIT) {
+                        fileInfo.textContent = 'Arquivo muito grande! O limite é 2MB.';
+                        fileInfo.classList.add('text-red-500');
+                        return;
+                    }
+                    const reader = new FileReader();
+                    reader.onload = (event) => {
+                        taskData.fileData = event.target.result;
+                        taskData.fileName = file.name;
+                        saveTaskData(taskData);
+                    };
+                    reader.readAsDataURL(file);
+                } else if (existingTask && existingTask.attachmentType === 'file') {
+                    taskData.fileData = existingTask.fileData;
+                    taskData.fileName = existingTask.fileName;
+                    saveTaskData(taskData);
+                } else {
+                    saveTaskData(taskData);
+                }
+            } else if (attachmentType === 'url') {
+                taskData.url = taskUrlInput.value.trim();
+                saveTaskData(taskData);
+            } else {
+                saveTaskData(taskData);
+            }
+        });
+
+        function saveTaskData(taskData) {
+            let tasks = getTasks();
+            const existingTaskIndex = tasks.findIndex(t => t.id == taskData.id);
+            if (existingTaskIndex > -1) tasks[existingTaskIndex] = taskData;
+            else tasks.push(taskData);
+            
+            try {
+                saveTasks(tasks);
+                renderTasks();
+                closeModal();
+            } catch (error) {
+                if (error.name === 'QuotaExceededError') alert('Erro: Armazenamento cheio. Tente um arquivo menor.');
+                else alert('Ocorreu um erro ao salvar.');
+            }
+        }
+
+        function base64ToBlob(base64, contentType = '') {
+            const byteCharacters = atob(base64.split(',')[1]);
+            const byteArrays = [];
+            for (let offset = 0; offset < byteCharacters.length; offset += 512) {
+                const slice = byteCharacters.slice(offset, offset + 512);
+                const byteNumbers = new Array(slice.length);
+                for (let i = 0; i < slice.length; i++) byteNumbers[i] = slice.charCodeAt(i);
+                byteArrays.push(new Uint8Array(byteNumbers));
+            }
+            return new Blob(byteArrays, { type: contentType });
+        }
+
+        taskList.addEventListener('click', (e) => {
+            const card = e.target.closest('.task-item');
+            if (!card) return;
+            const taskId = card.dataset.id;
+            const tasks = getTasks();
+            const task = tasks.find(t => t.id == taskId);
+
+            if (e.target.closest('.edit-btn')) {
+                modalTitle.textContent = 'Editar Tarefa';
+                taskIdInput.value = task.id;
+                taskDescriptionInput.value = task.description;
+                endDateInput.value = task.endDate;
+                endTimeInput.value = task.endTime;
+                
+                attachmentTypeSelect.value = task.attachmentType || 'none';
+                taskUrlInput.value = task.url || '';
+                taskFileInput.value = '';
+                
+                fileInfo.textContent = task.fileName ? `Anexo atual: ${task.fileName}` : 'Limite de 2MB.';
+                fileInfo.classList.remove('text-red-500');
+                
+                attachmentTypeSelect.dispatchEvent(new Event('change'));
+                openModal();
+            }
+            if (e.target.closest('.delete-btn')) {
+                saveTasks(tasks.filter(t => t.id != taskId));
+                renderTasks();
+            }
+            if (e.target.closest('.attachment-btn[data-type="file"]')) {
+                if (task && task.fileData) {
+                    const blob = base64ToBlob(task.fileData, 'application/pdf');
+                    window.open(URL.createObjectURL(blob), '_blank');
+                }
+            }
+        });
+
+        // --- Initialization ---
+        applyTheme();
+        renderTasks();
+    });
+    </script>
+</body>
+</html>
