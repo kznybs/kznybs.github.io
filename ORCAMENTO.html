@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ERP - Controle de Lançamentos</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f1f5f9; /* slate-100 */
+        }
+        /* Animação de surgimento */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .fade-in {
+            animation: fadeIn 0.4s ease-out forwards;
+        }
+        /* Estilo para inputs e selects da tabela */
+        .table-input, .table-select {
+            width: 100%;
+            padding: 8px 10px;
+            border: 1px solid #cbd5e1; /* slate-300 */
+            border-radius: 6px;
+            background-color: white;
+            transition: border-color 0.2s, box-shadow 0.2s;
+            font-size: 14px;
+        }
+        .table-input:focus, .table-select:focus {
+            outline: none;
+            border-color: #4f46e5; /* indigo-600 */
+            box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.3);
+        }
+        /* Ajuste de largura mínima para colunas */
+        .col-categoria, .col-status { min-width: 220px; }
+        .col-servico { min-width: 250px; }
+        .col-nf { min-width: 150px; }
+        .col-valor { min-width: 160px; }
+        .col-acao { width: 60px; text-align: center; }
+
+        /* Estilos para Impressão */
+        @media print {
+            body {
+                background-color: white;
+            }
+            .no-print {
+                display: none !important;
+            }
+            .print-card {
+                box-shadow: none !important;
+                border: 1px solid #ccc !important;
+                margin-bottom: 20px !important;
+                page-break-inside: avoid;
+            }
+            .print-header {
+                display: block !important;
+                text-align: center;
+                margin-bottom: 40px;
+            }
+            .table-input, .table-select {
+                border: none;
+                background-color: transparent;
+                padding: 0;
+                -webkit-appearance: none;
+                -moz-appearance: none;
+                appearance: none;
+            }
+            select {
+                pointer-events: none;
+            }
+            input[type="text"], input[type="number"] {
+                pointer-events: none;
+            }
+        }
+        .print-header {
+            display: none;
+        }
+    </style>
+</head>
+<body class="text-slate-800">
+
+    <div id="app" class="min-h-screen">
+        <!-- Cabeçalho da Aplicação -->
+        <header class="bg-white shadow-md sticky top-0 z-10 no-print">
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-4">
+                <div class="flex flex-wrap justify-between items-center gap-4">
+                    <h1 class="text-2xl font-bold text-slate-700">Sistema de Controle de Lançamentos</h1>
+                    <div class="flex items-center gap-3 w-full sm:w-auto">
+                        <input type="text" id="input-novo-setor" placeholder="Nome do novo setor" class="flex-grow w-full sm:w-52 p-2 border border-slate-300 rounded-md focus:ring-2 focus:ring-indigo-500 transition">
+                        <button onclick="adicionarSetor()" class="bg-indigo-600 text-white font-semibold py-2 px-4 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition whitespace-nowrap">
+                            Adicionar Setor
+                        </button>
+                        <button onclick="window.print()" class="bg-slate-600 text-white font-semibold py-2 px-4 rounded-md hover:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-500 transition whitespace-nowrap">
+                            Imprimir Relatório
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Conteúdo Principal -->
+        <main class="container mx-auto p-4 sm:p-6 lg:p-8">
+            <div class="print-header">
+                <h1 class="text-3xl font-bold">Relatório de Lançamentos</h1>
+                <p class="text-sm text-slate-500">Gerado em: <span id="print-date"></span></p>
+            </div>
+            <div id="container-setores" class="space-y-10">
+                <!-- Setores são carregados aqui pelo JavaScript -->
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal de Confirmação de Exclusão -->
+    <div id="delete-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 hidden no-print">
+        <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-md text-center fade-in">
+            <h2 class="text-xl font-bold mb-4">Confirmar Exclusão</h2>
+            <p class="text-slate-600 mb-6">Você tem certeza que deseja excluir este setor e todos os seus lançamentos? Esta ação não pode ser desfeita.</p>
+            <div class="flex justify-center gap-4">
+                <button id="cancel-delete-btn" class="py-2 px-6 bg-slate-200 hover:bg-slate-300 rounded-md font-semibold transition">Cancelar</button>
+                <button id="confirm-delete-btn" class="py-2 px-6 bg-red-600 text-white hover:bg-red-700 rounded-md font-semibold transition">Excluir</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- LÓGICA DE PERSISTÊNCIA DE DADOS ---
+        function saveState() {
+            const setores = [];
+            document.querySelectorAll('.setor-card').forEach(setorCard => {
+                const nomeSetor = setorCard.querySelector('.setor-nome').textContent;
+                const setorId = setorCard.id;
+                const linhas = [];
+                setorCard.querySelectorAll('tbody tr').forEach(tr => {
+                    const linha = {
+                        categoria: tr.querySelector('.sel-categoria').value,
+                        servico: tr.querySelector('.inp-servico').value,
+                        nf: tr.querySelector('.inp-nf').value,
+                        valorNf: tr.querySelector('.inp-valor-nf').value,
+                        valorOrcado: tr.querySelector('.inp-valor-orcado').value,
+                        status: tr.querySelector('.sel-status').value,
+                    };
+                    linhas.push(linha);
+                });
+                setores.push({ id: setorId, nome: nomeSetor, linhas: linhas });
+            });
+            localStorage.setItem('erpData', JSON.stringify(setores));
+        }
+
+        function loadState() {
+            const data = JSON.parse(localStorage.getItem('erpData'));
+            if (data) {
+                data.forEach(setorData => {
+                    adicionarSetor(setorData.nome, setorData.id, setorData.linhas);
+                });
+            }
+        }
+
+        // --- LÓGICA DE MANIPULAÇÃO DA UI ---
+        function adicionarSetor(nome, id, linhasData = []) {
+            const inputSetor = document.getElementById('input-novo-setor');
+            const nomeSetor = nome || inputSetor.value.trim();
+
+            if (nomeSetor === '') {
+                alert('Por favor, digite o nome do setor.');
+                return;
+            }
+
+            const containerSetores = document.getElementById('container-setores');
+            const setorId = id || 'setor-' + Date.now();
+            const tbodyId = 'tbody-' + setorId;
+
+            const novoSetorHTML = `
+                <div id="${setorId}" class="setor-card bg-white rounded-xl shadow-lg border border-slate-200 fade-in print-card">
+                    <div class="p-4 border-b border-slate-200 flex justify-between items-center">
+                        <div class="flex items-center gap-3">
+                            <h3 class="text-xl font-bold text-slate-800 setor-nome">${nomeSetor}</h3>
+                            <button onclick="abrirModalConfirmacao('${setorId}')" class="text-slate-400 hover:text-red-500 transition no-print" title="Remover Setor">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
+                                    <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0z"/>
+                                    <path d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4zM2.5 3h11V2h-11z"/>
+                                </svg>
+                            </button>
+                        </div>
+                        <button onclick="adicionarLinha('${tbodyId}')" class="bg-green-500 text-white font-semibold py-2 px-4 rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition text-sm no-print">
+                            + Adicionar Lançamento
+                        </button>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full text-sm text-left">
+                            <thead class="bg-slate-50">
+                                <tr>
+                                    <th class="p-3 font-semibold text-slate-600 col-categoria">Categoria</th>
+                                    <th class="p-3 font-semibold text-slate-600 col-servico">Nome do Serviço/Licença</th>
+                                    <th class="p-3 font-semibold text-slate-600 col-nf">NF</th>
+                                    <th class="p-3 font-semibold text-slate-600 col-valor">Valor NF (R$)</th>
+                                    <th class="p-3 font-semibold text-slate-600 col-valor">Valor Orçado (R$)</th>
+                                    <th class="p-3 font-semibold text-slate-600 col-status">Status</th>
+                                    <th class="p-3 font-semibold text-slate-600 col-acao no-print">Ação</th>
+                                </tr>
+                            </thead>
+                            <tbody id="${tbodyId}"></tbody>
+                        </table>
+                    </div>
+                </div>
+            `;
+            containerSetores.insertAdjacentHTML('beforeend', novoSetorHTML);
+            
+            if (linhasData.length > 0) {
+                linhasData.forEach(linhaData => adicionarLinha(tbodyId, linhaData));
+            }
+            
+            if (!nome) {
+                saveState();
+                inputSetor.value = '';
+                inputSetor.focus();
+            }
+        }
+
+        function adicionarLinha(tbodyId, data = {}) {
+            const tbody = document.getElementById(tbodyId);
+            if (!tbody) return;
+
+            const novaLinha = document.createElement('tr');
+            novaLinha.className = 'fade-in bg-white hover:bg-slate-50/50';
+            novaLinha.innerHTML = `
+                <td class="p-2 border-b border-slate-200"><select class="table-select sel-categoria"><option value="serv-adm">Prestação de Serviço Adm</option><option value="serv-ind">Prestação de Serviço Ind</option><option value="lic-adm">Licenciamento de Software Adm</option><option value="lic-ind">Licenciamento de Software Ind</option></select></td>
+                <td class="p-2 border-b border-slate-200"><input type="text" class="table-input inp-servico" placeholder="Descrição..."></td>
+                <td class="p-2 border-b border-slate-200"><input type="text" class="table-input inp-nf" placeholder="NF..."></td>
+                <td class="p-2 border-b border-slate-200"><input type="number" step="0.01" class="table-input inp-valor-nf" placeholder="0.00"></td>
+                <td class="p-2 border-b border-slate-200"><input type="number" step="0.01" class="table-input inp-valor-orcado" placeholder="0.00"></td>
+                <td class="p-2 border-b border-slate-200"><select class="table-select sel-status"><option value="orcado">Orçado</option><option value="nao-orcado">Não orçado</option><option value="unica">Única</option><option value="errada">Categoria errada</option></select></td>
+                <td class="p-2 border-b border-slate-200 text-center no-print"><button onclick="removerLinha(this)" class="text-red-500 hover:text-red-700 font-bold text-xl" title="Remover Linha">&times;</button></td>
+            `;
+            // Preenche os valores
+            novaLinha.querySelector('.sel-categoria').value = data.categoria || 'serv-adm';
+            novaLinha.querySelector('.inp-servico').value = data.servico || '';
+            novaLinha.querySelector('.inp-nf').value = data.nf || '';
+            novaLinha.querySelector('.inp-valor-nf').value = data.valorNf || '';
+            novaLinha.querySelector('.inp-valor-orcado').value = data.valorOrcado || '';
+            novaLinha.querySelector('.sel-status').value = data.status || 'orcado';
+
+            tbody.appendChild(novaLinha);
+            
+            if (Object.keys(data).length === 0) {
+                saveState();
+            }
+        }
+
+        function removerLinha(buttonElement) {
+            const linhaParaRemover = buttonElement.closest('tr');
+            linhaParaRemover.remove();
+            saveState();
+        }
+
+        // --- LÓGICA DO MODAL DE EXCLUSÃO ---
+        const modal = document.getElementById('delete-modal');
+        const confirmDeleteBtn = document.getElementById('confirm-delete-btn');
+        const cancelDeleteBtn = document.getElementById('cancel-delete-btn');
+
+        function abrirModalConfirmacao(setorId) {
+            confirmDeleteBtn.dataset.setorId = setorId;
+            modal.classList.remove('hidden');
+        }
+
+        function fecharModal() {
+            modal.classList.add('hidden');
+        }
+
+        confirmDeleteBtn.addEventListener('click', () => {
+            const setorId = confirmDeleteBtn.dataset.setorId;
+            const setorParaRemover = document.getElementById(setorId);
+            if (setorParaRemover) {
+                setorParaRemover.remove();
+                saveState();
+            }
+            fecharModal();
+        });
+
+        cancelDeleteBtn.addEventListener('click', fecharModal);
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) fecharModal();
+        });
+
+        // --- INICIALIZAÇÃO E EVENTOS ---
+        document.getElementById('container-setores').addEventListener('change', (event) => {
+            if (event.target.matches('.table-input, .table-select')) {
+                saveState();
+            }
+        });
+        
+        document.getElementById('input-novo-setor').addEventListener('keyup', function(event) {
+            if (event.key === 'Enter') {
+                adicionarSetor();
+            }
+        });
+
+        window.addEventListener('beforeprint', () => {
+            document.getElementById('print-date').textContent = new Date().toLocaleString('pt-BR');
+        });
+
+        document.addEventListener('DOMContentLoaded', loadState);
+    </script>
+</body>
+</html>
