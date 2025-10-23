@@ -94,13 +94,19 @@
                 <!-- Aumento 1 (Sempre visível) -->
                 <p class="text-md sm:text-lg text-gray-800 dark:text-gray-200 text-center">
                     Aumento F1 -> F2:
+                    <!-- Percentual -->
                     <span id="aumento1Result" class="font-bold text-blue-600 dark:text-blue-400">...</span>
+                    <!-- Valor -->
+                    <span id="aumento1Valor" class="font-medium ml-2">(...)</span>
                 </p>
                 
                 <!-- Aumento 2 (Opcional) -->
                 <p id="paragrafoAumento2" class="text-md sm:text-lg text-gray-800 dark:text-gray-200 text-center hidden">
                     Aumento F2 -> F3:
+                    <!-- Percentual -->
                     <span id="aumento2Result" class="font-bold text-blue-600 dark:text-blue-400">...</span>
+                    <!-- Valor -->
+                    <span id="aumento2Valor" class="font-medium ml-2">(...)</span>
                 </p>
                 
                 <!-- Linha (Opcional) -->
@@ -113,9 +119,14 @@
                 </p>
 
                 <!-- Projeção (Sempre visível) -->
-                <p class="text-lg sm:text-xl text-gray-800 dark:text-gray-200 text-center">
+                <p class="text-lg sm:text-xl text-gray-800 dark:text-gray-200 text-center mt-4">
                     <span id="labelProjecao">Projeção Próxima Fatura:</span>
-                    <span id="nextBillResult" class="font-bold text-green-600 dark:text-green-400">...</span>
+                </p>
+                <!-- Valor Projetado (Destaque) -->
+                <p class="text-2xl sm:text-3xl font-bold text-center text-gray-900 dark:text-gray-100">
+                    <span id="nextBillResult">R$ ...</span>
+                    <!-- Valor do Aumento Projetado -->
+                    <span id="aumentoProjecaoValor" class="text-sm font-medium ml-2">(...)</span>
                 </p>
             </div>
 
@@ -124,7 +135,7 @@
 
     <script>
         // Função auxiliar para colorir o texto (vermelho/verde)
-        function colorirPercentual(element, valor) {
+        function colorirValor(element, valor) {
             if (valor > 0) {
                 element.classList.remove('text-green-600', 'dark:text-green-400', 'text-gray-600', 'dark:text-gray-400');
                 element.classList.add('text-red-600', 'dark:text-red-400');
@@ -147,13 +158,16 @@
         // Elementos de Resultado
         const areaResultados = document.getElementById('areaResultados');
         const aumento1ResultEl = document.getElementById('aumento1Result');
+        const aumento1ValorEl = document.getElementById('aumento1Valor'); // Novo
         const paragrafoAumento2 = document.getElementById('paragrafoAumento2');
         const aumento2ResultEl = document.getElementById('aumento2Result');
+        const aumento2ValorEl = document.getElementById('aumento2Valor'); // Novo
         const linhaResultados = document.getElementById('linhaResultados');
         const labelMedia = document.getElementById('labelMedia');
         const mediaResultEl = document.getElementById('mediaResult');
         const labelProjecao = document.getElementById('labelProjecao');
         const nextBillResultEl = document.getElementById('nextBillResult');
+        const aumentoProjecaoValorEl = document.getElementById('aumentoProjecaoValor'); // Novo
 
 
         // Adiciona o evento de clique ao botão
@@ -185,24 +199,33 @@
             // --- Início dos Cálculos ---
 
             let aumento1_percent = ((f2 - f1) / f1) * 100;
+            let aumento1_valor = f2 - f1;
             let media_aumento_percent = 0;
             let projecao_valor = 0;
+            let aumento_projecao_valor = 0;
 
             // Exibe sempre o primeiro aumento
             aumento1ResultEl.textContent = `${aumento1_percent.toFixed(2)}%`;
-            colorirPercentual(aumento1ResultEl, aumento1_percent);
+            aumento1ValorEl.textContent = `(R$ ${aumento1_valor.toFixed(2)})`;
+            colorirValor(aumento1ResultEl, aumento1_percent);
+            colorirValor(aumento1ValorEl, aumento1_valor);
 
             // Verifica se a Fatura 3 foi preenchida
             if (!isNaN(f3) && f3 > 0) {
                 // --- CÁLCULO COM 3 FATURAS ---
 
                 const aumento2_percent = ((f3 - f2) / f2) * 100;
+                const aumento2_valor = f3 - f2;
                 media_aumento_percent = (aumento1_percent + aumento2_percent) / 2;
                 projecao_valor = f3 * (1 + (media_aumento_percent / 100));
+                aumento_projecao_valor = projecao_valor - f3;
 
                 // Exibe os resultados da Fatura 3
                 aumento2ResultEl.textContent = `${aumento2_percent.toFixed(2)}%`;
-                colorirPercentual(aumento2ResultEl, aumento2_percent);
+                aumento2ValorEl.textContent = `(R$ ${aumento2_valor.toFixed(2)})`;
+                colorirValor(aumento2ResultEl, aumento2_percent);
+                colorirValor(aumento2ValorEl, aumento2_valor);
+                
                 paragrafoAumento2.classList.remove('hidden');
                 linhaResultados.classList.remove('hidden');
                 
@@ -215,6 +238,7 @@
                 
                 media_aumento_percent = aumento1_percent; // A "média" é o único aumento
                 projecao_valor = f2 * (1 + (media_aumento_percent / 100));
+                aumento_projecao_valor = projecao_valor - f2;
 
                 // Esconde os campos da Fatura 3
                 paragrafoAumento2.classList.add('hidden');
@@ -228,16 +252,12 @@
             // Exibe os resultados finais (Média e Projeção)
             mediaResultEl.textContent = `${media_aumento_percent.toFixed(2)}%`;
             nextBillResultEl.textContent = `R$ ${projecao_valor.toFixed(2)}`;
+            aumentoProjecaoValorEl.textContent = `(R$ ${aumento_projecao_valor.toFixed(2)})`;
 
             // Colore os resultados finais
-            colorirPercentual(mediaResultEl, media_aumento_percent);
-            // Colore a projeção (vermelho/verde)
-            if (projecao_valor > (isNaN(f3) ? f2 : f3)) {
-                 colorirPercentual(nextBillResultEl, 1); // Positivo
-            } else {
-                 colorirPercentual(nextBillResultEl, -1); // Negativo ou igual
-            }
-
+            colorirValor(mediaResultEl, media_aumento_percent);
+            colorirValor(aumentoProjecaoValorEl, aumento_projecao_valor);
+           
             // Mostra a área de resultados
             areaResultados.classList.remove('hidden');
         });
@@ -255,4 +275,3 @@
 
 </body>
 </html>
-
