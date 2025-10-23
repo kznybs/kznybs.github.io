@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Título atualizado -->
+    <title>Calculadora de Projeção Dinâmica</title>
+    <!-- Carrega o Tailwind CSS para estilização -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Carrega a fonte Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        /* Define a fonte Inter como padrão */
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        /* Melhora a aparência dos inputs de número no Firefox */
+        input[type=number] {
+            -moz-appearance: textfield;
+        }
+        /* Esconde as setas de incremento/decremento no Chrome, Safari, Edge */
+        input[type=number]::-webkit-inner-spin-button,
+        input[type=number]::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors duration-300">
+
+    <div class="flex items-center justify-center min-h-screen p-4">
+        
+        <div class="bg-white dark:bg-gray-800 p-6 sm:p-8 rounded-2xl shadow-2xl w-full max-w-md">
+            
+            <h1 class="text-2xl sm:text-3xl font-bold text-center mb-6 text-blue-600 dark:text-blue-400">
+                Calculadora de Projeção
+            </h1>
+
+            <!-- Container do formulário -->
+            <div class="space-y-4">
+                
+                <!-- Campo 1: Fatura 1 (Obrigatória) -->
+                <div>
+                    <label for="fatura1" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Fatura 1 (Mais Antiga)
+                    </label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500 dark:text-gray-400">R$</span>
+                        <input type="number" id="fatura1" placeholder="0.00"
+                               class="w-full pl-10 pr-4 py-3 bg-gray-100 dark:bg-gray-700 border-2 border-gray-200 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-300">
+                    </div>
+                </div>
+
+                <!-- Campo 2: Fatura 2 (Obrigatória) -->
+                <div>
+                    <label for="fatura2" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Fatura 2
+                    </label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500 dark:text-gray-400">R$</span>
+                        <input type="number" id="fatura2" placeholder="0.00"
+                               class="w-full pl-10 pr-4 py-3 bg-gray-100 dark:bg-gray-700 border-2 border-gray-200 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-300">
+                    </div>
+                </div>
+
+                <!-- Campo 3: Fatura 3 (Opcional) -->
+                <div>
+                    <label for="fatura3" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Fatura 3 (Opcional)
+                    </label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500 dark:text-gray-400">R$</span>
+                        <input type="number" id="fatura3" placeholder="0.00"
+                               class="w-full pl-10 pr-4 py-3 bg-gray-100 dark:bg-gray-700 border-2 border-gray-200 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-300">
+                    </div>
+                </div>
+
+                <!-- Botão de Cálculo -->
+                <button id="calcularBtn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg shadow-lg transition duration-300 ease-in-out transform hover:-translate-y-0.5">
+                    Calcular Projeção
+                </button>
+            </div>
+
+            <!-- Área de Mensagem de Erro -->
+            <div id="mensagemErro" class="mt-4 p-4 bg-red-100 dark:bg-red-900 border border-red-400 dark:border-red-700 text-red-700 dark:text-red-200 rounded-lg hidden text-center">
+                Por favor, preencha as Faturas 1 e 2 com valores válidos maior que zero.
+            </div>
+
+            <!-- Área de Resultados -->
+            <div id="areaResultados" class="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700 space-y-3 hidden">
+                
+                <!-- Aumento 1 (Sempre visível) -->
+                <p class="text-md sm:text-lg text-gray-800 dark:text-gray-200 text-center">
+                    Aumento F1 -> F2:
+                    <span id="aumento1Result" class="font-bold text-blue-600 dark:text-blue-400">...</span>
+                </p>
+                
+                <!-- Aumento 2 (Opcional) -->
+                <p id="paragrafoAumento2" class="text-md sm:text-lg text-gray-800 dark:text-gray-200 text-center hidden">
+                    Aumento F2 -> F3:
+                    <span id="aumento2Result" class="font-bold text-blue-600 dark:text-blue-400">...</span>
+                </p>
+                
+                <!-- Linha (Opcional) -->
+                <hr id="linhaResultados" class="border-gray-300 dark:border-gray-600 hidden">
+                
+                <!-- Média (Sempre visível, mas o label muda) -->
+                <p class="text-lg sm:text-xl text-gray-800 dark:text-gray-200 text-center">
+                    <span id="labelMedia">Média de Aumento:</span>
+                    <span id="mediaResult" class="font-bold text-blue-600 dark:text-blue-400">...</span>
+                </p>
+
+                <!-- Projeção (Sempre visível) -->
+                <p class="text-lg sm:text-xl text-gray-800 dark:text-gray-200 text-center">
+                    <span id="labelProjecao">Projeção Próxima Fatura:</span>
+                    <span id="nextBillResult" class="font-bold text-green-600 dark:text-green-400">...</span>
+                </p>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        // Função auxiliar para colorir o texto (vermelho/verde)
+        function colorirPercentual(element, valor) {
+            if (valor > 0) {
+                element.classList.remove('text-green-600', 'dark:text-green-400', 'text-gray-600', 'dark:text-gray-400');
+                element.classList.add('text-red-600', 'dark:text-red-400');
+            } else if (valor < 0) {
+                element.classList.remove('text-red-600', 'dark:text-red-400', 'text-gray-600', 'dark:text-gray-400');
+                element.classList.add('text-green-600', 'dark:text-green-400');
+            } else {
+                element.classList.remove('text-red-600', 'dark:text-red-400', 'text-green-600', 'dark:text-green-400');
+                element.classList.add('text-gray-600', 'dark:text-gray-400');
+            }
+        }
+
+        // Seleciona os elementos do DOM
+        const fatura1El = document.getElementById('fatura1');
+        const fatura2El = document.getElementById('fatura2');
+        const fatura3El = document.getElementById('fatura3');
+        const calcularBtn = document.getElementById('calcularBtn');
+        const mensagemErroEl = document.getElementById('mensagemErro');
+
+        // Elementos de Resultado
+        const areaResultados = document.getElementById('areaResultados');
+        const aumento1ResultEl = document.getElementById('aumento1Result');
+        const paragrafoAumento2 = document.getElementById('paragrafoAumento2');
+        const aumento2ResultEl = document.getElementById('aumento2Result');
+        const linhaResultados = document.getElementById('linhaResultados');
+        const labelMedia = document.getElementById('labelMedia');
+        const mediaResultEl = document.getElementById('mediaResult');
+        const labelProjecao = document.getElementById('labelProjecao');
+        const nextBillResultEl = document.getElementById('nextBillResult');
+
+
+        // Adiciona o evento de clique ao botão
+        calcularBtn.addEventListener('click', () => {
+            // Pega os valores e converte para números
+            const f1 = parseFloat(fatura1El.value);
+            const f2 = parseFloat(fatura2El.value);
+            const f3 = parseFloat(fatura3El.value); // Será NaN se vazio
+
+            // Validação dos campos obrigatórios (F1 e F2)
+            if (isNaN(f1) || isNaN(f2) || f1 <= 0 || f2 <= 0) {
+                mensagemErroEl.textContent = "Por favor, preencha as Faturas 1 e 2 com valores válidos maior que zero.";
+                mensagemErroEl.classList.remove('hidden'); // Mostra erro
+                areaResultados.classList.add('hidden'); // Esconde resultados
+                return; // Para a execução
+            }
+            
+            // Validação do campo opcional (F3), se preenchido
+            if (!isNaN(f3) && f3 <= 0) {
+                 mensagemErroEl.textContent = "A Fatura 3 deve ser um valor válido maior que zero (ou deixada em branco).";
+                 mensagemErroEl.classList.remove('hidden'); // Mostra erro
+                 areaResultados.classList.add('hidden'); // Esconde resultados
+                 return; // Para a execução
+            }
+
+            // Se a validação passar, esconde a mensagem de erro
+            mensagemErroEl.classList.add('hidden');
+
+            // --- Início dos Cálculos ---
+
+            let aumento1_percent = ((f2 - f1) / f1) * 100;
+            let media_aumento_percent = 0;
+            let projecao_valor = 0;
+
+            // Exibe sempre o primeiro aumento
+            aumento1ResultEl.textContent = `${aumento1_percent.toFixed(2)}%`;
+            colorirPercentual(aumento1ResultEl, aumento1_percent);
+
+            // Verifica se a Fatura 3 foi preenchida
+            if (!isNaN(f3) && f3 > 0) {
+                // --- CÁLCULO COM 3 FATURAS ---
+
+                const aumento2_percent = ((f3 - f2) / f2) * 100;
+                media_aumento_percent = (aumento1_percent + aumento2_percent) / 2;
+                projecao_valor = f3 * (1 + (media_aumento_percent / 100));
+
+                // Exibe os resultados da Fatura 3
+                aumento2ResultEl.textContent = `${aumento2_percent.toFixed(2)}%`;
+                colorirPercentual(aumento2ResultEl, aumento2_percent);
+                paragrafoAumento2.classList.remove('hidden');
+                linhaResultados.classList.remove('hidden');
+                
+                // Atualiza labels para 3 faturas
+                labelMedia.textContent = "Média de Aumento:";
+                labelProjecao.textContent = "Projeção Próxima Fatura (F4):";
+                
+            } else {
+                // --- CÁLCULO COM 2 FATURAS ---
+                
+                media_aumento_percent = aumento1_percent; // A "média" é o único aumento
+                projecao_valor = f2 * (1 + (media_aumento_percent / 100));
+
+                // Esconde os campos da Fatura 3
+                paragrafoAumento2.classList.add('hidden');
+                linhaResultados.classList.add('hidden');
+
+                // Atualiza labels para 2 faturas
+                labelMedia.textContent = "Aumento Aplicado:";
+                labelProjecao.textContent = "Projeção Próxima Fatura (F3):";
+            }
+
+            // Exibe os resultados finais (Média e Projeção)
+            mediaResultEl.textContent = `${media_aumento_percent.toFixed(2)}%`;
+            nextBillResultEl.textContent = `R$ ${projecao_valor.toFixed(2)}`;
+
+            // Colore os resultados finais
+            colorirPercentual(mediaResultEl, media_aumento_percent);
+            // Colore a projeção (vermelho/verde)
+            if (projecao_valor > (isNaN(f3) ? f2 : f3)) {
+                 colorirPercentual(nextBillResultEl, 1); // Positivo
+            } else {
+                 colorirPercentual(nextBillResultEl, -1); // Negativo ou igual
+            }
+
+            // Mostra a área de resultados
+            areaResultados.classList.remove('hidden');
+        });
+
+        // Adiciona eventos para calcular ao pressionar Enter
+        [fatura1El, fatura2El, fatura3El].forEach(input => {
+            input.addEventListener('keypress', function(event) {
+                if (event.key === 'Enter') {
+                    event.preventDefault(); 
+                    calcularBtn.click(); 
+                }
+            });
+        });
+    </script>
+
+</body>
+</html>
+
