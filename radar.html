@@ -26,48 +26,54 @@
             width: 100vw;
             height: 100vh;
             cursor: move;
-            /* Padrão radial de fundo para combinar com o layout */
+            /* Padrão radial de fundo */
             background-image: radial-gradient(#334155 1px, transparent 1px);
-            background-size: 30px 30px;
+            background-size: 40px 40px;
         }
 
+        /* Otimização: removemos transições pesadas de CSS para nós */
         .node circle {
             fill: #1e293b;
             stroke: #3b82f6;
-            stroke-width: 2px;
-            transition: all 0.3s;
+            stroke-width: 1.5px;
             cursor: pointer;
         }
 
+        /* Efeito hover simplificado para performance */
         .node circle:hover {
             stroke: #60a5fa;
-            stroke-width: 4px;
-            filter: drop-shadow(0 0 8px rgba(59, 130, 246, 0.5));
+            stroke-width: 3px;
+            fill: #334155;
         }
 
         .node text {
-            font-size: 12px;
+            font-size: 10px; /* Fonte menor para caber mais itens */
             font-family: sans-serif;
-            fill: #ffffff; /* Texto branco puro */
-            text-shadow: 0 1px 4px black; 
-            font-weight: 500;
+            fill: #e2e8f0;
+            font-weight: 400;
+            pointer-events: none; /* Melhora performance do mouse */
         }
 
         .link {
             fill: none;
             stroke: #475569;
-            stroke-width: 1.5px;
-            opacity: 0.5;
+            stroke-width: 1px;
+            opacity: 0.3; /* Menos opacidade para reduzir ruído visual */
         }
 
-        /* Status colors for leaf nodes */
+        /* Cores de Status */
         .status-online { fill: #10b981 !important; stroke: #059669 !important; }
-        .status-offline { fill: #ef4444 !important; stroke: #b91c1c !important; animation: pulse 2s infinite; }
+        .status-offline { fill: #ef4444 !important; stroke: #b91c1c !important; }
 
-        @keyframes pulse {
-            0% { r: 5; opacity: 1; stroke-width: 2px; }
-            50% { r: 8; opacity: 0.7; stroke-width: 1px; }
-            100% { r: 5; opacity: 1; stroke-width: 2px; }
+        /* Animação APENAS para itens offline (chama atenção sem pesar tudo) */
+        .node circle.status-offline {
+            animation: pulse-red 2s infinite;
+        }
+
+        @keyframes pulse-red {
+            0% { stroke-width: 2px; stroke-opacity: 1; }
+            50% { stroke-width: 6px; stroke-opacity: 0.4; }
+            100% { stroke-width: 2px; stroke-opacity: 1; }
         }
 
         /* Tooltip */
@@ -84,7 +90,7 @@
             z-index: 100;
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2);
             opacity: 0;
-            transition: opacity 0.2s;
+            transition: opacity 0.1s; /* Rápido */
         }
         
         /* Floating Controls */
@@ -93,12 +99,12 @@
             top: 20px;
             left: 20px;
             z-index: 50;
-            background: rgba(30, 41, 59, 0.8);
+            background: rgba(30, 41, 59, 0.9); /* Menos transparência para leitura */
             backdrop-filter: blur(4px);
             padding: 15px;
             border-radius: 12px;
             border: 1px solid rgba(255,255,255,0.1);
-            min-width: 220px;
+            min-width: 240px;
             transition: all 0.3s ease;
         }
     </style>
@@ -107,7 +113,6 @@
 
     <!-- Controls -->
     <div class="controls shadow-xl">
-        <!-- Header clicável para colapsar -->
         <div class="flex items-center justify-between cursor-pointer select-none mb-2" onclick="toggleControls()">
             <h1 class="text-xl font-bold text-white flex items-center">
                 <i class="fas fa-spider text-indigo-400 mr-2"></i>Radar de Ativos
@@ -115,78 +120,66 @@
             <i id="toggle-icon" class="fas fa-chevron-up text-slate-400 transition-transform duration-300"></i>
         </div>
         
-        <!-- Conteúdo que será escondido -->
         <div id="controls-content" class="transition-all duration-300 overflow-hidden" style="max-height: 500px; opacity: 1;">
-            <p class="text-xs text-slate-400 mb-4">Visualização Radial de Estrutura</p>
+            <p class="text-xs text-slate-400 mb-4 flex justify-between">
+                <span>Total de Itens: <strong id="total-count" class="text-white">0</strong></span>
+                <span id="perf-indicator" class="text-[10px] text-emerald-400">Modo: Rápido</span>
+            </p>
             
             <div class="space-y-2">
-                <!-- Botões de Filtro -->
                 <div class="flex gap-2">
-                    <button onclick="filterTree('Offline')" class="w-1/3 bg-red-600 hover:bg-red-700 text-white text-[10px] font-bold py-2 px-1 rounded transition flex items-center justify-center gap-1" title="Apenas Offline">
-                        <i class="fas fa-exclamation-circle"></i> Offline
+                    <button onclick="filterTree('Offline')" class="w-1/3 bg-red-600/90 hover:bg-red-700 text-white text-[10px] font-bold py-2 px-1 rounded transition flex items-center justify-center gap-1">
+                        <i class="fas fa-bug"></i> Offline
                     </button>
-                    <button onclick="filterTree('Online')" class="w-1/3 bg-emerald-600 hover:bg-emerald-700 text-white text-[10px] font-bold py-2 px-1 rounded transition flex items-center justify-center gap-1" title="Apenas Online">
-                        <i class="fas fa-check-circle"></i> Online
+                    <button onclick="filterTree('Online')" class="w-1/3 bg-emerald-600/90 hover:bg-emerald-700 text-white text-[10px] font-bold py-2 px-1 rounded transition flex items-center justify-center gap-1">
+                        <i class="fas fa-check"></i> Online
                     </button>
-                    <button onclick="clearFilter()" class="w-1/3 bg-slate-500 hover:bg-slate-600 text-white text-[10px] font-bold py-2 px-1 rounded transition flex items-center justify-center gap-1" title="Mostrar Tudo">
-                        <i class="fas fa-layer-group"></i> Todos
+                    <button onclick="clearFilter()" class="w-1/3 bg-slate-600 hover:bg-slate-700 text-white text-[10px] font-bold py-2 px-1 rounded transition flex items-center justify-center gap-1">
+                        <i class="fas fa-globe"></i> Todos
                     </button>
                 </div>
                 
                 <div id="filter-indicator" class="hidden text-center text-[10px] text-yellow-400 font-bold border border-yellow-400/30 bg-yellow-400/10 rounded py-1">
-                    Filtro Ativo: <span id="filter-name"></span>
+                    Filtro: <span id="filter-name"></span>
                 </div>
 
-                <button onclick="downloadTemplate()" class="w-full bg-slate-600 hover:bg-slate-700 text-white text-xs font-bold py-2 px-4 rounded transition flex items-center justify-center gap-2">
+                <button onclick="downloadTemplate()" class="w-full bg-slate-700 hover:bg-slate-600 text-white text-xs font-bold py-2 px-4 rounded transition flex items-center justify-center gap-2 border border-slate-600">
                     <i class="fas fa-download"></i> Baixar Modelo CSV
                 </button>
 
-                <button onclick="toggleDataModal()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold py-2 px-4 rounded transition flex items-center justify-center gap-2">
-                    <i class="fas fa-file-csv"></i> Importar / Editar
+                <button onclick="toggleDataModal()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold py-2 px-4 rounded transition flex items-center justify-center gap-2 shadow-lg shadow-indigo-500/20">
+                    <i class="fas fa-database"></i> Importar / Editar Dados
                 </button>
             </div>
             
-            <div class="mt-4 border-t border-slate-600 pt-3">
-                <div class="flex items-center gap-2 mb-1">
-                    <span class="w-3 h-3 rounded-full bg-green-500 block"></span>
-                    <span class="text-xs text-slate-300">Online</span>
-                </div>
-                <div class="flex items-center gap-2">
-                    <span class="w-3 h-3 rounded-full bg-red-500 block animate-pulse"></span>
-                    <span class="text-xs text-slate-300">Offline / Crítico</span>
-                </div>
-            </div>
-
-            <div class="mt-4 text-xs text-slate-500">
-                * Dados e visualização salvos<br>
-                * Use o scroll para zoom<br>
-                * Clique e arraste para mover<br>
+            <div class="mt-3 text-[10px] text-slate-500 text-center border-t border-slate-700 pt-2">
+                Dica: Use o scroll do mouse para Zoom.<br>
+                O gráfico ajusta o tamanho automaticamente.
             </div>
         </div>
     </div>
 
-    <!-- Tree Visualization Container -->
     <div id="tree-container"></div>
     <div id="tooltip" class="tooltip"></div>
 
     <!-- Modal Data Input -->
-    <div id="data-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-[2000] hidden flex items-center justify-center">
-        <div class="bg-slate-800 w-full max-w-2xl rounded-xl border border-slate-600 shadow-2xl p-6 m-4">
+    <div id="data-modal" class="fixed inset-0 bg-black/90 backdrop-blur-sm z-[2000] hidden flex items-center justify-center">
+        <div class="bg-slate-800 w-full max-w-2xl rounded-xl border border-slate-600 shadow-2xl p-6 m-4 flex flex-col h-[80vh]">
             <div class="flex justify-between items-center mb-4">
-                <h3 class="text-xl font-bold text-white">Dados dos Ativos (CSV)</h3>
+                <h3 class="text-xl font-bold text-white">Importar Dados (CSV)</h3>
                 <button onclick="toggleDataModal()" class="text-slate-400 hover:text-white"><i class="fas fa-times text-xl"></i></button>
             </div>
             
-            <p class="text-sm text-slate-400 mb-2">Cole seus dados aqui. Formato: <code class="bg-slate-900 px-1 rounded text-indigo-400">Tipo, Nome, Setor, Status</code></p>
+            <p class="text-sm text-slate-400 mb-2">Cole aqui (Milhares de linhas suportadas). Formato: <code class="bg-slate-900 px-1 rounded text-indigo-400">Tipo, Nome, Setor, Status</code></p>
             
-            <textarea id="csv-input" class="w-full h-64 bg-slate-900 border border-slate-700 rounded-lg p-3 text-xs font-mono text-green-400 focus:outline-none focus:border-indigo-500 mb-4" spellcheck="false"></textarea>
+            <textarea id="csv-input" class="w-full flex-1 bg-slate-900 border border-slate-700 rounded-lg p-3 text-xs font-mono text-green-400 focus:outline-none focus:border-indigo-500 mb-4 resize-none" spellcheck="false"></textarea>
             
             <div class="flex justify-between gap-3">
-                <button onclick="if(confirm('Isso irá substituir seus dados atuais pelos dados de exemplo. Continuar?')) loadDefaultData()" class="px-4 py-2 text-red-400 hover:text-red-300 text-xs underline">Restaurar Padrão</button>
+                <button onclick="if(confirm('Restaurar dados de exemplo?')) loadDefaultData()" class="px-4 py-2 text-red-400 hover:text-red-300 text-xs underline">Restaurar Padrão</button>
                 <div class="flex gap-2">
                     <button onclick="toggleDataModal()" class="px-4 py-2 text-slate-400 hover:text-white text-sm">Cancelar</button>
-                    <button onclick="processData()" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-bold transition">
-                        <i class="fas fa-save mr-2"></i> Salvar e Gerar
+                    <button onclick="processData()" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-bold transition flex items-center">
+                        <i class="fas fa-rocket mr-2"></i> Gerar Gráfico
                     </button>
                 </div>
             </div>
@@ -198,7 +191,6 @@
         const width = window.innerWidth;
         const height = window.innerHeight;
         
-        // Cores por nível
         const colors = {
             root: "#6366f1",   // Indigo
             sector: "#3b82f6", // Blue
@@ -206,64 +198,40 @@
             leaf: "#94a3b8"    // Slate
         };
 
-        // --- DADOS PADRÃO ---
-        const DEFAULT_CSV = `
-Tipo,Nome,Setor,Status,Lat,Lng
+        // --- DADOS PADRÃO (Pequeno exemplo, mas preparado para milhares) ---
+        const DEFAULT_CSV = `Tipo,Nome,Setor,Status,Lat,Lng
 computer,BRCINF01,TI,Offline,0,0
 computer,BRCINF02,TI,Online,0,0
 computer,BRCINF03,TI,Online,0,0
 computer,BRCINF04,TI,Online,0,0
 computer,BRCINF05,TI,Offline,0,0
-computer,BRCINF06,TI,Online,0,0
-computer,BRCINF07,TI,Online,0,0
-computer,BRCINF08,TI,Online,0,0
-computer,BRCINF09,TI,Online,0,0
-printer,HP Laser 400 (192.168.1.55),TI,Online,0,0
+printer,HP Laser 400,TI,Online,0,0
 computer,BRCIND01,Indústria,Online,0,0
 computer,BRCIND02,Indústria,Offline,0,0
 computer,BRCIND03,Indústria,Online,0,0
-computer,BRCIND04,Indústria,Online,0,0
-computer,BRCIND05,Indústria,Online,0,0
-printer,Zebra ZT230 (10.0.0.89),Indústria,Online,0,0
+printer,Zebra ZT230,Indústria,Online,0,0
 computer,BRCOFA01,Oficina,Online,0,0
 computer,BRCOFA02,Oficina,Offline,0,0
-computer,BRCOFA03,Oficina,Online,0,0
-computer,BRCOFA04,Oficina,Online,0,0
-computer,BRCADM01,Administrativo,Online,0,0
-computer,BRCADM02,Administrativo,Online,0,0
-computer,BRCADM03,Administrativo,Offline,0,0
-printer,Kyocera (192.168.0.200),Administrativo,Online,0,0
-wifi,AP-Refeitorio,Geral,Online,0,0
-wifi,AP-Portaria,Segurança,Online,0,0
-`.trim();
+wifi,AP-Refeitorio,Geral,Online,0,0`;
 
         // Variáveis Globais
         let svg, g, tree, root;
-        let i = 0;
-        const duration = 750;
-        let activeFilter = null; // Armazena o filtro atual
+        let activeFilter = null;
         let isControlsCollapsed = false;
+        let zoomBehavior;
 
         // --- INICIALIZAÇÃO ---
         window.onload = () => {
             initD3();
-            
-            // LÓGICA DE PERSISTÊNCIA DE DADOS
             const savedData = localStorage.getItem('radar_ativos_data_v2');
-            if (savedData) {
-                document.getElementById('csv-input').value = savedData;
-                console.log("Dados carregados do armazenamento local.");
-            } else {
-                document.getElementById('csv-input').value = DEFAULT_CSV;
-            }
-            
+            document.getElementById('csv-input').value = savedData || DEFAULT_CSV;
             processData();
         };
 
         function initD3() {
-            // Zoom behavior
-            const zoom = d3.zoom()
-                .scaleExtent([0.1, 4])
+            // Configuração de Zoom Otimizada
+            zoomBehavior = d3.zoom()
+                .scaleExtent([0.05, 5]) // Permite zoom out muito maior para ver grandes teias
                 .on("zoom", (event) => {
                     g.attr("transform", event.transform);
                 });
@@ -271,70 +239,250 @@ wifi,AP-Portaria,Segurança,Online,0,0
             svg = d3.select("#tree-container").append("svg")
                 .attr("width", width)
                 .attr("height", height)
-                .call(zoom)
+                .call(zoomBehavior)
                 .on("dblclick.zoom", null);
 
-            // Grupo principal centralizado na tela para efeito radial
             g = svg.append("g")
                 .attr("transform", "translate(" + (width / 2) + "," + (height / 2) + ")");
-
-            // CONFIGURAÇÃO RADIAL (Teia de Aranha)
-            tree = d3.tree()
-                .size([2 * Math.PI, Math.min(width, height) / 2 - 100])
-                // AJUSTE CRÍTICO: 
-                // parent == parent ? 0.2 (Irmãos MUITO juntos - Reduzido de 0.5)
-                // else : 1 (Primos/Grupos mais separados)
-                // Isso força o agrupamento visual dos itens finais.
-                .separation((a, b) => (a.parent == b.parent ? 0.2 : 1) / a.depth);
         }
 
-        // --- CONTROLES DE INTERFACE ---
-        function toggleControls() {
-            const content = document.getElementById('controls-content');
-            const icon = document.getElementById('toggle-icon');
-            isControlsCollapsed = !isControlsCollapsed;
+        // --- LÓGICA PRINCIPAL ---
 
-            if (isControlsCollapsed) {
-                content.style.maxHeight = '0px';
-                content.style.opacity = '0';
-                content.style.marginTop = '0';
-                icon.style.transform = 'rotate(180deg)';
+        function processData() {
+            const rawText = document.getElementById('csv-input').value.trim();
+            if(rawText) localStorage.setItem('radar_ativos_data_v2', rawText);
+
+            const lines = rawText.split('\n');
+            // Remove cabeçalho
+            const dataLines = lines.slice(1);
+            
+            // 1. Construção da Hierarquia (Otimizada)
+            const hierarchy = { name: "Usina", children: [], type: "root", id: "root" };
+            const sectorMap = new Map(); // Mapa para acesso rápido O(1)
+
+            let totalNodes = 0;
+
+            for (let i = 0; i < dataLines.length; i++) {
+                const line = dataLines[i];
+                if (!line.trim()) continue; // Pula linhas vazias
+
+                const parts = line.split(',');
+                if (parts.length < 4) continue;
+
+                const typeRaw = parts[0].trim();
+                const name = parts[1].trim();
+                const sector = parts[2].trim();
+                const status = parts[3].trim();
+
+                // Filtragem Rápida na Fonte
+                if (activeFilter && status !== activeFilter) continue;
+
+                // Busca ou cria Setor
+                let sectorNode = sectorMap.get(sector);
+                if (!sectorNode) {
+                    sectorNode = { name: sector, children: [], type: "sector", id: "sec_" + sector };
+                    hierarchy.children.push(sectorNode);
+                    sectorMap.set(sector, sectorNode);
+                }
+
+                // Agrupamento por Tipo (Opcional, removi o nível 'Tipo' explícito do nó visual para economizar espaço em grandes volumes, 
+                // mas podemos manter se quiser. Aqui vou simplificar: Setor -> Itens, agrupados por cor/nome se necessário,
+                // OU manter a estrutura original Setor -> Tipo -> Item se for crucial. 
+                // Vou manter Setor -> Tipo -> Item para organização, mas otimizar o objeto)
+                
+                // Busca ou cria Tipo dentro do Setor
+                // Pequena otimização: map para tipos dentro do setor
+                if(!sectorNode.typeMap) sectorNode.typeMap = new Map();
+                
+                const typeMapLabel = { 'printer': 'Impressoras', 'computer': 'PCs', 'camera': 'Câmeras', 'wifi': 'Rede' }[typeRaw] || "Outros";
+                
+                let typeNode = sectorNode.typeMap.get(typeMapLabel);
+                if (!typeNode) {
+                    typeNode = { name: typeMapLabel, children: [], type: "type", id: sectorNode.id + "_" + typeMapLabel };
+                    sectorNode.children.push(typeNode);
+                    sectorNode.typeMap.set(typeMapLabel, typeNode);
+                }
+
+                // Adiciona Item
+                typeNode.children.push({
+                    name: name,
+                    type: "leaf",
+                    status: status,
+                    rawType: typeRaw,
+                    id: typeNode.id + "_" + i // ID único simples
+                });
+                totalNodes++;
+            }
+
+            // Remove ramos vazios (Setores sem filhos após filtro)
+            hierarchy.children = hierarchy.children.filter(s => s.children.length > 0);
+
+            // Atualiza contadores UI
+            document.getElementById('total-count').innerText = totalNodes;
+            const perfMode = totalNodes > 500 ? "Alta Performance (Sem Animação)" : "Padrão";
+            document.getElementById('perf-indicator').innerText = `Modo: ${perfMode}`;
+
+            // --- CÁLCULO DE RAIO DINÂMICO (Solução para "grudados") ---
+            // Se temos 3000 itens, precisamos de um raio ENORME para que a circunferência caiba todos.
+            // Circunferência = 2 * PI * R.
+            // Precisamos de aprox 15px por nó na circunferência externa.
+            // R = (TotalNodes * 15) / (2 * PI)
+            
+            let dynamicRadius = 120; // Padrão mínimo entre níveis
+            
+            // Calcula quantos nós folha existem (aproximadamente) para ajustar o raio final
+            const estimatedLeaves = totalNodes; 
+            const minCircumference = estimatedLeaves * 12; // 12px por item mínimo
+            const requiredRadius = minCircumference / (2 * Math.PI);
+            
+            // O raio do último nível deve ser pelo menos 'requiredRadius'
+            // Como temos 3 níveis (Setor -> Tipo -> Item), o raio total é 3 * step.
+            // Então cada step deve ser:
+            if (requiredRadius > 360) { // 360 = 3 * 120
+                dynamicRadius = requiredRadius / 3;
+            }
+
+            // Limita raio mínimo para não ficar muito pequeno
+            if(dynamicRadius < 120) dynamicRadius = 120;
+
+            console.log(`Total: ${totalNodes}, Required Radius: ${requiredRadius}, Step: ${dynamicRadius}`);
+
+            // Configura o layout da árvore
+            root = d3.hierarchy(hierarchy, d => d.children);
+            
+            // Layout Radial
+            // separation: 1 para primos, 0.5 para irmãos. Isso junta irmãos e separa grupos.
+            tree = d3.tree()
+                .size([2 * Math.PI, dynamicRadius * 3]) // Tamanho total baseado no dinâmico
+                .separation((a, b) => (a.parent == b.parent ? 1 : 2) / a.depth); 
+
+            // Gera IDs
+            assignUniqueIds(root, "");
+            
+            // Se filtro ativo, expande tudo. Se não, restaura (ou expande tudo se for pouco dado)
+            if(activeFilter || totalNodes < 200) {
+                // Expande tudo
             } else {
-                content.style.maxHeight = '500px'; // Altura suficiente para o conteúdo
-                content.style.opacity = '1';
-                content.style.marginTop = '';
-                icon.style.transform = 'rotate(0deg)';
+                restoreTreeState(); 
+            }
+
+            renderTree(dynamicRadius, totalNodes > 500); // Passa flag de performance
+            
+            // Fecha modal
+            const modal = document.getElementById('data-modal');
+            if (!modal.classList.contains('hidden')) toggleDataModal();
+        }
+
+        // --- RENDERIZAÇÃO (REESCRITA PARA PERFORMANCE) ---
+        function renderTree(radiusStep, disableAnimation) {
+            // Calcula posições
+            tree(root);
+
+            // Ajusta o raio Y manualmente para garantir espaçamento exato entre níveis
+            root.descendants().forEach(d => {
+                d.y = d.depth * radiusStep;
+            });
+
+            const nodes = root.descendants();
+            const links = root.links();
+
+            // --- 1. LINKS (Linhas) ---
+            // Usamos join() para melhor performance em atualizações
+            const linkSelection = g.selectAll(".link")
+                .data(links, d => d.target.data.uniqueId);
+
+            linkSelection.exit().remove();
+
+            const linkEnter = linkSelection.enter().append("path")
+                .attr("class", "link")
+                .attr("d", d3.linkRadial().angle(d => d.x).radius(d => d.y));
+
+            // Se animação estiver ativa e for atualização
+            if (!disableAnimation) {
+                linkEnter.merge(linkSelection).transition().duration(500)
+                    .attr("d", d3.linkRadial().angle(d => d.x).radius(d => d.y));
+            } else {
+                linkEnter.merge(linkSelection)
+                    .attr("d", d3.linkRadial().angle(d => d.x).radius(d => d.y));
+            }
+
+            // --- 2. NÓS (Círculos e Textos) ---
+            const nodeSelection = g.selectAll(".node")
+                .data(nodes, d => d.data.uniqueId);
+
+            nodeSelection.exit().remove();
+
+            const nodeEnter = nodeSelection.enter().append("g")
+                .attr("class", "node")
+                .attr("transform", d => `rotate(${d.x * 180 / Math.PI - 90}) translate(${d.y})`)
+                .on("click", click)
+                .on("mouseover", showTooltip)
+                .on("mouseout", hideTooltip);
+
+            // Círculo
+            nodeEnter.append("circle")
+                .attr("r", 4); // Raio fixo pequeno para performance
+
+            // Texto (Só desenha se for visível/necessário ou se houver espaço)
+            // Otimização: Não renderizar texto para nós internos muito densos se não quiser
+            nodeEnter.append("text")
+                .attr("dy", "0.31em")
+                .attr("x", d => d.x < Math.PI ? 8 : -8)
+                .attr("text-anchor", d => d.x < Math.PI ? "start" : "end")
+                .attr("transform", d => d.x >= Math.PI ? "rotate(180)" : null)
+                .text(d => {
+                    // Trunca nomes muito longos se necessário
+                    return d.data.name.length > 20 ? d.data.name.substring(0, 18) + '..' : d.data.name;
+                });
+
+            // Atualização (Merge)
+            const nodeUpdate = nodeEnter.merge(nodeSelection);
+
+            // Posicionamento Rápido (Sem transition se disableAnimation = true)
+            if (!disableAnimation) {
+                nodeUpdate.transition().duration(500)
+                    .attr("transform", d => `rotate(${d.x * 180 / Math.PI - 90}) translate(${d.y})`);
+            } else {
+                nodeUpdate.attr("transform", d => `rotate(${d.x * 180 / Math.PI - 90}) translate(${d.y})`);
+            }
+
+            // Estilização condicional (Classes CSS são mais rápidas que .style inline)
+            nodeUpdate.select("circle")
+                .attr("class", d => {
+                    if (d.data.type === 'leaf') return d.data.status === 'Online' ? 'status-online' : 'status-offline';
+                    return '';
+                })
+                .style("fill", d => d._children ? colors[d.data.type] : "#1e293b")
+                .style("stroke", d => colors[d.data.type] || "#fff");
+            
+            // Correção de rotação de texto em atualizações
+            nodeUpdate.select("text")
+                .attr("x", d => d.x < Math.PI ? 8 : -8)
+                .attr("text-anchor", d => d.x < Math.PI ? "start" : "end")
+                .attr("transform", d => d.x >= Math.PI ? "rotate(180)" : null);
+
+            // --- AUTO ZOOM ---
+            // Se for a primeira carga ou filtro, ajusta o zoom para caber tudo
+            // Mas com um limite para não ficar minúsculo
+            if(disableAnimation || activeFilter) {
+                // Pequeno delay para garantir renderização
+                setTimeout(() => {
+                    const bounds = g.node().getBBox();
+                    const fullWidth = width;
+                    const fullHeight = height;
+                    const scale = 0.9 / Math.max(bounds.width / fullWidth, bounds.height / fullHeight);
+                    // Não aplica zoom out absurdo, limita a 0.5x
+                    const finalScale = Math.max(scale, 0.1); 
+                    
+                    svg.transition().duration(750).call(
+                        zoomBehavior.transform,
+                        d3.zoomIdentity.translate(width / 2, height / 2).scale(finalScale).translate(-(bounds.x + bounds.width / 2), -(bounds.y + bounds.height / 2))
+                    );
+                }, 100);
             }
         }
 
-        function toggleDataModal() {
-            document.getElementById('data-modal').classList.toggle('hidden');
-        }
-
-        function loadDefaultData() {
-            document.getElementById('csv-input').value = DEFAULT_CSV;
-        }
-
-        function downloadTemplate() {
-            // Cria um arquivo CSV simples para download
-            const csvContent = "data:text/csv;charset=utf-8," + 
-                "Tipo,Nome,Setor,Status,Lat,Lng\n" +
-                "printer,Exemplo Impressora,Administrativo,Online,0,0\n" +
-                "computer,Exemplo PC,TI,Online,0,0\n" +
-                "camera,Exemplo Camera,Seguranca,Offline,0,0\n" +
-                "wifi,Exemplo AP,Geral,Online,0,0";
-                
-            const encodedUri = encodeURI(csvContent);
-            const link = document.createElement("a");
-            link.setAttribute("href", encodedUri);
-            link.setAttribute("download", "modelo_ativos_barralcool.csv");
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-        }
-
-        // --- PERSISTÊNCIA DE ESTADO DA ÁRVORE ---
-        
+        // --- AUXILIARES ---
         function assignUniqueIds(node, parentId) {
             node.data.uniqueId = parentId ? `${parentId}|${node.data.name}` : node.data.name;
             if (node.children) node.children.forEach(child => assignUniqueIds(child, node.data.uniqueId));
@@ -342,321 +490,96 @@ wifi,AP-Portaria,Segurança,Online,0,0
         }
 
         function saveTreeState() {
-            // Se estiver filtrado, não salvamos o estado de abertura para não sobrescrever o layout padrão "Ver Todos"
             if (activeFilter) return;
-
             const expandedIds = [];
-            // Percorre todos os descendentes para ver quem está aberto
             root.descendants().forEach(d => {
-                if (d.children) {
-                    expandedIds.push(d.data.uniqueId);
-                }
+                if (d.children) expandedIds.push(d.data.uniqueId);
             });
             localStorage.setItem('radar_ativos_tree_state', JSON.stringify(expandedIds));
         }
 
         function restoreTreeState() {
-            // Se tiver filtro ativo, expandimos tudo forçadamente
-            if (activeFilter) {
-                root.descendants().forEach(d => {
-                    if (d._children) {
-                        d.children = d._children;
-                        d._children = null;
-                    }
-                });
-                return;
-            }
-
+            if (activeFilter) return;
             const savedStateJSON = localStorage.getItem('radar_ativos_tree_state');
-            
-            // Se não houver estado salvo, não faz nada (mantém padrão "tudo aberto")
             if (!savedStateJSON) return;
-
             const expandedIds = JSON.parse(savedStateJSON);
-
+            
             function applyState(d) {
                 const isOpen = expandedIds.includes(d.data.uniqueId);
-                
                 if (isOpen) {
-                    if (!d.children && d._children) {
-                        d.children = d._children;
-                        d._children = null;
-                    }
+                    if (!d.children && d._children) { d.children = d._children; d._children = null; }
                 } else {
-                    if (d.children) {
-                        d._children = d.children;
-                        d.children = null;
-                    }
+                    if (d.children) { d._children = d.children; d.children = null; }
                 }
-
                 if (d.children) d.children.forEach(applyState);
                 if (d._children) d._children.forEach(applyState);
             }
-
             applyState(root);
         }
 
-        // --- LÓGICA DE FILTRO REAL ---
         function filterTree(status) {
             activeFilter = status;
-            
-            const indicator = document.getElementById('filter-indicator');
-            const indicatorName = document.getElementById('filter-name');
-            indicator.classList.remove('hidden');
-            indicatorName.innerText = status;
-
-            processData(); // Recarrega os dados com o filtro aplicado
+            document.getElementById('filter-indicator').classList.remove('hidden');
+            document.getElementById('filter-name').innerText = status;
+            processData();
         }
 
         function clearFilter() {
             activeFilter = null;
-            
-            const indicator = document.getElementById('filter-indicator');
-            indicator.classList.add('hidden');
-
-            processData(); // Recarrega os dados completos
-        }
-        
-        // Função auxiliar para remover ramos vazios da árvore
-        function pruneHierarchy(node) {
-            if (node.children) {
-                // Filtra recursivamente os filhos
-                node.children = node.children.filter(child => {
-                    pruneHierarchy(child);
-                    // Mantém se for folha OU se for nó interno com filhos
-                    if (child.type === 'leaf') return true;
-                    return child.children && child.children.length > 0;
-                });
-            }
+            document.getElementById('filter-indicator').classList.add('hidden');
+            processData();
         }
 
-        function processData() {
-            const rawText = document.getElementById('csv-input').value.trim();
-            
-            // SALVA OS DADOS NO NAVEGADOR
-            if(rawText) {
-                localStorage.setItem('radar_ativos_data_v2', rawText);
-            }
-
-            const lines = rawText.split('\n');
-            const hierarchy = { name: "Usina", children: [], type: "root" };
-
-            const findOrCreate = (parentArray, name, type) => {
-                let node = parentArray.find(n => n.name === name);
-                if (!node) {
-                    node = { name: name, children: [], type: type };
-                    parentArray.push(node);
-                }
-                return node;
-            };
-
-            for (let i = 1; i < lines.length; i++) {
-                const parts = lines[i].split(',');
-                if (parts.length >= 4) {
-                    const typeRaw = parts[0].trim();
-                    const name = parts[1].trim();
-                    const sector = parts[2].trim();
-                    const status = parts[3].trim();
-
-                    // --- FILTRAGEM NA FONTE ---
-                    // Se houver um filtro ativo e o item não corresponder, pula este item.
-                    // Isso garante que "irmãos" indesejados nem entrem na árvore.
-                    if (activeFilter && status !== activeFilter) {
-                        continue;
-                    }
-
-                    const sectorNode = findOrCreate(hierarchy.children, sector, "sector");
-                    
-                    const typeMap = { 'printer': 'Impressoras', 'computer': 'PCs', 'camera': 'Câmeras', 'wifi': 'Rede' };
-                    const typeLabel = typeMap[typeRaw] || "Outros";
-                    const typeNode = findOrCreate(sectorNode.children, typeLabel, "type");
-
-                    typeNode.children.push({
-                        name: name,
-                        type: "leaf",
-                        status: status,
-                        rawType: typeRaw
-                    });
-                }
-            }
-
-            // Remove ramos que ficaram vazios após o filtro (ex: um setor sem nenhum item Offline)
-            if (activeFilter) {
-                pruneHierarchy(hierarchy);
-            }
-
-            root = d3.hierarchy(hierarchy, d => d.children);
-            
-            // Gera IDs únicos para persistência
-            assignUniqueIds(root, "");
-
-            // Tenta restaurar o estado visual (aberto/fechado)
-            restoreTreeState();
-            
-            update(root);
-            
-            // Se o modal estiver aberto, fecha
-            const modal = document.getElementById('data-modal');
-            if (!modal.classList.contains('hidden')) {
-                toggleDataModal();
-            }
-        }
-
-        // --- UPDATE RADIAL ---
-        function update(source) {
-            // Se a árvore ficou vazia após o filtro (nada encontrado), trate o erro
-            if (!root) {
-                g.selectAll('*').remove();
-                return;
-            }
-
-            // Recalcula o layout da árvore radial
-            tree(root);
-
-            const nodes = root.descendants();
-            const links = root.links();
-
-            // Ajuste manual dos raios (distância do centro) para cada nível
-            // Compactado para 120px para economizar espaço
-            nodes.forEach(d => { 
-                d.y = d.depth * 120; 
-            });
-
-            // --- NÓS ---
-            const node = g.selectAll('g.node')
-                .data(nodes, d => d.data.uniqueId); // Usa uniqueId para key do D3 também (melhora transição)
-
-            const nodeEnter = node.enter().append('g')
-                .attr('class', 'node')
-                .attr("transform", d => `rotate(${(source.x0 || 0) * 180 / Math.PI - 90}) translate(${source.y0 || 0})`)
-                .on('click', click)
-                .on('mouseover', showTooltip)
-                .on('mouseout', hideTooltip);
-
-            nodeEnter.append('circle')
-                .attr('class', d => {
-                    if (d.data.type === 'leaf') return d.data.status === 'Online' ? 'status-online' : 'status-offline';
-                    return '';
-                })
-                .attr('r', 1e-6)
-                .style("fill", d => d._children ? colors[d.data.type] : "#0f172a")
-                .style("stroke", d => colors[d.data.type] || "#fff");
-
-            // Ícones
-            nodeEnter.append('text')
-                .attr("dy", 3)
-                .attr("x", 0)
-                .style("text-anchor", "middle")
-                .style("font-family", "FontAwesome")
-                .style("font-size", "10px")
-                .style("fill", "#fff")
-                .style("pointer-events", "none")
-                .attr("transform", d => {
-                    return `rotate(${-(d.x * 180 / Math.PI - 90)})`;
-                })
-                .text(d => {
-                    if (d.data.type !== 'leaf') return '';
-                    if (d.data.rawType === 'printer') return '\uf02f';
-                    if (d.data.rawType === 'computer') return '\uf108';
-                    if (d.data.rawType === 'camera') return '\uf03d';
-                    if (d.data.rawType === 'wifi') return '\uf1eb';
-                    return '\uf111';
-                });
-
-            // Labels inteligentes
-            nodeEnter.append('text')
-                .attr("dy", "0.31em")
-                .attr("x", d => d.x < Math.PI ? 15 : -15) 
-                .attr("text-anchor", d => d.x < Math.PI ? "start" : "end") 
-                .attr("transform", d => d.x >= Math.PI ? "rotate(180)" : null) 
-                .text(d => d.data.name)
-                .style("fill", "#ffffff");
-
-            // --- MERGE & UPDATE NODES ---
-            const nodeUpdate = node.merge(nodeEnter).transition().duration(duration)
-                .attr("transform", d => `rotate(${d.x * 180 / Math.PI - 90}) translate(${d.y})`);
-
-            nodeUpdate.select('circle')
-                .attr('r', d => d.data.type === 'leaf' ? 5 : 8)
-                .style("fill", d => d._children ? colors[d.data.type] : "#0f172a");
-
-            nodeUpdate.select('text').style("fill-opacity", 1);
-            
-            nodeUpdate.select('text:last-child')
-                .attr("x", d => d.x < Math.PI ? 15 : -15)
-                .attr("text-anchor", d => d.x < Math.PI ? "start" : "end")
-                .attr("transform", d => d.x >= Math.PI ? "rotate(180)" : null);
-
-            // --- SAÍDA DE NÓS ---
-            const nodeExit = node.exit().transition().duration(duration)
-                .attr("transform", d => `rotate(${source.x * 180 / Math.PI - 90}) translate(${source.y})`)
-                .remove();
-
-            nodeExit.select('circle').attr('r', 1e-6);
-            nodeExit.select('text').style("fill-opacity", 1e-6);
-
-            // --- LINKS ---
-            const link = g.selectAll('path.link')
-                .data(links, d => d.target.data.uniqueId); // Usa uniqueId para key
-
-            const radialLink = d3.linkRadial()
-                .angle(d => d.x)
-                .radius(d => d.y);
-
-            const linkEnter = link.enter().insert('path', "g")
-                .attr("class", "link")
-                .attr('d', d => {
-                    const o = {x: source.x0 || 0, y: source.y0 || 0};
-                    return radialLink({source: o, target: o});
-                });
-
-            link.merge(linkEnter).transition().duration(duration)
-                .attr('d', radialLink);
-
-            link.exit().transition().duration(duration)
-                .attr('d', d => {
-                    const o = {x: source.x, y: source.y};
-                    return radialLink({source: o, target: o});
-                })
-                .remove();
-
-            nodes.forEach(d => {
-                d.x0 = d.x;
-                d.y0 = d.y;
-            });
-        }
-
-        // --- INTERAÇÕES ---
-        function click(event, d) {
-            if (d.children) {
-                d._children = d.children;
-                d.children = null;
+        function toggleControls() {
+            const content = document.getElementById('controls-content');
+            const icon = document.getElementById('toggle-icon');
+            isControlsCollapsed = !isControlsCollapsed;
+            if (isControlsCollapsed) {
+                content.style.maxHeight = '0px';
+                content.style.opacity = '0';
+                content.style.marginTop = '0';
+                icon.style.transform = 'rotate(180deg)';
             } else {
-                d.children = d._children;
-                d._children = null;
+                content.style.maxHeight = '500px';
+                content.style.opacity = '1';
+                content.style.marginTop = '';
+                icon.style.transform = 'rotate(0deg)';
             }
-            // Salva o estado da árvore após o clique
+        }
+
+        function toggleDataModal() { document.getElementById('data-modal').classList.toggle('hidden'); }
+        function loadDefaultData() { document.getElementById('csv-input').value = DEFAULT_CSV; }
+        
+        function downloadTemplate() {
+            const csvContent = "data:text/csv;charset=utf-8,Tipo,Nome,Setor,Status,Lat,Lng\ncomputer,PC01,TI,Online,0,0";
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", "modelo.csv");
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        function click(event, d) {
+            if (d.children) { d._children = d.children; d.children = null; }
+            else { d.children = d._children; d._children = null; }
             saveTreeState();
-            update(d);
+            // Recalcula geometria ao clicar (necessário pois o tamanho pode mudar)
+            // Mas mantemos a lógica de performance
+            processData(); 
         }
 
         const tooltip = document.getElementById('tooltip');
         function showTooltip(event, d) {
             if(d.data.type === 'leaf') {
                 tooltip.style.opacity = 1;
-                tooltip.innerHTML = `
-                    <strong>${d.data.name}</strong><br>
-                    <span style="color:${d.data.status === 'Online' ? '#4ade80' : '#f87171'}">
-                        ${d.data.status}
-                    </span>
-                `;
+                tooltip.innerHTML = `<strong>${d.data.name}</strong><br><span style="color:${d.data.status === 'Online' ? '#4ade80' : '#f87171'}">${d.data.status}</span>`;
                 tooltip.style.left = (event.pageX + 10) + 'px';
                 tooltip.style.top = (event.pageY - 28) + 'px';
             }
         }
-        function hideTooltip() {
-            tooltip.style.opacity = 0;
-        }
+        function hideTooltip() { tooltip.style.opacity = 0; }
 
     </script>
 </body>
