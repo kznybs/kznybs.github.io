@@ -6,618 +6,464 @@
     <title>Apresentação Recursividade - Grupo Gabriel</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body {
-            background-color: #0f172a; /* slate-900 */
-            color: #2dd4bf; /* teal-400 */
-            font-family: 'Courier New', Courier, monospace;
-            overflow-x: hidden;
-        }
-
-        /* --- ESTILOS GERAIS --- */
-        .view-section {
-            display: none;
-            width: 100%;
-            animation: fadeIn 0.5s;
-        }
-        .view-section.active {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
+        body { background-color: #0f172a; color: #2dd4bf; font-family: 'Courier New', Courier, monospace; overflow-x: hidden; }
         
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
+        /* --- GERAL --- */
+        .view-section { display: none; width: 100%; animation: fadeIn 0.5s; padding-bottom: 50px; }
+        .view-section.active { display: flex; flex-direction: column; align-items: center; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        button:disabled { opacity: 0.5; cursor: not-allowed; }
 
-        /* --- MERGE SORT STYLES --- */
-        #diagram-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 40px;
-            position: relative;
-        }
-        #svg-layer {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            z-index: 0;
-        }
-        .arrow-line {
-            stroke: #2dd4bf;
-            stroke-width: 2;
-            opacity: 0.2;
-            transition: opacity 0.5s, stroke 0.5s;
-        }
-        .arrow-line.active {
-            opacity: 1;
-            stroke: #22c55e;
-            filter: drop-shadow(0 0 3px #22c55e);
-        }
-        .level-row {
-            display: flex;
-            justify-content: center;
-            gap: 20px;
-            margin-bottom: 50px;
-            position: relative;
-            z-index: 10;
-        }
-        .node-box {
-            display: flex;
-            border: 2px solid #2dd4bf;
-            border-radius: 6px;
-            background-color: #1e293b;
-            box-shadow: 0 0 5px rgba(45, 212, 191, 0.2);
-            transition: all 0.4s ease;
-            opacity: 0.3;
-            transform: scale(0.95);
-        }
-        .node-box.active {
-            opacity: 1;
-            transform: scale(1);
-            box-shadow: 0 0 15px rgba(45, 212, 191, 0.5);
-            background-color: #0f172a;
-        }
-        .node-box.sorted {
-            border-color: #22c55e;
-            color: #22c55e;
-            box-shadow: 0 0 20px rgba(34, 197, 94, 0.4);
-        }
-        .cell {
-            width: 34px;
-            height: 34px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-right: 1px solid #334155;
-            font-weight: bold;
-            font-size: 16px;
-        }
+        /* --- MERGE SORT --- */
+        #diagram-container { display: flex; flex-direction: column; align-items: center; padding: 20px; position: relative; }
+        #svg-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0; }
+        .arrow-line { stroke: #2dd4bf; stroke-width: 2; opacity: 0.2; transition: opacity 0.5s; }
+        .arrow-line.active { opacity: 1; stroke: #22c55e; filter: drop-shadow(0 0 3px #22c55e); }
+        .level-row { display: flex; justify-content: center; gap: 20px; margin-bottom: 40px; position: relative; z-index: 10; }
+        .node-box { display: flex; border: 2px solid #2dd4bf; border-radius: 6px; background-color: #1e293b; opacity: 0.3; transform: scale(0.95); transition: all 0.4s; }
+        .node-box.active { opacity: 1; transform: scale(1); background-color: #0f172a; box-shadow: 0 0 15px rgba(45,212,191,0.3); }
+        .node-box.sorted { border-color: #22c55e; color: #22c55e; box-shadow: 0 0 15px rgba(34,197,94,0.4); }
+        .cell { width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; border-right: 1px solid #334155; font-weight: bold; }
         .cell:last-child { border-right: none; }
 
-        /* --- CALL STACK STYLES --- */
-        .stack-container {
-            display: flex;
-            flex-direction: column-reverse;
-            height: 400px;
-            width: 300px;
-            border: 4px solid #475569;
-            border-top: none;
-            background-color: #1e293b;
-            padding: 10px;
-            overflow: hidden;
-            position: relative;
-            border-radius: 0 0 8px 8px;
-            margin-top: 20px;
-        }
-        .stack-frame {
-            height: 50px;
-            width: 100%;
-            margin-bottom: 5px;
-            border-radius: 4px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0 10px;
-            font-family: monospace;
-            font-weight: bold;
-            opacity: 0;
-            transform: translateY(-20px);
-            transition: all 0.5s ease;
-            border: 1px solid rgba(255,255,255,0.1);
-        }
+        /* --- CALL STACK --- */
+        .stack-container { display: flex; flex-direction: column-reverse; height: 350px; width: 280px; border: 4px solid #475569; border-top: none; background: #1e293b; padding: 10px; overflow: hidden; position: relative; border-radius: 0 0 8px 8px; }
+        .stack-frame { height: 45px; width: 100%; margin-bottom: 4px; border-radius: 4px; display: flex; align-items: center; justify-content: space-between; padding: 0 10px; font-weight: bold; opacity: 0; transform: translateY(-20px); transition: 0.5s; border: 1px solid rgba(255,255,255,0.1); font-size: 12px; }
         .stack-frame.push { opacity: 1; transform: translateY(0); }
         .stack-frame.pop { opacity: 0; transform: translateX(50px); }
-        .frame-blue { background-color: #0ea5e9; color: white; border-color: #38bdf8; }
-        .frame-green { background-color: #22c55e; color: white; border-color: #4ade80; }
-        .frame-red { background-color: #ef4444; color: white; border-color: #f87171; }
+        .frame-blue { background: #0ea5e9; color: white; }
+        .frame-green { background: #22c55e; color: white; }
 
-        /* --- HANOI STYLES --- */
-        .hanoi-base {
-            display: flex;
-            justify-content: space-around;
-            align-items: flex-end;
-            width: 600px;
-            height: 300px;
-            border-bottom: 10px solid #475569;
-            position: relative;
-        }
-        .tower {
-            width: 10px;
-            height: 250px;
-            background-color: #475569;
-            border-radius: 5px 5px 0 0;
-            position: relative;
-            display: flex;
-            flex-direction: column-reverse;
-            align-items: center;
-        }
-        .disk {
-            height: 25px;
-            background-color: #2dd4bf;
-            border: 1px solid #134e4a;
-            border-radius: 4px;
-            transition: all 0.3s ease;
-            z-index: 10;
-            margin-bottom: 2px;
-        }
-        /* Disk widths */
-        .d1 { width: 40px; background: #22d3ee; }
-        .d2 { width: 60px; background: #2dd4bf; }
-        .d3 { width: 80px; background: #34d399; }
-        .d4 { width: 100px; background: #a78bfa; }
-        .d5 { width: 120px; background: #e879f9; }
+        /* --- HANOI --- */
+        .hanoi-base { display: flex; justify-content: space-around; align-items: flex-end; width: 500px; height: 250px; border-bottom: 10px solid #475569; position: relative; }
+        .tower { width: 10px; height: 200px; background: #475569; border-radius: 5px 5px 0 0; position: relative; display: flex; flex-direction: column-reverse; align-items: center; }
+        .disk { height: 20px; background: #2dd4bf; border: 1px solid #134e4a; border-radius: 4px; transition: all 0.3s; z-index: 10; margin-bottom: 1px; }
+        .d1 { width: 30px; background: #22d3ee; } .d2 { width: 50px; background: #2dd4bf; } .d3 { width: 70px; background: #34d399; } .d4 { width: 90px; background: #a78bfa; } .d5 { width: 110px; background: #e879f9; }
 
-        /* Navigation Buttons */
-        .nav-btn {
-            background-color: #1e293b;
-            color: #94a3b8;
-            padding: 0.5rem 1rem;
-            border-radius: 0.5rem;
-            border: 1px solid #334155;
-            transition: all 0.2s;
-        }
-        .nav-btn:hover { background-color: #334155; color: white; }
-        .nav-btn.active {
-            background-color: #0f766e; /* teal-700 */
-            color: white;
-            border-color: #2dd4bf;
-            box-shadow: 0 0 10px rgba(45, 212, 191, 0.3);
-        }
+        /* --- BINARY SEARCH --- */
+        .bs-array { display: flex; gap: 4px; height: 100px; align-items: flex-end; justify-content: center; }
+        .bs-bar { width: 30px; background: #334155; color: white; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; border-radius: 4px 4px 0 0; transition: 0.3s; font-size: 10px; padding-bottom: 2px; opacity: 0.3; }
+        .bs-bar.active-range { opacity: 1; background: #0ea5e9; }
+        .bs-bar.checked { background: #eab308; transform: scale(1.1); }
+        .bs-bar.found { background: #22c55e; transform: scale(1.2); box-shadow: 0 0 15px #22c55e; }
+        .bs-bar.discarded { opacity: 0.1; }
 
+        /* --- FIBONACCI --- */
+        .fib-tree-container { position: relative; width: 100%; height: 500px; overflow: auto; background: #0f172a; border: 1px solid #334155; border-radius: 8px; }
+        #fib-svg-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0; }
+        .fib-node { 
+            width: 36px; height: 36px; border-radius: 50%; 
+            background: #1e293b; border: 2px solid #94a3b8; 
+            display: flex; align-items: center; justify-content: center; 
+            font-size: 11px; font-weight: bold; color: white;
+            position: absolute; z-index: 10; 
+            opacity: 0; transform: scale(0.5); transition: all 0.4s ease-out;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5);
+        }
+        .fib-node.visible { opacity: 1; transform: scale(1); }
+        .fib-node.computing { border-color: #facc15; box-shadow: 0 0 15px rgba(250, 204, 21, 0.4); } /* Amarelo */
+        .fib-node.recalculated { background: #7f1d1d; border-color: #ef4444; box-shadow: 0 0 15px rgba(239, 68, 68, 0.6); } /* Vermelho */
+        .fib-node.memoized { background: #064e3b; border-color: #22c55e; box-shadow: 0 0 15px rgba(34, 197, 94, 0.6); } /* Verde */
+        
+        .fib-line { stroke: #475569; stroke-width: 2; opacity: 0.3; transition: all 0.5s; }
+        .fib-line.active { stroke: #94a3b8; opacity: 0.8; }
+
+        /* NAV */
+        .nav-btn { background: #1e293b; color: #94a3b8; padding: 8px 16px; border-radius: 6px; border: 1px solid #334155; font-size: 13px; transition: 0.2s; white-space: nowrap; }
+        .nav-btn:hover { background: #334155; color: white; }
+        .nav-btn.active { background: #0f766e; color: white; border-color: #2dd4bf; box-shadow: 0 0 8px rgba(45,212,191,0.3); }
     </style>
 </head>
 <body class="flex flex-col min-h-screen">
 
-    <!-- Header Fixo de Navegação -->
-    <div class="fixed top-0 left-0 w-full bg-slate-900/95 backdrop-blur z-50 border-b border-slate-800 p-3 shadow-lg flex flex-col md:flex-row items-center justify-between gap-4">
-        <div>
-            <h1 class="text-xl font-bold text-white tracking-wider">RECURSIVIDADE <span class="text-teal-400">VISUAL</span></h1>
-        </div>
-        
-        <div class="flex gap-2">
+    <div class="fixed top-0 left-0 w-full bg-slate-900/95 backdrop-blur z-50 border-b border-slate-800 p-2 shadow-lg flex flex-col md:flex-row items-center justify-between gap-3">
+        <h1 class="text-lg font-bold text-white ml-4">GRUPO GABRIEL <span class="text-teal-400">DEMO</span></h1>
+        <div class="flex gap-2 overflow-x-auto pb-1 px-4 no-scrollbar">
             <button onclick="switchView('mergesort')" id="btn-mergesort" class="nav-btn active">1. Merge Sort</button>
             <button onclick="switchView('callstack')" id="btn-callstack" class="nav-btn">2. Call Stack</button>
             <button onclick="switchView('hanoi')" id="btn-hanoi" class="nav-btn">3. Hanói</button>
+            <button onclick="switchView('binary')" id="btn-binary" class="nav-btn border-teal-500/50 text-teal-200">4. Busca Binária</button>
+            <button onclick="switchView('fib')" id="btn-fib" class="nav-btn border-purple-500/50 text-purple-200">5. Fibonacci (Otimização)</button>
         </div>
     </div>
-
-    <!-- Espaçamento -->
     <div class="h-20"></div>
 
-    <!-- ================= VIEW 1: MERGE SORT ================= -->
+    <!-- VIEW 1: MERGE SORT -->
     <div id="view-mergesort" class="view-section active">
-        <div class="w-full max-w-4xl p-4 flex flex-col items-center">
-            <h2 class="text-2xl font-bold text-teal-400 mb-2">Merge Sort: Divisão e Conquista</h2>
-            <p class="text-slate-400 mb-4 text-center text-sm">Slide 9: A árvore que divide (topo) e conquista (fundo)</p>
-
-            <div class="flex items-center gap-4 mb-4 bg-slate-800 p-2 rounded border border-slate-700">
-                <div class="flex items-center gap-2">
-                    <span class="text-sm text-slate-300">Velocidade:</span>
-                    <input type="range" id="ms-speed" min="100" max="1500" value="800" class="w-24 accent-teal-500">
-                </div>
-                <button onclick="msStart()" id="ms-btnStart" class="bg-green-600 hover:bg-green-500 text-white font-bold py-1 px-4 rounded transition text-sm">INICIAR</button>
-                <button onclick="msReset()" class="bg-slate-700 hover:bg-slate-600 text-white py-1 px-3 rounded transition text-sm">Reset</button>
-            </div>
-
-            <div id="ms-status" class="text-lg font-mono text-white mb-2 h-6 text-center">Pronto para iniciar</div>
-
-            <div id="diagram-container">
-                <svg id="svg-layer">
-                    <defs>
-                        <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#2dd4bf" /></marker>
-                        <marker id="arrowhead-active" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#22c55e" /></marker>
-                    </defs>
-                </svg>
-            </div>
+        <h2 class="text-xl font-bold text-teal-400 mt-4">Merge Sort (Slide 9)</h2>
+        <div class="flex gap-4 my-4 items-center">
+            <button onclick="msStart()" id="ms-btn" class="bg-green-600 text-white px-4 py-1 rounded font-bold hover:bg-green-500">INICIAR</button>
+            <button onclick="msReset()" class="bg-slate-700 text-white px-3 py-1 rounded">Reset</button>
         </div>
+        <div id="ms-status" class="text-white font-mono text-sm h-6 mb-2">Pronto</div>
+        <div id="diagram-container"><svg id="svg-layer"><defs><marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#2dd4bf"/></marker><marker id="arrowhead-active" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#22c55e"/></marker></defs></svg></div>
     </div>
 
-    <!-- ================= VIEW 2: CALL STACK ================= -->
+    <!-- VIEW 2: CALL STACK -->
     <div id="view-callstack" class="view-section">
-        <div class="w-full max-w-4xl p-4 flex flex-col items-center">
-            <h2 class="text-2xl font-bold text-sky-400 mb-2">A Pilha de Chamadas (Call Stack)</h2>
-            <p class="text-slate-400 mb-4 text-center text-sm">Slides 4-6: Visualizando o risco de Stack Overflow</p>
-
-            <div class="flex items-center gap-4 mb-4 bg-slate-800 p-2 rounded border border-slate-700">
-                <label class="text-sm font-bold text-white">Fatorial de:</label>
-                <input type="number" id="cs-input" value="5" max="7" min="0" class="w-16 p-1 text-black rounded text-center font-bold">
-                <button onclick="csRun()" id="cs-btnRun" class="bg-sky-600 hover:bg-sky-500 text-white font-bold py-1 px-4 rounded transition text-sm">EMPILHAR</button>
-            </div>
-
-            <div class="flex gap-8 items-end">
-                <!-- Visual Stack -->
-                <div class="flex flex-col items-center">
-                    <div class="text-slate-500 font-bold mb-1 text-xs tracking-widest">MEMÓRIA RAM</div>
-                    <div class="stack-container" id="cs-stack">
-                        <div class="absolute top-1/2 left-0 w-full text-center text-slate-600 font-bold text-4xl opacity-20 select-none">LIFO</div>
-                    </div>
-                </div>
-                
-                <!-- Logs & Result -->
-                <div class="w-64 flex flex-col gap-4">
-                    <div class="bg-black p-3 rounded border border-slate-700 font-mono text-xs h-48 overflow-y-auto text-green-400" id="cs-log">
-                        // Log de execução...
-                    </div>
-                    <div class="bg-slate-800 p-4 rounded text-center border border-sky-500/30">
-                        <div class="text-slate-400 text-xs uppercase">Resultado Final</div>
-                        <div id="cs-result" class="text-3xl font-bold text-white">-</div>
-                    </div>
-                </div>
-            </div>
+        <h2 class="text-xl font-bold text-sky-400 mt-4">Stack Overflow (Slide 4-7)</h2>
+        <div class="flex gap-4 my-4 items-center">
+            <input type="number" id="cs-in" value="5" max="7" class="w-12 text-center text-black rounded font-bold">
+            <button onclick="csRun()" id="cs-btn" class="bg-sky-600 text-white px-4 py-1 rounded font-bold">EMPILHAR</button>
+        </div>
+        <div class="flex gap-8">
+            <div class="stack-container" id="cs-stack"><div class="absolute top-1/2 w-full text-center text-slate-600 text-4xl opacity-20 font-bold">RAM</div></div>
+            <div class="w-48 bg-black p-2 rounded text-xs text-green-400 font-mono overflow-y-auto h-64 border border-slate-700" id="cs-log"></div>
         </div>
     </div>
 
-    <!-- ================= VIEW 3: HANOI ================= -->
+    <!-- VIEW 3: HANOI -->
     <div id="view-hanoi" class="view-section">
-        <div class="w-full max-w-4xl p-4 flex flex-col items-center">
-            <h2 class="text-2xl font-bold text-purple-400 mb-2">Torres de Hanói</h2>
-            <p class="text-slate-400 mb-4 text-center text-sm">Slide 13: Elegância Recursiva (Movendo N-1 discos)</p>
-
-            <div class="flex items-center gap-4 mb-8 bg-slate-800 p-2 rounded border border-slate-700">
-                <label class="text-sm text-white">Discos:</label>
-                <input type="number" id="h-disks" value="3" min="3" max="5" class="w-12 p-1 rounded text-black text-center">
-                <button onclick="hStart()" id="h-btnStart" class="bg-purple-600 hover:bg-purple-500 text-white font-bold py-1 px-4 rounded transition text-sm">SOLUCIONAR</button>
-                <button onclick="hReset()" class="bg-slate-700 hover:bg-slate-600 text-white py-1 px-3 rounded transition text-sm">Reset</button>
-            </div>
-
-            <div class="hanoi-base">
-                <div class="tower" id="tower-1"></div>
-                <div class="tower" id="tower-2"></div>
-                <div class="tower" id="tower-3"></div>
-            </div>
-            <div class="flex w-[600px] justify-between text-slate-400 mt-2 text-sm font-mono">
-                <div class="w-1/3 text-center">Origem</div>
-                <div class="w-1/3 text-center">Auxiliar</div>
-                <div class="w-1/3 text-center">Destino</div>
-            </div>
-            <div id="h-status" class="mt-4 text-purple-300 font-mono text-sm h-6"></div>
+        <h2 class="text-xl font-bold text-purple-400 mt-4">Torres de Hanói (Slide 13)</h2>
+        <div class="flex gap-4 my-4 items-center">
+            <input type="number" id="h-in" value="3" max="5" min="3" class="w-12 text-center text-black rounded font-bold">
+            <button onclick="hStart()" id="h-btn" class="bg-purple-600 text-white px-4 py-1 rounded font-bold">RESOLVER</button>
+            <button onclick="hReset()" class="bg-slate-700 text-white px-3 py-1 rounded">Reset</button>
         </div>
+        <div class="hanoi-base mt-8">
+            <div class="tower" id="t1"></div><div class="tower" id="t2"></div><div class="tower" id="t3"></div>
+        </div>
+        <div id="h-status" class="text-purple-300 font-mono mt-4">...</div>
+    </div>
+
+    <!-- VIEW 4: BINARY SEARCH -->
+    <div id="view-binary" class="view-section">
+        <h2 class="text-xl font-bold text-teal-200 mt-4">Busca Binária (Slide 10)</h2>
+        <p class="text-slate-400 text-xs mb-4">"Descarta metade do espaço a cada passo"</p>
+        
+        <div class="flex gap-4 mb-8 items-center">
+            <span class="text-white text-sm">Buscar número: <strong id="bs-target-display" class="text-yellow-400 text-lg">42</strong></span>
+            <button onclick="bsStart()" id="bs-btn" class="bg-teal-600 text-white px-4 py-1 rounded font-bold hover:bg-teal-500">BUSCAR (Recursivo)</button>
+            <button onclick="bsInit()" class="bg-slate-700 text-white px-3 py-1 rounded">Gerar Novos</button>
+        </div>
+
+        <div id="bs-container" class="bs-array w-full max-w-3xl px-4"></div>
+        <div id="bs-status" class="text-xl font-mono text-yellow-300 mt-8 h-8"></div>
+        <div id="bs-log" class="text-xs font-mono text-slate-500 mt-2"></div>
+    </div>
+
+    <!-- VIEW 5: FIBONACCI -->
+    <div id="view-fib" class="view-section">
+        <h2 class="text-xl font-bold text-purple-200 mt-4">Fibonacci & Otimização (Slide 12)</h2>
+        <p class="text-slate-400 text-xs mb-4 text-center max-w-md">Compare a explosão da árvore (Vermelho) com a elegância da Memoização (Verde)</p>
+        
+        <div class="flex gap-4 mb-4 items-center bg-slate-800 p-2 rounded border border-slate-700">
+            <span class="text-white text-sm font-bold">Calcular Fib(5):</span>
+            <button onclick="fibStart(false)" id="fib-btn-naive" class="bg-red-600 text-white px-4 py-1.5 rounded font-bold text-xs hover:bg-red-500 border border-red-400 transition transform hover:scale-105">1. INGÊNUO (Lento)</button>
+            <button onclick="fibStart(true)" id="fib-btn-memo" class="bg-green-600 text-white px-4 py-1.5 rounded font-bold text-xs hover:bg-green-500 border border-green-400 transition transform hover:scale-105">2. MEMOIZED (Rápido)</button>
+        </div>
+
+        <div class="fib-tree-container w-full max-w-4xl" id="fib-container">
+            <svg id="fib-svg-layer"></svg>
+            <!-- Nodes will be injected here -->
+        </div>
+        <div id="fib-stats" class="text-white font-mono text-sm mt-4 text-center h-12"></div>
     </div>
 
     <script>
-        // --- VIEW SWITCHING ---
-        function switchView(viewId) {
-            // Hide all
-            document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
-            document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
-            
-            // Show selected
-            document.getElementById(`view-${viewId}`).classList.add('active');
-            document.getElementById(`btn-${viewId}`).classList.add('active');
-            
-            // Trigger Resize for lines
-            if(viewId === 'mergesort') setTimeout(msDrawLines, 100);
+        function switchView(id){
+            document.querySelectorAll('.view-section').forEach(e=>e.classList.remove('active'));
+            document.querySelectorAll('.nav-btn').forEach(e=>e.classList.remove('active'));
+            document.getElementById(`view-${id}`).classList.add('active');
+            document.getElementById(`btn-${id}`).classList.add('active');
+            if(id==='mergesort') setTimeout(msDrawLines,100);
+            if(id==='binary') bsInit();
         }
+        function sleep(ms){return new Promise(r=>setTimeout(r,ms))}
 
-        function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
-
-        /* =========================================
-           LOGIC: MERGE SORT
-           ========================================= */
-        const initialArray = [38, 27, 43, 3, 9, 82, 10, 50];
-        let msVisualNodes = [], msConnections = [];
-
-        function msGenerateTree(arr, depth = 0, idPrefix = 'root') {
-            const node = { id: idPrefix, array: arr, depth: depth, left: null, right: null };
-            if (arr.length > 1) {
-                const mid = Math.floor(arr.length / 2);
-                node.left = msGenerateTree(arr.slice(0, mid), depth + 1, idPrefix + 'L');
-                node.right = msGenerateTree(arr.slice(mid), depth + 1, idPrefix + 'R');
-            }
-            return node;
+        // --- MERGE SORT LOGIC ---
+        const initArr=[38,27,43,3,9,82,10,50]; let msNodes=[],msConns=[];
+        function msGen(a,d=0,id='r'){
+            let n={id:id,arr:a,d:d,l:null,r:null};
+            if(a.length>1){ let m=Math.floor(a.length/2); n.l=msGen(a.slice(0,m),d+1,id+'L'); n.r=msGen(a.slice(m),d+1,id+'R'); }
+            return n;
         }
-
-        function msGenerateMergeSteps(splitNode, idPrefix = 'm') {
-            if (!splitNode.left && !splitNode.right) {
-                return { id: idPrefix + splitNode.id, array: splitNode.array, depth: 0, isLeaf: true, sources: [splitNode] };
-            }
-            const leftM = msGenerateMergeSteps(splitNode.left, idPrefix);
-            const rightM = msGenerateMergeSteps(splitNode.right, idPrefix);
-            return {
-                id: idPrefix + splitNode.id,
-                array: [...splitNode.array].sort((a,b)=>a-b),
-                depth: Math.max(leftM.depth, rightM.depth) + 1,
-                leftSource: leftM, rightSource: rightM, isLeaf: false
-            };
+        function msMerge(n,id='m'){
+            if(!n.l&&!n.r) return {id:id+n.id,arr:n.arr,d:0,leaf:true,src:n};
+            let l=msMerge(n.l,id),r=msMerge(n.r,id);
+            return {id:id+n.id,arr:[...n.arr].sort((a,b)=>a-b),d:Math.max(l.d,r.d)+1,ls:l,rs:r};
         }
-
-        function msRender() {
-            const container = document.getElementById('diagram-container');
-            const svg = document.getElementById('svg-layer');
-            // Clear content but keep svg
-            const svgEl = container.querySelector('svg');
-            container.innerHTML = '';
-            container.appendChild(svgEl);
-            
-            msVisualNodes = []; msConnections = [];
-
-            // Split Tree
-            const splitRoot = msGenerateTree(initialArray);
-            let queue = [splitRoot];
-            let lvl = 0;
-            while(queue.length > 0) {
-                const row = document.createElement('div'); row.className = 'level-row'; row.id = `split-${lvl}`;
-                let nextQ = [];
-                queue.forEach(n => {
-                    const el = msCreateNode(n.array, n.id); row.appendChild(el);
-                    // Split arrows go DOWN (Parent -> Child)
-                    msConnections.push(n.left ? {from: n.id, to: n.left.id, type: 'split'} : null);
-                    msConnections.push(n.right ? {from: n.id, to: n.right.id, type: 'split'} : null);
-                    if(n.left) nextQ.push(n.left); if(n.right) nextQ.push(n.right);
+        function msRender(){
+            let c=document.getElementById('diagram-container'),svg=document.getElementById('svg-layer');
+            let defs=svg.innerHTML; c.innerHTML=''; c.appendChild(svg); svg.innerHTML=defs;
+            msNodes=[]; msConns=[];
+            // Split
+            let q=[msGen(initArr)],lvl=0;
+            while(q.length){
+                let row=document.createElement('div'); row.className='level-row'; row.id='sp-'+lvl;
+                let nq=[];
+                q.forEach(n=>{
+                    row.appendChild(msBox(n.arr,n.id));
+                    if(n.l){msConns.push({f:n.id,t:n.l.id,type:'s'}); nq.push(n.l);}
+                    if(n.r){msConns.push({f:n.id,t:n.r.id,type:'s'}); nq.push(n.r);}
                 });
-                container.appendChild(row);
-                queue = nextQ; lvl++;
+                c.appendChild(row); q=nq; lvl++;
             }
-
-            // Merge Tree
-            const mergeRoot = msGenerateMergeSteps(splitRoot);
-            let mergeLevels = [];
-            function collect(n, d) {
-                if(n.isLeaf) return;
-                if(!mergeLevels[d]) mergeLevels[d] = [];
-                mergeLevels[d].push(n);
-                collect(n.leftSource, d-1); collect(n.rightSource, d-1);
-            }
-            collect(mergeRoot, mergeRoot.depth);
-            
-            for(let d=1; d<=mergeRoot.depth; d++) {
-                const row = document.createElement('div'); row.className = 'level-row'; row.id = `merge-${d}`;
-                // Dedupe and sort
-                const nodes = [...new Set(mergeLevels[d])].sort((a,b)=>a.id.localeCompare(b.id));
-                nodes.forEach(n => {
-                    const el = msCreateNode(n.array, n.id); row.appendChild(el);
-                    // Merge arrows go UP (Child/Result -> Parent/Source)
-                    if(n.leftSource) {
-                        const sourceId = n.leftSource.isLeaf ? n.leftSource.sources[0].id : n.leftSource.id;
-                        // IMPORTANT: 'from' is current node (bottom), 'to' is source (top)
-                        // This makes the arrow point UP
-                        msConnections.push({from: n.id, to: sourceId, type: 'merge'});
-                    }
-                    if(n.rightSource) {
-                        const sourceId = n.rightSource.isLeaf ? n.rightSource.sources[0].id : n.rightSource.id;
-                        msConnections.push({from: n.id, to: sourceId, type: 'merge'});
-                    }
+            // Merge
+            let mRoot=msMerge(msGen(initArr)), levels=[];
+            function col(n,d){ if(n.leaf)return; if(!levels[d])levels[d]=[]; levels[d].push(n); col(n.ls,d-1); col(n.rs,d-1); }
+            col(mRoot,mRoot.d);
+            for(let d=1;d<=mRoot.d;d++){
+                let row=document.createElement('div'); row.className='level-row'; row.id='mg-'+d;
+                [...new Set(levels[d])].sort((a,b)=>a.id.localeCompare(b.id)).forEach(n=>{
+                    row.appendChild(msBox(n.arr,n.id));
+                    if(n.ls) msConns.push({f:n.ls.leaf?n.ls.src.id:n.ls.id, t:n.id, type:'m'});
+                    if(n.rs) msConns.push({f:n.rs.leaf?n.rs.src.id:n.rs.id, t:n.id, type:'m'});
                 });
-                container.appendChild(row);
+                c.appendChild(row);
             }
-            setTimeout(msDrawLines, 100);
+            setTimeout(msDrawLines,100);
         }
-
-        function msCreateNode(arr, id) {
-            const box = document.createElement('div'); box.className = 'node-box'; box.id = `box-${id}`;
-            arr.forEach(v => { const c=document.createElement('div'); c.className='cell'; c.innerText=v; box.appendChild(c); });
-            return box;
+        function msBox(a,id){
+            let b=document.createElement('div'); b.className='node-box'; b.id='bx-'+id;
+            a.forEach(v=>{let c=document.createElement('div'); c.className='cell'; c.innerText=v; b.appendChild(c)});
+            return b;
         }
-
-        function msDrawLines() {
-            const svg = document.getElementById('svg-layer');
+        function msDrawLines(){
+            let svg=document.getElementById('svg-layer');
             svg.querySelectorAll('line').forEach(l=>l.remove());
-            msConnections.filter(c=>c).forEach(c => {
-                const f = document.getElementById(`box-${c.from}`);
-                const t = document.getElementById(`box-${c.to}`);
-                if(f && t) {
-                    const l = document.createElementNS('http://www.w3.org/2000/svg','line');
-                    const cRect = document.getElementById('diagram-container').getBoundingClientRect();
-                    const fR = f.getBoundingClientRect(); const tR = t.getBoundingClientRect();
-                    
-                    // Logic to connect center-to-center or edge-to-edge
-                    // If split (Down): Bottom of From -> Top of To
-                    // If merge (Up): Top of From -> Bottom of To
-                    
-                    if (c.type === 'merge') {
-                        // Drawing line from Bottom Node (From) UP to Top Node (To)
-                        l.setAttribute('x1', fR.left + fR.width/2 - cRect.left);
-                        l.setAttribute('y1', fR.top - cRect.top); // Start from top of merge box
-                        l.setAttribute('x2', tR.left + tR.width/2 - cRect.left);
-                        l.setAttribute('y2', tR.bottom - cRect.top); // End at bottom of source box
-                    } else {
-                        // Standard Down
-                        l.setAttribute('x1', fR.left + fR.width/2 - cRect.left);
-                        l.setAttribute('y1', fR.bottom - cRect.top);
-                        l.setAttribute('x2', tR.left + tR.width/2 - cRect.left);
-                        l.setAttribute('y2', tR.top - cRect.top);
-                    }
-
-                    l.setAttribute('class', 'arrow-line');
-                    l.setAttribute('marker-end', 'url(#arrowhead)');
-                    l.id = `line-${c.from}-${c.to}`; // This ID is used for animation
-                    svg.appendChild(l);
+            msConns.forEach(c=>{
+                let f=document.getElementById('bx-'+c.f), t=document.getElementById('bx-'+c.t);
+                if(f&&t){
+                    let l=document.createElementNS('http://www.w3.org/2000/svg','line');
+                    let cr=document.getElementById('diagram-container').getBoundingClientRect();
+                    let fr=f.getBoundingClientRect(), tr=t.getBoundingClientRect();
+                    l.setAttribute('x1',fr.left+fr.width/2-cr.left); l.setAttribute('y1',c.type=='m'?fr.bottom-cr.top:fr.bottom-cr.top);
+                    l.setAttribute('x2',tr.left+tr.width/2-cr.left); l.setAttribute('y2',c.type=='m'?tr.top-cr.top:tr.top-cr.top);
+                    l.setAttribute('class','arrow-line'); l.setAttribute('marker-end','url(#arrowhead)');
+                    l.id=`ln-${c.f}-${c.t}`; svg.appendChild(l);
                 }
             });
         }
-
-        async function msStart() {
-            document.getElementById('ms-btnStart').disabled = true;
-            msResetVisuals();
-            const spd = 2000 - document.getElementById('ms-speed').value;
-            const status = document.getElementById('ms-status');
-
-            status.innerText = "Fase 1: Dividir (Descendo...)";
-            for(let i=0; i<4; i++) {
-                const r = document.getElementById(`split-${i}`);
-                if(!r) break;
+        async function msStart(){
+            document.getElementById('ms-btn').disabled=true; msResetVis();
+            let st=document.getElementById('ms-status');
+            st.innerText="Fase 1: DIVIDIR (Descendo...)";
+            for(let i=0;i<4;i++){
+                let r=document.getElementById('sp-'+i); if(!r)break;
                 Array.from(r.children).forEach(e=>e.classList.add('active'));
-                if(i<3) {
-                    await sleep(spd/2);
-                    Array.from(r.children).forEach(e => {
-                        const id = e.id.replace('box-','');
-                        // Activate arrows originating from this box
-                        msConnections.forEach(c => { if(c && c.from===id) {
-                            const l = document.getElementById(`line-${c.from}-${c.to}`);
-                            if(l) { l.classList.add('active'); l.setAttribute('marker-end','url(#arrowhead-active)'); }
-                        }});
-                    });
+                if(i<3){await sleep(400); Array.from(r.children).forEach(e=>{ msConns.filter(c=>c.f==e.id.substr(3)).forEach(c=>{ let l=document.getElementById(`ln-${c.f}-${c.t}`); if(l){l.classList.add('active');l.setAttribute('marker-end','url(#arrowhead-active)')} }) });}
+                await sleep(800);
+            }
+            st.innerText="Fase 2: CONQUISTAR (Juntando...)";
+            for(let i=1;i<=3;i++){
+                let r=document.getElementById('mg-'+i); if(!r)break;
+                Array.from(r.children).forEach(e=>{ msConns.filter(c=>c.t==e.id.substr(3)).forEach(c=>{ let l=document.getElementById(`ln-${c.f}-${c.t}`); if(l){l.classList.add('active');l.setAttribute('marker-end','url(#arrowhead-active)')} }) });
+                await sleep(400);
+                Array.from(r.children).forEach(e=>{e.classList.add('active');e.classList.add('sorted')});
+                await sleep(800);
+            }
+            st.innerText="Concluído!"; document.getElementById('ms-btn').disabled=false;
+        }
+        function msResetVis(){ document.querySelectorAll('.node-box').forEach(e=>e.classList.remove('active','sorted')); document.querySelectorAll('.arrow-line').forEach(e=>{e.classList.remove('active');e.setAttribute('marker-end','url(#arrowhead)')}); }
+        function msReset(){msResetVis();document.getElementById('ms-status').innerText="Pronto";}
+
+        // --- CALL STACK ---
+        async function csRun(){
+            let n=parseInt(document.getElementById('cs-in').value), c=document.getElementById('cs-stack'), l=document.getElementById('cs-log');
+            c.innerHTML='<div class="absolute top-1/2 w-full text-center text-slate-600 text-4xl opacity-20 font-bold">RAM</div>'; l.innerHTML='';
+            document.getElementById('cs-btn').disabled=true;
+            async function fact(x){
+                if(x>8){alert('Overflow!');return 0;}
+                let f=document.createElement('div'); f.className='stack-frame push '+(x<=1?'frame-green':'frame-blue');
+                f.innerHTML=`<span>Fat(${x})</span><span>...</span>`; c.appendChild(f);
+                l.innerHTML+=`<div>> Push Fat(${x})</div>`; l.scrollTop=l.scrollHeight;
+                await sleep(800);
+                if(x<=1){
+                    f.innerHTML=`<span>Fat(${x})</span><span>Ret 1</span>`; await sleep(500);
+                    f.classList.add('pop'); await sleep(500); f.remove(); return 1;
                 }
-                await sleep(spd);
+                let res=x*await fact(x-1);
+                f.innerHTML=`<span>Fat(${x})</span><span>${x}*${res/x}=${res}</span>`; f.classList.remove('frame-blue'); f.classList.add('frame-green');
+                l.innerHTML+=`<div>< Pop Fat(${x}) Ret ${res}</div>`; l.scrollTop=l.scrollHeight;
+                await sleep(800); f.classList.add('pop'); await sleep(500); f.remove(); return res;
             }
-
-            status.innerText = "Fase 2: Conquistar (Voltando para cima...)";
-            for(let i=1; i<=3; i++) {
-                const r = document.getElementById(`merge-${i}`);
-                if(!r) break;
-                // Animate lines ORIGINATING from this node (pointing UP)
-                Array.from(r.children).forEach(e => {
-                    const id = e.id.replace('box-','');
-                    msConnections.forEach(c => { if(c && c.from===id) {
-                         const l = document.getElementById(`line-${c.from}-${c.to}`);
-                         if(l) { l.classList.add('active'); l.setAttribute('marker-end','url(#arrowhead-active)'); }
-                    }});
-                });
-                await sleep(spd/2);
-                Array.from(r.children).forEach(e => { e.classList.add('active'); e.classList.add('sorted'); });
-                await sleep(spd);
-            }
-            status.innerText = "Concluído!";
-            document.getElementById('ms-btnStart').disabled = false;
+            await fact(n); document.getElementById('cs-btn').disabled=false;
         }
 
-        function msResetVisuals() {
-            document.querySelectorAll('.node-box').forEach(e => e.classList.remove('active', 'sorted'));
-            document.querySelectorAll('.arrow-line').forEach(e => { e.classList.remove('active'); e.setAttribute('marker-end','url(#arrowhead)'); });
+        // --- HANOI ---
+        function hReset(){
+            let n=document.getElementById('h-in').value;
+            ['t1','t2','t3'].forEach(i=>document.getElementById(i).innerHTML='');
+            for(let i=n;i>=1;i--){let d=document.createElement('div');d.className=`disk d${i}`;document.getElementById('t1').appendChild(d)}
+            document.getElementById('h-status').innerText="...";
         }
-        function msReset() { msResetVisuals(); document.getElementById('ms-status').innerText="Pronto"; }
+        async function hStart(){
+            let n=document.getElementById('h-in').value, s=document.getElementById('h-status');
+            hReset(); document.getElementById('h-btn').disabled=true;
+            async function mv(k,f,a,t){
+                if(k==0)return;
+                await mv(k-1,f,t,a);
+                let twF=document.getElementById(f), twT=document.getElementById(t), d=twF.lastElementChild;
+                d.style.marginBottom="150px"; await sleep(300);
+                twT.appendChild(d); d.style.marginBottom="1px"; 
+                s.innerText=`Mover disco ${k} de ${f} para ${t}`; await sleep(300);
+                await mv(k-1,a,f,t);
+            }
+            await mv(n,'t1','t2','t3'); s.innerText="Resolvido!"; document.getElementById('h-btn').disabled=false;
+        }
 
+        // --- BINARY SEARCH (NOVO) ---
+        let bsArr=[], bsTarget=42;
+        function bsInit(){
+            bsArr=[]; for(let i=0;i<20;i++) bsArr.push(Math.floor(Math.random()*100));
+            bsArr.sort((a,b)=>a-b); bsTarget=bsArr[Math.floor(Math.random()*bsArr.length)];
+            let c=document.getElementById('bs-container'); c.innerHTML='';
+            bsArr.forEach((v,i)=>{
+                let b=document.createElement('div'); b.className='bs-bar'; b.style.height=(v*0.8+10)+'%'; b.innerText=v; b.id='bs-'+i;
+                c.appendChild(b);
+            });
+            document.getElementById('bs-target-display').innerText=bsTarget;
+            document.getElementById('bs-status').innerText="Vetor Ordenado. Pronto.";
+            document.getElementById('bs-log').innerText="";
+        }
+        async function bsStart(){
+            let btn=document.getElementById('bs-btn'); btn.disabled=true;
+            let log=document.getElementById('bs-log'), st=document.getElementById('bs-status');
+            async function search(l,r){
+                if(l>r){ st.innerText="Não encontrado"; return;}
+                // Visual Range
+                for(let i=0;i<bsArr.length;i++){
+                    let el=document.getElementById('bs-'+i);
+                    if(i>=l && i<=r) { el.classList.remove('discarded'); el.classList.add('active-range'); }
+                    else { el.classList.add('discarded'); el.classList.remove('active-range'); }
+                }
+                let m=Math.floor((l+r)/2);
+                let mEl=document.getElementById('bs-'+m);
+                mEl.classList.add('checked');
+                st.innerText=`Meio [${m}] vale ${bsArr[m]}. Alvo é ${bsTarget}`;
+                log.innerText+=`Busca em [${l}..${r}]. Meio=${bsArr[m]}\n`;
+                await sleep(1500);
 
-        /* =========================================
-           LOGIC: CALL STACK
-           ========================================= */
-        async function csRun() {
-            const n = parseInt(document.getElementById('cs-input').value);
-            const container = document.getElementById('cs-stack');
-            const logEl = document.getElementById('cs-log');
-            const resEl = document.getElementById('cs-result');
-            
+                if(bsArr[m]===bsTarget){
+                    mEl.classList.remove('checked'); mEl.classList.add('found');
+                    st.innerText="ENCONTRADO!"; return;
+                }
+                mEl.classList.remove('checked');
+                if(bsArr[m]<bsTarget) await search(m+1,r);
+                else await search(l,m-1);
+            }
+            await search(0,bsArr.length-1);
+            btn.disabled=false;
+        }
+
+        // --- FIBONACCI (CORRIGIDO E OTIMIZADO) ---
+        let fibCount=0, fibCache={};
+        async function fibStart(memo){
             // Reset
-            container.innerHTML = '<div class="absolute top-1/2 left-0 w-full text-center text-slate-600 font-bold text-4xl opacity-20 select-none">LIFO</div>';
-            logEl.innerHTML = ''; resEl.innerText = '-';
-            document.getElementById('cs-btnRun').disabled = true;
+            let container=document.getElementById('fib-container'); 
+            let svg=document.getElementById('fib-svg-layer');
+            svg.innerHTML = '';
+            // Remove old nodes but keep svg
+            Array.from(container.children).forEach(c => { if(c.id !== 'fib-svg-layer') c.remove() });
+            
+            let stats=document.getElementById('fib-stats'); 
+            fibCount=0; fibCache={};
+            document.getElementById('fib-btn-naive').disabled = true;
+            document.getElementById('fib-btn-memo').disabled = true;
 
-            const log = (m) => logEl.innerHTML += `<div>> ${m}</div>`; logEl.scrollTop=logEl.scrollHeight;
-
-            async function factorial(x, depth) {
-                if(depth > 7) { alert("Limite visual atingido!"); return 0; }
-                
-                // Push Visual
-                const frame = document.createElement('div');
-                frame.className = `stack-frame push ${depth===0?'frame-blue':(x<=1?'frame-green':'frame-blue')}`;
-                frame.id = `f-${x}`;
-                frame.innerHTML = `<span>Fatorial(${x})</span> <span class="text-xs opacity-70">Aguardando...</span>`;
-                container.appendChild(frame);
-                log(`Chamou Fatorial(${x}) - Push na Pilha`);
-                await sleep(800);
-
-                if (x <= 1) {
-                    log(`Base alcançada: Fatorial(${x}) = 1`);
-                    frame.innerHTML = `<span>Fatorial(${x})</span> <span>Retorna 1</span>`;
-                    frame.classList.remove('frame-blue'); frame.classList.add('frame-green');
-                    await sleep(800);
-                    frame.classList.add('pop');
-                    await sleep(400); frame.remove();
-                    log(`Removeu Fatorial(${x}) - Pop`);
-                    return 1;
+            // Draw Node Function
+            async function createNode(n, x, y, px, py) {
+                // Draw Line if parent exists
+                if(px !== null) {
+                    let line = document.createElementNS('http://www.w3.org/2000/svg','line');
+                    line.setAttribute('x1', px+18); // center offset (36px width/2)
+                    line.setAttribute('y1', py+36); // bottom of parent
+                    line.setAttribute('x2', x+18);  // center offset
+                    line.setAttribute('y2', y);     // top of child
+                    line.setAttribute('class', 'fib-line');
+                    svg.appendChild(line);
+                    setTimeout(() => line.classList.add('active'), 50);
                 }
 
-                const sub = await factorial(x - 1, depth + 1);
-                const res = x * sub;
+                // Create Node
+                let div = document.createElement('div');
+                div.className = 'fib-node computing';
+                div.style.left = x + 'px';
+                div.style.top = y + 'px';
+                div.innerText = `F(${n})`;
+                container.appendChild(div);
                 
-                frame.innerHTML = `<span>Fatorial(${x})</span> <span>${x} * ${sub} = ${res}</span>`;
-                frame.classList.remove('frame-blue'); frame.classList.add('frame-green');
-                log(`Calculou: ${x} * ${sub} = ${res}`);
-                await sleep(800);
-                frame.classList.add('pop');
-                await sleep(400); frame.remove();
-                log(`Removeu Fatorial(${x}) - Pop`);
+                // Animate entry
+                await sleep(50);
+                div.classList.add('visible');
+                
+                return div;
+            }
+
+            async function fib(n, x, y, dx, px, py){
+                fibCount++;
+                stats.innerHTML = `Chamadas: <span class="text-yellow-400 text-xl font-bold">${fibCount}</span> | Status: Calculando F(${n})...`;
+                
+                let node = await createNode(n, x, y, px, py);
+                await sleep(400); // Delay for visual pacing
+
+                // 1. MEMOIZATION CHECK
+                if(memo && fibCache[n] !== undefined) {
+                    node.classList.remove('computing');
+                    node.classList.add('memoized'); // Green
+                    node.innerText = fibCache[n];
+                    node.innerHTML += `<div class="absolute -top-4 text-xs text-green-400 font-mono">Cache</div>`;
+                    stats.innerHTML = `Chamadas: ${fibCount} | <span class="text-green-400">Cache Hit! Retornando ${fibCache[n]}</span>`;
+                    await sleep(600);
+                    return fibCache[n];
+                }
+
+                // 2. BASE CASE
+                if(n <= 1) {
+                    node.classList.remove('computing');
+                    if(memo) fibCache[n] = n;
+                    // If naive and base case, neutral color or kept computing style briefly? 
+                    // Let's make base cases just look normal/finished
+                    node.style.borderColor = "#94a3b8";
+                    node.style.background = "#334155";
+                    node.innerText = n;
+                    return n;
+                }
+
+                // 3. RECURSIVE STEP
+                // Left
+                let v1 = await fib(n-1, x - dx, y + 80, dx / 2, x, y);
+                // Right
+                let v2 = await fib(n-2, x + dx, y + 80, dx / 2, x, y);
+                
+                let res = v1 + v2;
+                node.innerText = res;
+                node.classList.remove('computing');
+                
+                // If Naive and redundant (n>1), mark Red to show inefficiency
+                if(!memo) {
+                    node.classList.add('recalculated');
+                } else {
+                    fibCache[n] = res;
+                    // First time calc in Memo is also neutral or distinctive? Let's keep neutral/blueish to imply "Stored"
+                    node.style.borderColor = "#2dd4bf"; // teal
+                }
+                
                 return res;
             }
 
-            const final = await factorial(n, 0);
-            resEl.innerText = final;
-            document.getElementById('cs-btnRun').disabled = false;
+            // Start Root at center
+            // Container width ~ 896px (max-w-4xl). Center ~ 400-450.
+            // Fib(5) needs decent width. 
+            // Level 0: 1 node
+            // Level 1: 2 nodes (dx)
+            // Level 2: 4 nodes
+            // Initial dx needs to be wide enough.
+            
+            // Centralizando visualmente
+            let containerWidth = container.offsetWidth;
+            let startX = (containerWidth / 2) - 18; // minus half node width
+            
+            let final = await fib(5, startX, 40, 160, null, null);
+            
+            stats.innerHTML = `Resultado Final: <span class="text-2xl font-bold text-white">${final}</span> | Total Chamadas: ${fibCount}`;
+            document.getElementById('fib-btn-naive').disabled = false;
+            document.getElementById('fib-btn-memo').disabled = false;
         }
 
-        /* =========================================
-           LOGIC: HANOI
-           ========================================= */
-        async function hStart() {
-            const count = parseInt(document.getElementById('h-disks').value);
-            const status = document.getElementById('h-status');
-            const btn = document.getElementById('h-btnStart');
-            
-            // Setup
-            hReset();
-            btn.disabled = true;
-            
-            // Algorithm
-            async function move(n, fromId, auxId, toId) {
-                if(n === 0) return;
-                await move(n-1, fromId, toId, auxId);
-                
-                // Visual Move
-                const fromTower = document.getElementById(fromId);
-                const toTower = document.getElementById(toId);
-                const disk = fromTower.lastElementChild;
-                
-                disk.style.marginBottom = "150px"; // lift
-                await sleep(400);
-                toTower.appendChild(disk);
-                disk.style.marginBottom = "2px"; // drop
-                status.innerText = `Moveu disco de ${fromId} para ${toId}`;
-                await sleep(400);
-                
-                await move(n-1, auxId, fromId, toId);
-            }
-
-            status.innerText = "Resolvendo...";
-            await move(count, 'tower-1', 'tower-2', 'tower-3');
-            status.innerText = "Resolvido!";
-            btn.disabled = false;
-        }
-
-        function hReset() {
-            const count = parseInt(document.getElementById('h-disks').value);
-            document.getElementById('tower-1').innerHTML = '';
-            document.getElementById('tower-2').innerHTML = '';
-            document.getElementById('tower-3').innerHTML = '';
-            
-            for(let i=count; i>=1; i--) {
-                const d = document.createElement('div');
-                d.className = `disk d${i}`;
-                document.getElementById('tower-1').appendChild(d);
-            }
-            document.getElementById('h-status').innerText = "Pronto";
-        }
-
-        // Init
-        window.onload = () => {
-            msRender();
-            window.onresize = msDrawLines;
-            hReset(); // Init Hanoi disks
-        };
+        window.onload=()=>{ msRender(); window.onresize=msDrawLines; hReset(); bsInit(); }
     </script>
 </body>
 </html>
