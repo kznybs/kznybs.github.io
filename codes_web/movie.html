@@ -20,24 +20,48 @@
             justify-content: center;
         }
 
-        /* Botão Flutuante Discreto (Esquerda) */
-        .float-btn {
+        /* --- ZONA DE CONTROLE (Barra do Topo) --- */
+        .top-bar {
             position: fixed;
-            top: 20px;
-            left: 20px;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 80px; /* Altura da área sensível */
+            z-index: 150;
+            display: flex;
+            justify-content: space-between; /* Um botão na esq, outro na dir */
+            align-items: flex-start;
+            padding: 20px;
+            box-sizing: border-box;
+            
+            /* Lógica de Aparecer/Desaparecer */
+            opacity: 0; 
+            transition: opacity 0.4s ease-in-out;
+            
+            /* Gradiente suave para o fundo dos botões quando visível */
+            background: linear-gradient(to bottom, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0) 100%);
+        }
+
+        /* Quando passar o mouse ou tocar na área, fica visível */
+        .top-bar:hover {
+            opacity: 1;
+        }
+
+        /* Estilo Comum dos Botões */
+        .float-btn {
             background: rgba(255, 255, 255, 0.1);
             color: rgba(255, 255, 255, 0.7);
             border: 1px solid rgba(255, 255, 255, 0.2);
             padding: 8px 15px;
             border-radius: 20px;
             cursor: pointer;
-            z-index: 100;
-            transition: all 0.3s ease;
             font-size: 14px;
             backdrop-filter: blur(5px);
             text-transform: uppercase;
             letter-spacing: 1px;
-            text-decoration: none; /* Para links */
+            text-decoration: none;
+            transition: all 0.3s ease;
+            white-space: nowrap;
         }
 
         .float-btn:hover {
@@ -47,25 +71,30 @@
             box-shadow: 0 0 15px rgba(0, 210, 255, 0.5);
         }
 
-        /* Botão Flutuante (Direita - Para abrir original) */
-        .right-btn {
-            left: auto; /* Anula o left */
-            right: 20px;
-            background: rgba(255, 0, 0, 0.15);
-            border-color: rgba(255, 0, 0, 0.25);
-            display: none; /* Escondido até carregar um vídeo */
+        /* Botão da Direita (Escondido por padrão até ter link) */
+        #btnOriginal {
+            display: none;
         }
 
-        .right-btn:hover {
+        /* Estilo Vermelho (YouTube) */
+        .yt-mode:hover {
             background: #ff0000;
             color: #fff;
             border-color: #ff0000;
             box-shadow: 0 0 15px rgba(255, 0, 0, 0.5);
         }
 
-        /* Modal de Input (Escondido por padrão) */
+        /* Estilo Verde (Download) */
+        .dl-mode:hover {
+            background: #25D366;
+            color: #fff;
+            border-color: #25D366;
+            box-shadow: 0 0 15px rgba(37, 211, 102, 0.5);
+        }
+
+        /* Modal de Input */
         .modal-overlay {
-            display: none; /* JS vai mudar isso para flex */
+            display: none;
             position: fixed;
             top: 0;
             left: 0;
@@ -147,17 +176,18 @@
             width: 100%;
             height: 100%;
             border: none;
-            object-fit: contain; /* Garante que mp4 não estique errado */
+            object-fit: contain;
         }
     </style>
 </head>
 <body>
 
-    <!-- Botão para abrir o menu -->
-    <button class="float-btn" onclick="toggleModal()">+ Link / Trocar Vídeo</button>
-
-    <!-- Botão de emergência para abrir no YouTube -->
-    <a id="btnOriginal" class="float-btn right-btn" href="#" target="_blank">Abrir no YouTube ↗</a>
+    <!-- ZONA DE CONTROLE (Invisível até passar o mouse) -->
+    <div class="top-bar">
+        <button class="float-btn" onclick="toggleModal()">+ Link / Trocar Vídeo</button>
+        
+        <a id="btnOriginal" class="float-btn" href="#" target="_blank">Abrir Link ↗</a>
+    </div>
 
     <!-- Modal para colar o link -->
     <div class="modal-overlay" id="modal">
@@ -168,7 +198,7 @@
                 <input type="text" id="linkInput" placeholder="Cole o link do vídeo aqui..." autofocus>
                 <button class="action-btn" onclick="carregarVideo()">Play</button>
             </div>
-            <p style="font-size: 12px; color: #666; margin:0;">Suporta: YouTube (Playlist/Shorts), MP4, MKV, WebM e Embeds.</p>
+            <p style="font-size: 12px; color: #666; margin:0;">Suporta: YouTube, Streams (com API Key), MP4 e Embeds.</p>
         </div>
     </div>
 
@@ -177,7 +207,7 @@
         <!-- Player para sites e YouTube -->
         <iframe id="tela" src="" allowfullscreen allow="autoplay; encrypted-media; picture-in-picture"></iframe>
         
-        <!-- Player Nativo para arquivos diretos (.mp4, .mkv, etc) -->
+        <!-- Player Nativo para arquivos diretos -->
         <video id="nativePlayer" controls autoplay style="display: none;"></video>
     </div>
 
@@ -187,6 +217,18 @@
         const btnOriginal = document.getElementById('btnOriginal');
         const iframe = document.getElementById('tela');
         const nativePlayer = document.getElementById('nativePlayer');
+        let currentUrl = "";
+
+        // --- SISTEMA DE ERRO INTELIGENTE ---
+        nativePlayer.onerror = function() {
+            console.log("Erro no Player Nativo. Tentando carregar como Iframe/Site...");
+            nativePlayer.style.display = 'none';
+            iframe.style.display = 'block';
+            iframe.src = currentUrl;
+            
+            btnOriginal.innerHTML = "Abrir Original ↗";
+            btnOriginal.classList.remove('dl-mode');
+        };
 
         function toggleModal() {
             if (modal.style.display === 'flex') {
@@ -204,28 +246,32 @@
         function carregarVideo() {
             const url = input.value.trim();
             if (!url) return;
+            currentUrl = url;
 
-            // Configura botão de emergência
+            // Configura botão
             btnOriginal.href = url;
             btnOriginal.style.display = 'block';
+            btnOriginal.classList.remove('yt-mode', 'dl-mode');
+            btnOriginal.removeAttribute('download');
 
-            // Reseta os players (para o som do anterior não continuar tocando)
+            // Reseta players
             iframe.src = "";
             nativePlayer.pause();
             nativePlayer.src = "";
 
-            // --- DETECÇÃO INTELIGENTE ---
+            // --- DETECÇÃO ---
+            const isVideoFile = /\.(mp4|webm|ogg|mov|mkv)($|\?)/i.test(url);
+            const isStreamApi = /api_key=|stream|vod\//i.test(url);
 
-            // 1. É arquivo de vídeo direto? (MP4, WEBM, OGG, MOV, MKV)
-            // Regex procura extensões comuns no final da url ou antes de parâmetros (?)
-            if (url.match(/\.(mp4|webm|ogg|mov|mkv)($|\?)/i)) {
+            if (isVideoFile || isStreamApi) {
                 iframe.style.display = 'none';
                 nativePlayer.style.display = 'block';
                 nativePlayer.src = url;
                 nativePlayer.play().catch(e => console.log("Autoplay bloqueado pelo navegador"));
+
+                btnOriginal.innerHTML = "Tentar Baixar ⬇";
+                btnOriginal.classList.add('dl-mode');
             }
-            
-            // 2. É YouTube?
             else if (url.match(/(?:youtu\.be\/|youtube\.com\/)/)) {
                 nativePlayer.style.display = 'none';
                 iframe.style.display = 'block';
@@ -241,16 +287,17 @@
                     }
                     iframe.src = finalUrl;
                 } else {
-                    // Fallback se não achar ID, tenta embed direto
                     iframe.src = url;
                 }
+
+                btnOriginal.innerHTML = "Abrir no YouTube ↗";
+                btnOriginal.classList.add('yt-mode');
             } 
-            
-            // 3. Qualquer outra coisa (Links de streaming, embeds genéricos)
             else {
                 nativePlayer.style.display = 'none';
                 iframe.style.display = 'block';
                 iframe.src = url;
+                btnOriginal.innerHTML = "Abrir Original ↗";
             }
 
             toggleModal();
