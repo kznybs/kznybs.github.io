@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Orçamento de Projeto: Agrotech</title>
+    <link rel="icon" type="image/png" href="https://i.imgur.com/K2papBR.png">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts: Poppins -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+
+    <style>
+        /* Custom styles to apply the Poppins font and other visual enhancements */
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #f7fafc; /* Lighter gray background */
+        }
+        
+        /* New gradient for the header with a more vibrant look */
+        .header-gradient {
+            background: linear-gradient(135deg, #2d572c 0%, #1a3a19 100%);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        /* Softer shadow for cards */
+        .card-shadow {
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.07);
+        }
+        
+        /* Enhanced transition for hover effects */
+        .card-hover {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .card-hover:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Animation for elements appearing */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.8s ease-out forwards;
+        }
+    </style>
+</head>
+<body class="antialiased text-slate-800">
+
+    <!-- Header Section -->
+    <header class="header-gradient text-white p-8 md:p-12 text-center rounded-b-3xl">
+        <div class="max-w-4xl mx-auto">
+            <img src="https://i.imgur.com/K2papBR.png" alt="Logo Agrotech" class="h-24 w-auto mx-auto mb-6">
+            <h1 class="text-4xl md:text-5xl font-bold mb-2">Orçamento de Projeto: Agrotech</h1>
+            <p class="text-lg text-green-200">
+                Apresentado por: Adilson, Gabriel & Vinicius | Data: 23 de Junho de 2025
+            </p>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container mx-auto p-4 md:p-8">
+
+        <!-- Summary Section -->
+        <section id="resumo" class="mb-16 fade-in">
+            <h2 class="text-3xl font-bold text-center mb-10 text-slate-700">Resumo de Custos</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 text-center max-w-5xl mx-auto">
+                <!-- Fixed Cost Card -->
+                <div class="bg-white p-6 rounded-2xl card-shadow card-hover">
+                    <i class="fas fa-file-signature text-4xl text-sky-500 mb-4"></i>
+                    <h3 class="text-lg font-semibold text-slate-600">Custo Fixo</h3>
+                    <p class="text-3xl font-bold text-sky-600 mt-1">R$ 440,00</p>
+                    <p class="text-sm text-slate-500">(Registro de Marca)</p>
+                </div>
+                <!-- Variable Cost Card -->
+                <div class="bg-white p-6 rounded-2xl card-shadow card-hover">
+                    <i class="fas fa-cogs text-4xl text-amber-500 mb-4"></i>
+                    <h3 class="text-lg font-semibold text-slate-600">Custo Variável</h3>
+                    <p class="text-3xl font-bold text-amber-600 mt-1">R$ 1.390,00 à R$ 11.147,00</p>
+                    <p class="text-sm text-slate-500">(Software, Hospedagem, Hardware)</p>
+                </div>
+                <!-- Total Cost Card -->
+                <div class="bg-green-800 text-white p-6 rounded-2xl card-shadow card-hover">
+                    <i class="fas fa-sack-dollar text-4xl text-green-300 mb-4"></i>
+                    <h3 class="text-lg font-semibold text-green-200">Valor Total Estimado</h3>
+                    <p class="text-3xl font-bold mt-1">R$ 1.830,00 à R$ 11.587,00</p>
+                    <p class="text-sm text-green-200">(Projeto Completo)</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Investment Scenarios Section -->
+        <section id="cenarios" class="mb-16 fade-in" style="animation-delay: 0.2s;">
+            <h2 class="text-3xl font-bold text-center mb-10 text-slate-700">Cenários de Investimento</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+                <!-- Minimum Scenario -->
+                <div class="bg-white p-6 rounded-2xl card-shadow card-hover">
+                    <h3 class="font-bold text-xl mb-4 text-center text-slate-700">Mínimo</h3>
+                    <p class="text-sm text-center text-slate-500 mb-4">Piso de investimentos (s/ notebook)</p>
+                    <ul class="text-slate-600 space-y-2 text-sm">
+                        <li><strong>Registro de Marca:</strong> R$ 440,00</li>
+                        <li><strong>HostGator:</strong> R$ 140,00</li>
+                        <li><strong>Canva:</strong> R$ 810,00</li>
+                    </ul>
+                    <div class="border-t-2 mt-4 pt-4 text-center">
+                        <p class="text-lg font-semibold text-slate-800">Total: <span class="text-green-700 font-bold">R$ 1.390,00</span> ✅</p>
+                    </div>
+                </div>
+                <!-- Intermediate Scenario -->
+                <div class="bg-white p-6 rounded-2xl card-shadow card-hover border-2 border-green-600">
+                    <h3 class="font-bold text-xl mb-4 text-center text-slate-700">Intermediário</h3>
+                    <p class="text-sm text-center text-slate-500 mb-4">Itens recomendados (s/ notebook)</p>
+                    <ul class="text-slate-600 space-y-2 text-sm">
+                        <li><strong>Registro de Marca:</strong> R$ 440,00</li>
+                        <li><strong>Hostinger:</strong> R$ 205,00</li>
+                        <li><strong>Adobe:</strong> R$ 3.600,00</li>
+                    </ul>
+                    <div class="border-t-2 mt-4 pt-4 text-center">
+                        <p class="text-lg font-semibold text-slate-800">Total: <span class="text-green-700 font-bold">R$ 4.245,00</span> ✅</p>
+                    </div>
+                </div>
+                <!-- Maximum Scenario -->
+                <div class="bg-white p-6 rounded-2xl card-shadow card-hover">
+                    <h3 class="font-bold text-xl mb-4 text-center text-slate-700">Máximo</h3>
+                    <p class="text-sm text-center text-slate-500 mb-4">Teto de investimentos (c/ notebook)</p>
+                    <ul class="text-slate-600 space-y-2 text-sm">
+                        <li><strong>Registro de Marca:</strong> R$ 440,00</li>
+                        <li><strong>Hostinger:</strong> R$ 205,00</li>
+                        <li><strong>Figma:</strong> R$ 5.954,15</li>
+                        <li><strong>Asus TUF F15:</strong> R$ 4.547,00</li>
+                    </ul>
+                    <div class="border-t-2 mt-4 pt-4 text-center">
+                        <p class="text-lg font-semibold text-slate-800">Total: <span class="text-green-700 font-bold">R$ 11.146,15</span> ✅</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Detailed Breakdown -->
+        <section id="detalhamento">
+            <h2 class="text-3xl font-bold text-center mb-12 text-slate-700 fade-in">Detalhamento do Orçamento</h2>
+
+            <!-- UI/UX & Design Tools Section -->
+            <div class="mb-16 fade-in" style="animation-delay: 0.2s;">
+                <h3 class="flex items-center justify-center text-2xl font-semibold mb-8 text-slate-600">
+                   <i class="fas fa-palette text-green-600 mr-3"></i>
+                   1. Ferramentas de UI/UX e Design
+                </h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <!-- Figma Card -->
+                    <div class="bg-white rounded-xl p-6 card-shadow card-hover h-full flex flex-col">
+                        <div class="text-center flex-grow">
+                            <i class="fa-brands fa-figma text-purple-600 text-5xl mx-auto mb-4"></i>
+                            <h4 class="font-bold text-xl mb-2 text-slate-800">Figma Enterprise</h4>
+                            <p class="text-3xl font-bold my-3 text-green-700">R$ 5.954<span class="text-lg font-normal text-slate-500">/ano</span></p>
+                            <p class="text-slate-600 mb-4 text-sm">(R$ 496,18 / mês)</p>
+                        </div>
+                        <div class="text-left space-y-1 text-slate-600 text-sm mt-auto">
+                            <p><i class="fas fa-check text-green-500 mr-2"></i>Áreas de trabalho de equipe</p>
+                            <p><i class="fas fa-check text-green-500 mr-2"></i>Temas de design system e APIs</p>
+                            <p><i class="fas fa-check text-green-500 mr-2"></i>Gestão de acessos SCIM</p>
+                        </div>
+                    </div>
+                    <!-- Adobe Card -->
+                    <div class="bg-white rounded-xl p-6 card-shadow card-hover h-full flex flex-col">
+                         <div class="text-center flex-grow">
+                           <img src="https://images-eds-ssl.xboxlive.com/image?url=4rt9.lXDC4H_93laV1_eHHFT949fUipzkiFOBH3fAiZZUCdYojwUyX2aTonS1aIwMrx6NUIsHfUHSLzjGJFxxrnN1XxpyhjxfzopzwjJ02fbuAntrnucDRg2EJprosL7aYhEj28PH_AzZskHVjc0CT6bhr2y358dAuyWXij.ikE-&format=source" alt="Logo do Adobe Creative Cloud" class="h-14 w-auto mx-auto mb-4">
+                           <h4 class="font-bold text-xl mb-2 text-slate-800">Adobe Creative Cloud</h4>
+                           <p class="text-3xl font-bold my-3 text-green-700">R$ 3.600<span class="text-lg font-normal text-slate-500">/ano</span></p>
+                           <p class="text-slate-600 mb-4 text-sm">Plano "Todos os Apps"</p>
+                        </div>
+                        <div class="text-left space-y-1 text-slate-600 text-sm mt-auto">
+                           <p><i class="fas fa-check text-green-500 mr-2"></i>Photoshop & Illustrator</p>
+                           <p><i class="fas fa-check text-green-500 mr-2"></i>Premiere Pro & After Effects</p>
+                           <p><i class="fas fa-check text-green-500 mr-2"></i>Mais de 20 apps de criação</p>
+                       </div>
+                   </div>
+                    <!-- Canva Card -->
+                    <div class="bg-white rounded-xl p-6 card-shadow card-hover h-full flex flex-col">
+                        <div class="text-center flex-grow">
+                            <img src="https://sm.pcmag.com/pcmag_au/review/c/canva/canva_gy5g.jpg" alt="Logo do Canva" class="h-14 w-auto mx-auto mb-4 rounded-lg">
+                            <h4 class="font-bold text-xl mb-2 text-slate-800">Canva Equipes</h4>
+                            <p class="text-3xl font-bold my-3 text-green-700">R$ 810<span class="text-lg font-normal text-slate-500">/ano</span></p>
+                            <p class="text-slate-600 mb-4 text-sm">(Time de 3 pessoas)</p>
+                        </div>
+                        <div class="text-left space-y-1 text-slate-600 text-sm mt-auto">
+                            <p><i class="fas fa-check text-green-500 mr-2"></i>1TB de armazenamento</p>
+                            <p><i class="fas fa-check text-green-500 mr-2"></i>Kit de Marca e templates premium</p>
+                            <p><i class="fas fa-check text-green-500 mr-2"></i>Removedor de Fundo Mágico</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Hardware Section -->
+            <div class="mb-16 fade-in" style="animation-delay: 0.4s;">
+                <h3 class="flex items-center justify-center text-2xl font-semibold mb-8 text-slate-600">
+                    <i class="fas fa-desktop text-green-600 mr-3"></i>
+                    2. Aquisição de Hardware
+                </h3>
+                <div class="bg-white rounded-xl p-6 md:p-8 card-shadow grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <!-- Hardware Options -->
+                    <div>
+                        <h4 class="font-bold text-xl mb-4 text-slate-700">Opções de Computador</h4>
+                        <div class="space-y-4">
+                            <div class="border p-4 rounded-lg flex justify-between items-center card-hover bg-slate-50">
+                                <span class="font-semibold text-slate-700">Asus TUF F15</span>
+                                <span class="font-bold text-lg text-green-700">R$ 4.547,00</span>
+                            </div>
+                            <div class="border p-4 rounded-lg flex justify-between items-center card-hover bg-slate-50">
+                                <span class="font-semibold text-slate-700">Acer Nitro V15</span>
+                                <span class="font-bold text-lg text-green-700">R$ 4.409,00</span>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Justification -->
+                    <div>
+                        <h4 class="font-bold text-xl mb-4 text-slate-700">Justificativa para Aquisição</h4>
+                        <div class="space-y-4 text-sm text-slate-600">
+                            <p><strong>Necessidade Técnica:</strong> Ferramentas como Unity e Unreal Engine 5 exigem alto desempenho gráfico (GPU dedicada como a RTX 3050) para desenvolvimento de simuladores realistas.</p>
+                            <p><strong>Infraestrutura Atual:</strong> A falta de computadores com GPU dedicada no SENAI impede a execução dos softwares e o uso do Meta Quest 2, inviabilizando o projeto.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Intellectual Property Section -->
+            <div class="mb-16 fade-in" style="animation-delay: 0.6s;">
+                 <h3 class="flex items-center justify-center text-2xl font-semibold mb-8 text-slate-600">
+                    <i class="fas fa-shield-alt text-green-600 mr-3"></i>
+                    3. Registro de Marca
+                </h3>
+                <div class="bg-white rounded-xl p-6 card-shadow max-w-2xl mx-auto">
+                    <p class="text-center text-slate-600 mb-4">Taxas para garantir o direito de uso exclusivo da marca "Agrotech".</p>
+                    <div class="divide-y divide-slate-200">
+                        <div class="flex justify-between items-center py-3">
+                            <span class="text-slate-700">Pedido de Registro (GRU)</span>
+                            <span class="font-bold text-lg text-green-700">R$ 142,00</span>
+                        </div>
+                        <div class="flex justify-between items-center py-3">
+                            <div>
+                                <p class="text-slate-700">Taxa de Concessão (GRU)</p>
+                                <p class="text-xs text-slate-500">Garante o direito por 10 anos</p>
+                            </div>
+                            <span class="font-bold text-lg text-green-700">R$ 298,00</span>
+                        </div>
+                         <div class="flex justify-between items-center pt-4 mt-2 border-t-2 border-slate-300">
+                            <span class="font-bold text-slate-800">Total Registro</span>
+                            <span class="font-bold text-xl text-green-800">R$ 440,00</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Hosting Section -->
+            <div class="mb-16 fade-in" style="animation-delay: 0.8s;">
+                <h3 class="flex items-center justify-center text-2xl font-semibold mb-8 text-slate-600">
+                    <i class="fas fa-server text-green-600 mr-3"></i>
+                    4. Hospedagem de Site e Domínio
+                </h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <!-- Option 1 -->
+                    <div class="bg-white p-6 rounded-xl card-shadow card-hover border-2 border-green-600 relative">
+                        <span class="absolute top-0 right-4 -mt-4 bg-green-600 text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">Recomendado</span>
+                        <h4 class="font-bold text-lg text-slate-800">Opção 1: Hostinger</h4>
+                        <p class="text-3xl font-bold my-3">R$ 205<span class="text-lg font-normal text-slate-500">/ano</span></p>
+                        <ul class="text-slate-600 space-y-2 text-sm">
+                            <li><i class="fas fa-check-circle text-green-500 mr-2"></i>Até 25 sites</li>
+                            <li><i class="fas fa-check-circle text-green-500 mr-2"></i>25 GB de espaço e Otimização IA</li>
+                            <li><i class="fas fa-check-circle text-green-500 mr-2"></i>Atualizações automáticas</li>
+                        </ul>
+                    </div>
+                    <!-- Option 2 -->
+                    <div class="bg-white p-6 rounded-xl card-shadow card-hover">
+                        <h4 class="font-bold text-lg text-slate-800">Opção 2: KingHost</h4>
+                        <p class="text-3xl font-bold my-3">R$ 156<span class="text-lg font-normal text-slate-500">/ano</span></p>
+                        <ul class="text-slate-600 space-y-2 text-sm">
+                            <li><i class="fas fa-check-circle text-green-500 mr-2"></i>Até 5 e-mails profissionais</li>
+                            <li><i class="fas fa-check-circle text-green-500 mr-2"></i>10 GB de espaço por e-mail</li>
+                            <li><i class="fas fa-check-circle text-green-500 mr-2"></i>Certificado SSL grátis</li>
+                        </ul>
+                    </div>
+                    <!-- Option 3 -->
+                    <div class="bg-white p-6 rounded-xl card-shadow card-hover">
+                        <h4 class="font-bold text-lg text-slate-800">Opção 3: Hostgator</h4>
+                        <p class="text-3xl font-bold my-3">R$ 140<span class="text-lg font-normal text-slate-500">/ano</span></p>
+                        <ul class="text-slate-600 space-y-2 text-sm">
+                            <li><i class="fas fa-check-circle text-green-500 mr-2"></i>E-mail profissional</li>
+                            <li><i class="fas fa-check-circle text-green-500 mr-2"></i>Certificado SSL e CDN Grátis</li>
+                            <li><i class="fas fa-check-circle text-green-500 mr-2"></i>cPanel e Criador de Sites</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+        </section>
+
+        <!-- Spreadsheet Section -->
+        <section id="planilha" class="mb-12 fade-in" style="animation-delay: 1.0s;">
+            <h2 class="text-3xl font-bold text-center mb-10 text-slate-700">Planilha de Itens Detalhada</h2>
+            <div class="bg-white rounded-2xl card-shadow overflow-x-auto">
+                <table class="w-full text-sm text-left text-slate-600">
+                    <thead class="text-xs text-slate-700 uppercase bg-slate-100">
+                        <tr>
+                            <th scope="col" class="px-6 py-4">Produto/Serviço</th>
+                            <th scope="col" class="px-6 py-4">Imagem/Ícone</th>
+                            <th scope="col" class="px-6 py-4">Valor Anual</th>
+                            <th scope="col" class="px-6 py-4">Anotações</th>
+                            <th scope="col" class="px-6 py-4 text-center">Link</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-200 align-middle">
+                        <tr class="bg-slate-50">
+                            <td colspan="5" class="px-6 py-3 text-center font-bold text-slate-500 uppercase tracking-wider">Software de Design</td>
+                        </tr>
+                        <tr class="hover:bg-slate-50">
+                            <td class="px-6 py-4 font-semibold">Figma Enterprise</td>
+                            <td class="px-6 py-4 text-center text-4xl text-purple-500"><i class="fa-brands fa-figma"></i></td>
+                            <td class="px-6 py-4 font-bold text-lg text-green-700">R$ 5.954,15</td>
+                            <td class="px-6 py-4">Plano Enterprise com acesso full para design system.</td>
+                            <td class="px-6 py-4 text-center">
+                                <a href="https://www.figma.com/pricing/" target="_blank" class="w-full sm:w-auto inline-block bg-green-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-green-700 transition-colors">Visitar</a>
+                            </td>
+                        </tr>
+                        <tr class="hover:bg-slate-50">
+                            <td class="px-6 py-4 font-semibold">Adobe Creative Cloud</td>
+                            <td class="px-6 py-4 text-center">
+                                <img src="https://images-eds-ssl.xboxlive.com/image?url=4rt9.lXDC4H_93laV1_eHHFT949fUipzkiFOBH3fAiZZUCdYojwUyX2aTonS1aIwMrx6NUIsHfUHSLzjGJFxxrnN1XxpyhjxfzopzwjJ02fbuAntrnucDRg2EJprosL7aYhEj28PH_AzZskHVjc0CT6bhr2y358dAuyWXij.ikE-&format=source" alt="Imagem do Adobe Creative Cloud" class="rounded-lg w-10 h-10 object-contain inline-block">
+                            </td>
+                            <td class="px-6 py-4 font-bold text-lg text-green-700">R$ 3.600,00</td>
+                            <td class="px-6 py-4">Plano Todos os Apps (Photoshop, Illustrator, etc.).</td>
+                            <td class="px-6 py-4 text-center">
+                                <a href="https://www.adobe.com/br/creativecloud/plans.html" target="_blank" class="w-full sm:w-auto inline-block bg-green-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-green-700 transition-colors">Visitar</a>
+                            </td>
+                        </tr>
+                        <tr class="hover:bg-slate-50">
+                            <td class="px-6 py-4 font-semibold">Canva Equipes</td>
+                            <td class="px-6 py-4 text-center">
+                                <img src="https://sm.pcmag.com/pcmag_au/review/c/canva/canva_gy5g.jpg" alt="Imagem do Canva" class="rounded-lg w-10 h-10 object-contain inline-block">
+                            </td>
+                            <td class="px-6 py-4 font-bold text-lg text-green-700">R$ 810,00</td>
+                            <td class="px-6 py-4">1TB de armazenamento, Kit de Marca, colaboração.</td>
+                            <td class="px-6 py-4 text-center">
+                                <a href="https://www.canva.com/br/precos/" target="_blank" class="w-full sm:w-auto inline-block bg-green-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-green-700 transition-colors">Visitar</a>
+                            </td>
+                        </tr>
+                        
+                        <tr class="bg-slate-50">
+                            <td colspan="5" class="px-6 py-3 text-center font-bold text-slate-500 uppercase tracking-wider">Hardware</td>
+                        </tr>
+                        <tr class="hover:bg-slate-50">
+                            <td class="px-6 py-4">
+                                <p class="font-semibold">Computador - Opção 1</p>
+                                <p class="text-xs text-slate-500">Asus TUF F15</p>
+                            </td>
+                            <td class="px-6 py-4">
+                                <img src="https://m.media-amazon.com/images/I/71zxWLbeYYL._UF894,1000_QL80_.jpg" alt="Imagem do notebook Asus TUF F15" class="rounded-lg w-32 h-auto object-contain mx-auto sm:mx-0">
+                            </td>
+                            <td class="px-6 py-4 font-bold text-lg text-green-700">R$ 4.547,00</td>
+                            <td class="px-6 py-4">RTX 3050, 512GB SSD. Ideal para desenvolvimento.</td>
+                            <td class="px-6 py-4 text-center">
+                                <a href="https://www.amazon.com.br/Notebook-ASUS-Gaming-NVIDIA-RTX3050/dp/B0CQ8PD4L3" target="_blank" class="w-full sm:w-auto inline-block bg-green-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-green-700 transition-colors">Ver Oferta</a>
+                            </td>
+                        </tr>
+                        <tr class="hover:bg-slate-50">
+                            <td class="px-6 py-4">
+                                <p class="font-semibold">Computador - Opção 2</p>
+                                <p class="text-xs text-slate-500">Acer Nitro V15</p>
+                            </td>
+                            <td class="px-6 py-4">
+                                <img src="https://acerstore.vtexassets.com/arquivos/ids/163359/ANV15-51-%E2%80%93-4.jpg?v=638513134859730000" alt="Imagem do notebook Acer Nitro V15" class="rounded-lg w-32 h-auto object-contain mx-auto sm:mx-0">
+                            </td>
+                            <td class="px-6 py-4 font-bold text-lg text-green-700">R$ 4.409,00</td>
+                            <td class="px-6 py-4">RTX 3050. Essencial para Unity/Unreal Engine.</td>
+                            <td class="px-6 py-4 text-center">
+                                <a href="https://www.mercadolivre.com.br/notebook-acer-nitro-v15-anv15-51-58az-core-i5-13420h-8gb-512gb-rtx-3050-cor-preto/p/MLB39107224" target="_blank" class="w-full sm:w-auto inline-block bg-green-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-green-700 transition-colors">Ver Oferta</a>
+                            </td>
+                        </tr>
+
+                        <tr class="bg-slate-50">
+                            <td colspan="5" class="px-6 py-3 text-center font-bold text-slate-500 uppercase tracking-wider">Propriedade Intelectual</td>
+                        </tr>
+                        <tr class="hover:bg-slate-50">
+                            <td class="px-6 py-4 font-semibold">Registro de Marca</td>
+                            <td class="px-6 py-4 text-center text-3xl text-sky-500"><i class="fas fa-file-signature"></i></td>
+                            <td class="px-6 py-4 font-bold text-lg text-green-700">R$ 440,00</td>
+                            <td class="px-6 py-4">Total (Pedido R$142 + Concessão R$298).</td>
+                            <td class="px-6 py-4 text-center">
+                                <a href="https://www.gov.br/inpi/pt-br" target="_blank" class="w-full sm:w-auto inline-block bg-green-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-green-700 transition-colors">INPI</a>
+                            </td>
+                        </tr>
+
+                        <tr class="bg-slate-50">
+                            <td colspan="5" class="px-6 py-3 text-center font-bold text-slate-500 uppercase tracking-wider">Hospedagem e Domínio</td>
+                        </tr>
+                        <tr class="hover:bg-slate-50">
+                            <td class="px-6 py-4 font-semibold">Hospedagem - Opção 1</td>
+                            <td class="px-6 py-4 text-center text-3xl text-sky-500"><i class="fas fa-server"></i></td>
+                            <td class="px-6 py-4 font-bold text-lg text-green-700">R$ 205,00</td>
+                            <td class="px-6 py-4">Hostinger: Até 25 sites, 25GB, otimização com IA.</td>
+                            <td class="px-6 py-4 text-center">
+                                <a href="https://www.hostinger.com.br/hospedagem-de-sites" target="_blank" class="w-full sm:w-auto inline-block bg-green-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-green-700 transition-colors">Visitar</a>
+                            </td>
+                        </tr>
+                        <tr class="hover:bg-slate-50">
+                            <td class="px-6 py-4 font-semibold">Hospedagem - Opção 2</td>
+                            <td class="px-6 py-4 text-center text-3xl text-sky-500"><i class="fas fa-server"></i></td>
+                            <td class="px-6 py-4 font-bold text-lg text-green-700">R$ 156,00</td>
+                            <td class="px-6 py-4">KingHost: Até 5 e-mails, 10GB de espaço.</td>
+                            <td class="px-6 py-4 text-center">
+                                <a href="https://king.host/hospedagem-de-sites#planos" target="_blank" class="w-full sm:w-auto inline-block bg-green-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-green-700 transition-colors">Visitar</a>
+                            </td>
+                        </tr>
+                        <tr class="hover:bg-slate-50">
+                            <td class="px-6 py-4 font-semibold">Hospedagem - Opção 3</td>
+                            <td class="px-6 py-4 text-center text-3xl text-sky-500"><i class="fas fa-server"></i></td>
+                            <td class="px-6 py-4 font-bold text-lg text-green-700">R$ 140,00</td>
+                            <td class="px-6 py-4">Hostgator: Inclui e-mail, SSL, CDN Grátis, cPanel.</td>
+                            <td class="px-6 py-4 text-center">
+                                <a href="https://www.hostgator.com.br/hospedagem-de-sites-passo-2?pid=5" target="_blank" class="w-full sm:w-auto inline-block bg-green-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-green-700 transition-colors">Visitar</a>
+                            </td>
+                        </tr>
+                        
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Link to Full Spreadsheet Section -->
+        <section id="link-planilha-completa" class="text-center py-12 fade-in" style="animation-delay: 1.2s;">
+            <h3 class="text-2xl font-semibold mb-6 text-slate-700">Acesse a Planilha Completa</h3>
+            <p class="max-w-2xl mx-auto text-slate-600 mb-8">
+                Para uma visão ainda mais detalhada de todos os itens, custos e anotações, acesse a nossa planilha original no Excel.
+            </p>
+            <a href="https://onedrive.live.com/:x:/g/personal/ACEA09EC722E5674/EcFRw-lOi8dHkK6SWh-Y7ZYBe2QvFuD8e-8Cf0jLjIMRxw?e=V2RnkW" target="_blank"
+               class="inline-block bg-green-700 text-white font-bold text-lg py-4 px-10 rounded-full hover:bg-green-800 transition-all duration-300 ease-in-out shadow-lg hover:shadow-xl transform hover:-translate-y-1">
+                <i class="fas fa-file-excel mr-3"></i>
+                Abrir Planilha no Excel
+            </a>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="text-center p-6 bg-slate-800 text-slate-400 mt-8">
+        <p>&copy; 2025 Projeto Agrotech | SENAI Barra do Bugres</p>
+    </footer>
+
+</body>
+</html>

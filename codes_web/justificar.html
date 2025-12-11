@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Controle Orçamentário</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- SheetJS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    
+    <!-- Chart.js (Removido pois não é mais usado, mas mantido caso precise voltar) -->
+    <!-- <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> -->
+    
+    <!-- Ícones -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+        .drop-zone {
+            transition: all 0.3s ease;
+            border-style: dashed;
+        }
+        .drop-zone.dragover {
+            background-color: #f0fdf4; /* Verde claro */
+            border-color: #16a34a;
+            transform: scale(1.02);
+        }
+        .animate-fade-in {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        .hidden-row {
+            display: none;
+        }
+        .expanded-row {
+            display: table-row;
+        }
+        .level-2-row {
+            background-color: #ffffff;
+        }
+        .level-2-row:hover {
+            background-color: #f8fafc;
+        }
+        .level-3-container {
+            background-color: #f1f5f9;
+        }
+        .cursor-pointer:hover {
+            background-color: #f1f5f9;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        /* Animação de destaque para a navegação */
+        @keyframes highlightPulse {
+            0% { background-color: #fef3c7; }
+            100% { background-color: white; }
+        }
+        .highlight-row {
+            animation: highlightPulse 2s ease-out;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col">
+
+    <!-- Navbar -->
+    <nav class="bg-white border-b border-slate-200 sticky top-0 z-30 px-6 py-4 flex justify-between items-center shadow-sm">
+        <div class="flex items-center gap-3">
+            <div class="bg-emerald-600 text-white p-2 rounded-lg">
+                <i class="fa-solid fa-scale-balanced"></i>
+            </div>
+            <div>
+                <h1 class="text-xl font-bold tracking-tight text-slate-800">Gestão Orçamentária</h1>
+                <p class="text-xs text-slate-500">Orçado vs. Realizado (Lógica Estrita (AA))</p>
+            </div>
+        </div>
+        <div class="text-sm text-slate-500">
+            Status: <span id="status-badge" class="px-2 py-1 rounded-full bg-slate-100 text-slate-600 font-medium">Aguardando Arquivo</span>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="flex-grow p-6 container mx-auto max-w-7xl">
+        
+        <!-- Controls Area (Compacto) -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8 items-start">
+            
+            <!-- File Upload Zone (Compacta) -->
+            <div class="lg:col-span-1">
+                <div id="drop-zone" class="drop-zone bg-white border-2 border-slate-300 rounded-xl px-4 py-6 text-center cursor-pointer hover:border-emerald-400 relative flex flex-col justify-center items-center group shadow-sm transition-all hover:shadow-md">
+                    <input type="file" id="file-input" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" accept=".xlsx, .xls, .csv">
+                    <div class="pointer-events-none flex items-center gap-3">
+                        <i class="fa-solid fa-file-excel text-2xl text-slate-400 group-hover:text-emerald-500 transition-colors"></i>
+                        <div class="text-left">
+                            <h3 class="text-sm font-semibold text-slate-700 leading-tight">Importar Relatório</h3>
+                            <p class="text-slate-400 text-xs mt-0.5">Arraste ou clique (Busca: "(AA)")</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Controls (Compacto) -->
+            <div class="lg:col-span-2 bg-white border border-slate-200 rounded-xl p-4 flex flex-col md:flex-row items-center gap-4 shadow-sm h-full">
+                <div class="flex-1 w-full">
+                    <button onclick="downloadTemplate()" class="w-full bg-slate-50 text-slate-600 hover:bg-slate-100 py-2.5 px-4 rounded-lg font-medium text-sm transition-colors text-left flex items-center gap-2 justify-center border border-slate-200">
+                        <i class="fa-solid fa-download text-emerald-600"></i> Baixar Modelo Oficial
+                    </button>
+                </div>
+                <div class="flex-1 w-full">
+                    <button onclick="clearStorage()" id="btn-clear" class="hidden w-full bg-red-50 text-red-600 hover:bg-red-100 py-2.5 px-4 rounded-lg font-medium text-sm transition-colors text-left flex items-center gap-2 justify-center border border-red-100">
+                        <i class="fa-solid fa-trash"></i> Resetar Dashboard
+                    </button>
+                </div>
+                <div class="text-xs text-slate-400 md:w-auto w-full text-center md:text-right md:border-l md:pl-4 md:border-slate-100">
+                    <div class="font-semibold text-slate-600 mb-1">Regra de Status:</div>
+                    <div><span class="text-emerald-600">●</span> &le; 5% = Meta atingida</div>
+                    <div><span class="text-blue-600">●</span> > 5% e &le; R$600 = Baixo impacto</div>
+                    <div><span class="text-red-600">●</span> > 5% e > R$600 = Justificar</div>
+                    <div><span class="text-amber-600">●</span> Sem Orçamento = Não Orçado</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Dashboard Content -->
+        <div id="dashboard-container" class="hidden animate-fade-in space-y-6">
+            
+            <!-- KPIs -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- KPI 1 -->
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100 border-l-4 border-l-blue-500">
+                    <p class="text-xs text-slate-500 font-bold uppercase tracking-wider">Orçamento Total (AA)</p>
+                    <h2 class="text-3xl font-bold text-slate-800 mt-2" id="kpi-orcamento">R$ 0,00</h2>
+                </div>
+                <!-- KPI 2 -->
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100 border-l-4 border-l-red-500">
+                    <p class="text-xs text-slate-500 font-bold uppercase tracking-wider">Total Gasto (Realizado)</p>
+                    <h2 class="text-3xl font-bold text-red-600 mt-2" id="kpi-gasto">R$ 0,00</h2>
+                </div>
+                <!-- KPI 3 -->
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100 border-l-4 border-l-emerald-500">
+                    <p class="text-xs text-slate-500 font-bold uppercase tracking-wider">Variação</p>
+                    <h2 class="text-3xl font-bold text-emerald-600 mt-2" id="kpi-saldo">R$ 0,00</h2>
+                </div>
+            </div>
+
+            <!-- Locator Toggle Section (Substituindo o Gráfico) -->
+            <div class="space-y-4">
+                <button onclick="toggleLocatorSection()" class="w-full bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 font-semibold py-3 px-4 rounded-xl shadow-sm transition-colors flex items-center justify-between group">
+                    <span class="flex items-center gap-2">
+                        <i class="fa-solid fa-magnifying-glass text-slate-400 group-hover:text-amber-500"></i>
+                        Localizador de "Não Orçado"
+                    </span>
+                    <i id="locator-toggle-icon" class="fa-solid fa-chevron-down text-slate-400 transition-transform"></i>
+                </button>
+
+                <div id="locator-section" class="hidden bg-white p-6 rounded-xl shadow-sm border border-slate-100 animate-fade-in border-l-4 border-l-amber-400">
+                    <h3 class="font-semibold text-sm text-slate-500 uppercase tracking-wide mb-4">Centros de Custo com itens não orçados</h3>
+                    <div id="locator-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                        <!-- Botões inseridos via JS -->
+                        <p class="text-sm text-slate-400 italic col-span-full">Nenhum item não orçado encontrado. Tudo certo!</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Detailed Table -->
+            <div class="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden flex flex-col">
+                <div class="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50 shrink-0">
+                    <h3 class="font-semibold text-lg text-slate-700">Detalhamento por Centro de Custo</h3>
+                    <div class="flex gap-2">
+                        <span id="record-count" class="text-xs bg-slate-200 text-slate-700 px-2 py-1 rounded font-semibold">0 Centros</span>
+                        <span class="text-xs bg-indigo-100 text-indigo-700 px-2 py-1 rounded font-semibold"><i class="fa-solid fa-hand-pointer"></i> Clique nas setas para expandir</span>
+                    </div>
+                </div>
+                
+                <div class="overflow-x-auto overflow-y-auto max-h-[600px] custom-scrollbar relative">
+                    <table class="w-full text-sm text-left text-slate-600 relative">
+                        <thead class="text-xs text-slate-700 uppercase bg-slate-100 border-b sticky top-0 z-10 shadow-sm">
+                            <tr>
+                                <th class="px-6 py-3 bg-slate-100 w-10"></th> <!-- Coluna para seta -->
+                                <th class="px-6 py-3 bg-slate-100">Centro de Custo</th>
+                                <th class="px-6 py-3 bg-slate-100 text-right">Orçamento (AA)</th>
+                                <th class="px-6 py-3 bg-slate-100 text-right">Gasto Realizado</th>
+                                <th class="px-6 py-3 bg-slate-100 text-right">Variação</th>
+                                <th class="px-6 py-3 bg-slate-100 text-center w-48">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="table-body" class="divide-y divide-slate-100">
+                            <!-- Rows inserted via JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Configuração Global
+        const STORAGE_KEY = 'dashboard_orcamento_v3';
+        const STORAGE_DATE_KEY = 'dashboard_orcamento_date_v3';
+
+        // Elementos DOM
+        const dropZone = document.getElementById('drop-zone');
+        const fileInput = document.getElementById('file-input');
+        const dashboardContainer = document.getElementById('dashboard-container');
+        const statusBadge = document.getElementById('status-badge');
+        const btnClear = document.getElementById('btn-clear');
+        const recordCountSpan = document.getElementById('record-count');
+        const locatorSection = document.getElementById('locator-section');
+        const locatorToggleIcon = document.getElementById('locator-toggle-icon');
+        const locatorList = document.getElementById('locator-list');
+
+        // Inicialização
+        window.addEventListener('DOMContentLoaded', () => {
+            const savedData = localStorage.getItem(STORAGE_KEY);
+            const savedDate = localStorage.getItem(STORAGE_DATE_KEY);
+
+            if (savedData) {
+                try {
+                    const parsedData = JSON.parse(savedData);
+                    processAndRender(parsedData);
+                    statusBadge.innerText = "Recuperado: " + savedDate;
+                    statusBadge.className = "px-2 py-1 rounded-full bg-blue-100 text-blue-700 font-medium";
+                    dashboardContainer.classList.remove('hidden');
+                    btnClear.classList.remove('hidden');
+                } catch (e) {
+                    console.error("Erro ao carregar:", e);
+                }
+            }
+        });
+
+        // Toggle do Localizador
+        function toggleLocatorSection() {
+            if (locatorSection.classList.contains('hidden')) {
+                locatorSection.classList.remove('hidden');
+                locatorToggleIcon.style.transform = 'rotate(180deg)';
+            } else {
+                locatorSection.classList.add('hidden');
+                locatorToggleIcon.style.transform = 'rotate(0deg)';
+            }
+        }
+
+        // Drag & Drop
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.classList.add('dragover');
+        });
+        dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('dragover');
+            if (e.dataTransfer.files.length) handleFile(e.dataTransfer.files[0]);
+        });
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length) handleFile(e.target.files[0]);
+        });
+
+        // Processamento do Arquivo
+        function handleFile(file) {
+            statusBadge.innerText = "Lendo Relatório...";
+            statusBadge.className = "px-2 py-1 rounded-full bg-yellow-100 text-yellow-700 font-medium";
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                try {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, { type: 'array' });
+                    const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+                    const jsonData = XLSX.utils.sheet_to_json(worksheet);
+
+                    if (jsonData.length === 0) throw new Error("Planilha vazia");
+
+                    // Normalizar dados
+                    const normalizedData = jsonData.map(row => {
+                        const newRow = {};
+                        for (const key in row) {
+                            const cleanKey = key.toLowerCase().trim().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+                            
+                            if (cleanKey.includes("historico")) newRow.historico = row[key];
+                            else if (cleanKey.includes("orcamento")) newRow.orcamento = row[key];
+                            else if (cleanKey.includes("realizado")) newRow.realizado = row[key];
+                            else if (cleanKey.includes("centro") && cleanKey.includes("custo")) newRow.centro = row[key];
+                            else if (cleanKey.includes("conta") && cleanKey.includes("analitica")) newRow.conta = row[key];
+                            else if (cleanKey.includes("diretorias")) newRow.direto = row[key];
+                            else if (cleanKey.includes("identificacao")) newRow.identificacao = row[key];
+                            else if (cleanKey.includes("sim") && (cleanKey.includes("nao") || cleanKey.includes("no"))) newRow.sim_nao = row[key];
+                            else if (cleanKey === "centro") newRow.centro = row[key];
+                            else if (cleanKey === "conta") newRow.conta = row[key];
+                            else newRow[cleanKey] = row[key];
+                        }
+                        return newRow;
+                    });
+
+                    saveToStorage(normalizedData);
+                    processAndRender(normalizedData);
+                    
+                    statusBadge.innerText = "Dashboard Atualizado";
+                    statusBadge.className = "px-2 py-1 rounded-full bg-emerald-100 text-emerald-700 font-medium";
+                    dashboardContainer.classList.remove('hidden');
+
+                } catch (error) {
+                    console.error(error);
+                    alert("Erro ao ler o arquivo. Verifique o layout.");
+                    statusBadge.innerText = "Erro";
+                    statusBadge.className = "px-2 py-1 rounded-full bg-red-100 text-red-700 font-medium";
+                }
+            };
+            reader.readAsArrayBuffer(file);
+        }
+
+        function processAndRender(data) {
+            const centros = {};
+            let totalOrcamento = 0;
+            let totalGasto = 0;
+
+            data.forEach(row => {
+                const centro = row.centro || "Sem Centro";
+                const conta = row.conta || "Geral";
+                
+                const historico = String(row.historico || "").toUpperCase();
+                const identificacao = row.identificacao || "-";
+                const valOrcamento = typeof row.orcamento === 'number' ? row.orcamento : 0;
+                const valRealizado = typeof row.realizado === 'number' ? row.realizado : 0;
+
+                const isReferenceLine = historico.includes("(AA)") || historico.includes("REF ORÇAMENTO");
+
+                if (!centros[centro]) {
+                    centros[centro] = {
+                        nome: centro,
+                        orcamento: 0,
+                        gasto: 0,
+                        contas: {},
+                        hasNonBudgeted: false // Flag para o localizador
+                    };
+                }
+
+                if (!centros[centro].contas[conta]) {
+                    centros[centro].contas[conta] = {
+                        nome: conta,
+                        orcamento: 0,
+                        gasto: 0,
+                        itens: [] 
+                    };
+                }
+
+                centros[centro].contas[conta].itens.push({
+                    historico: row.historico || "Sem histórico",
+                    identificacao: identificacao,
+                    sim_nao: row.sim_nao || "-",
+                    valor: isReferenceLine ? valOrcamento : valRealizado,
+                    tipo: isReferenceLine ? 'ORC' : 'GASTO'
+                });
+
+                if (isReferenceLine) {
+                    centros[centro].orcamento += valOrcamento;
+                    centros[centro].contas[conta].orcamento += valOrcamento;
+                    totalOrcamento += valOrcamento;
+                } else {
+                    centros[centro].gasto += valRealizado;
+                    centros[centro].contas[conta].gasto += valRealizado;
+                    totalGasto += valRealizado;
+                }
+            });
+
+            // Verificar "Não Orçado" após agregação (Gasto > 0 e Orçamento = 0)
+            const reportCentros = Object.values(centros).sort((a,b) => a.nome.localeCompare(b.nome));
+            
+            // Popula o Localizador
+            locatorList.innerHTML = '';
+            let hasFoundAny = false;
+
+            reportCentros.forEach((centro, index) => {
+                // Verificar se alguma conta deste centro tem problema
+                let centroHasIssue = false;
+                Object.values(centro.contas).forEach(conta => {
+                    if (conta.orcamento === 0 && conta.gasto > 0) {
+                        centroHasIssue = true;
+                    }
+                });
+
+                if (centroHasIssue) {
+                    hasFoundAny = true;
+                    const btn = document.createElement('button');
+                    btn.className = "text-left text-xs bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 p-3 rounded-lg transition-colors flex justify-between items-center group";
+                    btn.innerHTML = `<span class="font-medium truncate mr-2">${centro.nome}</span> <i class="fa-solid fa-arrow-right-to-bracket opacity-50 group-hover:opacity-100"></i>`;
+                    btn.onclick = () => scrollToCenter(index);
+                    locatorList.appendChild(btn);
+                }
+            });
+
+            if (!hasFoundAny) {
+                locatorList.innerHTML = '<p class="text-sm text-slate-400 italic col-span-full bg-slate-50 p-4 rounded text-center">Nenhum "Não Orçado" encontrado. Tudo certo!</p>';
+            }
+
+            // KPIs
+            const totalSaldo = totalOrcamento - totalGasto;
+            document.getElementById('kpi-orcamento').innerText = formatCurrency(totalOrcamento);
+            document.getElementById('kpi-gasto').innerText = formatCurrency(totalGasto);
+            document.getElementById('kpi-saldo').innerText = formatCurrency(totalSaldo);
+            
+            const kpiSaldo = document.getElementById('kpi-saldo');
+            if(totalSaldo < 0) kpiSaldo.className = "text-3xl font-bold text-red-600 mt-2";
+            else kpiSaldo.className = "text-3xl font-bold text-emerald-600 mt-2";
+
+            recordCountSpan.innerText = `${reportCentros.length} Centros`;
+
+            renderTable(reportCentros);
+        }
+
+        function scrollToCenter(index) {
+            const rowId = 'center-row-' + index;
+            const detailsId = 'details-' + index;
+            const row = document.getElementById(rowId);
+            
+            if (row) {
+                // Scroll suave
+                row.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                
+                // Adiciona efeito de destaque
+                row.classList.remove('highlight-row');
+                void row.offsetWidth; // Trigger reflow
+                row.classList.add('highlight-row');
+
+                // Abre o detalhe se estiver fechado
+                // Precisamos chamar a lógica de toggle manualmente ou simular clique
+                const detailsRow = document.getElementById(detailsId);
+                if (detailsRow && detailsRow.classList.contains('hidden-row')) {
+                    // Chama a função de toggle passando o ID e o elemento da linha
+                    toggleDetails(detailsId, row);
+                }
+            }
+        }
+
+        function renderTable(centrosList) {
+            const tbody = document.getElementById('table-body');
+            tbody.innerHTML = '';
+
+            centrosList.forEach((centro, index) => {
+                if (centro.orcamento === 0 && centro.gasto === 0) return;
+
+                const saldo = centro.orcamento - centro.gasto;
+                const rowId = `details-${index}`;
+                const mainRowId = `center-row-${index}`; // ID para scroll
+                
+                let statusHtml = getStatusHtml(centro.orcamento, centro.gasto);
+
+                const trMain = `
+                    <tr id="${mainRowId}" class="bg-white border-b border-slate-200 hover:bg-slate-50 cursor-pointer transition-colors group" onclick="toggleDetails('${rowId}', this)">
+                        <td class="px-6 py-4 text-center text-slate-400 group-hover:text-slate-600">
+                            <i class="fa-solid fa-chevron-right transition-transform duration-200"></i>
+                        </td>
+                        <td class="px-6 py-4 font-bold text-slate-800 text-sm">
+                            ${centro.nome}
+                            <div class="text-xs text-slate-500 font-normal mt-1">${Object.keys(centro.contas).length} Contas Analíticas</div>
+                        </td>
+                        <td class="px-6 py-4 text-right text-blue-700 font-medium">${formatCurrency(centro.orcamento)}</td>
+                        <td class="px-6 py-4 text-right text-red-600 font-medium">${formatCurrency(centro.gasto)}</td>
+                        <td class="px-6 py-4 text-right ${saldo < 0 ? 'text-red-600 font-bold' : 'text-emerald-600 font-bold'}">${formatCurrency(saldo)}</td>
+                        <td class="px-6 py-4 text-center">${statusHtml}</td>
+                    </tr>
+                `;
+                tbody.innerHTML += trMain;
+
+                let subRows = '';
+                let contaIndex = 0;
+                
+                Object.values(centro.contas).forEach(conta => {
+                     const cSaldo = conta.orcamento - conta.gasto;
+                     const cStatusHtml = getStatusHtml(conta.orcamento, conta.gasto);
+                     const subRowId = `${rowId}-conta-${contaIndex}`;
+                     
+                     let itemRows = '';
+                     conta.itens.forEach(item => {
+                         const itemColor = item.tipo === 'ORC' ? 'text-blue-600' : 'text-red-500';
+                         const itemSign = item.tipo === 'ORC' ? '+' : '-';
+                         
+                         let simNaoText = item.sim_nao ? String(item.sim_nao).trim().toUpperCase() : "-";
+                         let simNaoClass = "text-slate-400";
+                         if(simNaoText === "SIM") simNaoClass = "text-emerald-600 font-bold";
+                         if(simNaoText === "NÃO" || simNaoText === "NAO") simNaoClass = "text-red-500 font-bold";
+
+                         itemRows += `
+                            <tr class="border-b border-slate-200/50 hover:bg-white last:border-0">
+                                <td class="py-2 pl-8 text-xs text-slate-600 w-1/2">${item.historico}</td>
+                                <td class="py-2 text-center text-xs text-slate-500 font-mono">${item.identificacao}</td>
+                                <td class="py-2 text-center text-xs ${simNaoClass}">${simNaoText}</td>
+                                <td class="py-2 pr-4 text-right text-xs ${itemColor}">${itemSign} ${formatCurrency(item.valor)}</td>
+                            </tr>
+                         `;
+                     });
+
+                     const detailsContainer = `
+                        <tr id="${subRowId}" class="hidden-row level-3-container shadow-inner">
+                            <td colspan="6" class="p-0">
+                                <div class="bg-slate-50/50 p-2 pl-12 border-l-4 border-slate-300">
+                                    <table class="w-full">
+                                        <thead class="text-xs text-slate-400 uppercase border-b border-slate-200">
+                                            <tr>
+                                                <th class="text-left pl-8 py-1">Histórico / Descrição</th>
+                                                <th class="text-center py-1">Identificação</th>
+                                                <th class="text-center py-1">Orçado?</th>
+                                                <th class="text-right pr-4 py-1">Valor</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>${itemRows}</tbody>
+                                    </table>
+                                </div>
+                            </td>
+                        </tr>
+                     `;
+
+                     subRows += `
+                        <tr class="level-2-row border-b border-slate-100 last:border-0 cursor-pointer transition-colors" onclick="toggleDetails('${subRowId}', this)">
+                            <td class="py-3 pl-4 text-xs text-slate-400 w-8 text-center"><i class="fa-solid fa-chevron-right text-[10px] transition-transform duration-200"></i></td>
+                            <td class="py-3 text-xs font-semibold text-slate-700">${conta.nome}</td>
+                            <td class="py-3 text-right text-xs text-blue-600">${formatCurrency(conta.orcamento)}</td>
+                            <td class="py-3 text-right text-xs text-red-500">${formatCurrency(conta.gasto)}</td>
+                            <td class="py-3 pr-4 text-right text-xs ${cSaldo < 0 ? 'text-red-600' : 'text-emerald-600'} font-bold">${formatCurrency(cSaldo)}</td>
+                            <td class="py-3 text-center">${cStatusHtml}</td>
+                        </tr>
+                        ${detailsContainer}
+                     `;
+                     contaIndex++;
+                });
+
+                const trDetails = `
+                    <tr id="${rowId}" class="hidden-row bg-slate-50 shadow-inner">
+                        <td colspan="6" class="p-4 pl-12">
+                            <div class="bg-white rounded border border-slate-200 overflow-hidden">
+                                <table class="w-full">
+                                    <thead class="bg-slate-100 text-xs text-slate-500 uppercase font-semibold">
+                                        <tr>
+                                            <th class="w-8"></th>
+                                            <th class="text-left py-2">Conta Analítica</th>
+                                            <th class="text-right py-2">Orçado</th>
+                                            <th class="text-right py-2">Realizado</th>
+                                            <th class="text-right pr-4 py-2">Variação</th>
+                                            <th class="text-center py-2 w-48">Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        ${subRows}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+                tbody.innerHTML += trDetails;
+            });
+        }
+
+        function getStatusHtml(orcamento, gasto) {
+            if (orcamento === 0) {
+                if (gasto > 0) {
+                    return `<span class="bg-amber-100 text-amber-800 text-xs font-semibold px-2.5 py-0.5 rounded border border-current opacity-90">Não Orçado</span>`;
+                }
+                return `<span class="text-slate-400 text-xs">-</span>`;
+            }
+
+            let percDeviation = (gasto / orcamento) - 1;
+            const absPerc = Math.abs(percDeviation);
+            const absDiff = Math.abs(gasto - orcamento);
+            
+            let statusText = '';
+            let statusClass = '';
+
+            if (absPerc <= 0.05) {
+                statusText = "Meta atingida";
+                statusClass = "bg-emerald-100 text-emerald-800";
+            } else {
+                if (absDiff <= 600) {
+                    statusText = "Baixo impacto";
+                    statusClass = "bg-blue-100 text-blue-800";
+                } else {
+                    statusText = "Justificar";
+                    statusClass = "bg-red-100 text-red-800";
+                }
+            }
+            return `<span class="${statusClass} text-xs font-semibold px-2.5 py-0.5 rounded border border-current opacity-90">${statusText}</span>`;
+        }
+
+        function toggleDetails(rowId, element) {
+            if(event) event.stopPropagation(); // Check se event existe
+            const detailsRow = document.getElementById(rowId);
+            const icon = element.querySelector('.fa-chevron-right');
+            if (!detailsRow) return;
+
+            if (detailsRow.classList.contains('hidden-row')) {
+                detailsRow.classList.remove('hidden-row');
+                detailsRow.classList.add('expanded-row');
+                if(icon) icon.style.transform = 'rotate(90deg)';
+                element.classList.add('bg-slate-100');
+            } else {
+                detailsRow.classList.add('hidden-row');
+                detailsRow.classList.remove('expanded-row');
+                if(icon) icon.style.transform = 'rotate(0deg)';
+                element.classList.remove('bg-slate-100');
+            }
+        }
+
+        function formatCurrency(value) {
+            return value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+        }
+
+        function saveToStorage(data) {
+            try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+                localStorage.setItem(STORAGE_DATE_KEY, new Date().toLocaleString());
+                btnClear.classList.remove('hidden');
+            } catch (e) {
+                console.warn("Storage cheio", e);
+            }
+        }
+
+        function clearStorage() {
+            localStorage.removeItem(STORAGE_KEY);
+            localStorage.removeItem(STORAGE_DATE_KEY);
+            location.reload();
+        }
+
+        function downloadTemplate() {
+            const data = [
+                { 
+                    "DIRETORIAS": "EXEMPLO DIR", 
+                    "CENTRO DE CUSTO - DESCRICÃO": "1102 - ADMINISTRATIVO", 
+                    "CONTA ANALITÍCA - DESCRIÇÃO": "127000 - Licenças Software", 
+                    "HISTORICO": "(AA) VALOR REF ORÇAMENTO", 
+                    "IDENTIFICACAO": "",
+                    "Realizado": "",
+                    "Orçamento": 1000,
+                    "Variação (R$)": 1000,
+                    "SIM/NÃO": ""
+                },
+                { 
+                    "DIRETORIAS": "EXEMPLO DIR", 
+                    "CENTRO DE CUSTO - DESCRICÃO": "1102 - ADMINISTRATIVO", 
+                    "CONTA ANALITÍCA - DESCRIÇÃO": "127000 - Licenças Software", 
+                    "HISTORICO": "NOTA FISCAL MICROSOFT", 
+                    "IDENTIFICACAO": "123456",
+                    "Realizado": 150.50,
+                    "Orçamento": "",
+                    "Variação (R$)": 150.50,
+                    "SIM/NÃO": "SIM"
+                }
+            ];
+            const ws = XLSX.utils.json_to_sheet(data);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Relatório");
+            XLSX.writeFile(wb, "Modelo_Relatorio_MD.xlsx");
+        }
+    </script>
+</body>
+</html>

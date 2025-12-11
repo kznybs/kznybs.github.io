@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visualizador de Deque Completo (Estilo Lousa)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Kalam:wght@400;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .handwritten {
+            font-family: 'Kalam', cursive;
+        }
+        .node-container {
+            transition: all 0.5s ease-in-out;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        .node-exit {
+            animation: fadeOut 0.5s ease-in-out forwards;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes fadeOut {
+            from { opacity: 1; transform: scale(1); }
+            to { opacity: 0; transform: scale(0.5); }
+        }
+        /* Scrollbar customizado para combinar com o tema */
+        .custom-scrollbar::-webkit-scrollbar {
+            height: 8px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #e2e8f0; /* slate-200 */
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #94a3b8; /* slate-400 */
+            border-radius: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #64748b; /* slate-500 */
+        }
+    </style>
+</head>
+<body class="bg-slate-100 text-slate-800 flex items-center justify-center min-h-screen p-4">
+
+    <div class="w-full max-w-screen-2xl bg-white rounded-2xl shadow-xl p-6 md:p-8 space-y-6 border-2 border-slate-200">
+        <!-- Cabeçalho -->
+        <div class="text-center">
+            <h1 class="text-3xl md:text-4xl font-bold text-teal-600 handwritten">Visualizador de Deque Duplamente Encadeada</h1>
+            <p class="text-slate-500 mt-2">Implementação visual do trabalho de Estrutura de Dados I.</p>
+        </div>
+
+        <!-- Controles -->
+        <div class="bg-slate-50 p-4 rounded-lg border border-slate-200 space-y-4">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
+                <div class="flex items-center space-x-3 md:col-span-1">
+                    <input type="number" id="data-input" class="bg-white border-2 border-slate-300 focus:border-teal-500 focus:ring-teal-500 rounded-lg px-4 py-2 text-slate-900 w-full text-center" placeholder="Valor do dado">
+                </div>
+                <div class="grid grid-cols-2 gap-3 md:col-span-2">
+                    <button id="insert-front-btn" class="bg-teal-600 hover:bg-teal-700 text-white font-semibold py-2 px-4 rounded-lg transition-transform transform hover:scale-105">1. Inserir no Início</button>
+                    <button id="insert-rear-btn" class="bg-sky-600 hover:bg-sky-700 text-white font-semibold py-2 px-4 rounded-lg transition-transform transform hover:scale-105">2. Inserir no Fim</button>
+                    <button id="delete-front-btn" class="bg-rose-600 hover:bg-rose-700 text-white font-semibold py-2 px-4 rounded-lg transition-transform transform hover:scale-105">3. Retirar do Início</button>
+                    <button id="delete-rear-btn" class="bg-amber-600 hover:bg-amber-700 text-white font-semibold py-2 px-4 rounded-lg transition-transform transform hover:scale-105">4. Retirar do Fim</button>
+                </div>
+            </div>
+             <div class="pt-4 border-t border-slate-200">
+                 <button id="clear-deque-btn" class="bg-slate-600 hover:bg-slate-700 w-full text-white font-semibold py-2 px-4 rounded-lg transition-transform transform hover:scale-105">6. Remover Todos os Valores</button>
+             </div>
+        </div>
+
+        <!-- Área de Visualização -->
+        <div class="relative bg-slate-100 rounded-lg p-4 min-h-[450px] flex flex-col border-2 border-dashed border-slate-300">
+            <!-- Título que permanece fixo no topo -->
+            <div id="deque-title" class="w-full text-center mb-4 flex-shrink-0">
+                <span class="text-slate-600 handwritten text-2xl">(5) Listar o Conteúdo do Deque</span>
+            </div>
+            <!-- Contêiner que efetivamente rola -->
+            <div id="scroll-wrapper" class="w-full overflow-x-auto custom-scrollbar flex-grow flex items-center">
+                <div id="deque-container" class="flex items-center justify-start p-12 space-x-4 min-w-max">
+                    <!-- Nós serão injetados aqui via JavaScript -->
+                </div>
+            </div>
+            <!-- Mensagem de deque vazio, posicionada em relação à área principal -->
+            <p id="message-area" class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-slate-500 text-2xl handwritten p-12 hidden">O Deque está vazio.</p>
+        </div>
+
+        <!-- Informações do Aluno -->
+        <div class="text-center pt-4 border-t border-slate-200">
+            <p class="text-slate-600 font-semibold">Acadêmico: Gabriel Olímpio Carvalho de Oliveira</p>
+            <p class="text-slate-500 text-sm">Estrutura de Dados I - Prof. Luciano Z. Wolski</p>
+        </div>
+    </div>
+
+    <script>
+        // --- Estrutura de Dados Deque (Implementação em JavaScript) ---
+        class No {
+            constructor(dado) {
+                this.dado = dado;
+                this.anterior = null;
+                this.proximo = null;
+                this.id = `no-${Date.now()}-${Math.random()}`;
+            }
+        }
+
+        class Deque {
+            constructor() {
+                this.inicio = null;
+                this.fim = null;
+            }
+
+            estaVazio() {
+                return this.inicio === null;
+            }
+
+            inserirInicio(dado) {
+                const novoNo = new No(dado);
+                if (this.estaVazio()) {
+                    this.inicio = this.fim = novoNo;
+                } else {
+                    novoNo.proximo = this.inicio;
+                    this.inicio.anterior = novoNo;
+                    this.inicio = novoNo;
+                }
+            }
+
+            inserirFim(dado) {
+                const novoNo = new No(dado);
+                if (this.estaVazio()) {
+                    this.inicio = this.fim = novoNo;
+                } else {
+                    novoNo.anterior = this.fim;
+                    this.fim.proximo = novoNo;
+                    this.fim = novoNo;
+                }
+            }
+
+            removerInicio() {
+                if (this.estaVazio()) return null;
+                const noTemporario = this.inicio;
+                this.inicio = this.inicio.proximo;
+                if (this.inicio) {
+                    this.inicio.anterior = null;
+                } else {
+                    this.fim = null;
+                }
+                return noTemporario;
+            }
+
+            removerFim() {
+                if (this.estaVazio()) return null;
+                const noTemporario = this.fim;
+                this.fim = this.fim.anterior;
+                if (this.fim) {
+                    this.fim.proximo = null;
+                } else {
+                    this.inicio = null;
+                }
+                return noTemporario;
+            }
+
+            esvaziar() {
+                this.inicio = null;
+                this.fim = null;
+            }
+        }
+
+        // --- Manipulação do DOM e Visualização ---
+        const deque = new Deque();
+        const dequeContainer = document.getElementById('deque-container');
+        const messageArea = document.getElementById('message-area');
+        const dequeTitle = document.getElementById('deque-title');
+        const dataInput = document.getElementById('data-input');
+        const scrollWrapper = document.getElementById('scroll-wrapper');
+
+        function renderizarDeque() {
+            dequeContainer.innerHTML = ''; 
+
+            if (deque.estaVazio()) {
+                messageArea.classList.remove('hidden');
+                scrollWrapper.classList.add('hidden'); 
+                dequeTitle.classList.add('hidden'); 
+                return;
+            }
+            
+            messageArea.classList.add('hidden');
+            scrollWrapper.classList.remove('hidden');
+            dequeTitle.classList.remove('hidden');
+            let atual = deque.inicio;
+
+            while (atual) {
+                const noContainer = document.createElement('div');
+                noContainer.id = atual.id;
+                noContainer.className = 'node-container relative flex flex-col items-center';
+
+                if (atual === deque.inicio) {
+                    noContainer.innerHTML += `
+                        <div class="absolute -top-10 text-teal-600 handwritten text-xl">Início</div>
+                        <svg class="absolute -top-5 w-6 h-6 text-teal-600" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a.75.75 0 01-.75-.75V4.66L6.22 7.72a.75.75 0 01-1.06-1.06l4.25-4.25a.75.75 0 011.06 0l4.25 4.25a.75.75 0 01-1.06 1.06L10.75 4.66v12.59A.75.75 0 0110 18z" clip-rule="evenodd"></path></svg>
+                    `;
+                }
+                if (atual === deque.fim) {
+                    noContainer.innerHTML += `
+                       <div class="absolute -bottom-10 text-sky-600 handwritten text-xl">Fim</div>
+                       <svg class="absolute -bottom-5 w-6 h-6 text-sky-600" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 2a.75.75 0 01.75.75v12.59l3.03-3.03a.75.75 0 111.06 1.06l-4.25 4.25a.75.75 0 01-1.06 0L5.97 13.3a.75.75 0 111.06-1.06l3.03 3.03V2.75A.75.75 0 0110 2z" clip-rule="evenodd"></path></svg>
+                    `;
+                }
+                
+                const noVisual = document.createElement('div');
+                noVisual.className = 'flex w-48 h-20 border-2 border-slate-300 rounded-md shadow-lg bg-white';
+                
+                const prevDiv = document.createElement('div');
+                prevDiv.className = 'w-1/4 flex items-center justify-center border-r-2 border-slate-300';
+                prevDiv.innerHTML = atual.anterior ? '<div class="w-2 h-2 bg-rose-500 rounded-full"></div>' : '<span class="text-slate-400 font-mono text-xl">Ø</span>';
+                
+                const dataDiv = document.createElement('div');
+                dataDiv.className = 'w-1/2 flex items-center justify-center text-3xl font-bold text-slate-800';
+                dataDiv.textContent = atual.dado;
+
+                const nextDiv = document.createElement('div');
+                nextDiv.className = 'w-1/4 flex items-center justify-center border-l-2 border-slate-300';
+                nextDiv.innerHTML = atual.proximo ? '<div class="w-2 h-2 bg-emerald-500 rounded-full"></div>' : '<span class="text-slate-400 font-mono text-xl">Ø</span>';
+
+                noVisual.appendChild(prevDiv);
+                noVisual.appendChild(dataDiv);
+                noVisual.appendChild(nextDiv);
+                noContainer.appendChild(noVisual);
+                dequeContainer.appendChild(noContainer);
+
+                if (atual.proximo) {
+                    const setaContainer = document.createElement('div');
+                    setaContainer.className = 'flex flex-col items-center justify-center h-20 w-32';
+                    setaContainer.innerHTML = `
+                        <div class="text-emerald-600 handwritten text-sm">próximo</div>
+                        <svg class="w-28 h-6 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>
+                        <svg class="w-28 h-6 text-rose-600 mt-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16l-4-4m0 0l4-4m-4 4h18"></path></svg>
+                        <div class="text-rose-600 handwritten text-sm">anterior</div>
+                    `;
+                    dequeContainer.appendChild(setaContainer);
+                }
+                atual = atual.proximo;
+            }
+        }
+        
+        function mostrarMensagem(texto, ehErro = false) {
+             let tempMessage = document.getElementById('temp-message');
+             if (!tempMessage) {
+                 tempMessage = document.createElement('p');
+                 tempMessage.id = 'temp-message';
+                 const mainContainer = document.querySelector('.relative.bg-slate-100');
+                 mainContainer.appendChild(tempMessage);
+             }
+             tempMessage.textContent = texto;
+             tempMessage.className = `absolute z-10 bottom-8 left-1/2 -translate-x-1/2 text-xl handwritten p-3 rounded-lg shadow-md ${ehErro ? 'bg-rose-600 text-white' : 'bg-slate-800 text-white'}`;
+             tempMessage.classList.remove('hidden');
+             
+             setTimeout(() => {
+                 tempMessage.classList.add('hidden');
+             }, 1200);
+        }
+
+        document.getElementById('insert-front-btn').addEventListener('click', () => {
+            if (dataInput.value === '') { mostrarMensagem('Por favor, insira um valor.', true); return; }
+            deque.inserirInicio(parseInt(dataInput.value, 10));
+            renderizarDeque();
+            scrollWrapper.scrollTo({ left: 0, behavior: 'smooth' });
+            mostrarMensagem(`${dataInput.value} inserido no início.`);
+            dataInput.value = ''; dataInput.focus();
+        });
+
+        document.getElementById('insert-rear-btn').addEventListener('click', () => {
+            if (dataInput.value === '') { mostrarMensagem('Por favor, insira um valor.', true); return; }
+            deque.inserirFim(parseInt(dataInput.value, 10));
+            renderizarDeque();
+            scrollWrapper.scrollTo({ left: scrollWrapper.scrollWidth, behavior: 'smooth' });
+            mostrarMensagem(`${dataInput.value} inserido no fim.`);
+            dataInput.value = ''; dataInput.focus();
+        });
+
+        document.getElementById('delete-front-btn').addEventListener('click', () => {
+            if (deque.estaVazio()) { mostrarMensagem('Underflow: O Deque está vazio!', true); return; }
+            const noRemovido = deque.removerInicio();
+            mostrarMensagem(`${noRemovido.dado} removido do início.`);
+            const elementoNo = document.getElementById(noRemovido.id);
+            if(elementoNo) { 
+                elementoNo.classList.add('node-exit'); 
+                setTimeout(() => {
+                    renderizarDeque();
+                    scrollWrapper.scrollTo({ left: 0, behavior: 'smooth' });
+                }, 500);
+            } else { 
+                renderizarDeque(); 
+                scrollWrapper.scrollTo({ left: 0, behavior: 'smooth' });
+            }
+        });
+
+        document.getElementById('delete-rear-btn').addEventListener('click', () => {
+             if (deque.estaVazio()) { mostrarMensagem('Underflow: O Deque está vazio!', true); return; }
+            const noRemovido = deque.removerFim();
+            mostrarMensagem(`${noRemovido.dado} removido do fim.`);
+            const elementoNo = document.getElementById(noRemovido.id);
+            if(elementoNo) { 
+                elementoNo.classList.add('node-exit'); 
+                setTimeout(() => {
+                    renderizarDeque();
+                    scrollWrapper.scrollTo({ left: scrollWrapper.scrollWidth, behavior: 'smooth' });
+                }, 500);
+            } else { 
+                renderizarDeque(); 
+                scrollWrapper.scrollTo({ left: scrollWrapper.scrollWidth, behavior: 'smooth' });
+            }
+        });
+        
+        document.getElementById('clear-deque-btn').addEventListener('click', () => {
+            if (deque.estaVazio()) { mostrarMensagem('O Deque já está vazio.', true); return; }
+
+            document.querySelectorAll('.node-container').forEach(no => no.classList.add('node-exit'));
+            
+            setTimeout(() => {
+                deque.esvaziar();
+                renderizarDeque();
+                mostrarMensagem('Todos os valores foram removidos.');
+            }, 500);
+        });
+
+        dataInput.addEventListener('keyup', (event) => {
+            if (event.key === 'Enter') { document.getElementById('insert-rear-btn').click(); }
+        });
+
+        renderizarDeque();
+    </script>
+
+</body>
+</html>

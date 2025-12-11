@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agenda de Tarefas</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+        // Aplica o tema escuro/claro imediatamente para evitar "flash"
+        if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark')
+        } else {
+            document.documentElement.classList.remove('dark')
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+        .task-item.completed .task-title {
+            text-decoration: line-through;
+            color: #a1a1aa; /* zinc-400 */
+        }
+        .dark .task-item.completed .task-title {
+            color: #52525b; /* zinc-600 */
+        }
+        .task-item.completed .checkbox-icon {
+            background-color: #3b82f6; /* blue-500 */
+            border-color: #3b82f6;
+        }
+        .checkbox-icon svg {
+            opacity: 0;
+            transform: scale(0.5);
+            transition: all 0.2s ease-in-out;
+        }
+        .task-item.completed .checkbox-icon svg {
+           opacity: 1;
+           transform: scale(1);
+        }
+        #task-modal {
+            transition: opacity 0.3s ease;
+        }
+        .modal-content {
+            transition: transform 0.3s ease;
+        }
+    </style>
+</head>
+<body class="bg-zinc-100 dark:bg-zinc-900 text-zinc-800 dark:text-zinc-200 transition-colors duration-300">
+
+    <div class="container mx-auto max-w-2xl bg-zinc-50 dark:bg-zinc-800 shadow-xl rounded-none sm:rounded-2xl my-0 sm:my-8 min-h-screen sm:min-h-0">
+        <!-- Cabeçalho -->
+        <header class="p-6 bg-white dark:bg-zinc-800 sm:rounded-t-2xl border-b border-zinc-200 dark:border-zinc-700 flex justify-between items-center">
+            <div>
+                <h1 class="text-3xl font-bold text-zinc-900 dark:text-zinc-100">Minha Agenda</h1>
+                <p id="current-date" class="text-zinc-500 dark:text-zinc-400"></p>
+            </div>
+            <button id="theme-toggle-btn" class="p-2 rounded-full text-zinc-500 hover:bg-zinc-100 dark:hover:bg-zinc-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <svg id="theme-icon-light" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
+                <svg id="theme-icon-dark" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" /></svg>
+            </button>
+        </header>
+
+        <!-- Seção de Tarefas -->
+        <main class="p-4 sm:p-6 pb-24">
+            <div id="task-list" class="space-y-3">
+                <!-- Lista de tarefas será inserida via JS -->
+            </div>
+             <div id="empty-state" class="text-center text-zinc-400 dark:text-zinc-500 py-16 hidden">
+                <svg xmlns="http://www.w3.org/2000/svg" class="mx-auto h-20 w-20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <p class="mt-4 text-lg font-semibold">Tudo em ordem!</p>
+                <p class="text-zinc-500 dark:text-zinc-400">Adicione uma nova tarefa para começar.</p>
+            </div>
+        </main>
+    </div>
+
+    <!-- Botão de Adicionar Tarefa (FAB) -->
+    <button id="add-task-btn" class="fixed bottom-6 right-6 bg-blue-600 text-white rounded-full p-4 shadow-lg hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-300 transition-all duration-300 transform hover:scale-110 z-10">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+        </svg>
+    </button>
+
+    <!-- Modal para Adicionar/Editar Tarefa -->
+    <div id="task-modal" class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4 hidden opacity-0 z-20">
+        <div class="modal-content bg-white dark:bg-zinc-800 rounded-2xl shadow-xl p-8 w-full max-w-md transform scale-95">
+            <h2 id="modal-title" class="text-2xl font-bold mb-6 text-zinc-900 dark:text-zinc-100"></h2>
+            <form id="task-form">
+                <input type="hidden" id="task-edit-index">
+                <div class="mb-4">
+                    <label for="task-title" class="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">Título</label>
+                    <input type="text" id="task-title" required class="w-full px-4 py-2 bg-white dark:bg-zinc-700 border border-zinc-300 dark:border-zinc-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
+                </div>
+                 <div class="mb-6">
+                    <label for="task-details" class="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">Detalhes (Opcional)</label>
+                    <textarea id="task-details" rows="3" class="w-full px-4 py-2 bg-white dark:bg-zinc-700 border border-zinc-300 dark:border-zinc-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"></textarea>
+                </div>
+                <div class="flex justify-end gap-3">
+                    <button type="button" id="cancel-task-btn" class="px-6 py-2 rounded-lg bg-zinc-200 dark:bg-zinc-700 hover:bg-zinc-300 dark:hover:bg-zinc-600 text-zinc-800 dark:text-zinc-200 font-semibold transition-colors">Cancelar</button>
+                    <button type="submit" id="submit-task-btn" class="px-6 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-semibold transition-colors"></button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const currentDateEl = document.getElementById('current-date');
+            const taskListEl = document.getElementById('task-list');
+            const addTaskBtn = document.getElementById('add-task-btn');
+            const taskModal = document.getElementById('task-modal');
+            const modalTitle = document.getElementById('modal-title');
+            const taskForm = document.getElementById('task-form');
+            const cancelTaskBtn = document.getElementById('cancel-task-btn');
+            const submitTaskBtn = document.getElementById('submit-task-btn');
+            const taskTitleInput = document.getElementById('task-title');
+            const taskDetailsInput = document.getElementById('task-details');
+            const taskEditIndexInput = document.getElementById('task-edit-index');
+            const emptyStateEl = document.getElementById('empty-state');
+            const themeToggleBtn = document.getElementById('theme-toggle-btn');
+            const lightIcon = document.getElementById('theme-icon-light');
+            const darkIcon = document.getElementById('theme-icon-dark');
+
+            let tasks = JSON.parse(localStorage.getItem('agendaTasksV3')) || [];
+
+            // --- Gerenciamento de Tema ---
+            const updateThemeIcon = () => {
+                if (document.documentElement.classList.contains('dark')) {
+                    lightIcon.classList.remove('hidden');
+                    darkIcon.classList.add('hidden');
+                } else {
+                    lightIcon.classList.add('hidden');
+                    darkIcon.classList.remove('hidden');
+                }
+            };
+
+            themeToggleBtn.addEventListener('click', () => {
+                const isDark = document.documentElement.classList.toggle('dark');
+                localStorage.theme = isDark ? 'dark' : 'light';
+                updateThemeIcon();
+            });
+            
+            // --- Gerenciamento de Tarefas ---
+            const saveTasks = () => {
+                localStorage.setItem('agendaTasksV3', JSON.stringify(tasks));
+            };
+            
+            const renderDate = () => {
+                 const today = new Date();
+                 const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+                 currentDateEl.textContent = today.toLocaleDateString('pt-BR', options);
+            }
+
+            const renderTasks = () => {
+                taskListEl.innerHTML = '';
+                emptyStateEl.classList.toggle('hidden', tasks.length > 0);
+
+                const sortedTasks = [...tasks].sort((a, b) => a.completed - b.completed);
+
+                sortedTasks.forEach(task => {
+                    const originalIndex = tasks.findIndex(t => t.id === task.id);
+                    const taskElement = document.createElement('div');
+                    taskElement.className = `task-item group flex items-start gap-4 bg-white dark:bg-zinc-900/50 p-4 shadow-sm rounded-lg border-l-4 cursor-pointer transition-all duration-300 ${task.completed ? 'completed border-zinc-300 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800/50' : 'border-blue-500'}`;
+                    
+                    const detailsHTML = task.details ? `<p class="text-sm text-zinc-500 dark:text-zinc-400">${task.details}</p>` : '';
+
+                    taskElement.innerHTML = `
+                        <button class="toggle-complete-btn flex-shrink-0 mt-1 z-10">
+                            <div class="checkbox-icon w-6 h-6 border-2 border-zinc-300 dark:border-zinc-600 rounded-full flex items-center justify-center transition-all duration-300">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+                            </div>
+                        </button>
+                        <div class="flex-grow">
+                            <p class="font-semibold task-title text-zinc-800 dark:text-zinc-200">${task.title}</p>
+                            ${detailsHTML}
+                        </div>
+                        <button class="delete-task-btn p-2 rounded-full text-zinc-400 hover:bg-red-100 dark:hover:bg-red-500/20 hover:text-red-500 dark:hover:text-red-400 transition-all duration-300 flex-shrink-0 opacity-0 group-hover:opacity-100 transform scale-75 group-hover:scale-100 z-10">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+                        </button>
+                    `;
+
+                    // Event listeners
+                    taskElement.querySelector('.delete-task-btn').addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        tasks.splice(originalIndex, 1);
+                        saveTasks();
+                        renderTasks();
+                    });
+                
+                    taskElement.querySelector('.toggle-complete-btn').addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        tasks[originalIndex].completed = !tasks[originalIndex].completed;
+                        saveTasks();
+                        renderTasks();
+                    });
+
+                    taskElement.addEventListener('click', () => openModal(originalIndex));
+                    
+                    taskListEl.appendChild(taskElement);
+                });
+            };
+
+            const openModal = (index = null) => {
+                taskForm.reset();
+                if (index !== null) {
+                    // Modo Edição
+                    modalTitle.textContent = 'Editar Tarefa';
+                    submitTaskBtn.textContent = 'Salvar Alterações';
+                    const task = tasks[index];
+                    taskTitleInput.value = task.title;
+                    taskDetailsInput.value = task.details;
+                    taskEditIndexInput.value = index;
+                } else {
+                    // Modo Criação
+                    modalTitle.textContent = 'Nova Tarefa';
+                    submitTaskBtn.textContent = 'Criar Tarefa';
+                    taskEditIndexInput.value = '';
+                }
+
+                taskModal.classList.remove('hidden');
+                setTimeout(() => {
+                    taskModal.classList.remove('opacity-0');
+                    taskModal.querySelector('.modal-content').classList.remove('scale-95');
+                    taskTitleInput.focus();
+                }, 10);
+            };
+
+            const closeModal = () => {
+                taskModal.classList.add('opacity-0');
+                taskModal.querySelector('.modal-content').classList.add('scale-95');
+                setTimeout(() => {
+                    taskModal.classList.add('hidden');
+                }, 300);
+            };
+            
+            addTaskBtn.addEventListener('click', () => openModal());
+            cancelTaskBtn.addEventListener('click', closeModal);
+            taskModal.addEventListener('click', (e) => {
+                if(e.target === taskModal) closeModal();
+            });
+
+            taskForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const title = taskTitleInput.value.trim();
+                const details = taskDetailsInput.value.trim();
+                const editIndex = taskEditIndexInput.value;
+                
+                if (!title) return;
+
+                if (editIndex !== '') {
+                    // Atualiza tarefa existente
+                    tasks[editIndex].title = title;
+                    tasks[editIndex].details = details;
+                } else {
+                    // Cria nova tarefa
+                    tasks.unshift({ id: Date.now(), title, details, completed: false });
+                }
+                
+                saveTasks();
+                renderTasks();
+                closeModal();
+            });
+
+            // Inicialização
+            updateThemeIcon();
+            renderDate();
+            renderTasks();
+        });
+    </script>
+</body>
+</html>

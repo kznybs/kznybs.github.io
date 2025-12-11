@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Poker Game</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #1a202c;
+            color: white;
+            overscroll-behavior: none;
+        }
+        .poker-table {
+            width: 90%;
+            max-width: 450px;
+            height: 70vh;
+            max-height: 800px;
+            background-color: #7f1d1d;
+            border: 10px solid #450a0a;
+            border-radius: 150px; /* Borda oval */
+            position: relative;
+            margin: auto;
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.5);
+        }
+        .player-seat {
+            position: absolute;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            transform: translate(-50%, -50%);
+            width: 90px;
+            min-height: 70px;
+        }
+        .player-info {
+            background-color: rgba(0, 0, 0, 0.6);
+            border-radius: 10px;
+            padding: 5px 10px;
+            text-align: center;
+            border: 2px solid #facc15; /* Borda amarela para jogador ativo */
+            box-shadow: 0 0 10px #facc15;
+        }
+        .player-info.inactive {
+            border-color: #4b5563; /* Borda cinza para inativo */
+            box-shadow: none;
+        }
+        .player-name {
+            font-weight: 700;
+            font-size: 0.9rem;
+        }
+        .player-chips {
+            font-weight: 900;
+            font-size: 1.1rem;
+        }
+        .player-action {
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-top: 4px;
+            color: white;
+        }
+        .action-call { background-color: #ca8a04; }
+        .action-raise { background-color: #dc2626; }
+        .action-fold { background-color: #3b82f6; }
+        .action-bb { background-color: #8b5cf6; }
+        .action-sb { background-color: #a855f7; }
+        .player-bet {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            margin-top: 5px;
+            font-weight: 700;
+        }
+        .chip-icon {
+            width: 18px;
+            height: 18px;
+            background-color: #dc2626;
+            border-radius: 50%;
+            border: 2px solid #fef2f2;
+        }
+        .dealer-button {
+            position: absolute;
+            width: 25px;
+            height: 25px;
+            background-color: white;
+            color: black;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1rem;
+            border: 2px solid #9ca3af;
+            transform: translate(30px, -15px);
+        }
+        .pot-container {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+        }
+        .pot-amount {
+            background-color: rgba(0,0,0,0.5);
+            padding: 5px 20px;
+            border-radius: 8px;
+            font-size: 1.5rem;
+            font-weight: 900;
+        }
+        .action-button {
+            border-radius: 50%;
+            width: 80px;
+            height: 80px;
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: white;
+            border: 4px solid rgba(255,255,255,0.3);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+            transition: transform 0.1s ease;
+        }
+        .action-button:active {
+            transform: scale(0.95);
+        }
+        .btn-call { background: linear-gradient(to top, #ca8a04, #fde047); }
+        .btn-raise { background: linear-gradient(to top, #b91c1c, #f87171); }
+        .btn-fold { background: linear-gradient(to top, #1d4ed8, #60a5fa); }
+
+        /* Screen transitions */
+        .screen { display: none; }
+        .screen.active { display: block; }
+
+        /* Setup Screen Styles */
+        .setup-container {
+            padding: 20px;
+            max-width: 500px;
+            margin: auto;
+        }
+        .input-group {
+            background-color: #2d3748;
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+        }
+        .input-field {
+            background-color: #4a5568;
+            border: none;
+            color: white;
+            border-radius: 8px;
+            padding: 10px;
+            text-align: center;
+            font-weight: 700;
+        }
+        .player-setup-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px;
+            background-color: #4a5568;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-white">
+
+    <!-- =========== SETUP SCREEN =========== -->
+    <div id="setupScreen" class="screen active">
+        <div class="setup-container">
+            <div class="flex justify-between items-center mb-6">
+                <button class="text-2xl">←</button>
+                <h1 class="text-2xl font-bold">Play</h1>
+                <button class="text-2xl">↻</button>
+            </div>
+
+            <div class="input-group">
+                <label class="block text-center text-lg mb-2">Starting chips</label>
+                <div class="flex justify-center items-center gap-2">
+                    <input type="number" id="startingChips" value="2400" class="input-field w-32 text-xl">
+                    <div class="w-8 h-8 bg-blue-600 rounded-full border-2 border-white flex items-center justify-center font-bold">
+                        <span class="text-sm">♦</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="input-group">
+                <h2 class="text-lg font-bold mb-3">Blind structure</h2>
+                <div id="blindLevelsContainer" class="space-y-2">
+                    <!-- Níveis de blind serão adicionados aqui via JS -->
+                </div>
+                <button id="addLevelBtn" class="mt-4 w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg">
+                    Add level
+                </button>
+            </div>
+
+            <div class="input-group">
+                <h2 class="text-lg font-bold mb-3">Players</h2>
+                <div id="playersContainer" class="grid grid-cols-2 gap-4">
+                    <!-- Jogadores serão adicionados aqui via JS -->
+                </div>
+            </div>
+
+            <button id="startGameBtn" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-4 px-4 rounded-lg text-2xl mt-4">
+                Start
+            </button>
+        </div>
+    </div>
+
+    <!-- =========== GAME SCREEN =========== -->
+    <div id="gameScreen" class="screen">
+        <header class="p-4 flex justify-between items-center">
+            <button class="bg-blue-600 px-4 py-2 rounded-lg font-bold">Menu ☰</button>
+            <h1 class="text-2xl font-bold" id="gamePhase">Preflo</h1>
+            <div class="text-right bg-gray-800 p-2 rounded-lg">
+                <div id="currentBlindsInfo" class="font-bold">100/50</div>
+                <div id="nextBlindsInfo" class="text-sm text-gray-400">Next level: 150/75</div>
+                <div id="handCountInfo" class="text-sm text-gray-400">3 HANDS</div>
+            </div>
+        </header>
+
+        <main class="relative">
+            <div class="poker-table" id="pokerTable">
+                <!-- Assentos dos jogadores serão adicionados aqui via JS -->
+
+                <div class="pot-container">
+                    <div class="chip-icon"></div>
+                    <div id="potTotal" class="pot-amount">150</div>
+                </div>
+            </div>
+        </main>
+
+        <footer class="fixed bottom-0 left-0 right-0 p-4 flex justify-around items-center bg-black bg-opacity-50">
+            <div class="text-center">
+                <div id="currentBetAmount" class="text-2xl font-bold mb-2">100</div>
+                <button id="callBtn" class="action-button btn-call">Call</button>
+            </div>
+            <div class="text-center">
+                <button id="raiseBtn" class="action-button btn-raise text-2xl">Raise</button>
+            </div>
+            <div class="text-center">
+                 <button id="foldBtn" class="action-button btn-fold">Fold</button>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        // Lógica do Jogo (JavaScript)
+        document.addEventListener('DOMContentLoaded', () => {
+            // ===================================
+            // ELEMENTOS DA UI
+            // ===================================
+            const setupScreen = document.getElementById('setupScreen');
+            const gameScreen = document.getElementById('gameScreen');
+            const startGameBtn = document.getElementById('startGameBtn');
+            const pokerTable = document.getElementById('pokerTable');
+            const potTotalEl = document.getElementById('potTotal');
+            const playersContainer = document.getElementById('playersContainer');
+            const blindLevelsContainer = document.getElementById('blindLevelsContainer');
+            const addLevelBtn = document.getElementById('addLevelBtn');
+            const startingChipsInput = document.getElementById('startingChips');
+
+            // ===================================
+            // ESTADO INICIAL DO JOGO
+            // ===================================
+            let gameState = {
+                players: [],
+                blindLevels: [
+                    { big: 100, small: 50, duration: 4 },
+                    { big: 150, small: 75, duration: 4 },
+                    { big: 200, small: 100, duration: 4 },
+                    { big: 300, small: 150, duration: 10 },
+                    { big: 400, small: 200, duration: 10 },
+                    { big: 500, small: 250, duration: '∞' },
+                ],
+                initialPlayers: [
+                    { name: 'Adilson', active: true },
+                    { name: null, active: false },
+                    { name: 'Kznbys', active: true },
+                    { name: null, active: false },
+                    { name: 'Vini', active: true },
+                    { name: null, active: false },
+                    { name: 'Gabriel', active: true },
+                    { name: null, active: false },
+                ],
+                pot: 0,
+                dealerPosition: 0,
+                currentPlayerIndex: 0,
+                currentBet: 0,
+                gamePhase: 'preflop', // preflop, flop, turn, river, showdown
+            };
+
+            // ===================================
+            // LÓGICA DA TELA DE CONFIGURAÇÃO
+            // ===================================
+
+            function renderBlindLevels() {
+                blindLevelsContainer.innerHTML = `
+                    <div class="grid grid-cols-4 gap-2 text-center font-bold mb-2 text-gray-400 text-sm">
+                        <span>Level</span>
+                        <span>Big</span>
+                        <span>Small</span>
+                        <span>Duration</span>
+                    </div>
+                `;
+                gameState.blindLevels.forEach((level, index) => {
+                    const levelEl = document.createElement('div');
+                    levelEl.className = 'grid grid-cols-4 gap-2 items-center';
+                    levelEl.innerHTML = `
+                        <span class="bg-gray-700 rounded-md p-2 text-center">${index + 1}</span>
+                        <input type="number" value="${level.big}" class="input-field text-sm p-2 w-full">
+                        <input type="number" value="${level.small}" class="input-field text-sm p-2 w-full">
+                        <input type="text" value="${level.duration}" class="input-field text-sm p-2 w-full">
+                        <button class="text-red-500 text-2xl font-bold">×</button>
+                    `;
+                    blindLevelsContainer.appendChild(levelEl);
+                });
+            }
+
+            function renderPlayerSetup() {
+                playersContainer.innerHTML = '';
+                gameState.initialPlayers.forEach((player, index) => {
+                    const playerEl = document.createElement('div');
+                    playerEl.className = 'player-setup-item';
+                    if (player.name) {
+                        playerEl.innerHTML = `
+                            <input type="text" value="${player.name}" class="input-field bg-transparent flex-grow !text-left">
+                            <button data-index="${index}" class="remove-player-btn text-red-500 text-xl font-bold">×</button>
+                        `;
+                    } else {
+                        playerEl.innerHTML = `
+                            <button data-index="${index}" class="add-player-btn text-blue-400 text-2xl w-full h-full">+</button>
+                        `;
+                    }
+                    playersContainer.appendChild(playerEl);
+                });
+            }
+            
+            playersContainer.addEventListener('click', (e) => {
+                 if (e.target.classList.contains('add-player-btn')) {
+                    const index = parseInt(e.target.dataset.index);
+                    const newName = prompt("Enter player name:", `Player ${index + 1}`);
+                    if (newName) {
+                        gameState.initialPlayers[index] = { name: newName, active: true };
+                        renderPlayerSetup();
+                    }
+                }
+                if (e.target.classList.contains('remove-player-btn')) {
+                    const index = parseInt(e.target.dataset.index);
+                    gameState.initialPlayers[index] = { name: null, active: false };
+                    renderPlayerSetup();
+                }
+            });
+
+            addLevelBtn.addEventListener('click', () => {
+                gameState.blindLevels.push({ big: 0, small: 0, duration: 10 });
+                renderBlindLevels();
+            });
+
+
+            // ===================================
+            // LÓGICA PRINCIPAL DO JOGO
+            // ===================================
+
+            function initializeGame() {
+                const startingChips = parseInt(startingChipsInput.value);
+                gameState.players = gameState.initialPlayers
+                    .filter(p => p.name)
+                    .map(p => ({
+                        ...p,
+                        chips: startingChips,
+                        bet: 0,
+                        hand: [],
+                        status: 'playing', // playing, fold, all-in
+                    }));
+
+                // Simulação de um estado de jogo para visualização
+                // Baseado na imagem "Preflo"
+                if(gameState.players.length >= 4) {
+                    gameState.players[0].chips = 2400; // Adilson
+                    gameState.players[1].chips = 2300; // Kznbys
+                    gameState.players[1].bet = 100;
+                    gameState.players[1].status = 'bb';
+                    gameState.players[2].chips = 2350; // Vini
+                    gameState.players[2].bet = 50;
+                    gameState.players[2].status = 'sb';
+                    gameState.players[3].chips = 2400; // Gabriel
+                    gameState.dealerPosition = 3; // Gabriel é o Dealer
+                    gameState.pot = 150;
+                    gameState.currentPlayerIndex = 0; // Adilson é o jogador atual
+                    gameState.currentBet = 100;
+                }
+
+                renderTable();
+                setupScreen.classList.remove('active');
+                gameScreen.classList.add('active');
+            }
+
+            function renderTable() {
+                pokerTable.innerHTML = ''; // Limpa a mesa
+                potTotalEl.textContent = gameState.pot;
+
+                const activePlayers = gameState.players.filter(p => p.chips > 0 || p.bet > 0);
+                const numPlayers = activePlayers.length;
+                const angleStep = 360 / (numPlayers > 6 ? 8 : 6); // Ajusta o espaçamento
+                const tableWidth = pokerTable.clientWidth;
+                const tableHeight = pokerTable.clientHeight;
+                const hRadius = tableWidth / 2 - 50;
+                const vRadius = tableHeight / 2 - 40;
+
+
+                activePlayers.forEach((player, index) => {
+                    // Posicionamento circular
+                    // Ajuste para uma mesa oval
+                    let angle;
+                    if (numPlayers <= 4) {
+                        angle = (index * 90) - 90; // N, E, S, W
+                    } else if (numPlayers <= 6) {
+                        angle = (index * 60) - 90;
+                    } else {
+                        angle = (index * 45) - 90;
+                    }
+
+                    const x = 50 + (hRadius / (tableWidth / 2)) * 50 * Math.cos(angle * Math.PI / 180);
+                    const y = 50 + (vRadius / (tableHeight / 2)) * 50 * Math.sin(angle * Math.PI / 180);
+
+                    const seat = document.createElement('div');
+                    seat.className = 'player-seat';
+                    seat.style.left = `${x}%`;
+                    seat.style.top = `${y}%`;
+
+                    const isCurrentPlayer = gameState.currentPlayerIndex === index;
+
+                    let actionHtml = '';
+                    if (player.status === 'bb') {
+                        actionHtml = `<div class="player-action action-bb">BB</div>`;
+                    } else if (player.status === 'sb') {
+                        actionHtml = `<div class="player-action action-sb">SB</div>`;
+                    }
+
+                    let betHtml = '';
+                    if (player.bet > 0) {
+                        betHtml = `
+                            <div class="player-bet">
+                                <div class="chip-icon"></div>
+                                <span>${player.bet}</span>
+                            </div>
+                        `;
+                    }
+                    
+                    const playerInfoClass = isCurrentPlayer ? 'player-info' : 'player-info inactive';
+
+                    seat.innerHTML = `
+                        <div class="${playerInfoClass}">
+                            <div class="player-name">${player.name}</div>
+                            <div class="player-chips">${player.chips}</div>
+                        </div>
+                        ${actionHtml}
+                        ${betHtml}
+                    `;
+                    
+                    if (gameState.dealerPosition === index) {
+                        const dealerBtn = document.createElement('div');
+                        dealerBtn.className = 'dealer-button';
+                        dealerBtn.textContent = 'D';
+                        seat.appendChild(dealerBtn);
+                    }
+
+                    pokerTable.appendChild(seat);
+                });
+            }
+
+            // ===================================
+            // EVENT LISTENERS
+            // ===================================
+            startGameBtn.addEventListener('click', initializeGame);
+            
+            window.addEventListener('resize', renderTable);
+
+
+            // Inicializa as telas de configuração
+            renderBlindLevels();
+            renderPlayerSetup();
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Follow-up de Compras</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- SheetJS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- Ícones -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+        .drop-zone {
+            transition: all 0.3s ease;
+            border-style: dashed;
+        }
+        .drop-zone.dragover {
+            background-color: #eff6ff;
+            border-color: #3b82f6;
+            transform: scale(1.02);
+        }
+        .animate-fade-in {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        
+        /* Custom Scrollbar para a tabela ficar elegante */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col">
+
+    <!-- Navbar -->
+    <nav class="bg-white border-b border-slate-200 sticky top-0 z-30 px-6 py-4 flex justify-between items-center shadow-sm">
+        <div class="flex items-center gap-3">
+            <div class="bg-indigo-600 text-white p-2 rounded-lg">
+                <i class="fa-solid fa-boxes-packing"></i>
+            </div>
+            <div>
+                <h1 class="text-xl font-bold tracking-tight text-slate-800">Controle de Solicitações</h1>
+                <p class="text-xs text-slate-500">Painel de Follow-up Pessoal</p>
+            </div>
+        </div>
+        <div class="text-sm text-slate-500">
+            Status: <span id="status-badge" class="px-2 py-1 rounded-full bg-slate-100 text-slate-600 font-medium">Aguardando Arquivo</span>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="flex-grow p-6 container mx-auto max-w-7xl">
+        
+        <!-- Controls Area (Alterado para 2 colunas iguais) -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+            
+            <!-- File Upload Zone -->
+            <div>
+                <div id="drop-zone" class="drop-zone bg-white border-2 border-slate-300 rounded-xl p-8 text-center cursor-pointer hover:border-indigo-400 relative h-full flex flex-col justify-center items-center group">
+                    <input type="file" id="file-input" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" accept=".xlsx, .xls, .csv">
+                    <div class="pointer-events-none">
+                        <i class="fa-solid fa-file-invoice text-4xl text-slate-400 mb-3 group-hover:text-indigo-500 transition-colors"></i>
+                        <h3 class="text-lg font-semibold text-slate-700">Arraste seu Follow-up aqui</h3>
+                        <p class="text-slate-500 text-sm mt-1">ou clique para selecionar (.xlsx)</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Controls -->
+            <div class="bg-white border border-slate-200 rounded-xl p-6 flex flex-col justify-center gap-4">
+                <h3 class="font-semibold text-slate-700">Ferramentas</h3>
+                <!-- Botão Demo Removido -->
+                <button onclick="downloadTemplate()" class="w-full bg-slate-50 text-slate-600 hover:bg-slate-100 py-3 px-4 rounded-lg font-medium transition-colors text-left flex items-center gap-3">
+                    <i class="fa-solid fa-download"></i> Baixar Modelo Padrão
+                </button>
+                <button onclick="clearStorage()" id="btn-clear" class="hidden w-full bg-red-50 text-red-600 hover:bg-red-100 py-2 px-4 rounded-lg font-medium transition-colors text-left text-sm flex items-center gap-3">
+                    <i class="fa-solid fa-trash"></i> Limpar Histórico
+                </button>
+                <div class="text-xs text-slate-400 mt-auto">
+                    *Colunas: Data da Criação, Nº Solicitação, Pedido de Compra, Descrição, Centro de Custo, Operação Tributaria.
+                </div>
+            </div>
+        </div>
+
+        <!-- Dashboard Content -->
+        <div id="dashboard-container" class="hidden animate-fade-in space-y-6">
+            
+            <!-- KPIs -->
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+                <!-- KPI 1 -->
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100 border-l-4 border-l-blue-500">
+                    <p class="text-xs text-slate-500 font-bold uppercase tracking-wider">Total Solicitações</p>
+                    <h2 class="text-3xl font-bold text-slate-800 mt-2" id="kpi-total">0</h2>
+                </div>
+                <!-- KPI 2 -->
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100 border-l-4 border-l-emerald-500">
+                    <p class="text-xs text-slate-500 font-bold uppercase tracking-wider">Pedidos Gerados</p>
+                    <h2 class="text-3xl font-bold text-slate-800 mt-2" id="kpi-concluidos">0</h2>
+                </div>
+                <!-- KPI 3 -->
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100 border-l-4 border-l-amber-500">
+                    <p class="text-xs text-slate-500 font-bold uppercase tracking-wider">Pendentes (S/ Pedido)</p>
+                    <h2 class="text-3xl font-bold text-amber-600 mt-2" id="kpi-pendentes">0</h2>
+                </div>
+                <!-- KPI 4 -->
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100 border-l-4 border-l-purple-500">
+                    <p class="text-xs text-slate-500 font-bold uppercase tracking-wider">Centro de Custo Top</p>
+                    <h2 class="text-xl font-bold text-slate-800 mt-3 truncate" id="kpi-cc-top">-</h2>
+                </div>
+            </div>
+
+            <!-- Charts Row -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- Chart 1: Centro de Custo -->
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100">
+                    <h3 class="font-semibold text-lg mb-4 text-slate-700">Solicitações por Centro de Custo</h3>
+                    <div class="relative h-64 w-full">
+                        <canvas id="ccChart"></canvas>
+                    </div>
+                </div>
+                <!-- Chart 2: Operação Tributária -->
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100">
+                    <h3 class="font-semibold text-lg mb-4 text-slate-700">Distribuição por Operação Tributária</h3>
+                    <div class="relative h-64 w-full">
+                        <canvas id="opChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Data Table -->
+            <div class="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden flex flex-col">
+                <div class="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50 shrink-0">
+                    <h3 class="font-semibold text-lg text-slate-700">Rastreabilidade (Lista Completa)</h3>
+                    <div class="flex gap-2">
+                        <span id="record-count" class="text-xs bg-slate-200 text-slate-700 px-2 py-1 rounded font-semibold">0 Registros</span>
+                        <span class="text-xs bg-indigo-100 text-indigo-700 px-2 py-1 rounded font-semibold">Scroll Infinito</span>
+                    </div>
+                </div>
+                
+                <!-- Table Container com Scroll Fixo -->
+                <!-- max-h-[600px] define a altura fixa. overflow-y-auto habilita o scroll vertical -->
+                <div class="overflow-x-auto overflow-y-auto max-h-[600px] custom-scrollbar relative">
+                    <table class="w-full text-sm text-left text-slate-600 relative">
+                        <!-- Sticky Header: O cabeçalho fica fixo ao rolar -->
+                        <thead class="text-xs text-slate-700 uppercase bg-slate-100 border-b sticky top-0 z-10 shadow-sm">
+                            <tr>
+                                <th class="px-6 py-3 bg-slate-100">Status</th>
+                                <th class="px-6 py-3 bg-slate-100">Data Criação</th>
+                                <th class="px-6 py-3 bg-slate-100">Nº Solicitação</th>
+                                <th class="px-6 py-3 bg-slate-100">Pedido Compra</th>
+                                <th class="px-6 py-3 bg-slate-100">Descrição</th>
+                                <th class="px-6 py-3 bg-slate-100">C. Custo</th>
+                                <th class="px-6 py-3 bg-slate-100">Op. Tributária</th>
+                            </tr>
+                        </thead>
+                        <tbody id="table-body" class="divide-y divide-slate-100">
+                            <!-- Rows inserted via JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="bg-white border-t border-slate-200 py-6 text-center text-sm text-slate-500 mt-auto">
+        <p>Sistema Local de Follow-up de Compras - Dados salvos apenas no seu navegador.</p>
+    </footer>
+
+    <script>
+        // Configuração Global
+        let ccChartInstance = null;
+        let opChartInstance = null;
+        const STORAGE_KEY = 'dashboard_compras_v2';
+        const STORAGE_DATE_KEY = 'dashboard_compras_date_v2';
+
+        // Elementos DOM
+        const dropZone = document.getElementById('drop-zone');
+        const fileInput = document.getElementById('file-input');
+        const dashboardContainer = document.getElementById('dashboard-container');
+        const statusBadge = document.getElementById('status-badge');
+        const btnClear = document.getElementById('btn-clear');
+        const recordCountSpan = document.getElementById('record-count');
+
+        // Inicialização
+        window.addEventListener('DOMContentLoaded', () => {
+            const savedData = localStorage.getItem(STORAGE_KEY);
+            const savedDate = localStorage.getItem(STORAGE_DATE_KEY);
+
+            if (savedData) {
+                try {
+                    const parsedData = JSON.parse(savedData);
+                    updateDashboard(parsedData);
+                    statusBadge.innerText = "Recuperado: " + savedDate;
+                    statusBadge.className = "px-2 py-1 rounded-full bg-blue-100 text-blue-700 font-medium";
+                    dashboardContainer.classList.remove('hidden');
+                    btnClear.classList.remove('hidden');
+                } catch (e) {
+                    console.error("Erro ao carregar:", e);
+                }
+            }
+        });
+
+        // Drag & Drop
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.classList.add('dragover');
+        });
+        dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('dragover');
+            if (e.dataTransfer.files.length) handleFile(e.dataTransfer.files[0]);
+        });
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length) handleFile(e.target.files[0]);
+        });
+
+        // Processamento do Arquivo
+        function handleFile(file) {
+            statusBadge.innerText = "Lendo planilha...";
+            statusBadge.className = "px-2 py-1 rounded-full bg-yellow-100 text-yellow-700 font-medium";
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                try {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, { type: 'array' });
+                    const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+                    const jsonData = XLSX.utils.sheet_to_json(worksheet);
+
+                    if (jsonData.length === 0) throw new Error("Planilha vazia");
+
+                    // Normalização inteligente das colunas
+                    const normalizedData = jsonData.map(row => {
+                        const newRow = {};
+                        // Mapeia nomes aproximados para chaves padrão
+                        for (const key in row) {
+                            const cleanKey = key.toLowerCase().trim().normalize("NFD").replace(/[\u0300-\u036f]/g, ""); // remove acentos
+                            
+                            if (cleanKey.includes("data")) newRow.data = row[key];
+                            else if (cleanKey.includes("solicitacao")) newRow.solicitacao = row[key];
+                            else if (cleanKey.includes("pedido")) newRow.pedido = row[key];
+                            else if (cleanKey.includes("descricao")) newRow.descricao = row[key];
+                            else if (cleanKey.includes("centro") || cleanKey.includes("custo")) newRow.centro_custo = row[key];
+                            else if (cleanKey.includes("operacao") || cleanKey.includes("tributaria")) newRow.operacao = row[key];
+                            else newRow[cleanKey] = row[key]; // fallback
+                        }
+                        return newRow;
+                    });
+
+                    updateDashboard(normalizedData);
+                    saveToStorage(normalizedData);
+                    
+                    statusBadge.innerText = "Atualizado Agora";
+                    statusBadge.className = "px-2 py-1 rounded-full bg-emerald-100 text-emerald-700 font-medium";
+                    dashboardContainer.classList.remove('hidden');
+
+                } catch (error) {
+                    console.error(error);
+                    alert("Erro ao processar. Verifique se as colunas correspondem ao modelo.");
+                    statusBadge.innerText = "Erro na Leitura";
+                    statusBadge.className = "px-2 py-1 rounded-full bg-red-100 text-red-700 font-medium";
+                }
+            };
+            reader.readAsArrayBuffer(file);
+        }
+
+        // Atualização da Interface
+        function updateDashboard(data) {
+            // KPIs
+            const total = data.length;
+            recordCountSpan.innerText = `${total} Registros`;
+            
+            // Lógica de Pedido: Se campo existir e não for vazio/hífen
+            const comPedido = data.filter(d => d.pedido && String(d.pedido).trim() !== '' && String(d.pedido).trim() !== '-').length;
+            const pendentes = total - comPedido;
+
+            // Top Centro de Custo
+            const ccMap = {};
+            data.forEach(d => {
+                const cc = d.centro_custo || 'Não Definido';
+                ccMap[cc] = (ccMap[cc] || 0) + 1;
+            });
+            const topCC = Object.entries(ccMap).sort((a,b) => b[1] - a[1])[0];
+
+            // Render KPIs
+            document.getElementById('kpi-total').innerText = total;
+            document.getElementById('kpi-concluidos').innerText = comPedido;
+            document.getElementById('kpi-pendentes').innerText = pendentes;
+            document.getElementById('kpi-cc-top').innerText = topCC ? `${topCC[0]} (${topCC[1]})` : '-';
+
+            // Gráficos
+            // 1. Centro de Custo (Doughnut)
+            const opMap = {};
+            data.forEach(d => {
+                const op = d.operacao || 'N/A';
+                opMap[op] = (opMap[op] || 0) + 1;
+            });
+
+            renderCharts(ccMap, opMap);
+
+            // Tabela
+            renderTable(data);
+        }
+
+        function renderTable(data) {
+            const tbody = document.getElementById('table-body');
+            tbody.innerHTML = '';
+            
+            // AGORA MOSTRA TUDO, APENAS INVERTIDO PARA O MAIS RECENTE PRIMEIRO
+            const recentData = [...data].reverse();
+
+            recentData.forEach(row => {
+                // Formatação Data
+                let dateStr = row.data;
+                if(typeof row.data === 'number') {
+                     dateStr = new Date(Math.round((row.data - 25569)*86400*1000)).toLocaleDateString('pt-BR');
+                }
+
+                // Lógica de Status (Tem pedido ou não?)
+                const hasOrder = row.pedido && String(row.pedido).trim() !== '' && String(row.pedido).trim() !== '-';
+                const statusHtml = hasOrder 
+                    ? `<span class="inline-flex items-center gap-1 bg-emerald-100 text-emerald-800 text-xs font-semibold px-2.5 py-0.5 rounded-full"><span class="w-2 h-2 bg-emerald-500 rounded-full"></span> Concluído</span>`
+                    : `<span class="inline-flex items-center gap-1 bg-amber-100 text-amber-800 text-xs font-semibold px-2.5 py-0.5 rounded-full"><span class="w-2 h-2 bg-amber-500 rounded-full animate-pulse"></span> Pendente</span>`;
+
+                const tr = `
+                    <tr class="bg-white hover:bg-slate-50 transition-colors">
+                        <td class="px-6 py-4">${statusHtml}</td>
+                        <td class="px-6 py-4 font-medium text-slate-900">${dateStr || '-'}</td>
+                        <td class="px-6 py-4 font-mono text-xs text-slate-500">${row.solicitacao || '-'}</td>
+                        <td class="px-6 py-4 font-mono text-xs font-bold text-slate-700">${row.pedido || '-'}</td>
+                        <td class="px-6 py-4 truncate max-w-xs" title="${row.descricao || ''}">${row.descricao || '-'}</td>
+                        <td class="px-6 py-4"><span class="bg-slate-100 text-slate-700 text-xs px-2 py-1 rounded">${row.centro_custo || '-'}</span></td>
+                        <td class="px-6 py-4 text-xs text-slate-500">${row.operacao || '-'}</td>
+                    </tr>
+                `;
+                tbody.innerHTML += tr;
+            });
+        }
+
+        function renderCharts(ccData, opData) {
+            const ctxCC = document.getElementById('ccChart').getContext('2d');
+            const ctxOp = document.getElementById('opChart').getContext('2d');
+
+            if (ccChartInstance) ccChartInstance.destroy();
+            if (opChartInstance) opChartInstance.destroy();
+
+            const colors = ['#6366f1', '#8b5cf6', '#ec4899', '#f43f5e', '#f59e0b', '#10b981'];
+
+            // Chart CC
+            ccChartInstance = new Chart(ctxCC, {
+                type: 'doughnut',
+                data: {
+                    labels: Object.keys(ccData),
+                    datasets: [{
+                        data: Object.values(ccData),
+                        backgroundColor: colors,
+                        borderWidth: 0,
+                        hoverOffset: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { position: 'right', labels: { boxWidth: 10, font: { size: 10 } } } }
+                }
+            });
+
+            // Chart OP
+            opChartInstance = new Chart(ctxOp, {
+                type: 'bar',
+                data: {
+                    labels: Object.keys(opData),
+                    datasets: [{
+                        label: 'Solicitações',
+                        data: Object.values(opData),
+                        backgroundColor: '#6366f1',
+                        borderRadius: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: { beginAtZero: true, grid: { display: false } },
+                        x: { grid: { display: false }, ticks: { font: { size: 10 } } }
+                    }
+                }
+            });
+        }
+
+        // Funções de Controle
+        function saveToStorage(data) {
+            try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+                localStorage.setItem(STORAGE_DATE_KEY, new Date().toLocaleString());
+                btnClear.classList.remove('hidden');
+            } catch (e) {
+                console.warn("Storage cheio/erro", e);
+            }
+        }
+
+        function clearStorage() {
+            localStorage.removeItem(STORAGE_KEY);
+            localStorage.removeItem(STORAGE_DATE_KEY);
+            location.reload();
+        }
+
+        function downloadTemplate() {
+            const data = [
+                { 
+                    "Data da Criação": "DD/MM/AAAA", 
+                    "Nº Solicitação": "Texto/Num", 
+                    "Pedido de Compra": "Preencher se houver", 
+                    "Descrição": "Detalhe do item", 
+                    "Centro de Custo": "Ex: TI, RH", 
+                    "Operação Tributaria": "Ex: Uso e Consumo" 
+                }
+            ];
+            const ws = XLSX.utils.json_to_sheet(data);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "ControleCompras");
+            XLSX.writeFile(wb, "Modelo_Controle_Compras.xlsx");
+        }
+    </script>
+</body>
+</html>

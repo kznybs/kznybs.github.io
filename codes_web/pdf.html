@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Girador de PDF</title>
+    <!-- Incluindo Tailwind CSS para estilização -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Incluindo a biblioteca pdf-lib para manipulação de PDF -->
+    <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
+    <style>
+        /* Estilo para o corpo da página */
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        /* Estilo para o input de arquivo customizado */
+        .file-input-label {
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .file-input-label:hover {
+            background-color: #3b82f6; /* Azul mais escuro no hover */
+        }
+        /* Animação do spinner */
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        .spinner {
+            border-top-color: #3498db;
+            animation: spin 1s linear infinite;
+        }
+    </style>
+    <link rel="stylesheet" href="https://rsms.me/inter/inter.css">
+</head>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen">
+
+    <div class="bg-white p-8 rounded-2xl shadow-lg w-full max-w-md mx-4">
+        <div class="text-center mb-6">
+            <h1 class="text-3xl font-bold text-gray-800">Girador de PDF</h1>
+            <p class="text-gray-500 mt-2">Gire e baixe seus arquivos PDF facilmente.</p>
+        </div>
+
+        <!-- Área de Upload -->
+        <div id="upload-area">
+            <label for="pdf-upload" class="file-input-label w-full flex flex-col items-center px-4 py-10 bg-blue-500 text-white rounded-lg tracking-wide uppercase border border-blue-500 cursor-pointer hover:bg-blue-600 transition-colors">
+                <svg class="w-10 h-10" fill="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                    <path d="M16.88 9.1A4 4 0 0 1 16 17H5a5 5 0 0 1-1-9.9V7a3 3 0 0 1 4.52-2.59A4.98 4.98 0 0 1 17 8c0 .38-.04.74-.12 1.1zM11 11h3l-4 4-4-4h3v-4h2v4z" />
+                </svg>
+                <span class="mt-2 text-base leading-normal">Selecione um PDF</span>
+            </label>
+            <input type='file' class="hidden" id="pdf-upload" accept=".pdf" />
+        </div>
+
+        <!-- Área de Controles de Rotação -->
+        <div id="controls-area" class="hidden mt-6">
+            <p id="file-name" class="text-center text-gray-600 mb-4 truncate"></p>
+            <div class="flex justify-center space-x-4">
+                <!-- Botão Girar para Esquerda -->
+                <button id="rotate-left" class="flex items-center justify-center bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold py-2 px-4 rounded-lg transition-colors">
+                    <svg class="w-5 h-5 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 15L3 9m0 0l6-6M3 9h12a6 6 0 010 12h-3" />
+                    </svg>
+                    Girar 90° ↺
+                </button>
+                <!-- Botão Girar para Direita -->
+                <button id="rotate-right" class="flex items-center justify-center bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold py-2 px-4 rounded-lg transition-colors">
+                    <svg class="w-5 h-5 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 15l6-6m0 0l-6-6m6 6H9a6 6 0 000 12h3" />
+                    </svg>
+                    Girar 90° ↻
+                </button>
+            </div>
+            <!-- Botão de Download -->
+            <div class="mt-6">
+                <button id="download-btn" class="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-4 rounded-lg transition-colors">
+                    Baixar PDF Modificado
+                </button>
+            </div>
+        </div>
+        
+        <!-- Mensagem de Status e Spinner -->
+        <div id="status-message" class="text-center mt-4 text-blue-600 font-medium"></div>
+        <div id="spinner" class="hidden spinner w-8 h-8 border-4 border-gray-200 rounded-full mx-auto mt-4"></div>
+
+    </div>
+
+    <script>
+        // Elementos do DOM
+        const pdfUpload = document.getElementById('pdf-upload');
+        const controlsArea = document.getElementById('controls-area');
+        const uploadArea = document.getElementById('upload-area');
+        const rotateLeftBtn = document.getElementById('rotate-left');
+        const rotateRightBtn = document.getElementById('rotate-right');
+        const downloadBtn = document.getElementById('download-btn');
+        const statusMessage = document.getElementById('status-message');
+        const fileNameDisplay = document.getElementById('file-name');
+        const spinner = document.getElementById('spinner');
+
+        // Variáveis globais para armazenar o documento PDF e o nome do arquivo
+        let pdfDoc = null;
+        let originalFileName = '';
+
+        // Extrai as funções necessárias da biblioteca pdf-lib
+        const { PDFDocument, degrees } = PDFLib;
+
+        // Função para mostrar ou esconder o spinner de carregamento
+        function setLoading(isLoading) {
+            if (isLoading) {
+                spinner.classList.remove('hidden');
+                statusMessage.textContent = 'Processando...';
+            } else {
+                spinner.classList.add('hidden');
+                statusMessage.textContent = '';
+            }
+        }
+
+        // Lida com a seleção de um arquivo PDF
+        pdfUpload.addEventListener('change', async (event) => {
+            const file = event.target.files[0];
+            if (!file || file.type !== 'application/pdf') {
+                statusMessage.textContent = 'Por favor, selecione um arquivo PDF.';
+                return;
+            }
+
+            originalFileName = file.name;
+            setLoading(true);
+
+            try {
+                // Lê o arquivo como um ArrayBuffer
+                const arrayBuffer = await file.arrayBuffer();
+                
+                // Carrega o PDF usando a pdf-lib
+                pdfDoc = await PDFDocument.load(arrayBuffer);
+
+                // Atualiza a UI
+                fileNameDisplay.textContent = originalFileName;
+                uploadArea.classList.add('hidden');
+                controlsArea.classList.remove('hidden');
+                statusMessage.textContent = 'PDF carregado. Pronto para girar!';
+            } catch (error) {
+                console.error('Erro ao carregar o PDF:', error);
+                statusMessage.textContent = 'Erro ao carregar o PDF. Tente novamente.';
+                pdfDoc = null; // Reseta o documento em caso de erro
+            } finally {
+                setLoading(false);
+            }
+        });
+
+        // Função para girar as páginas do PDF
+        function rotatePDF(direction) {
+            if (!pdfDoc) return;
+
+            const angle = direction === 'right' ? 90 : -90;
+            const pages = pdfDoc.getPages();
+
+            pages.forEach(page => {
+                const currentRotation = page.getRotation().angle;
+                page.setRotation(degrees(currentRotation + angle));
+            });
+
+            statusMessage.textContent = `PDF girado ${angle}°. Clique em "Baixar" para salvar.`;
+        }
+
+        // Adiciona eventos de clique aos botões de rotação
+        rotateLeftBtn.addEventListener('click', () => rotatePDF('left'));
+        rotateRightBtn.addEventListener('click', () => rotatePDF('right'));
+
+        // Lida com o download do PDF modificado
+        downloadBtn.addEventListener('click', async () => {
+            if (!pdfDoc) return;
+
+            setLoading(true);
+            
+            try {
+                // Salva o documento PDF em bytes
+                const pdfBytes = await pdfDoc.save();
+                
+                // Cria um Blob com os bytes do PDF
+                const blob = new Blob([pdfBytes], { type: 'application/pdf' });
+                
+                // Cria um link de download temporário
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(blob);
+                link.download = `girado-${originalFileName}`;
+                
+                // Simula o clique no link para iniciar o download
+                document.body.appendChild(link);
+                link.click();
+                
+                // Remove o link após o download
+                document.body.removeChild(link);
+                
+                statusMessage.textContent = 'Download iniciado!';
+            } catch (error) {
+                console.error('Erro ao salvar o PDF:', error);
+                statusMessage.textContent = 'Erro ao salvar o PDF. Tente novamente.';
+            } finally {
+                setLoading(false);
+            }
+        });
+    </script>
+</body>
+</html>
