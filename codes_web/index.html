@@ -132,59 +132,203 @@
 
         // CONFIGURAÇÃO DOS PROJETOS
         // ======================================================================
-        // EDITE AQUI: Adicione os nomes dos arquivos dos seus projetos (sem .html).
-        // O "id" deve ser o nome exato do arquivo.
-        // O código vai adicionar .html automaticamente no final.
+        // Lista Completa de Projetos (24 Itens)
         // ======================================================================
         const baseUrl = "https://kznybs.github.io/codes_web/";
         
         const projetos = [
+            // --- GRUPO 1: SISTEMAS & FERRAMENTAS ---
             {
-                id: "ArvoresEstruturaDeDados2", // Nome do arquivo: ArvoresEstruturaDeDados2.html
+                id: "desktop", 
+                nome: "ARES OS Web",
+                desc: "Um sistema operacional simulado no navegador com janelas funcionais.",
+                tech: ["OS", "Canvas", "PWA"],
+                icon: "monitor"
+            },
+            {
+                id: "TI", 
+                nome: "Gestão de TI",
+                desc: "Dashboard completo para TI: gestão de tarefas, estoque e chamados.",
+                tech: ["Admin", "Dashboard"],
+                icon: "server"
+            },
+            {
+                id: "pdf", 
+                nome: "Ferramenta PDF",
+                desc: "Utilitário para girar páginas de arquivos PDF diretamente no navegador.",
+                tech: ["PDF-Lib", "Tool"],
+                icon: "file-text"
+            },
+            {
+                id: "radar",
+                nome: "Radar de Ativos",
+                desc: "Visualização radial de ativos de rede usando D3.js com filtro e zoom.",
+                tech: ["D3.js", "Data Viz"],
+                icon: "radar"
+            },
+            {
+                id: "time",
+                nome: "Countdown 2025",
+                desc: "Contagem regressiva visual para data específica com efeito de vidro.",
+                tech: ["Timer", "UI"],
+                icon: "clock"
+            },
+            
+            // --- GRUPO 2: FINANÇAS & GESTÃO ---
+            {
+                id: "solicitacao",
+                nome: "Follow-up Compras",
+                desc: "Controle de solicitações de compra com KPIs e gráficos de status.",
+                tech: ["SheetJS", "Chart.js"],
+                icon: "clipboard-list"
+            },
+            {
+                id: "mensal.v3",
+                nome: "Orçamento Pro",
+                desc: "Dashboard avançado de gestão orçamentária com importação de Excel e análise.",
+                tech: ["SheetJS", "Chart.js"],
+                icon: "bar-chart-2"
+            },
+            {
+                id: "justificar",
+                nome: "Controle Orçamentário",
+                desc: "Dashboard financeiro com importação de planilhas Excel (XLSX).",
+                tech: ["SheetJS", "Finance"],
+                icon: "pie-chart"
+            },
+            {
+                id: "ORCAMENTO",
+                nome: "Relatório Orçamentário",
+                desc: "Gerador de relatórios de orçamento com layout otimizado para impressão.",
+                tech: ["Print-ready", "CRUD"],
+                icon: "printer"
+            },
+            {
+                id: "orc",
+                nome: "Justificativas",
+                desc: "Tabela editável para justificativas de centros de custo com persistência.",
+                tech: ["LocalStorage", "Editable"],
+                icon: "table"
+            },
+            {
+                id: "projeção", // Atenção ao acento
+                nome: "Calc. Projeção",
+                desc: "Estima valores futuros de faturas com base em histórico e média de aumento.",
+                tech: ["Math", "Finance"],
+                icon: "trending-up"
+            },
+            {
+                id: "agrotechqualifica",
+                nome: "Orçamento Agrotech",
+                desc: "Apresentação detalhada de custos e cenários de investimento.",
+                tech: ["Presentation", "UI"],
+                icon: "sprout"
+            },
+
+            // --- GRUPO 3: ALGORITMOS & MATEMÁTICA ---
+            {
+                id: "recursividade",
+                nome: "Algoritmos Visuais",
+                desc: "Demonstrações interativas: Merge Sort, Torres de Hanói e Fibonacci.",
+                tech: ["Edu", "Algorithms"],
+                icon: "git-merge"
+            },
+            {
+                id: "Exercício", // Atenção ao acento
+                nome: "Grafos DFS/BFS", 
+                desc: "Visualizador de algoritmos de busca em grafos (Profundidade e Largura).",
+                tech: ["Canvas", "Algoritmos"],
+                icon: "share-2" 
+            },
+            {
+                id: "deque-duplamente-encadeada",
+                nome: "Visualizador Deque",
+                desc: "Implementação visual de um Deque Duplamente Encadeado.",
+                tech: ["Estrutura de Dados", "UI"],
+                icon: "database"
+            },
+            {
+                id: "ArvoresEstruturaDeDados2",
                 nome: "Árvores Binárias", 
                 desc: "Estrutura de dados e visualização de árvore binária.",
-                tech: ["HTML", "JS", "Canvas"],
+                tech: ["Canvas", "Tree"],
                 icon: "network" 
             },
             {
-                id: "calculadora", 
-                nome: "Calculadora JS",
-                desc: "Uma calculadora moderna com histórico de operações.",
-                tech: ["JS", "Math"],
+                id: "passa faixa", // Atenção ao espaço
+                nome: "RF Filter Design",
+                desc: "Calculadora e simulador de filtros RF (Passa-faixa) com gráfico Bode.",
+                tech: ["Engineering", "Chart.js"],
+                icon: "activity"
+            },
+            {
+                id: "carga",
+                nome: "Calc. Balanceamento",
+                desc: "Calculadora para distribuição de cargas em vagões.",
+                tech: ["Logística", "Math"],
                 icon: "calculator"
             },
+
+            // --- GRUPO 4: JOGOS & LAZER ---
             {
-                id: "weather-app",
-                nome: "Previsão do Tempo",
-                desc: "Consumo de API para verificar o clima em tempo real.",
-                tech: ["API", "Async"],
-                icon: "cloud-rain"
+                id: "PokerMaster Manager", // Atenção ao espaço
+                nome: "Poker Manager",
+                desc: "Gerenciador completo para torneios de Poker com timer e fichas.",
+                tech: ["Game Tool", "Timer"],
+                icon: "club"
             },
             {
-                id: "todo-list",
-                nome: "Gerenciador de Tarefas",
-                desc: "Lista de tarefas com persistência no LocalStorage.",
-                tech: ["CRUD", "Storage"],
-                icon: "check-square"
+                id: "rtt",
+                nome: "Mesa de Poker",
+                desc: "Interface visual para simulação de mesa de poker e gestão de apostas.",
+                tech: ["Game UI", "Simulation"],
+                icon: "layout"
+            },
+
+            // --- GRUPO 5: PRODUTIVIDADE ---
+            {
+                id: "erp",
+                nome: "Agenda ERP",
+                desc: "Dashboard administrativo com gerenciamento de tarefas.",
+                tech: ["Dashboard", "CRUD"],
+                icon: "layout-dashboard"
             },
             {
-                id: "landing-page",
-                nome: "Landing Page",
-                desc: "Página de vendas responsiva e otimizada.",
-                tech: ["Responsive", "UI"],
-                icon: "monitor"
+                id: "erp1",
+                nome: "Agenda Híbrida",
+                desc: "Versão avançada da agenda com suporte a anexos e links.",
+                tech: ["File API", "Links"],
+                icon: "paperclip"
             },
-            // Adicione mais objetos aqui...
+            {
+                id: "ag",
+                nome: "Minha Agenda",
+                desc: "Gerenciador de tarefas pessoal com tema claro e escuro.",
+                tech: ["Dark Mode", "Storage"],
+                icon: "calendar"
+            },
+            {
+                id: "agenda",
+                nome: "Agenda da Alice",
+                desc: "Lista de tarefas simplificada com saudações dinâmicas.",
+                tech: ["Simple", "Mobile"],
+                icon: "list-todo"
+            }
         ];
 
         const grid = document.getElementById('projectsGrid');
         const searchInput = document.getElementById('searchInput');
         const noResults = document.getElementById('noResults');
 
-        // Função para gerar cores aleatórias para as tags (opcional, visual)
+        // Função para gerar cores aleatórias para as tags
         function getTagColor(tech) {
-            const colors = ['bg-blue-500/20 text-blue-300', 'bg-green-500/20 text-green-300', 'bg-purple-500/20 text-purple-300', 'bg-orange-500/20 text-orange-300'];
-            // Hash simples para manter a mesma cor para a mesma string
+            const colors = [
+                'bg-blue-500/10 text-blue-300 border-blue-500/20', 
+                'bg-emerald-500/10 text-emerald-300 border-emerald-500/20', 
+                'bg-purple-500/10 text-purple-300 border-purple-500/20', 
+                'bg-amber-500/10 text-amber-300 border-amber-500/20',
+                'bg-pink-500/10 text-pink-300 border-pink-500/20'
+            ];
             let hash = 0;
             for (let i = 0; i < tech.length; i++) {
                 hash = tech.charCodeAt(i) + ((hash << 5) - hash);
@@ -203,41 +347,42 @@
             noResults.classList.add('hidden');
 
             lista.forEach(proj => {
-                // ALTERAÇÃO: Agora adiciona .html ao final do ID
                 const url = `${baseUrl}${proj.id}.html`;
                 
                 // Criação das tags de tecnologia
                 const tagsHtml = proj.tech.map(t => 
-                    `<span class="text-xs px-2 py-1 rounded ${getTagColor(t)} border border-white/5">${t}</span>`
+                    `<span class="text-[10px] font-medium px-2 py-1 rounded-full border ${getTagColor(t)}">${t}</span>`
                 ).join('');
 
                 const card = document.createElement('div');
                 card.className = 'glass-card rounded-2xl p-6 flex flex-col h-full group relative overflow-hidden';
                 
                 card.innerHTML = `
-                    <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-                        <i data-lucide="${proj.icon}" class="w-24 h-24 transform translate-x-4 -translate-y-4 rotate-12"></i>
+                    <div class="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity duration-500">
+                        <i data-lucide="${proj.icon}" class="w-32 h-32 transform translate-x-8 -translate-y-8 rotate-12"></i>
                     </div>
 
-                    <div class="flex items-center gap-4 mb-4">
-                        <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-slate-700 to-slate-800 flex items-center justify-center border border-white/10 group-hover:border-violet-500/50 transition-colors">
-                            <i data-lucide="${proj.icon}" class="w-6 h-6 text-violet-400"></i>
+                    <div class="flex items-start justify-between mb-4 relative z-10">
+                        <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-slate-700 to-slate-800 flex items-center justify-center border border-white/10 group-hover:border-violet-500/50 transition-all shadow-lg group-hover:shadow-violet-500/20">
+                            <i data-lucide="${proj.icon}" class="w-6 h-6 text-violet-400 group-hover:text-violet-300"></i>
                         </div>
-                        <div>
-                            <h3 class="font-bold text-lg leading-tight group-hover:text-violet-300 transition-colors">${proj.nome}</h3>
-                            <span class="text-xs text-slate-500 font-mono">/${proj.id}.html</span>
-                        </div>
+                        <span class="text-[10px] font-mono text-slate-600 bg-slate-900/50 px-2 py-1 rounded border border-white/5 opacity-0 group-hover:opacity-100 transition-opacity">
+                            ${proj.id}.html
+                        </span>
                     </div>
                     
-                    <p class="text-slate-400 text-sm mb-6 flex-grow leading-relaxed">
-                        ${proj.desc}
-                    </p>
+                    <div class="relative z-10 flex-grow">
+                        <h3 class="font-bold text-xl mb-2 group-hover:text-violet-300 transition-colors">${proj.nome}</h3>
+                        <p class="text-slate-400 text-sm leading-relaxed mb-4">
+                            ${proj.desc}
+                        </p>
+                    </div>
 
-                    <div class="flex flex-wrap gap-2 mb-6">
+                    <div class="flex flex-wrap gap-2 mb-6 relative z-10">
                         ${tagsHtml}
                     </div>
 
-                    <a href="${url}" target="_blank" class="mt-auto w-full py-3 rounded-lg bg-white/5 hover:bg-violet-600 hover:text-white border border-white/10 hover:border-violet-500 text-center text-sm font-semibold transition-all flex items-center justify-center gap-2 group-hover:shadow-lg group-hover:shadow-violet-500/20">
+                    <a href="${url}" target="_blank" class="mt-auto w-full py-3 rounded-xl bg-white/5 hover:bg-violet-600 hover:text-white border border-white/10 hover:border-violet-500 text-center text-sm font-semibold transition-all flex items-center justify-center gap-2 group-hover:shadow-lg group-hover:shadow-violet-500/20 relative z-10">
                         <span>Acessar Projeto</span>
                         <i data-lucide="external-link" class="w-4 h-4"></i>
                     </a>
@@ -259,7 +404,8 @@
             const filtrados = projetos.filter(p => 
                 p.nome.toLowerCase().includes(termo) || 
                 p.desc.toLowerCase().includes(termo) ||
-                p.id.toLowerCase().includes(termo)
+                p.id.toLowerCase().includes(termo) ||
+                p.tech.some(t => t.toLowerCase().includes(termo))
             );
             renderProjects(filtrados);
         });
