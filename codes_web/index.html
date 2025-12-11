@@ -132,22 +132,22 @@
 
         // CONFIGURAÇÃO DOS PROJETOS
         // ======================================================================
-        // EDITE AQUI: Adicione os nomes das pastas dos seus projetos.
-        // O "id" deve ser o nome exato da pasta no URL.
-        // O "icon" pode ser qualquer nome de ícone do site: https://lucide.dev/icons/
+        // EDITE AQUI: Adicione os nomes dos arquivos dos seus projetos (sem .html).
+        // O "id" deve ser o nome exato do arquivo.
+        // O código vai adicionar .html automaticamente no final.
         // ======================================================================
         const baseUrl = "https://kznybs.github.io/codes_web/";
         
         const projetos = [
             {
-                id: "nome-da-pasta-1", 
-                nome: "Projeto Exemplo 1", 
-                desc: "Uma breve descrição do que este projeto faz.",
-                tech: ["HTML", "CSS"],
-                icon: "layout" 
+                id: "ArvoresEstruturaDeDados2", // Nome do arquivo: ArvoresEstruturaDeDados2.html
+                nome: "Árvores Binárias", 
+                desc: "Estrutura de dados e visualização de árvore binária.",
+                tech: ["HTML", "JS", "Canvas"],
+                icon: "network" 
             },
             {
-                id: "calculadora", // Exemplo: se a pasta for /calculadora/
+                id: "calculadora", 
                 nome: "Calculadora JS",
                 desc: "Uma calculadora moderna com histórico de operações.",
                 tech: ["JS", "Math"],
@@ -203,7 +203,8 @@
             noResults.classList.add('hidden');
 
             lista.forEach(proj => {
-                const url = `${baseUrl}${proj.id}/`;
+                // ALTERAÇÃO: Agora adiciona .html ao final do ID
+                const url = `${baseUrl}${proj.id}.html`;
                 
                 // Criação das tags de tecnologia
                 const tagsHtml = proj.tech.map(t => 
@@ -224,7 +225,7 @@
                         </div>
                         <div>
                             <h3 class="font-bold text-lg leading-tight group-hover:text-violet-300 transition-colors">${proj.nome}</h3>
-                            <span class="text-xs text-slate-500 font-mono">/${proj.id}</span>
+                            <span class="text-xs text-slate-500 font-mono">/${proj.id}.html</span>
                         </div>
                     </div>
                     
