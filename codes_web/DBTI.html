@@ -1,0 +1,1293 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestão de TI</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .transition-all {
+            transition: all 0.3s ease-in-out;
+        }
+        .modal-enter { animation: modal-in 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards; }
+        .modal-leave { animation: modal-out 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards; }
+        @keyframes modal-in {
+            from { opacity: 0; transform: translateY(30px) scale(0.95); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        @keyframes modal-out {
+            from { opacity: 1; transform: translateY(0) scale(1); }
+            to { opacity: 0; transform: translateY(30px) scale(0.95); }
+        }
+        .sidebar-link-active {
+            background-color: #059669; /* green-600 */
+            color: white;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-gray-200">
+
+    <div class="flex h-screen">
+        <!-- Sidebar -->
+        <aside class="w-64 bg-gray-800 text-white flex-col hidden sm:flex">
+            <div class="h-20 flex items-center justify-center bg-gray-900/50">
+                <svg class="w-8 h-8 text-green-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0h18M-4.5 12h22.5" /></svg>
+                <h1 class="text-xl font-bold ml-2">Gestão de TI</h1>
+            </div>
+            <nav id="sidebar-nav" class="flex-1 px-4 py-6 space-y-2">
+                <a href="#" class="sidebar-link flex items-center px-4 py-2.5 rounded-lg transition-all sidebar-link-active" data-view="tarefas">
+                    <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z" /></svg>
+                    <span class="ml-4 font-medium">Minhas Tarefas</span>
+                </a>
+                <a href="#" class="sidebar-link flex items-center px-4 py-2.5 rounded-lg hover:bg-gray-700 transition-all text-gray-300" data-view="standby">
+                    <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 3v1.5M4.5 8.25H3m18 0h-1.5M4.5 12H3m18 0h-1.5m-15 3.75H3m18 0h-1.5M8.25 21v-1.5M12 3v1.5m0 15V21m3.75-18v1.5M12 8.25h-1.5M12 12h-1.5m-1.5 3.75H12m3.75 0h-1.5m-1.5-3.75H12m3.75 0h-1.5M12 3a9 9 0 00-9 9c0 4.968 4.032 9 9 9s9-4.032 9-9c0-4.968-4.032-9-9-9z" /></svg>
+                    <span class="ml-4 font-medium">StandBy TI</span>
+                </a>
+                <a href="#" class="sidebar-link flex items-center px-4 py-2.5 rounded-lg hover:bg-gray-700 transition-all text-gray-300" data-view="compras">
+                    <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 00-3 3h15.75m-12.75-3h11.218c.51 0 .962-.343 1.087-.835l1.838-5.513c.275-.824-.25-1.665-1.112-1.665H6.32M7.5 14.25L5.106 5.165A1.125 1.125 0 003.991 4.5H3" /></svg>
+                    <span class="ml-4 font-medium">Solicitação de Compra</span>
+                </a>
+                <a href="#" class="sidebar-link flex items-center px-4 py-2.5 rounded-lg hover:bg-gray-700 transition-all text-gray-300" data-view="remessa">
+                    <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M11.42 15.17L17.25 21A2.652 2.652 0 0021 17.25l-5.877-5.877M11.42 15.17l2.471-2.471a1.125 1.125 0 00-1.59-1.59L9.828 13.586m-3.182.172a4.5 4.5 0 005.909 5.909L11.42 15.17z" /></svg>
+                    <span class="ml-4 font-medium">Remessa de Conserto</span>
+                </a>
+                <a href="#" class="sidebar-link flex items-center px-4 py-2.5 rounded-lg hover:bg-gray-700 transition-all text-gray-300" data-view="transferencia">
+                    <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M7.5 21L3 16.5m0 0L7.5 12M3 16.5h13.5m0-13.5L21 7.5m0 0L16.5 12M21 7.5H7.5" /></svg>
+                    <span class="ml-4 font-medium">Transferência de Ativo</span>
+                </a>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <div class="flex-1 flex flex-col overflow-hidden">
+            <header class="h-20 bg-gray-800/50 backdrop-blur-sm shadow-sm flex items-center justify-between px-6 flex-shrink-0">
+                <h2 id="main-header-title" class="text-2xl font-bold text-white">Minhas Tarefas</h2>
+                <div class="flex items-center space-x-4">
+                    <div id="cuiaba-clock" class="text-right"></div>
+                </div>
+            </header>
+
+            <!-- Tasks View -->
+            <main id="tarefas-view" class="view-container flex-1 overflow-y-auto p-6 relative">
+                <div id="task-list" class="space-y-4"></div>
+                <div id="no-tasks-message" class="text-center py-16 px-6 hidden">
+                    <svg class="mx-auto h-16 w-16 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path vector-effect="non-scaling-stroke" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                    <h3 class="mt-2 text-lg font-semibold">Nenhuma tarefa encontrada</h3>
+                    <p class="mt-1 text-sm text-gray-500">Comece adicionando uma nova tarefa.</p>
+                </div>
+                <button id="add-task-btn" class="add-btn fixed bottom-8 right-8 bg-green-600 hover:bg-green-700 text-white font-bold w-14 h-14 rounded-full flex items-center justify-center shadow-lg transform hover:scale-110 transition-transform z-20">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" /></svg>
+                </button>
+            </main>
+
+            <!-- StandBy TI View -->
+            <main id="standby-view" class="view-container flex-1 overflow-y-auto p-6 relative hidden">
+                <div id="standby-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"></div>
+                <div id="no-standby-message" class="text-center py-16 px-6 hidden">
+                    <svg class="mx-auto h-16 w-16 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 3v1.5M4.5 8.25H3m18 0h-1.5M4.5 12H3m18 0h-1.5m-15 3.75H3m18 0h-1.5M8.25 21v-1.5M12 3v1.5m0 15V21m3.75-18v1.5M12 8.25h-1.5M12 12h-1.5m-1.5 3.75H12m3.75 0h-1.5m-1.5-3.75H12m3.75 0h-1.5M12 3a9 9 0 00-9 9c0 4.968 4.032 9 9 9s9-4.032 9-9c0-4.968-4.032-9-9-9z" /></svg>
+                    <h3 class="mt-2 text-lg font-semibold">Nenhum equipamento em standby</h3>
+                    <p class="mt-1 text-sm text-gray-500">Adicione um novo item para começar o controle.</p>
+                </div>
+                <button id="add-standby-btn" class="add-btn fixed bottom-8 right-8 bg-green-600 hover:bg-green-700 text-white font-bold w-14 h-14 rounded-full flex items-center justify-center shadow-lg transform hover:scale-110 transition-transform z-20">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" /></svg>
+                </button>
+            </main>
+            
+            <!-- Compras View -->
+            <main id="compras-view" class="view-container flex-1 overflow-y-auto p-6 relative hidden">
+                <div id="compras-list" class="space-y-4"></div>
+                <div id="no-compras-message" class="text-center py-16 px-6 hidden">
+                    <svg class="mx-auto h-16 w-16 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 00-3 3h15.75m-12.75-3h11.218c.51 0 .962-.343 1.087-.835l1.838-5.513c.275-.824-.25-1.665-1.112-1.665H6.32M7.5 14.25L5.106 5.165A1.125 1.125 0 003.991 4.5H3" /></svg>
+                    <h3 class="mt-2 text-lg font-semibold">Nenhuma solicitação de compra</h3>
+                    <p class="mt-1 text-sm text-gray-500">Adicione uma nova solicitação para começar.</p>
+                </div>
+                <button id="add-compra-btn" class="add-btn fixed bottom-8 right-8 bg-green-600 hover:bg-green-700 text-white font-bold w-14 h-14 rounded-full flex items-center justify-center shadow-lg transform hover:scale-110 transition-transform z-20">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" /></svg>
+                </button>
+            </main>
+
+            <!-- Remessa View -->
+            <main id="remessa-view" class="view-container flex-1 overflow-y-auto p-6 relative hidden">
+                <div id="remessa-list" class="space-y-4"></div>
+                <div id="no-remessa-message" class="text-center py-16 px-6 hidden">
+                    <svg class="mx-auto h-16 w-16 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M11.42 15.17L17.25 21A2.652 2.652 0 0021 17.25l-5.877-5.877M11.42 15.17l2.471-2.471a1.125 1.125 0 00-1.59-1.59L9.828 13.586m-3.182.172a4.5 4.5 0 005.909 5.909L11.42 15.17z" /></svg>
+                    <h3 class="mt-2 text-lg font-semibold">Nenhuma remessa de conserto</h3>
+                    <p class="mt-1 text-sm text-gray-500">Adicione uma nova remessa para começar.</p>
+                </div>
+                <button id="add-remessa-btn" class="add-btn fixed bottom-8 right-8 bg-green-600 hover:bg-green-700 text-white font-bold w-14 h-14 rounded-full flex items-center justify-center shadow-lg transform hover:scale-110 transition-transform z-20">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" /></svg>
+                </button>
+            </main>
+
+            <!-- Transferencia View -->
+            <main id="transferencia-view" class="view-container flex-1 overflow-y-auto p-6 relative hidden">
+                <div id="transferencia-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"></div>
+                <div id="no-transferencia-message" class="text-center py-16 px-6 hidden">
+                    <svg class="mx-auto h-16 w-16 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M7.5 21L3 16.5m0 0L7.5 12M3 16.5h13.5m0-13.5L21 7.5m0 0L16.5 12M21 7.5H7.5" /></svg>
+                    <h3 class="mt-2 text-lg font-semibold">Nenhuma transferência registrada</h3>
+                    <p class="mt-1 text-sm text-gray-500">Adicione uma nova transferência para começar.</p>
+                </div>
+                <button id="add-transferencia-btn" class="add-btn fixed bottom-8 right-8 bg-green-600 hover:bg-green-700 text-white font-bold w-14 h-14 rounded-full flex items-center justify-center shadow-lg transform hover:scale-110 transition-transform z-20">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" /></svg>
+                </button>
+            </main>
+        </div>
+    </div>
+
+    <!-- Task Modal -->
+    <div id="task-modal" class="modal fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4 z-50 hidden">
+        <div class="bg-gray-800 rounded-2xl shadow-xl w-full max-w-lg mx-auto modal-content">
+            <form id="task-form" class="p-6">
+                <h2 id="modal-title" class="text-2xl font-bold mb-6">Nova Tarefa</h2>
+                <input type="hidden" id="task-id">
+                <div class="space-y-5">
+                    <div>
+                        <label for="task-description" class="block text-sm font-medium text-gray-300 mb-1">Descrição</label>
+                        <textarea id="task-description" placeholder="Ex: Preparar relatório de vendas" class="w-full px-4 py-2 border border-gray-600 bg-gray-700 rounded-lg focus:ring-2 focus:ring-green-500 transition" required rows="3"></textarea>
+                    </div>
+                    <div>
+                        <label for="attachment-type" class="block text-sm font-medium text-gray-300 mb-1">Tipo de Anexo</label>
+                        <select id="attachment-type" class="w-full px-4 py-2 border border-gray-600 bg-gray-700 rounded-lg focus:ring-2 focus:ring-green-500 transition">
+                            <option value="none">Nenhum</option>
+                            <option value="file">Arquivo PDF</option>
+                            <option value="url">Link da Web (URL)</option>
+                        </select>
+                    </div>
+                    <div id="file-input-container" class="hidden">
+                        <label for="task-file" class="block text-sm font-medium text-gray-300 mb-1">Anexar PDF</label>
+                        <input type="file" id="task-file" accept=".pdf" class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-green-900/50 file:text-green-300 hover:file:bg-green-900">
+                        <p id="file-info" class="text-xs text-gray-500 mt-1">Limite de 2MB. O arquivo é salvo no navegador.</p>
+                    </div>
+                    <div id="url-input-container" class="hidden">
+                        <label for="task-url" class="block text-sm font-medium text-gray-300 mb-1">URL do Link</label>
+                        <input type="url" id="task-url" placeholder="https://outlook.live.com/..." class="w-full px-4 py-2 border border-gray-600 bg-gray-700 rounded-lg focus:ring-2 focus:ring-green-500 transition">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-1">Prazo Final</label>
+                        <div class="grid grid-cols-2 gap-4">
+                            <input type="date" id="end-date" class="w-full px-4 py-2 border border-gray-600 bg-gray-700 rounded-lg focus:ring-2 focus:ring-green-500 transition" required>
+                            <input type="time" id="end-time" class="w-full px-4 py-2 border border-gray-600 bg-gray-700 rounded-lg focus:ring-2 focus:ring-green-500 transition" required>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-8 flex justify-end space-x-3">
+                    <button type="button" class="cancel-btn px-5 py-2.5 text-sm font-medium rounded-lg transition">Cancelar</button>
+                    <button type="submit" class="px-5 py-2.5 text-sm font-medium text-white bg-green-600 hover:bg-green-700 rounded-lg transition">Salvar Tarefa</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Standby Modal -->
+    <div id="standby-modal" class="modal fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4 z-50 hidden">
+        <div class="bg-gray-800 rounded-2xl shadow-xl w-full max-w-lg mx-auto modal-content">
+            <form id="standby-form" class="p-6">
+                <h2 id="standby-modal-title" class="text-2xl font-bold mb-6">Novo Item em Standby</h2>
+                <input type="hidden" id="standby-id">
+                <div class="space-y-5">
+                    <div>
+                        <label for="standby-description" class="block text-sm font-medium text-gray-300 mb-1">Descrição do Equipamento</label>
+                        <textarea id="standby-description" placeholder="Ex: Notebook Dell Vostro, Monitor LG 24'" class="w-full px-4 py-2 border border-gray-600 bg-gray-700 rounded-lg focus:ring-2 focus:ring-green-500 transition" required rows="2"></textarea>
+                    </div>
+                    <div>
+                        <label for="standby-centro-custo" class="block text-sm font-medium text-gray-300 mb-1">Centro de Custo de Origem</label>
+                        <input type="text" id="standby-centro-custo" placeholder="Ex: 1101 - TI" class="w-full px-4 py-2 border border-gray-600 bg-gray-700 rounded-lg focus:ring-2 focus:ring-green-500 transition">
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label for="standby-patrimonio" class="block text-sm font-medium text-gray-300 mb-1">Patrimônio</label>
+                            <input type="text" id="standby-patrimonio" class="w-full px-4 py-2 border border-gray-600 bg-gray-700 rounded-lg focus:ring-2 focus:ring-green-500 transition">
+                        </div>
+                        <div>
+                            <label for="standby-serial" class="block text-sm font-medium text-gray-300 mb-1">Serial</label>
+                            <input type="text" id="standby-serial" class="w-full px-4 py-2 border border-gray-600 bg-gray-700 rounded-lg focus:ring-2 focus:ring-green-500 transition">
+                        </div>
+                    </div>
+                    <div>
+                        <label for="standby-image" class="block text-sm font-medium text-gray-300 mb-1">Foto do Equipamento</label>
+                        <input type="file" id="standby-image" accept="image/*" class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-green-900/50 file:text-green-300 hover:file:bg-green-900">
+                        <p id="standby-file-info" class="text-xs text-gray-500 mt-1">Limite de 2MB. A imagem é salva no navegador.</p>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label for="entry-date" class="block text-sm font-medium text-gray-300 mb-1">Data de Entrada</label>
+                            <input type="date" id="entry-date" class="w-full px-4 py-2 border border-gray-600 bg-gray-700 rounded-lg focus:ring-2 focus:ring-green-500 transition" required>
+                        </div>
+                        <div>
+                            <label for="exit-date" class="block text-sm font-medium text-gray-300 mb-1">Data de Saída (Opcional)</label>
+                            <input type="date" id="exit-date" class="w-full px-4 py-2 border border-gray-600 bg-gray-700 rounded-lg focus:ring-2 focus:ring-green-500 transition">
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-8 flex justify-end space-x-3">
+                    <button type="button" class="cancel-btn px-5 py-2.5 text-sm font-medium rounded-lg transition">Cancelar</button>
+                    <button type="submit" class="px-5 py-2.5 text-sm font-medium text-white bg-green-600 hover:bg-green-700 rounded-lg transition">Salvar Item</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Compra Modal -->
+    <div id="compra-modal" class="modal fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4 z-50 hidden">
+        <div class="bg-gray-800 rounded-2xl shadow-xl w-full max-w-lg mx-auto modal-content">
+            <form id="compra-form" class="p-6">
+                <h2 id="compra-modal-title" class="text-2xl font-bold mb-6">Nova Solicitação de Compra</h2>
+                <input type="hidden" id="compra-id">
+                <div class="space-y-5">
+                    <div>
+                        <label for="compra-description" class="block text-sm font-medium text-gray-300 mb-1">Descrição</label>
+                        <textarea id="compra-description" placeholder="Ex: 5x Mouse Logitech MX Master 3" class="w-full px-4 py-2 border border-gray-600 bg-gray-700 rounded-lg focus:ring-2 focus:ring-green-500 transition" required rows="2"></textarea>
+                    </div>
+                    <div>
+                        <label for="compra-centro-custo" class="block text-sm font-medium text-gray-300 mb-1">Centro de Custo</label>
+                        <input type="text" id="compra-centro-custo" class="w-full px-4 py-2 border border-gray-600 bg-gray-700 rounded-lg focus:ring-2 focus:ring-green-500 transition" required>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label for="compra-codigo-solicitacao" class="block text-sm font-medium text-gray-300 mb-1">Cód. Solicitação</label>
+                            <input type="text" id="compra-codigo-solicitacao" class="w-full px-4 py-2 border border-gray-600 bg-gray-700 rounded-lg focus:ring-2 focus:ring-green-500 transition" required>
+                        </div>
+                        <div>
+                            <label for="compra-codigo-produto" class="block text-sm font-medium text-gray-300 mb-1">Cód. Produto (Opcional)</label>
+                            <input type="text" id="compra-codigo-produto" class="w-full px-4 py-2 border border-gray-600 bg-gray-700 rounded-lg focus:ring-2 focus:ring-green-500 transition">
+                        </div>
+                    </div>
+                     <div class="grid grid-cols-3 gap-4">
+                        <div>
+                            <label for="compra-data-inicio" class="block text-sm font-medium text-gray-300 mb-1">Data Início</label>
+                            <input type="date" id="compra-data-inicio" class="w-full px-4 py-2 border border-gray-600 bg-gray-700 rounded-lg focus:ring-2 focus:ring-green-500 transition" required>
+                        </div>
+                        <div>
+                            <label for="compra-data-chegou" class="block text-sm font-medium text-gray-300 mb-1">Data Chegada</label>
+                            <input type="date" id="compra-data-chegou" class="w-full px-4 py-2 border border-gray-600 bg-gray-700 rounded-lg focus:ring-2 focus:ring-green-500 transition">
+                        </div>
+                         <div>
+                            <label for="compra-data-check" class="block text-sm font-medium text-gray-300 mb-1">Data Check</label>
+                            <input type="date" id="compra-data-check" class="w-full px-4 py-2 border border-gray-600 bg-gray-700 rounded-lg focus:ring-2 focus:ring-green-500 transition">
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-8 flex justify-end space-x-3">
+                    <button type="button" class="cancel-btn px-5 py-2.5 text-sm font-medium rounded-lg transition">Cancelar</button>
+                    <button type="submit" class="px-5 py-2.5 text-sm font-medium text-white bg-green-600 hover:bg-green-700 rounded-lg transition">Salvar Solicitação</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Remessa Modal -->
+    <div id="remessa-modal" class="modal fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4 z-50 hidden">
+        <div class="bg-gray-800 rounded-2xl shadow-xl w-full max-w-lg mx-auto modal-content">
+            <form id="remessa-form" class="p-6">
+                <h2 id="remessa-modal-title" class="text-2xl font-bold mb-6">Nova Remessa de Conserto</h2>
+                <input type="hidden" id="remessa-id">
+                <div class="space-y-5">
+                    <div>
+                        <label for="remessa-description" class="block text-sm font-medium text-gray-300 mb-1">Descrição</label>
+                        <textarea id="remessa-description" placeholder="Ex: Impressora HP LaserJet Pro M404dn" class="w-full px-4 py-2 border border-gray-600 bg-gray-700 rounded-lg focus:ring-2 focus:ring-green-500 transition" required rows="2"></textarea>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label for="remessa-empresa" class="block text-sm font-medium text-gray-300 mb-1">Empresa</label>
+                            <input type="text" id="remessa-empresa" placeholder="Nome da assistência técnica" class="w-full px-4 py-2 border border-gray-600 bg-gray-700 rounded-lg focus:ring-2 focus:ring-green-500 transition" required>
+                        </div>
+                        <div>
+                             <label for="remessa-centro-custo" class="block text-sm font-medium text-gray-300 mb-1">Centro de Custo</label>
+                            <input type="text" id="remessa-centro-custo" class="w-full px-4 py-2 border border-gray-600 bg-gray-700 rounded-lg focus:ring-2 focus:ring-green-500 transition" required>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label for="remessa-patrimonio" class="block text-sm font-medium text-gray-300 mb-1">Patrimônio</label>
+                            <input type="text" id="remessa-patrimonio" class="w-full px-4 py-2 border border-gray-600 bg-gray-700 rounded-lg focus:ring-2 focus:ring-green-500 transition" required>
+                        </div>
+                        <div>
+                            <label for="remessa-serial" class="block text-sm font-medium text-gray-300 mb-1">Serial</label>
+                            <input type="text" id="remessa-serial" class="w-full px-4 py-2 border border-gray-600 bg-gray-700 rounded-lg focus:ring-2 focus:ring-green-500 transition" required>
+                        </div>
+                    </div>
+                     <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label for="remessa-data-inicio" class="block text-sm font-medium text-gray-300 mb-1">Data de Início</label>
+                            <input type="date" id="remessa-data-inicio" class="w-full px-4 py-2 border border-gray-600 bg-gray-700 rounded-lg focus:ring-2 focus:ring-green-500 transition" required>
+                        </div>
+                        <div>
+                            <label for="remessa-data-final" class="block text-sm font-medium text-gray-300 mb-1">Data Final (Chegada)</label>
+                            <input type="date" id="remessa-data-final" class="w-full px-4 py-2 border border-gray-600 bg-gray-700 rounded-lg focus:ring-2 focus:ring-green-500 transition">
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-8 flex justify-end space-x-3">
+                    <button type="button" class="cancel-btn px-5 py-2.5 text-sm font-medium rounded-lg transition">Cancelar</button>
+                    <button type="submit" class="px-5 py-2.5 text-sm font-medium text-white bg-green-600 hover:bg-green-700 rounded-lg transition">Salvar Remessa</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Transferencia Modal -->
+    <div id="transferencia-modal" class="modal fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4 z-50 hidden">
+        <div class="bg-gray-800 rounded-2xl shadow-xl w-full max-w-lg mx-auto modal-content">
+            <form id="transferencia-form" class="p-6">
+                <h2 id="transferencia-modal-title" class="text-2xl font-bold mb-6">Nova Transferência de Ativo</h2>
+                <input type="hidden" id="transferencia-id">
+                <div class="space-y-5">
+                    <div>
+                        <label for="transferencia-description" class="block text-sm font-medium text-gray-300 mb-1">Descrição do Equipamento</label>
+                        <textarea id="transferencia-description" placeholder="Ex: Notebook Dell Latitude 5420" class="w-full px-4 py-2 border border-gray-600 bg-gray-700 rounded-lg focus:ring-2 focus:ring-green-500 transition" required rows="2"></textarea>
+                    </div>
+                    <div>
+                        <label for="transferencia-image" class="block text-sm font-medium text-gray-300 mb-1">Foto do Equipamento</label>
+                        <input type="file" id="transferencia-image" accept="image/*" class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-green-900/50 file:text-green-300 hover:file:bg-green-900">
+                        <p id="transferencia-file-info" class="text-xs text-gray-500 mt-1">Limite de 2MB. A imagem é salva no navegador.</p>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label for="transferencia-patrimonio" class="block text-sm font-medium text-gray-300 mb-1">Patrimônio</label>
+                            <input type="text" id="transferencia-patrimonio" class="w-full px-4 py-2 border border-gray-600 bg-gray-700 rounded-lg focus:ring-2 focus:ring-green-500 transition" required>
+                        </div>
+                        <div>
+                            <label for="transferencia-serial" class="block text-sm font-medium text-gray-300 mb-1">Serial</label>
+                            <input type="text" id="transferencia-serial" class="w-full px-4 py-2 border border-gray-600 bg-gray-700 rounded-lg focus:ring-2 focus:ring-green-500 transition" required>
+                        </div>
+                    </div>
+                     <div class="grid grid-cols-3 gap-4">
+                        <div>
+                             <label for="transferencia-data" class="block text-sm font-medium text-gray-300 mb-1">Data</label>
+                            <input type="date" id="transferencia-data" class="w-full px-4 py-2 border border-gray-600 bg-gray-700 rounded-lg focus:ring-2 focus:ring-green-500 transition" required>
+                        </div>
+                        <div>
+                            <label for="transferencia-setor-origem" class="block text-sm font-medium text-gray-300 mb-1">Setor de Origem</label>
+                            <input type="text" id="transferencia-setor-origem" placeholder="Ex: TI" class="w-full px-4 py-2 border border-gray-600 bg-gray-700 rounded-lg focus:ring-2 focus:ring-green-500 transition" required>
+                        </div>
+                        <div>
+                            <label for="transferencia-setor-destino" class="block text-sm font-medium text-gray-300 mb-1">Setor de Destino</label>
+                            <input type="text" id="transferencia-setor-destino" placeholder="Ex: Financeiro" class="w-full px-4 py-2 border border-gray-600 bg-gray-700 rounded-lg focus:ring-2 focus:ring-green-500 transition" required>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-8 flex justify-end space-x-3">
+                    <button type="button" class="cancel-btn px-5 py-2.5 text-sm font-medium rounded-lg transition">Cancelar</button>
+                    <button type="submit" class="px-5 py-2.5 text-sm font-medium text-white bg-green-600 hover:bg-green-700 rounded-lg transition">Salvar Transferência</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        // --- CONSTANTS ---
+        const FILE_SIZE_LIMIT = 2 * 1024 * 1024; // 2MB
+        const TASKS_DB_NAME = 'tasks-erp-hybrid';
+        const STANDBY_DB_NAME = 'standby-ti-items';
+        const COMPRAS_DB_NAME = 'compras-ti-items';
+        const REMESSA_DB_NAME = 'remessa-ti-items';
+        const TRANSFERENCIA_DB_NAME = 'transferencia-ti-items';
+
+        // --- GLOBAL SELECTORS ---
+        const clockElement = document.getElementById('cuiaba-clock');
+        const mainHeaderTitle = document.getElementById('main-header-title');
+        const sidebarNav = document.getElementById('sidebar-nav');
+
+        // --- VIEW CONTAINERS ---
+        const taskView = document.getElementById('tarefas-view');
+        const standbyView = document.getElementById('standby-view');
+        const comprasView = document.getElementById('compras-view');
+        const remessaView = document.getElementById('remessa-view');
+        const transferenciaView = document.getElementById('transferencia-view');
+
+        // --- TASK SELECTORS ---
+        const taskList = document.getElementById('task-list');
+        const noTasksMessage = document.getElementById('no-tasks-message');
+        const addTaskBtn = document.getElementById('add-task-btn');
+        const taskModal = document.getElementById('task-modal');
+        const taskForm = document.getElementById('task-form');
+        const taskModalTitle = document.getElementById('modal-title');
+        const taskIdInput = document.getElementById('task-id');
+        const taskDescriptionInput = document.getElementById('task-description');
+        const attachmentTypeSelect = document.getElementById('attachment-type');
+        const fileInputContainer = document.getElementById('file-input-container');
+        const urlInputContainer = document.getElementById('url-input-container');
+        const taskFileInput = document.getElementById('task-file');
+        const fileInfo = document.getElementById('file-info');
+        const taskUrlInput = document.getElementById('task-url');
+        const endDateInput = document.getElementById('end-date');
+        const endTimeInput = document.getElementById('end-time');
+
+        // --- STANDBY SELECTORS ---
+        const standbyList = document.getElementById('standby-list');
+        const noStandbyMessage = document.getElementById('no-standby-message');
+        const addStandbyBtn = document.getElementById('add-standby-btn');
+        const standbyModal = document.getElementById('standby-modal');
+        const standbyForm = document.getElementById('standby-form');
+        const standbyModalTitle = document.getElementById('standby-modal-title');
+        const standbyIdInput = document.getElementById('standby-id');
+        const standbyDescriptionInput = document.getElementById('standby-description');
+        const standbyCentroCustoInput = document.getElementById('standby-centro-custo');
+        const standbyPatrimonioInput = document.getElementById('standby-patrimonio');
+        const standbySerialInput = document.getElementById('standby-serial');
+        const standbyImageInput = document.getElementById('standby-image');
+        const standbyFileInfo = document.getElementById('standby-file-info');
+        const entryDateInput = document.getElementById('entry-date');
+        const exitDateInput = document.getElementById('exit-date');
+
+        // --- COMPRAS SELECTORS ---
+        const comprasList = document.getElementById('compras-list');
+        const noComprasMessage = document.getElementById('no-compras-message');
+        const addCompraBtn = document.getElementById('add-compra-btn');
+        const compraModal = document.getElementById('compra-modal');
+        const compraForm = document.getElementById('compra-form');
+        const compraModalTitle = document.getElementById('compra-modal-title');
+        const compraIdInput = document.getElementById('compra-id');
+        const compraDescriptionInput = document.getElementById('compra-description');
+        const compraCentroCustoInput = document.getElementById('compra-centro-custo');
+        const compraCodigoSolicitacaoInput = document.getElementById('compra-codigo-solicitacao');
+        const compraCodigoProdutoInput = document.getElementById('compra-codigo-produto');
+        const compraDataInicioInput = document.getElementById('compra-data-inicio');
+        const compraDataChegouInput = document.getElementById('compra-data-chegou');
+        const compraDataCheckInput = document.getElementById('compra-data-check');
+
+        // --- REMESSA SELECTORS ---
+        const remessaList = document.getElementById('remessa-list');
+        const noRemessaMessage = document.getElementById('no-remessa-message');
+        const addRemessaBtn = document.getElementById('add-remessa-btn');
+        const remessaModal = document.getElementById('remessa-modal');
+        const remessaForm = document.getElementById('remessa-form');
+        const remessaModalTitle = document.getElementById('remessa-modal-title');
+        const remessaIdInput = document.getElementById('remessa-id');
+        const remessaDescriptionInput = document.getElementById('remessa-description');
+        const remessaEmpresaInput = document.getElementById('remessa-empresa');
+        const remessaCentroCustoInput = document.getElementById('remessa-centro-custo');
+        const remessaPatrimonioInput = document.getElementById('remessa-patrimonio');
+        const remessaSerialInput = document.getElementById('remessa-serial');
+        const remessaDataInicioInput = document.getElementById('remessa-data-inicio');
+        const remessaDataFinalInput = document.getElementById('remessa-data-final');
+
+        // --- TRANSFERENCIA SELECTORS ---
+        const transferenciaList = document.getElementById('transferencia-list');
+        const noTransferenciaMessage = document.getElementById('no-transferencia-message');
+        const addTransferenciaBtn = document.getElementById('add-transferencia-btn');
+        const transferenciaModal = document.getElementById('transferencia-modal');
+        const transferenciaForm = document.getElementById('transferencia-form');
+        const transferenciaModalTitle = document.getElementById('transferencia-modal-title');
+        const transferenciaIdInput = document.getElementById('transferencia-id');
+        const transferenciaDescriptionInput = document.getElementById('transferencia-description');
+        const transferenciaImageInput = document.getElementById('transferencia-image');
+        const transferenciaFileInfo = document.getElementById('transferencia-file-info');
+        const transferenciaPatrimonioInput = document.getElementById('transferencia-patrimonio');
+        const transferenciaSerialInput = document.getElementById('transferencia-serial');
+        const transferenciaDataInput = document.getElementById('transferencia-data');
+        const transferenciaSetorOrigemInput = document.getElementById('transferencia-setor-origem');
+        const transferenciaSetorDestinoInput = document.getElementById('transferencia-setor-destino');
+
+
+        // --- GENERAL HELPER FUNCTIONS ---
+        const formatDate = (dateStr) => {
+            if (!dateStr) return '';
+            return new Date(dateStr + 'T00:00:00').toLocaleDateString('pt-BR');
+        };
+
+        const base64ToBlob = (base64, contentType = '') => {
+            const byteCharacters = atob(base64.split(',')[1]);
+            const byteArrays = [];
+            for (let offset = 0; offset < byteCharacters.length; offset += 512) {
+                const slice = byteCharacters.slice(offset, offset + 512);
+                const byteNumbers = new Array(slice.length);
+                for (let i = 0; i < slice.length; i++) byteNumbers[i] = slice.charCodeAt(i);
+                byteArrays.push(new Uint8Array(byteNumbers));
+            }
+            return new Blob(byteArrays, { type: contentType });
+        };
+
+        // --- CLOCK & THEME LOGIC ---
+        const updateClock = () => {
+            const now = new Date();
+            const timeZone = 'America/Cuiaba';
+            const timeString = now.toLocaleTimeString('pt-BR', { timeZone, hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            const dateString = now.toLocaleDateString('pt-BR', { timeZone, weekday: 'long', month: 'long', day: 'numeric' });
+            clockElement.innerHTML = `<p class="font-semibold text-sm text-green-400">${timeString}</p><p class="text-xs text-gray-400 capitalize">${dateString}</p>`;
+        };
+        setInterval(updateClock, 1000);
+
+        const applyTheme = () => {
+            document.querySelectorAll('.cancel-btn').forEach(btn => {
+                btn.classList.add('bg-gray-700', 'text-gray-300', 'hover:bg-gray-600');
+            });
+        };
+
+        // --- NAVIGATION / VIEW SWITCHING LOGIC ---
+        const switchView = (viewName) => {
+            document.querySelectorAll('.view-container').forEach(view => view.classList.add('hidden'));
+            document.getElementById(`${viewName}-view`).classList.remove('hidden');
+
+            document.querySelectorAll('.sidebar-link').forEach(link => {
+                link.classList.remove('sidebar-link-active');
+                link.classList.add('text-gray-300');
+            });
+            const activeLink = document.querySelector(`.sidebar-link[data-view="${viewName}"]`);
+            activeLink.classList.add('sidebar-link-active');
+            activeLink.classList.remove('text-gray-300');
+            
+            const titles = {
+                tarefas: 'Minhas Tarefas',
+                standby: 'StandBy TI',
+                compras: 'Solicitação de Compra',
+                remessa: 'Remessa de Conserto',
+                transferencia: 'Transferência de Ativo'
+            };
+            mainHeaderTitle.textContent = titles[viewName] || 'Gestão de TI';
+        };
+
+        sidebarNav.addEventListener('click', (e) => {
+            const link = e.target.closest('.sidebar-link');
+            if (link) {
+                e.preventDefault();
+                switchView(link.dataset.view);
+            }
+        });
+
+        // --- MODAL LOGIC ---
+        const openModal = (modal) => {
+            modal.classList.remove('hidden');
+            modal.querySelector('.modal-content').classList.add('modal-enter');
+        };
+        const closeModal = (modal) => {
+            modal.querySelector('.modal-content').classList.remove('modal-leave');
+            modal.querySelector('.modal-content').classList.add('modal-enter');
+            setTimeout(() => modal.classList.add('hidden'), 300);
+        };
+        document.querySelectorAll('.modal').forEach(modal => {
+            modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(modal); });
+            modal.querySelector('.cancel-btn').addEventListener('click', () => closeModal(modal));
+        });
+
+        // --- TASK MANAGEMENT ---
+        const getTasks = () => JSON.parse(localStorage.getItem(TASKS_DB_NAME)) || [];
+        const saveTasks = (tasks) => localStorage.setItem(TASKS_DB_NAME, JSON.stringify(tasks));
+
+        const renderTasks = () => {
+            const tasks = getTasks();
+            taskList.innerHTML = '';
+            noTasksMessage.classList.toggle('hidden', tasks.length > 0);
+            tasks.sort((a, b) => new Date(`${a.endDate}T${a.endTime}`) - new Date(`${b.endDate}T${b.endTime}`));
+
+            tasks.forEach(task => {
+                const isOverdue = new Date() > new Date(`${task.endDate}T${task.endTime}`);
+                const deadlineColor = isOverdue ? 'text-red-500 font-semibold' : 'text-gray-400';
+                const deadlineText = isOverdue ? `Atrasada! Prazo era ${formatDate(task.endDate)}` : `Prazo: ${formatDate(task.endDate)} às ${task.endTime}`;
+                const card = document.createElement('div');
+                card.className = 'task-item bg-gray-800 rounded-xl shadow-md p-4 space-y-3 transition-all';
+                card.dataset.id = task.id;
+
+                let attachmentButton = '';
+                if (task.attachmentType === 'file' && task.fileData) {
+                    attachmentButton = `<button class="attachment-btn flex items-center gap-2 text-sm text-green-400 hover:text-green-300 font-medium" data-type="file"><svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M18.375 12.739l-7.693 7.693a4.5 4.5 0 01-6.364-6.364l10.94-10.94A3.375 3.375 0 1118.375 7.21l-4.242 4.242a1.125 1.125 0 01-1.59-1.59l4.242-4.242a3.375 3.375 0 014.773 4.773l-10.94 10.94a4.5 4.5 0 11-6.364-6.364l7.693-7.693a1.125 1.125 0 011.59 1.59z" /></svg>${task.fileName}</button>`;
+                } else if (task.attachmentType === 'url' && task.url) {
+                    attachmentButton = `<a href="${task.url}" target="_blank" rel="noopener noreferrer" class="attachment-btn flex items-center gap-2 text-sm text-green-400 hover:text-green-300 font-medium" data-type="url"><svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244" /></svg>Abrir Link</a>`;
+                }
+
+                card.innerHTML = `
+                    <div class="flex justify-between items-start">
+                        <p class="font-semibold text-gray-100 break-words pr-2">${task.description}</p>
+                        <div class="flex-shrink-0 flex items-center">
+                             <button class="duplicate-btn p-2 text-gray-400 hover:text-yellow-500 rounded-full hover:bg-gray-700 transition" title="Duplicar"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg></button>
+                            <button class="edit-btn p-2 text-gray-400 hover:text-blue-500 rounded-full hover:bg-gray-700 transition" title="Editar"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.5L16.732 3.732z"></path></svg></button>
+                            <button class="delete-btn p-2 text-gray-400 hover:text-red-500 rounded-full hover:bg-gray-700 transition" title="Excluir"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg></button>
+                        </div>
+                    </div>
+                    <div class="flex justify-between items-center text-sm pt-2 border-t border-gray-700">
+                         <span class="${deadlineColor}">${deadlineText}</span>
+                         ${attachmentButton}
+                    </div>`;
+                taskList.appendChild(card);
+            });
+        };
+
+        addTaskBtn.addEventListener('click', () => {
+            taskForm.reset();
+            taskIdInput.value = '';
+            taskModalTitle.textContent = 'Nova Tarefa';
+            fileInfo.textContent = 'Limite de 2MB. O arquivo é salvo no navegador.';
+            fileInfo.classList.remove('text-red-500');
+            attachmentTypeSelect.value = 'none';
+            attachmentTypeSelect.dispatchEvent(new Event('change'));
+            endDateInput.value = new Date().toISOString().split('T')[0];
+            openModal(taskModal);
+        });
+
+        attachmentTypeSelect.addEventListener('change', (e) => {
+            fileInputContainer.classList.toggle('hidden', e.target.value !== 'file');
+            urlInputContainer.classList.toggle('hidden', e.target.value !== 'url');
+        });
+
+        taskForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const attachmentType = attachmentTypeSelect.value;
+            const taskData = {
+                id: taskIdInput.value || Date.now(),
+                description: taskDescriptionInput.value.trim(),
+                endDate: endDateInput.value,
+                endTime: endTimeInput.value,
+                attachmentType: attachmentType,
+                fileData: null, fileName: null, url: null
+            };
+
+            const saveTaskData = (data) => {
+                let tasks = getTasks();
+                const index = tasks.findIndex(t => t.id == data.id);
+                if (index > -1) tasks[index] = data; else tasks.push(data);
+                try {
+                    saveTasks(tasks);
+                    renderTasks();
+                    closeModal(taskModal);
+                } catch (error) {
+                    if (error.name === 'QuotaExceededError') alert('Erro: Armazenamento cheio.');
+                    else alert('Ocorreu um erro ao salvar.');
+                }
+            };
+
+            if (attachmentType === 'file') {
+                const file = taskFileInput.files[0];
+                const existingTask = getTasks().find(t => t.id == taskData.id);
+                if (file) {
+                    if (file.size > FILE_SIZE_LIMIT) {
+                        fileInfo.textContent = 'Arquivo muito grande! O limite é 2MB.';
+                        fileInfo.classList.add('text-red-500');
+                        return;
+                    }
+                    const reader = new FileReader();
+                    reader.onload = (event) => {
+                        taskData.fileData = event.target.result;
+                        taskData.fileName = file.name;
+                        saveTaskData(taskData);
+                    };
+                    reader.readAsDataURL(file);
+                } else if (existingTask && existingTask.attachmentType === 'file') {
+                    taskData.fileData = existingTask.fileData;
+                    taskData.fileName = existingTask.fileName;
+                    saveTaskData(taskData);
+                } else {
+                    saveTaskData(taskData);
+                }
+            } else if (attachmentType === 'url') {
+                taskData.url = taskUrlInput.value.trim();
+                saveTaskData(taskData);
+            } else {
+                saveTaskData(taskData);
+            }
+        });
+
+        taskList.addEventListener('click', (e) => {
+            const card = e.target.closest('.task-item');
+            if (!card) return;
+            const taskId = card.dataset.id;
+            let tasks = getTasks();
+            const task = tasks.find(t => t.id == taskId);
+
+            if (e.target.closest('.edit-btn')) {
+                taskModalTitle.textContent = 'Editar Tarefa';
+                taskIdInput.value = task.id;
+                taskDescriptionInput.value = task.description;
+                endDateInput.value = task.endDate;
+                endTimeInput.value = task.endTime;
+                attachmentTypeSelect.value = task.attachmentType || 'none';
+                taskUrlInput.value = task.url || '';
+                taskFileInput.value = '';
+                fileInfo.textContent = task.fileName ? `Anexo atual: ${task.fileName}` : 'Limite de 2MB.';
+                fileInfo.classList.remove('text-red-500');
+                attachmentTypeSelect.dispatchEvent(new Event('change'));
+                openModal(taskModal);
+            }
+            if (e.target.closest('.delete-btn')) {
+                saveTasks(tasks.filter(t => t.id != taskId));
+                renderTasks();
+            }
+            if (e.target.closest('.duplicate-btn')) {
+                const taskToDuplicate = { ...task, id: Date.now(), description: `${task.description} (Cópia)`};
+                tasks.push(taskToDuplicate);
+                saveTasks(tasks);
+                renderTasks();
+            }
+            if (e.target.closest('.attachment-btn[data-type="file"]')) {
+                if (task && task.fileData) {
+                    window.open(URL.createObjectURL(base64ToBlob(task.fileData, 'application/pdf')), '_blank');
+                }
+            }
+        });
+
+        // --- STANDBY MANAGEMENT ---
+        const getStandbyItems = () => JSON.parse(localStorage.getItem(STANDBY_DB_NAME)) || [];
+        const saveStandbyItems = (items) => localStorage.setItem(STANDBY_DB_NAME, JSON.stringify(items));
+
+        const renderStandbyItems = () => {
+            const items = getStandbyItems();
+            standbyList.innerHTML = '';
+            noStandbyMessage.classList.toggle('hidden', items.length > 0);
+            items.sort((a, b) => new Date(a.entryDate) - new Date(b.entryDate));
+
+            items.forEach(item => {
+                const card = document.createElement('div');
+                card.className = 'standby-item bg-gray-800 rounded-xl shadow-md overflow-hidden flex flex-col';
+                card.dataset.id = item.id;
+
+                const statusText = item.exitDate ? `Retirado em: ${formatDate(item.exitDate)}` : 'Em Standby';
+                const statusColor = item.exitDate ? 'bg-yellow-500' : 'bg-green-500';
+
+                card.innerHTML = `
+                    <img src="${item.imageData || 'https://placehold.co/600x400/374151/9CA3AF?text=Sem+Imagem'}" alt="Foto do equipamento" class="w-full h-48 object-cover">
+                    <div class="p-4 flex flex-col flex-grow">
+                        <p class="font-bold text-gray-100 flex-grow">${item.description}</p>
+                        <div class="text-sm text-gray-400 mt-2">
+                            ${item.centroCusto ? `<p>Centro de Custo: ${item.centroCusto}</p>` : ''}
+                            ${item.patrimonio ? `<p>Patrimônio: ${item.patrimonio}</p>` : ''}
+                            ${item.serial ? `<p>Serial: ${item.serial}</p>` : ''}
+                        </div>
+                        <div class="text-sm text-gray-400 mt-3">
+                            <p>Entrada: ${formatDate(item.entryDate)}</p>
+                            <p>${statusText}</p>
+                        </div>
+                    </div>
+                    <div class="flex justify-between items-center p-2 bg-gray-800/50 border-t border-gray-700">
+                        <span class="px-2 py-1 text-xs font-semibold text-white ${statusColor} rounded-full">${item.exitDate ? 'Retirado' : 'Disponível'}</span>
+                        <div>
+                            <button class="duplicate-btn p-2 text-gray-400 hover:text-yellow-500 rounded-full hover:bg-gray-700 transition" title="Duplicar"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg></button>
+                            <button class="edit-btn p-2 text-gray-400 hover:text-blue-500 rounded-full hover:bg-gray-700 transition" title="Editar"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.5L16.732 3.732z"></path></svg></button>
+                            <button class="delete-btn p-2 text-gray-400 hover:text-red-500 rounded-full hover:bg-gray-700 transition" title="Excluir"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg></button>
+                        </div>
+                    </div>
+                `;
+                standbyList.appendChild(card);
+            });
+        };
+
+        addStandbyBtn.addEventListener('click', () => {
+            standbyForm.reset();
+            standbyIdInput.value = '';
+            standbyModalTitle.textContent = 'Novo Item em Standby';
+            standbyFileInfo.textContent = 'Limite de 2MB. A imagem é salva no navegador.';
+            standbyFileInfo.classList.remove('text-red-500');
+            entryDateInput.value = new Date().toISOString().split('T')[0];
+            openModal(standbyModal);
+        });
+
+        standbyForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const itemData = {
+                id: standbyIdInput.value || Date.now(),
+                description: standbyDescriptionInput.value.trim(),
+                centroCusto: standbyCentroCustoInput.value.trim(),
+                patrimonio: standbyPatrimonioInput.value.trim(),
+                serial: standbySerialInput.value.trim(),
+                entryDate: entryDateInput.value,
+                exitDate: exitDateInput.value,
+                imageData: null
+            };
+
+            const saveItemData = (data) => {
+                let items = getStandbyItems();
+                const index = items.findIndex(i => i.id == data.id);
+                if (index > -1) items[index] = data; else items.push(data);
+                try {
+                    saveStandbyItems(items);
+                    renderStandbyItems();
+                    closeModal(standbyModal);
+                } catch (error) {
+                    if (error.name === 'QuotaExceededError') alert('Erro: Armazenamento cheio.');
+                    else alert('Ocorreu um erro ao salvar.');
+                }
+            };
+
+            const file = standbyImageInput.files[0];
+            const existingItem = getStandbyItems().find(i => i.id == itemData.id);
+
+            if (file) {
+                if (file.size > FILE_SIZE_LIMIT) {
+                    standbyFileInfo.textContent = 'Arquivo muito grande! O limite é 2MB.';
+                    standbyFileInfo.classList.add('text-red-500');
+                    return;
+                }
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    itemData.imageData = event.target.result;
+                    saveItemData(itemData);
+                };
+                reader.readAsDataURL(file);
+            } else if (existingItem) {
+                itemData.imageData = existingItem.imageData;
+                saveItemData(itemData);
+            } else {
+                saveItemData(itemData);
+            }
+        });
+
+        standbyList.addEventListener('click', (e) => {
+            const card = e.target.closest('.standby-item');
+            if (!card) return;
+            const itemId = card.dataset.id;
+            let items = getStandbyItems();
+            const item = items.find(i => i.id == itemId);
+
+            if (e.target.closest('.edit-btn')) {
+                standbyModalTitle.textContent = 'Editar Item';
+                standbyIdInput.value = item.id;
+                standbyDescriptionInput.value = item.description;
+                standbyCentroCustoInput.value = item.centroCusto || '';
+                standbyPatrimonioInput.value = item.patrimonio || '';
+                standbySerialInput.value = item.serial || '';
+                entryDateInput.value = item.entryDate;
+                exitDateInput.value = item.exitDate || '';
+                standbyImageInput.value = '';
+                standbyFileInfo.textContent = 'Anexe uma nova imagem para substituir a atual.';
+                standbyFileInfo.classList.remove('text-red-500');
+                openModal(standbyModal);
+            }
+            if (e.target.closest('.delete-btn')) {
+                saveStandbyItems(items.filter(i => i.id != itemId));
+                renderStandbyItems();
+            }
+            if (e.target.closest('.duplicate-btn')) {
+                const itemToDuplicate = { ...item, id: Date.now(), description: `${item.description} (Cópia)`};
+                items.push(itemToDuplicate);
+                saveStandbyItems(items);
+                renderStandbyItems();
+            }
+        });
+        
+        // --- COMPRAS MANAGEMENT ---
+        const getCompras = () => JSON.parse(localStorage.getItem(COMPRAS_DB_NAME)) || [];
+        const saveCompras = (items) => localStorage.setItem(COMPRAS_DB_NAME, JSON.stringify(items));
+
+        const renderCompras = () => {
+            const items = getCompras();
+            comprasList.innerHTML = '';
+            noComprasMessage.classList.toggle('hidden', items.length > 0);
+            items.sort((a,b) => new Date(b.dataInicio) - new Date(a.dataInicio));
+
+            items.forEach(item => {
+                const card = document.createElement('div');
+                
+                const startDate = new Date(item.dataInicio + 'T00:00:00');
+                const daysPassed = (new Date() - startDate) / (1000 * 60 * 60 * 24);
+                let alertClass = '';
+                let statusText = 'Em andamento';
+                let statusColor = 'bg-blue-500';
+
+                if (item.dataCheck) {
+                    statusText = `Finalizada em ${formatDate(item.dataCheck)}`;
+                    statusColor = 'bg-green-500';
+                } else if (daysPassed > 20) {
+                    alertClass = 'border-2 border-red-500';
+                    statusText = `Atenção: ${Math.floor(daysPassed)} dias se passaram`;
+                    statusColor = 'bg-red-500';
+                }
+
+                card.className = `compra-item bg-gray-800 rounded-xl shadow-md p-4 space-y-3 transition-all ${alertClass}`;
+                card.dataset.id = item.id;
+
+                card.innerHTML = `
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <p class="font-bold text-gray-100">${item.description}</p>
+                            <p class="text-sm text-gray-400">Cód. Solicitação: ${item.codigoSolicitacao}</p>
+                            ${item.codigoProduto ? `<p class="text-sm text-gray-400">Cód. Produto: ${item.codigoProduto}</p>` : ''}
+                            ${item.centroCusto ? `<p class="text-sm text-gray-400">Centro de Custo: ${item.centroCusto}</p>` : ''}
+                        </div>
+                        <div class="flex-shrink-0 flex items-center">
+                            <button class="duplicate-btn p-2 text-gray-400 hover:text-yellow-500 rounded-full hover:bg-gray-700 transition" title="Duplicar"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg></button>
+                            <button class="edit-btn p-2 text-gray-400 hover:text-blue-500 rounded-full hover:bg-gray-700 transition" title="Editar"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.5L16.732 3.732z"></path></svg></button>
+                            <button class="delete-btn p-2 text-gray-400 hover:text-red-500 rounded-full hover:bg-gray-700 transition" title="Excluir"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg></button>
+                        </div>
+                    </div>
+                    <div class="flex justify-between items-center text-sm pt-2 border-t border-gray-700">
+                        <div>
+                            <p class="text-gray-400">Início: ${formatDate(item.dataInicio)}</p>
+                            ${item.dataChegou ? `<p class="text-gray-400">Chegada: ${formatDate(item.dataChegou)}</p>` : ''}
+                        </div>
+                        <span class="px-2 py-1 text-xs font-semibold text-white ${statusColor} rounded-full">${statusText}</span>
+                    </div>
+                `;
+                comprasList.appendChild(card);
+            });
+        };
+
+        addCompraBtn.addEventListener('click', () => {
+            compraForm.reset();
+            compraIdInput.value = '';
+            compraModalTitle.textContent = 'Nova Solicitação de Compra';
+            compraDataInicioInput.value = new Date().toISOString().split('T')[0];
+            openModal(compraModal);
+        });
+
+        compraForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const itemData = {
+                id: compraIdInput.value || Date.now(),
+                description: compraDescriptionInput.value.trim(),
+                centroCusto: compraCentroCustoInput.value.trim(),
+                codigoSolicitacao: compraCodigoSolicitacaoInput.value.trim(),
+                codigoProduto: compraCodigoProdutoInput.value.trim(),
+                dataInicio: compraDataInicioInput.value,
+                dataChegou: compraDataChegouInput.value,
+                dataCheck: compraDataCheckInput.value
+            };
+            let items = getCompras();
+            const index = items.findIndex(i => i.id == itemData.id);
+            if (index > -1) items[index] = itemData; else items.push(itemData);
+            saveCompras(items);
+            renderCompras();
+            closeModal(compraModal);
+        });
+
+        comprasList.addEventListener('click', (e) => {
+            const card = e.target.closest('.compra-item');
+            if (!card) return;
+            const itemId = card.dataset.id;
+            let items = getCompras();
+            const item = items.find(i => i.id == itemId);
+
+            if (e.target.closest('.edit-btn')) {
+                compraModalTitle.textContent = 'Editar Solicitação';
+                compraIdInput.value = item.id;
+                compraDescriptionInput.value = item.description;
+                compraCentroCustoInput.value = item.centroCusto || '';
+                compraCodigoSolicitacaoInput.value = item.codigoSolicitacao;
+                compraCodigoProdutoInput.value = item.codigoProduto || '';
+                compraDataInicioInput.value = item.dataInicio;
+                compraDataChegouInput.value = item.dataChegou || '';
+                compraDataCheckInput.value = item.dataCheck || '';
+                openModal(compraModal);
+            }
+            if (e.target.closest('.delete-btn')) {
+                saveCompras(items.filter(i => i.id != itemId));
+                renderCompras();
+            }
+            if (e.target.closest('.duplicate-btn')) {
+                const itemToDuplicate = { ...item, id: Date.now(), description: `${item.description} (Cópia)`};
+                items.push(itemToDuplicate);
+                saveCompras(items);
+                renderCompras();
+            }
+        });
+
+        // --- REMESSA MANAGEMENT ---
+        const getRemessas = () => JSON.parse(localStorage.getItem(REMESSA_DB_NAME)) || [];
+        const saveRemessas = (items) => localStorage.setItem(REMESSA_DB_NAME, JSON.stringify(items));
+
+        const renderRemessas = () => {
+            const items = getRemessas();
+            remessaList.innerHTML = '';
+            noRemessaMessage.classList.toggle('hidden', items.length > 0);
+            items.sort((a,b) => new Date(b.dataInicio) - new Date(a.dataInicio));
+
+            items.forEach(item => {
+                const card = document.createElement('div');
+                const statusText = item.dataFinal ? `Retornou em: ${formatDate(item.dataFinal)}` : 'Em conserto';
+                const statusColor = item.dataFinal ? 'bg-green-500' : 'bg-yellow-500';
+
+                card.className = `remessa-item bg-gray-800 rounded-xl shadow-md p-4 space-y-3 transition-all`;
+                card.dataset.id = item.id;
+
+                card.innerHTML = `
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <p class="font-bold text-gray-100">${item.description}</p>
+                            <p class="text-sm text-gray-400">Empresa: ${item.empresa}</p>
+                             <p class="text-sm text-gray-400">Centro de Custo: ${item.centroCusto}</p>
+                            <p class="text-sm text-gray-400">Patrimônio: ${item.patrimonio} | Serial: ${item.serial}</p>
+                        </div>
+                        <div class="flex-shrink-0 flex items-center">
+                            <button class="duplicate-btn p-2 text-gray-400 hover:text-yellow-500 rounded-full hover:bg-gray-700 transition" title="Duplicar"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg></button>
+                            <button class="edit-btn p-2 text-gray-400 hover:text-blue-500 rounded-full hover:bg-gray-700 transition" title="Editar"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.5L16.732 3.732z"></path></svg></button>
+                            <button class="delete-btn p-2 text-gray-400 hover:text-red-500 rounded-full hover:bg-gray-700 transition" title="Excluir"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg></button>
+                        </div>
+                    </div>
+                    <div class="flex justify-between items-center text-sm pt-2 border-t border-gray-700">
+                        <p class="text-gray-400">Enviado em: ${formatDate(item.dataInicio)}</p>
+                        <span class="px-2 py-1 text-xs font-semibold text-white ${statusColor} rounded-full">${statusText}</span>
+                    </div>
+                `;
+                remessaList.appendChild(card);
+            });
+        };
+
+        addRemessaBtn.addEventListener('click', () => {
+            remessaForm.reset();
+            remessaIdInput.value = '';
+            remessaModalTitle.textContent = 'Nova Remessa de Conserto';
+            remessaDataInicioInput.value = new Date().toISOString().split('T')[0];
+            openModal(remessaModal);
+        });
+
+        remessaForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const itemData = {
+                id: remessaIdInput.value || Date.now(),
+                description: remessaDescriptionInput.value.trim(),
+                empresa: remessaEmpresaInput.value.trim(),
+                centroCusto: remessaCentroCustoInput.value.trim(),
+                patrimonio: remessaPatrimonioInput.value.trim(),
+                serial: remessaSerialInput.value.trim(),
+                dataInicio: remessaDataInicioInput.value,
+                dataFinal: remessaDataFinalInput.value
+            };
+            let items = getRemessas();
+            const index = items.findIndex(i => i.id == itemData.id);
+            if (index > -1) items[index] = itemData; else items.push(itemData);
+            saveRemessas(items);
+            renderRemessas();
+            closeModal(remessaModal);
+        });
+
+        remessaList.addEventListener('click', (e) => {
+            const card = e.target.closest('.remessa-item');
+            if (!card) return;
+            const itemId = card.dataset.id;
+            let items = getRemessas();
+            const item = items.find(i => i.id == itemId);
+
+            if (e.target.closest('.edit-btn')) {
+                remessaModalTitle.textContent = 'Editar Remessa';
+                remessaIdInput.value = item.id;
+                remessaDescriptionInput.value = item.description;
+                remessaEmpresaInput.value = item.empresa;
+                remessaCentroCustoInput.value = item.centroCusto || '';
+                remessaPatrimonioInput.value = item.patrimonio;
+                remessaSerialInput.value = item.serial;
+                remessaDataInicioInput.value = item.dataInicio;
+                remessaDataFinalInput.value = item.dataFinal || '';
+                openModal(remessaModal);
+            }
+            if (e.target.closest('.delete-btn')) {
+                saveRemessas(items.filter(i => i.id != itemId));
+                renderRemessas();
+            }
+            if (e.target.closest('.duplicate-btn')) {
+                const itemToDuplicate = { ...item, id: Date.now(), description: `${item.description} (Cópia)`};
+                items.push(itemToDuplicate);
+                saveRemessas(items);
+                renderRemessas();
+            }
+        });
+
+        // --- TRANSFERENCIA MANAGEMENT ---
+        const getTransferencias = () => JSON.parse(localStorage.getItem(TRANSFERENCIA_DB_NAME)) || [];
+        const saveTransferencias = (items) => localStorage.setItem(TRANSFERENCIA_DB_NAME, JSON.stringify(items));
+
+        const renderTransferencias = () => {
+            const items = getTransferencias();
+            transferenciaList.innerHTML = '';
+            noTransferenciaMessage.classList.toggle('hidden', items.length > 0);
+            items.sort((a,b) => new Date(b.data) - new Date(a.data));
+
+            items.forEach(item => {
+                const card = document.createElement('div');
+                card.className = 'transferencia-item bg-gray-800 rounded-xl shadow-md overflow-hidden flex flex-col';
+                card.dataset.id = item.id;
+
+                card.innerHTML = `
+                    <img src="${item.imageData || 'https://placehold.co/600x400/374151/9CA3AF?text=Sem+Imagem'}" alt="Foto do equipamento" class="w-full h-48 object-cover">
+                    <div class="p-4 flex flex-col flex-grow">
+                        <p class="font-bold text-gray-100 flex-grow">${item.description}</p>
+                        <div class="text-sm text-gray-400 mt-2">
+                            <p>Patrimônio: ${item.patrimonio}</p>
+                            <p>Serial: ${item.serial}</p>
+                        </div>
+                        <div class="text-sm text-gray-400 mt-3">
+                            <p>Data: ${formatDate(item.data)}</p>
+                            <p>De: <span class="font-medium text-gray-300">${item.setorOrigem}</span> -> Para: <span class="font-medium text-gray-300">${item.setorDestino}</span></p>
+                        </div>
+                    </div>
+                    <div class="flex justify-end items-center p-2 bg-gray-800/50 border-t border-gray-700">
+                        <div>
+                            <button class="duplicate-btn p-2 text-gray-400 hover:text-yellow-500 rounded-full hover:bg-gray-700 transition" title="Duplicar"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg></button>
+                            <button class="edit-btn p-2 text-gray-400 hover:text-blue-500 rounded-full hover:bg-gray-700 transition" title="Editar"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.5L16.732 3.732z"></path></svg></button>
+                            <button class="delete-btn p-2 text-gray-400 hover:text-red-500 rounded-full hover:bg-gray-700 transition" title="Excluir"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg></button>
+                        </div>
+                    </div>
+                `;
+                transferenciaList.appendChild(card);
+            });
+        };
+
+        addTransferenciaBtn.addEventListener('click', () => {
+            transferenciaForm.reset();
+            transferenciaIdInput.value = '';
+            transferenciaModalTitle.textContent = 'Nova Transferência de Ativo';
+            transferenciaFileInfo.textContent = 'Limite de 2MB. A imagem é salva no navegador.';
+            transferenciaFileInfo.classList.remove('text-red-500');
+            transferenciaDataInput.value = new Date().toISOString().split('T')[0];
+            openModal(transferenciaModal);
+        });
+
+        transferenciaForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const itemData = {
+                id: transferenciaIdInput.value || Date.now(),
+                description: transferenciaDescriptionInput.value.trim(),
+                patrimonio: transferenciaPatrimonioInput.value.trim(),
+                serial: transferenciaSerialInput.value.trim(),
+                data: transferenciaDataInput.value,
+                setorOrigem: transferenciaSetorOrigemInput.value.trim(),
+                setorDestino: transferenciaSetorDestinoInput.value.trim(),
+                imageData: null
+            };
+
+            const saveItemData = (data) => {
+                let items = getTransferencias();
+                const index = items.findIndex(i => i.id == data.id);
+                if (index > -1) items[index] = data; else items.push(data);
+                try {
+                    saveTransferencias(items);
+                    renderTransferencias();
+                    closeModal(transferenciaModal);
+                } catch (error) {
+                    if (error.name === 'QuotaExceededError') alert('Erro: Armazenamento cheio.');
+                    else alert('Ocorreu um erro ao salvar.');
+                }
+            };
+
+            const file = transferenciaImageInput.files[0];
+            const existingItem = getTransferencias().find(i => i.id == itemData.id);
+
+            if (file) {
+                if (file.size > FILE_SIZE_LIMIT) {
+                    transferenciaFileInfo.textContent = 'Arquivo muito grande! O limite é 2MB.';
+                    transferenciaFileInfo.classList.add('text-red-500');
+                    return;
+                }
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    itemData.imageData = event.target.result;
+                    saveItemData(itemData);
+                };
+                reader.readAsDataURL(file);
+            } else if (existingItem) {
+                itemData.imageData = existingItem.imageData;
+                saveItemData(itemData);
+            } else {
+                saveItemData(itemData);
+            }
+        });
+
+        transferenciaList.addEventListener('click', (e) => {
+            const card = e.target.closest('.transferencia-item');
+            if (!card) return;
+            const itemId = card.dataset.id;
+            let items = getTransferencias();
+            const item = items.find(i => i.id == itemId);
+
+            if (e.target.closest('.edit-btn')) {
+                transferenciaModalTitle.textContent = 'Editar Transferência';
+                transferenciaIdInput.value = item.id;
+                transferenciaDescriptionInput.value = item.description;
+                transferenciaPatrimonioInput.value = item.patrimonio;
+                transferenciaSerialInput.value = item.serial;
+                transferenciaDataInput.value = item.data;
+                transferenciaSetorOrigemInput.value = item.setorOrigem;
+                transferenciaSetorDestinoInput.value = item.setorDestino;
+                transferenciaImageInput.value = '';
+                transferenciaFileInfo.textContent = 'Anexe uma nova imagem para substituir a atual.';
+                transferenciaFileInfo.classList.remove('text-red-500');
+                openModal(transferenciaModal);
+            }
+            if (e.target.closest('.delete-btn')) {
+                saveTransferencias(items.filter(i => i.id != itemId));
+                renderTransferencias();
+            }
+            if (e.target.closest('.duplicate-btn')) {
+                const itemToDuplicate = { ...item, id: Date.now(), description: `${item.description} (Cópia)`};
+                items.push(itemToDuplicate);
+                saveTransferencias(items);
+                renderTransferencias();
+            }
+        });
+
+
+        // --- REAL-TIME STATUS UPDATES ---
+        const updateTaskStatus = () => {
+            const tasks = getTasks();
+            document.querySelectorAll('#task-list .task-item').forEach(card => {
+                const taskId = card.dataset.id;
+                const task = tasks.find(t => t.id == taskId);
+                if (!task) return;
+
+                const isOverdue = new Date() > new Date(`${task.endDate}T${task.endTime}`);
+                const deadlineColor = isOverdue ? 'text-red-500 font-semibold' : 'text-gray-400';
+                const deadlineText = isOverdue ? `Atrasada! Prazo era ${formatDate(task.endDate)}` : `Prazo: ${formatDate(task.endDate)} às ${task.endTime}`;
+                
+                const deadlineSpan = card.querySelector('.flex.justify-between.items-center > span:first-child');
+                if (deadlineSpan) {
+                    deadlineSpan.className = ``; // Clear existing classes
+                    deadlineColor.split(' ').forEach(c => deadlineSpan.classList.add(c));
+                    deadlineSpan.textContent = deadlineText;
+                }
+            });
+        };
+
+        const updateCompraStatus = () => {
+            const items = getCompras();
+            document.querySelectorAll('#compras-list .compra-item').forEach(card => {
+                const itemId = card.dataset.id;
+                const item = items.find(i => i.id == itemId);
+                if (!item) return;
+
+                const startDate = new Date(item.dataInicio + 'T00:00:00');
+                const daysPassed = (new Date() - startDate) / (1000 * 60 * 60 * 24);
+                
+                let needsAlert = false;
+                let statusText = 'Em andamento';
+                let statusColor = 'bg-blue-500';
+
+                if (item.dataCheck) {
+                    statusText = `Finalizada em ${formatDate(item.dataCheck)}`;
+                    statusColor = 'bg-green-500';
+                } else if (daysPassed > 20) {
+                    needsAlert = true;
+                    statusText = `Atenção: ${Math.floor(daysPassed)} dias se passaram`;
+                    statusColor = 'bg-red-500';
+                }
+
+                if (needsAlert) {
+                    card.classList.add('border-2', 'border-red-500');
+                } else {
+                    card.classList.remove('border-2', 'border-red-500');
+                }
+
+                const statusSpan = card.querySelector('.flex.justify-between.items-center span:last-child');
+                if (statusSpan) {
+                    statusSpan.className = `px-2 py-1 text-xs font-semibold text-white ${statusColor} rounded-full`;
+                    statusSpan.textContent = statusText;
+                }
+            });
+        };
+
+
+        // --- INITIALIZATION ---
+        applyTheme();
+        updateClock();
+        renderTasks();
+        renderStandbyItems();
+        renderCompras();
+        renderRemessas();
+        renderTransferencias();
+        switchView('tarefas'); // Start on tasks view
+
+        // --- REAL-TIME STATUS UPDATER ---
+        setInterval(() => {
+            updateTaskStatus();
+            updateCompraStatus();
+        }, 30000); // Check every 30 seconds
+    });
+    </script>
+</body>
+</html>
