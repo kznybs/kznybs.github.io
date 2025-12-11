@@ -20,7 +20,7 @@
             justify-content: center;
         }
 
-        /* Botão Flutuante Discreto */
+        /* Botão Flutuante Discreto (Esquerda) */
         .float-btn {
             position: fixed;
             top: 20px;
@@ -37,6 +37,7 @@
             backdrop-filter: blur(5px);
             text-transform: uppercase;
             letter-spacing: 1px;
+            text-decoration: none; /* Para links */
         }
 
         .float-btn:hover {
@@ -44,6 +45,22 @@
             color: #000;
             border-color: #00d2ff;
             box-shadow: 0 0 15px rgba(0, 210, 255, 0.5);
+        }
+
+        /* Botão Flutuante (Direita - Para abrir original) */
+        .right-btn {
+            left: auto; /* Anula o left */
+            right: 20px;
+            background: rgba(255, 0, 0, 0.15);
+            border-color: rgba(255, 0, 0, 0.25);
+            display: none; /* Escondido até carregar um vídeo */
+        }
+
+        .right-btn:hover {
+            background: #ff0000;
+            color: #fff;
+            border-color: #ff0000;
+            box-shadow: 0 0 15px rgba(255, 0, 0, 0.5);
         }
 
         /* Modal de Input (Escondido por padrão) */
@@ -123,12 +140,14 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            background: #000;
         }
 
-        iframe {
+        iframe, video {
             width: 100%;
             height: 100%;
             border: none;
+            object-fit: contain; /* Garante que mp4 não estique errado */
         }
     </style>
 </head>
@@ -136,6 +155,9 @@
 
     <!-- Botão para abrir o menu -->
     <button class="float-btn" onclick="toggleModal()">+ Link / Trocar Vídeo</button>
+
+    <!-- Botão de emergência para abrir no YouTube -->
+    <a id="btnOriginal" class="float-btn right-btn" href="#" target="_blank">Abrir no YouTube ↗</a>
 
     <!-- Modal para colar o link -->
     <div class="modal-overlay" id="modal">
@@ -146,69 +168,94 @@
                 <input type="text" id="linkInput" placeholder="Cole o link do vídeo aqui..." autofocus>
                 <button class="action-btn" onclick="carregarVideo()">Play</button>
             </div>
-            <p style="font-size: 12px; color: #666; margin:0;">Suporta YouTube (Playlists/Shorts), Links Diretos e Embeds.</p>
+            <p style="font-size: 12px; color: #666; margin:0;">Suporta: YouTube (Playlist/Shorts), MP4, MKV, WebM e Embeds.</p>
         </div>
     </div>
 
     <!-- Área do Vídeo -->
     <div class="video-container">
+        <!-- Player para sites e YouTube -->
         <iframe id="tela" src="" allowfullscreen allow="autoplay; encrypted-media; picture-in-picture"></iframe>
+        
+        <!-- Player Nativo para arquivos diretos (.mp4, .mkv, etc) -->
+        <video id="nativePlayer" controls autoplay style="display: none;"></video>
     </div>
 
     <script>
         const modal = document.getElementById('modal');
         const input = document.getElementById('linkInput');
+        const btnOriginal = document.getElementById('btnOriginal');
+        const iframe = document.getElementById('tela');
+        const nativePlayer = document.getElementById('nativePlayer');
 
         function toggleModal() {
             if (modal.style.display === 'flex') {
                 modal.style.display = 'none';
             } else {
                 modal.style.display = 'flex';
-                input.focus(); // Foca no input assim que abrir
+                input.focus(); 
             }
         }
 
-        // Fecha modal ao clicar fora
         modal.addEventListener('click', function(e) {
             if (e.target === modal) toggleModal();
         });
 
         function carregarVideo() {
             const url = input.value.trim();
-            const iframe = document.getElementById('tela');
-
             if (!url) return;
 
-            // --- Lógica Nova (Mais Robusta) ---
-            
-            // 1. Tenta encontrar um ID de vídeo do YouTube (funciona para watch?v=, youtu.be, shorts, embed)
-            // Regex explicada: procura por (v= OU /v/ OU /embed/ OU youtu.be/) e pega os próximos 11 caracteres
-            const youtubeIdMatch = url.match(/(?:youtu\.be\/|youtube\.com\/(?:.*v=|.*\/|embed\/|v\/))([^?&"'>]{11})/);
-            
-            // 2. Tenta encontrar um ID de Playlist (list=...)
-            const listMatch = url.match(/[?&]list=([^#\&\?]+)/);
+            // Configura botão de emergência
+            btnOriginal.href = url;
+            btnOriginal.style.display = 'block';
 
-            if (youtubeIdMatch && youtubeIdMatch[1]) {
-                const videoId = youtubeIdMatch[1];
-                let finalUrl = `https://www.youtube.com/embed/${videoId}?autoplay=1`;
-                
-                // Se o link original tinha playlist, adiciona ela no player para você poder navegar
-                if (listMatch && listMatch[1]) {
-                    finalUrl += `&list=${listMatch[1]}`;
+            // Reseta os players (para o som do anterior não continuar tocando)
+            iframe.src = "";
+            nativePlayer.pause();
+            nativePlayer.src = "";
+
+            // --- DETECÇÃO INTELIGENTE ---
+
+            // 1. É arquivo de vídeo direto? (MP4, WEBM, OGG, MOV, MKV)
+            // Regex procura extensões comuns no final da url ou antes de parâmetros (?)
+            if (url.match(/\.(mp4|webm|ogg|mov|mkv)($|\?)/i)) {
+                iframe.style.display = 'none';
+                nativePlayer.style.display = 'block';
+                nativePlayer.src = url;
+                nativePlayer.play().catch(e => console.log("Autoplay bloqueado pelo navegador"));
+            }
+            
+            // 2. É YouTube?
+            else if (url.match(/(?:youtu\.be\/|youtube\.com\/)/)) {
+                nativePlayer.style.display = 'none';
+                iframe.style.display = 'block';
+
+                const youtubeIdMatch = url.match(/(?:youtu\.be\/|youtube\.com\/(?:.*v=|.*\/|embed\/|v\/))([^?&"'>]{11})/);
+                const listMatch = url.match(/[?&]list=([^#\&\?]+)/);
+
+                if (youtubeIdMatch && youtubeIdMatch[1]) {
+                    const videoId = youtubeIdMatch[1];
+                    let finalUrl = `https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1`;
+                    if (listMatch && listMatch[1]) {
+                        finalUrl += `&list=${listMatch[1]}`;
+                    }
+                    iframe.src = finalUrl;
+                } else {
+                    // Fallback se não achar ID, tenta embed direto
+                    iframe.src = url;
                 }
-
-                iframe.src = finalUrl;
             } 
-            // 3. Se não for YouTube, assume que é link direto
+            
+            // 3. Qualquer outra coisa (Links de streaming, embeds genéricos)
             else {
+                nativePlayer.style.display = 'none';
+                iframe.style.display = 'block';
                 iframe.src = url;
             }
 
-            // Fecha o modal após carregar
             toggleModal();
         }
         
-        // Enter para carregar
         input.addEventListener("keypress", function(event) {
             if (event.key === "Enter") {
                 carregarVideo();
