@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cardápio Flyer Editável</title>
+    <!-- Biblioteca para gerar imagem -->
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
 
@@ -53,7 +55,7 @@
             display: flex;
             justify-content: space-between;
             align-items: flex-start;
-            margin-bottom: 10px;
+            margin-bottom: 5px; /* Reduzido de 10px */
         }
 
         .main-title {
@@ -67,7 +69,7 @@
         .subtitle {
             font-size: 18px;
             font-weight: 500;
-            margin: 5px 0 15px 0;
+            margin: 2px 0 10px 0; /* Margens reduzidas para aproximar */
             text-transform: uppercase;
         }
 
@@ -93,7 +95,7 @@
             font-weight: bold;
             font-size: 18px;
             display: inline-block;
-            margin-bottom: 20px;
+            margin-bottom: 15px; /* Reduzido de 20px */
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
 
@@ -101,7 +103,7 @@
         .meal-list {
             display: flex;
             flex-direction: column;
-            gap: 15px;
+            gap: 8px; /* Reduzido de 15px para ficar mais compacto */
         }
 
         .meal-item {
@@ -118,7 +120,7 @@
         .meal-title {
             font-size: 18px;
             font-weight: 700;
-            margin: 0 0 2px 0;
+            margin: 0 0 1px 0; /* Margem minúscula entre título e desc */
             display: block;
         }
 
@@ -127,12 +129,12 @@
             font-weight: 400;
             margin: 0;
             opacity: 0.95;
-            line-height: 1.3;
+            line-height: 1.2;
         }
 
         .meal-image {
-            width: 80px;
-            height: 80px;
+            width: 70px; /* Levemente menor para caber melhor compacto */
+            height: 70px;
             border-radius: 50%;
             object-fit: cover;
             border: 2px solid rgba(255,255,255,0.2);
@@ -257,10 +259,10 @@
 
     <!-- Botões Flutuantes -->
     <div class="fab-container no-print">
-        <button onclick="window.print()" class="fab-btn" title="Salvar PDF/Imprimir">
+        <button onclick="downloadImage()" class="fab-btn" title="Baixar Imagem PNG">
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 16 16">
-                <path d="M2.5 8a.5.5 0 1 0 0-1 .5.5 0 0 0 0 1z"/>
-                <path d="M5 1a2 2 0 0 0-2 2v2H2a2 2 0 0 0-2 2v3a2 2 0 0 0 2 2h1v1a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2v-1h1a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-1V3a2 2 0 0 0-2-2H5zM4 3a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2H4V3zm1 5a2 2 0 0 0-2 2v1H2a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1h-1v-1a2 2 0 0 0-2-2H5zm7 2v3a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-3a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1z"/>
+                <path d="M6.002 5.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0z"/>
+                <path d="M2.002 1a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V3a2 2 0 0 0-2-2h-12zm12 1a1 1 0 0 1 1 1v6.5l-3.777-1.947a.5.5 0 0 0-.577.093l-3.71 3.71-2.66-1.772a.5.5 0 0 0-.63.062L1.002 12V3a1 1 0 0 1 1-1h12z"/>
             </svg>
         </button>
         <button id="editBtn" onclick="toggleEditMode()" class="fab-btn" title="Editar Texto">
@@ -299,8 +301,28 @@
                 editBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 16 16"><path d="M12.146.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1 0 .708l-10 10a.5.5 0 0 1-.168.11l-5 2a.5.5 0 0 1-.65-.65l2-5a.5.5 0 0 1 .11-.168l10-10zM11.207 2.5 13.5 4.793 14.793 3.5 12.5 1.207 11.207 2.5zm1.586 3L10.5 3.207 4 9.707V10h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.293l6.5-6.5zm-9.761 5.175-.106.106-1.528 3.821 3.821-1.528.106-.106A.5.5 0 0 1 5 12.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.468-.325z"/> </svg>`;
             }
         }
+        
+        // Função para baixar como Imagem (PNG)
+        function downloadImage() {
+            // Se estiver editando, finaliza a edição para não sair as bordas tracejadas
+            if(isEditMode) toggleEditMode();
 
-        // Prevenir colagem com formatação
+            // Usa html2canvas para converter a div #cardContent em imagem
+            html2canvas(cardContainer, {
+                scale: 2, // Aumenta a qualidade
+                backgroundColor: null, // Mantém transparência se houver, mas o gradiente cobrirá
+                useCORS: true // Importante para imagens externas (unsplash)
+            }).then(canvas => {
+                const link = document.createElement('a');
+                link.download = 'meu-cardapio-semanal.png';
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+            }).catch(err => {
+                console.error("Erro ao gerar imagem:", err);
+                alert("Houve um erro ao gerar a imagem. Verifique se as imagens carregaram corretamente.");
+            });
+        }
+
         document.addEventListener('paste', function (e) {
             if (isEditMode) {
                 e.preventDefault();
