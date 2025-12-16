@@ -1,0 +1,696 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Consultoria Premium - Leonardo</title>
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;700;800&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #000000;
+            --card-bg: #121212;
+            --gold: #D4AF37;
+            --text-main: #ffffff;
+            --text-muted: #aaaaaa;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            font-family: 'Open Sans', sans-serif;
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+        }
+
+        /* Container Principal */
+        #app-container {
+            width: 100%;
+            max-width: 450px;
+            height: 100%;
+            background-color: var(--card-bg);
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 0 50px rgba(212, 175, 55, 0.1);
+        }
+
+        /* Barras de Progresso */
+        .progress-container {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            right: 10px;
+            display: flex;
+            gap: 3px;
+            z-index: 20;
+        }
+
+        .progress-bar {
+            flex: 1;
+            height: 3px;
+            background-color: rgba(255, 255, 255, 0.2);
+            border-radius: 2px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background-color: var(--gold);
+            width: 0%;
+            transition: width 0.2s linear;
+        }
+
+        .progress-bar.completed .progress-fill { width: 100%; }
+        .progress-bar.active .progress-fill { width: 100%; }
+
+        /* Slides */
+        .slides-wrapper {
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .slide {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            padding: 40px 20px 90px 20px;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            opacity: 0;
+            transform: scale(0.95);
+            transition: opacity 0.3s ease, transform 0.3s ease;
+            pointer-events: none;
+        }
+
+        .slide.active {
+            opacity: 1;
+            transform: scale(1);
+            pointer-events: all;
+            z-index: 10;
+        }
+
+        /* Estilos de Conteúdo */
+        .header-tag {
+            text-align: center;
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--gold);
+            margin-bottom: 15px;
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 700;
+        }
+
+        .slide-title {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 26px;
+            font-weight: 800;
+            text-transform: uppercase;
+            margin: 0 0 15px 0;
+            color: var(--text-main);
+            line-height: 1.1;
+            text-align: center;
+        }
+
+        .slide-icon {
+            font-size: 40px;
+            text-align: center;
+            margin-bottom: 15px;
+            display: block;
+            text-shadow: 0 0 20px rgba(212, 175, 55, 0.3);
+        }
+
+        .content-box {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+        }
+        
+        .food-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            font-size: 15px;
+            line-height: 1.5;
+        }
+        
+        .food-list li {
+            margin-bottom: 8px;
+            border-bottom: 1px dashed rgba(255,255,255,0.1);
+            padding-bottom: 8px;
+        }
+        .food-list li:last-child { border-bottom: none; }
+
+        .time-badge {
+            display: inline-block;
+            background-color: var(--gold);
+            color: #000;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-weight: 800;
+            font-size: 14px;
+            margin-bottom: 10px;
+            font-family: 'Montserrat', sans-serif;
+            align-self: center;
+        }
+        
+        .center-flex { display: flex; flex-direction: column; align-items: center; }
+
+        /* Macros */
+        .macros-row {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            padding-top: 15px;
+        }
+        .macro-item { text-align: center; flex: 1; }
+        .macro-val { display: block; font-weight: 700; color: var(--gold); font-size: 13px; }
+        .macro-lbl { display: block; font-size: 9px; color: var(--text-muted); text-transform: uppercase; }
+
+        /* Navegação */
+        .tap-zone {
+            position: absolute;
+            top: 50px;
+            bottom: 80px;
+            width: 30%;
+            z-index: 15;
+            cursor: pointer;
+        }
+        .tap-left { left: 0; }
+        .tap-right { right: 0; }
+
+        /* Desabilita navegação no modo edição */
+        .is-editing .tap-zone {
+            pointer-events: none;
+            display: none;
+        }
+
+        /* Controles */
+        .controls-bar {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 80px;
+            background: linear-gradient(to top, #000 0%, transparent 100%);
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            z-index: 30;
+            padding-bottom: 10px;
+        }
+
+        .ctrl-btn {
+            background: rgba(255,255,255,0.1);
+            border: none;
+            color: #fff;
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            backdrop-filter: blur(5px);
+            transition: all 0.2s;
+        }
+        .ctrl-btn:active { transform: scale(0.9); }
+        .ctrl-btn.primary { background: var(--gold); color: #000; box-shadow: 0 0 15px rgba(212, 175, 55, 0.4); }
+
+        /* Lista View */
+        #list-view {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: var(--card-bg);
+            z-index: 50;
+            overflow-y: auto;
+            padding: 20px 20px 80px 20px;
+            box-sizing: border-box;
+            display: none;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        #list-view.show { display: block; opacity: 1; }
+
+        .list-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            border-bottom: 1px solid var(--gold);
+            padding-bottom: 10px;
+            margin-top: 10px;
+        }
+        
+        .list-item {
+            background: rgba(255,255,255,0.05);
+            margin-bottom: 10px;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 3px solid var(--gold);
+            font-size: 14px;
+            cursor: pointer; /* Indica clicável */
+            transition: background 0.2s;
+        }
+        .list-item:hover {
+            background: rgba(212, 175, 55, 0.1); /* Efeito hover dourado */
+        }
+        .list-item:active {
+            transform: scale(0.98);
+        }
+        .list-item strong { color: var(--gold); display: block; margin-bottom: 4px; }
+
+        .editable-area { min-width: 10px; display: inline-block; border-bottom: 1px dashed transparent; }
+        .is-editing .editable-area { border-bottom: 1px dashed var(--gold); background: rgba(255,255,255,0.1); cursor: text; }
+        
+        /* Indicador visual de modo edição */
+        .edit-indicator {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: var(--gold);
+            color: black;
+            font-size: 10px;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-weight: bold;
+            z-index: 25;
+            display: none;
+            pointer-events: none;
+        }
+        .is-editing .edit-indicator { display: block; }
+
+    </style>
+</head>
+<body>
+
+    <div id="app-container">
+        
+        <!-- Indicador de Edição -->
+        <div class="edit-indicator">MODO EDIÇÃO (NAVEGAÇÃO TRAVADA)</div>
+
+        <!-- Progresso -->
+        <div class="progress-container" id="progress-container"></div>
+
+        <!-- Toque (Desabilitado via CSS no modo edição) -->
+        <div class="tap-zone tap-left" onclick="prevSlide()"></div>
+        <div class="tap-zone tap-right" onclick="nextSlide()"></div>
+
+        <!-- SLIDES -->
+        <div class="slides-wrapper">
+            
+            <!-- Slide 0: Capa -->
+            <div class="slide active">
+                <div class="header-tag editable-area">INSTRUTOR GUSTAVO</div>
+                <div class="slide-icon">🔥</div>
+                <h1 class="slide-title editable-area">Leonardo Andrade</h1>
+                <div class="content-box">
+                    <p style="text-align: center; margin-bottom: 10px; color: var(--text-muted);">
+                        <span class="editable-area">Regime: CLT • Treino: Manhã</span>
+                    </p>
+                    <div style="text-align: center; margin-bottom: 20px;">
+                        <strong style="color:var(--gold);">Objetivo:</strong><br>
+                        <span class="editable-area">Déficit calórico + Preservação</span>
+                    </div>
+                    <div class="macros-row">
+                        <div class="macro-item"><span class="macro-val editable-area">1850</span><span class="macro-lbl">Kcal</span></div>
+                        <div class="macro-item"><span class="macro-val editable-area">190g</span><span class="macro-lbl">Prot</span></div>
+                        <div class="macro-item"><span class="macro-val editable-area">70g</span><span class="macro-lbl">Carb</span></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Slide 1: Página 1 (Base) -->
+            <div class="slide">
+                <div class="header-tag">Página 1</div>
+                <div class="slide-icon">🌙</div>
+                <h2 class="slide-title editable-area">Sono & Água</h2>
+                <div class="content-box">
+                    <ul class="food-list editable-area">
+                        <li><strong>Sono:</strong> 22:30 ➔ 05:30 (7h)</li>
+                        <li><strong>Meta Água:</strong> 3.0L a 3.5L</li>
+                        <li>500ml ao acordar (05:30)</li>
+                        <li>1L Manhã / 1L Tarde</li>
+                    </ul>
+                    <p style="text-align: center; font-size: 12px; margin-top: 15px; color: var(--gold);">
+                        "Sem água, não há lipólise."
+                    </p>
+                </div>
+            </div>
+
+            <!-- Slide 2: Página 2 (Pré-Treino) -->
+            <div class="slide">
+                <div class="header-tag">Página 2</div>
+                <div class="center-flex"><span class="time-badge editable-area">05:45</span></div>
+                <h2 class="slide-title editable-area">Pré-Treino</h2>
+                <div class="content-box">
+                    <ul class="food-list editable-area">
+                        <li>2 ovos inteiros</li>
+                        <li>Cenoura crua ou folhas</li>
+                        <li>Café preto / Chá (Opc)</li>
+                        <li>5g Creatina (Se usar)</li>
+                    </ul>
+                    <div class="macros-row">
+                        <div class="macro-item"><span class="macro-val editable-area">180</span><span class="macro-lbl">Kcal</span></div>
+                        <div class="macro-item"><span class="macro-val editable-area">12g</span><span class="macro-lbl">P</span></div>
+                        <div class="macro-item"><span class="macro-val editable-area">4g</span><span class="macro-lbl">C</span></div>
+                        <div class="macro-item"><span class="macro-val editable-area">10g</span><span class="macro-lbl">G</span></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Slide 3: Página 3 (Treino) -->
+            <div class="slide">
+                <div class="header-tag">Página 3</div>
+                <div class="center-flex"><span class="time-badge editable-area">06:30 - 07:30</span></div>
+                <div class="slide-icon">🏋️‍♂️</div>
+                <h2 class="slide-title editable-area">Treino</h2>
+                <div class="content-box" style="border-color: var(--gold);">
+                    <ul class="food-list editable-area" style="text-align: center;">
+                        <li><strong>Água:</strong> Beber durante todo o treino</li>
+                        <li>Treino em jejum quebrado</li>
+                        <li>Estratégico, não extremo</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Slide 4: Página 4 (Café/Pós) -->
+            <div class="slide">
+                <div class="header-tag">Página 4</div>
+                <div class="center-flex"><span class="time-badge editable-area">07:45</span></div>
+                <h2 class="slide-title editable-area">Café / Pós</h2>
+                <div class="content-box">
+                    <ul class="food-list editable-area">
+                        <li>3 ovos inteiros</li>
+                        <li>100g Brócolis</li>
+                        <li>50g Cenoura</li>
+                        <li>Recuperação Imediata</li>
+                    </ul>
+                    <div class="macros-row">
+                        <div class="macro-item"><span class="macro-val editable-area">390</span><span class="macro-lbl">Kcal</span></div>
+                        <div class="macro-item"><span class="macro-val editable-area">27g</span><span class="macro-lbl">P</span></div>
+                        <div class="macro-item"><span class="macro-val editable-area">12g</span><span class="macro-lbl">C</span></div>
+                        <div class="macro-item"><span class="macro-val editable-area">26g</span><span class="macro-lbl">G</span></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Slide 5: Página 5 (Lanche Manhã) -->
+            <div class="slide">
+                <div class="header-tag">Página 5</div>
+                <div class="center-flex"><span class="time-badge editable-area">10:30</span></div>
+                <h2 class="slide-title editable-area">Lanche Manhã</h2>
+                <div class="content-box">
+                    <ul class="food-list editable-area">
+                        <li>2 ovos cozidos</li>
+                        <li>Folhas verdes ou Cenoura</li>
+                        <li>Foco no trabalho</li>
+                    </ul>
+                    <div class="macros-row">
+                        <div class="macro-item"><span class="macro-val editable-area">180</span><span class="macro-lbl">Kcal</span></div>
+                        <div class="macro-item"><span class="macro-val editable-area">12g</span><span class="macro-lbl">P</span></div>
+                        <div class="macro-item"><span class="macro-val editable-area">4g</span><span class="macro-lbl">C</span></div>
+                        <div class="macro-item"><span class="macro-val editable-area">10g</span><span class="macro-lbl">G</span></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Slide 6: Página 6 (Almoço) -->
+            <div class="slide">
+                <div class="header-tag">Página 6</div>
+                <div class="center-flex"><span class="time-badge editable-area">13:00</span></div>
+                <h2 class="slide-title editable-area">Almoço (CLT)</h2>
+                <div class="content-box">
+                    <ul class="food-list editable-area">
+                        <li>180g Patinho grelhado</li>
+                        <li>100g Beterraba + 80g Cenoura</li>
+                        <li>Brócolis à vontade</li>
+                        <li>5ml Azeite</li>
+                    </ul>
+                    <div class="macros-row">
+                        <div class="macro-item"><span class="macro-val editable-area">520</span><span class="macro-lbl">Kcal</span></div>
+                        <div class="macro-item"><span class="macro-val editable-area">45g</span><span class="macro-lbl">P</span></div>
+                        <div class="macro-item"><span class="macro-val editable-area">28g</span><span class="macro-lbl">C</span></div>
+                        <div class="macro-item"><span class="macro-val editable-area">18g</span><span class="macro-lbl">G</span></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Slide 7: Página 7 (Lanche Tarde) -->
+            <div class="slide">
+                <div class="header-tag">Página 7</div>
+                <div class="center-flex"><span class="time-badge editable-area">16:30</span></div>
+                <h2 class="slide-title editable-area">Lanche Tarde</h2>
+                <div class="content-box">
+                    <ul class="food-list editable-area">
+                        <li>150g Frango grelhado/desf.</li>
+                        <li>Salada crua ou cenoura</li>
+                        <li>Metabolismo ativo</li>
+                    </ul>
+                    <div class="macros-row">
+                        <div class="macro-item"><span class="macro-val editable-area">260</span><span class="macro-lbl">Kcal</span></div>
+                        <div class="macro-item"><span class="macro-val editable-area">35g</span><span class="macro-lbl">P</span></div>
+                        <div class="macro-item"><span class="macro-val editable-area">6g</span><span class="macro-lbl">C</span></div>
+                        <div class="macro-item"><span class="macro-val editable-area">5g</span><span class="macro-lbl">G</span></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Slide 8: Página 8 (Jantar) -->
+            <div class="slide">
+                <div class="header-tag">Página 8</div>
+                <div class="center-flex"><span class="time-badge editable-area">20:00</span></div>
+                <h2 class="slide-title editable-area">Jantar</h2>
+                <div class="content-box">
+                    <ul class="food-list editable-area">
+                        <li>200g Frango OU Patinho</li>
+                        <li>Legumes verdes à vontade</li>
+                        <li>🚫 Sem carbo concentrado</li>
+                    </ul>
+                    <div class="macros-row">
+                        <div class="macro-item"><span class="macro-val editable-area">350</span><span class="macro-lbl">Kcal</span></div>
+                        <div class="macro-item"><span class="macro-val editable-area">42g</span><span class="macro-lbl">P</span></div>
+                        <div class="macro-item"><span class="macro-val editable-area">10g</span><span class="macro-lbl">C</span></div>
+                        <div class="macro-item"><span class="macro-val editable-area">8g</span><span class="macro-lbl">G</span></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Slide 9: Página 9 (Ceia) -->
+            <div class="slide">
+                <div class="header-tag">Página 9</div>
+                <div class="center-flex"><span class="time-badge editable-area">22:00</span></div>
+                <h2 class="slide-title editable-area">Ceia (Opc)</h2>
+                <div class="content-box">
+                    <ul class="food-list editable-area">
+                        <li>2 claras + 1 ovo inteiro</li>
+                        <li>OU 100g Frango</li>
+                        <li>Ajuste fino</li>
+                    </ul>
+                    <div class="macros-row">
+                        <div class="macro-item"><span class="macro-val editable-area">150</span><span class="macro-lbl">Kcal</span></div>
+                        <div class="macro-item"><span class="macro-val editable-area">20g</span><span class="macro-lbl">P</span></div>
+                        <div class="macro-item"><span class="macro-val editable-area">2g</span><span class="macro-lbl">C</span></div>
+                        <div class="macro-item"><span class="macro-val editable-area">5g</span><span class="macro-lbl">G</span></div>
+                    </div>
+                </div>
+            </div>
+
+             <!-- Slide 10: Resumo -->
+             <div class="slide">
+                <div class="header-tag">Página Final</div>
+                <div class="slide-icon">🏆</div>
+                <h2 class="slide-title editable-area">Resumo Diário</h2>
+                <div class="content-box">
+                    <ul class="food-list" style="text-align: center;">
+                        <li style="color:var(--gold);">Total Calorias: <span class="editable-area">1.850 kcal</span></li>
+                        <li>Proteínas: <span class="editable-area">180–190 g</span></li>
+                        <li>Carboidratos: <span class="editable-area">60–70 g</span></li>
+                        <li>Gorduras: <span class="editable-area">~70 g</span></li>
+                    </ul>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- MODO LISTA -->
+        <div id="list-view">
+            <div class="list-header">
+                <span style="font-weight: 800; color: var(--gold);">RESUMO GERAL</span>
+                <button onclick="toggleListView()" style="background:none; border:none; color:white; font-size: 20px;">✕</button>
+            </div>
+            
+            <div class="list-item" onclick="goToSlide(0)"><strong>Início</strong>Capa - Leonardo Andrade</div>
+            <div class="list-item" onclick="goToSlide(1)"><strong>Sono & Água</strong>Metas Diárias</div>
+            <div class="list-item" onclick="goToSlide(2)"><strong>05:45 - Pré-Treino</strong>2 ovos, Cenoura/Folhas (180kcal)</div>
+            <div class="list-item" onclick="goToSlide(3)"><strong>06:30 - Treino</strong>Jejum quebrado, Água</div>
+            <div class="list-item" onclick="goToSlide(4)"><strong>07:45 - Café/Pós</strong>3 ovos, Brócolis, Cenoura (390kcal)</div>
+            <div class="list-item" onclick="goToSlide(5)"><strong>10:30 - Lanche Manhã</strong>2 ovos cozidos, Verde (180kcal)</div>
+            <div class="list-item" onclick="goToSlide(6)"><strong>13:00 - Almoço</strong>180g Patinho, Beterraba, Cenoura (520kcal)</div>
+            <div class="list-item" onclick="goToSlide(7)"><strong>16:30 - Lanche Tarde</strong>150g Frango, Salada (260kcal)</div>
+            <div class="list-item" onclick="goToSlide(8)"><strong>20:00 - Jantar</strong>200g Frango/Patinho, Verde (350kcal)</div>
+            <div class="list-item" onclick="goToSlide(9)"><strong>22:00 - Ceia</strong>Ovos ou Frango (150kcal)</div>
+            <div class="list-item" onclick="goToSlide(10)"><strong>Resumo Final</strong>Totais de Macros</div>
+        </div>
+
+        <!-- Barra Inferior -->
+        <div class="controls-bar no-print">
+            <button class="ctrl-btn" onclick="toggleListView()" title="Ver Lista">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16"><path d="M2 2.5a.5.5 0 0 0-.5.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5H2zm3 0a.5.5 0 0 0 .5.5v1a.5.5 0 0 0 .5.5h9a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5H5zM2 6a.5.5 0 0 0-.5.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5H2zm3 0a.5.5 0 0 0 .5.5v1a.5.5 0 0 0 .5.5h9a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5H5zM2 9.5a.5.5 0 0 0-.5.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5H2zm3 0a.5.5 0 0 0 .5.5v1a.5.5 0 0 0 .5.5h9a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5H5z"/></svg>
+            </button>
+            <button class="ctrl-btn primary" onclick="downloadCurrentSlide()" title="Baixar Story">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 16 16"><path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z"/><path d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708l3 3z"/></svg>
+            </button>
+            <button class="ctrl-btn" onclick="toggleEditMode()" id="editBtn" title="Editar">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16"><path d="M12.146.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1 0 .708l-10 10a.5.5 0 0 1-.168.11l-5 2a.5.5 0 0 1-.65-.65l2-5a.5.5 0 0 1 .11-.168l10-10zM11.207 2.5 13.5 4.793 14.793 3.5 12.5 1.207 11.207 2.5zm1.586 3L10.5 3.207 4 9.707V10h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.293l6.5-6.5zm-9.761 5.175-.106.106-1.528 3.821 3.821-1.528.106-.106A.5.5 0 0 1 5 12.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.468-.325z"/></svg>
+            </button>
+        </div>
+
+    </div>
+
+    <script>
+        let currentSlide = 0;
+        const slides = document.querySelectorAll('.slide');
+        const totalSlides = slides.length;
+        const progressContainer = document.getElementById('progress-container');
+        let isEditMode = false;
+
+        function initProgressBars() {
+            progressContainer.innerHTML = '';
+            for (let i = 0; i < totalSlides; i++) {
+                const bar = document.createElement('div');
+                bar.className = 'progress-bar';
+                const fill = document.createElement('div');
+                fill.className = 'progress-fill';
+                bar.appendChild(fill);
+                progressContainer.appendChild(bar);
+            }
+            updateProgress();
+        }
+
+        function showSlide(index) {
+            if (index < 0) index = 0;
+            if (index >= totalSlides) index = totalSlides - 1;
+            currentSlide = index;
+            
+            slides.forEach((slide, i) => {
+                slide.classList.remove('active');
+                if (i === currentSlide) slide.classList.add('active');
+            });
+            updateProgress();
+        }
+
+        // Nova Função: Ir para Slide específico e fechar menu
+        function goToSlide(index) {
+            showSlide(index);
+            toggleListView(); // Fecha o menu
+        }
+
+        function nextSlide() { 
+            if (isEditMode) return; 
+            showSlide(currentSlide + 1); 
+        }
+
+        function prevSlide() { 
+            if (isEditMode) return; 
+            showSlide(currentSlide - 1); 
+        }
+
+        function updateProgress() {
+            const bars = document.querySelectorAll('.progress-bar');
+            bars.forEach((bar, i) => {
+                bar.classList.remove('completed', 'active');
+                const fill = bar.querySelector('.progress-fill');
+                
+                if (i < currentSlide) {
+                    bar.classList.add('completed');
+                    fill.style.width = '100%';
+                } else if (i === currentSlide) {
+                    bar.classList.add('active');
+                    fill.style.width = '100%'; 
+                } else {
+                    fill.style.width = '0%';
+                }
+            });
+        }
+
+        function toggleListView() {
+            document.getElementById('list-view').classList.toggle('show');
+        }
+
+        function toggleEditMode() {
+            isEditMode = !isEditMode;
+            const btn = document.getElementById('editBtn');
+            const editables = document.querySelectorAll('.editable-area');
+            const container = document.getElementById('app-container');
+
+            if(isEditMode) {
+                btn.style.color = 'var(--gold)';
+                container.classList.add('is-editing');
+                editables.forEach(el => el.contentEditable = "true");
+            } else {
+                btn.style.color = '#fff';
+                container.classList.remove('is-editing');
+                editables.forEach(el => el.contentEditable = "false");
+            }
+        }
+
+        function downloadCurrentSlide() {
+            if(isEditMode) toggleEditMode();
+            const controls = document.querySelector('.controls-bar');
+            controls.style.display = 'none';
+            const editInd = document.querySelector('.edit-indicator');
+            editInd.style.display = 'none';
+            
+            const container = document.getElementById('app-container');
+            html2canvas(container, { scale: 3, backgroundColor: "#000000", useCORS: true }).then(canvas => {
+                const link = document.createElement('a');
+                link.download = `Consultoria_Leonardo_Slide_${currentSlide}.png`;
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+                controls.style.display = 'flex';
+                editInd.style.display = '';
+            });
+        }
+
+        // Swipe
+        let touchStartX = 0;
+        let touchEndX = 0;
+        document.addEventListener('touchstart', e => touchStartX = e.changedTouches[0].screenX);
+        document.addEventListener('touchend', e => {
+            touchEndX = e.changedTouches[0].screenX;
+            if (isEditMode) return; // Travado no modo edição
+            if (touchEndX < touchStartX - 50) nextSlide();
+            if (touchEndX > touchStartX + 50) prevSlide();
+        });
+
+        // Bloqueio de colar formatação
+        document.addEventListener('paste', function (e) {
+            if (isEditMode) {
+                e.preventDefault();
+                var text = (e.originalEvent || e).clipboardData.getData('text/plain');
+                document.execCommand("insertHTML", false, text);
+            }
+        });
+
+        initProgressBars();
+    </script>
+</body>
+</html>
+
