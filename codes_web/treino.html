@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Academia Pro</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <!-- Custom Config -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        slate: {
+                            950: '#020617',
+                        }
+                    },
+                    keyframes: {
+                        'slide-in': {
+                            '0%': { transform: 'translateY(100%)', opacity: '0' },
+                            '100%': { transform: 'translateY(0)', opacity: '1' },
+                        }
+                    },
+                    animation: {
+                        'slide-in': 'slide-in 0.3s ease-out',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* Hide scrollbar for Chrome, Safari and Opera */
+        .scrollbar-hide::-webkit-scrollbar {
+            display: none;
+        }
+        /* Hide scrollbar for IE, Edge and Firefox */
+        .scrollbar-hide {
+            -ms-overflow-style: none;  /* IE and Edge */
+            scrollbar-width: none;  /* Firefox */
+        }
+        
+        .pb-safe {
+            padding-bottom: env(safe-area-inset-bottom);
+        }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-100 font-sans pb-32">
+
+    <!-- App Container -->
+    <div id="app">
+        <!-- Header will be injected here -->
+        <div id="header-container"></div>
+        
+        <!-- Main Content -->
+        <main class="container mx-auto px-4 py-6">
+            <!-- Timer Container -->
+            <div id="timer-container"></div>
+            
+            <!-- Section Title -->
+            <div class="flex items-center justify-between mb-4">
+                <h2 id="section-title" class="text-lg font-bold text-white flex items-center">
+                    Seu Treino
+                </h2>
+                <span id="exercise-count" class="text-xs text-slate-400 bg-slate-800 px-2 py-1 rounded-md border border-slate-700">
+                    0 exercícios
+                </span>
+            </div>
+
+            <!-- Grid -->
+            <div id="exercise-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Exercises will be injected here -->
+            </div>
+        </main>
+
+        <!-- Mobile Nav -->
+        <nav id="mobile-nav" class="fixed bottom-0 left-0 right-0 bg-slate-900/95 backdrop-blur-md border-t border-slate-800 pb-safe pt-2 px-2 md:hidden z-50">
+            <!-- Mobile nav items injected here -->
+        </nav>
+    </div>
+
+    <script>
+        // --- DATA ---
+        const exerciseData = [
+            { id: 'p1', category: 'Peito', name: 'Supino Reto com Barra', sets: 4, reps: '8-12', image: 'https://placehold.co/600x350/1e293b/34d399?text=Supino+Reto&font=roboto', difficulty: 'Intermediário', description: 'O clássico para volume peitoral.', videoQuery: 'supino reto barra execução correta' },
+            { id: 'p2', category: 'Peito', name: 'Supino Inclinado Halteres', sets: 3, reps: '10-12', image: 'https://placehold.co/600x350/1e293b/34d399?text=Supino+Inclinado&font=roboto', difficulty: 'Intermediário', description: 'Foca na parte superior do peito.', videoQuery: 'supino inclinado halteres execução' },
+            { id: 'p3', category: 'Peito', name: 'Crossover (Polia Alta)', sets: 4, reps: '12-15', image: 'https://placehold.co/600x350/1e293b/34d399?text=Crossover&font=roboto', difficulty: 'Avançado', description: 'Ótimo para isolamento.', videoQuery: 'crossover polia alta execução' },
+            { id: 'p4', category: 'Peito', name: 'Flexão de Braços', sets: 3, reps: 'Falha', image: 'https://placehold.co/600x350/1e293b/34d399?text=Flexao+de+Bracos&font=roboto', difficulty: 'Iniciante', description: 'Calistenia fundamental.', videoQuery: 'flexão de braço execução' },
+            { id: 'c1', category: 'Costas', name: 'Puxada Alta (Frente)', sets: 4, reps: '10-12', image: 'https://placehold.co/600x350/1e293b/34d399?text=Puxada+Alta&font=roboto', difficulty: 'Iniciante', description: 'Foque nos cotovelos.', videoQuery: 'puxada alta frente execução' },
+            { id: 'c2', category: 'Costas', name: 'Remada Curvada', sets: 4, reps: '8-10', image: 'https://placehold.co/600x350/1e293b/34d399?text=Remada+Curvada&font=roboto', difficulty: 'Avançado', description: 'Densidade dorsal.', videoQuery: 'remada curvada barra execução' },
+            { id: 'l1', category: 'Pernas', name: 'Agachamento Livre', sets: 4, reps: '6-10', image: 'https://placehold.co/600x350/1e293b/34d399?text=Agachamento+Livre&font=roboto', difficulty: 'Avançado', description: 'O rei dos exercícios.', videoQuery: 'agachamento livre execução' },
+            { id: 'l2', category: 'Pernas', name: 'Leg Press 45º', sets: 4, reps: '10-12', image: 'https://placehold.co/600x350/1e293b/34d399?text=Leg+Press+45&font=roboto', difficulty: 'Iniciante', description: 'Cuidado com a extensão total.', videoQuery: 'leg press 45 execução' },
+            { id: 'o1', category: 'Ombros', name: 'Desenvolvimento Halteres', sets: 4, reps: '8-10', image: 'https://placehold.co/600x350/1e293b/34d399?text=Desenvolvimento&font=roboto', difficulty: 'Intermediário', description: 'Massa para ombros.', videoQuery: 'desenvolvimento halteres execução' },
+            { id: 'o2', category: 'Ombros', name: 'Elevação Lateral', sets: 4, reps: '12-15', image: 'https://placehold.co/600x350/1e293b/34d399?text=Elevacao+Lateral&font=roboto', difficulty: 'Iniciante', description: 'Largura do ombro.', videoQuery: 'elevação lateral execução' },
+            { id: 'b1', category: 'Braços', name: 'Rosca Direta', sets: 3, reps: '8-12', image: 'https://placehold.co/600x350/1e293b/34d399?text=Rosca+Direta&font=roboto', difficulty: 'Iniciante', description: 'Bíceps clássico.', videoQuery: 'rosca direta barra execução' },
+            { id: 'b2', category: 'Braços', name: 'Tríceps Corda', sets: 3, reps: '10-12', image: 'https://placehold.co/600x350/1e293b/34d399?text=Triceps+Corda&font=roboto', difficulty: 'Iniciante', description: 'Isolamento tríceps.', videoQuery: 'triceps corda polia execução' },
+            { id: 'a1', category: 'Abdômen', name: 'Prancha', sets: 3, reps: '45s', image: 'https://placehold.co/600x350/1e293b/34d399?text=Prancha&font=roboto', difficulty: 'Iniciante', description: 'Estabilidade do core.', videoQuery: 'prancha abdominal execução' }
+        ];
+
+        const categories = ['Todos', 'Peito', 'Costas', 'Pernas', 'Ombros', 'Braços', 'Abdômen'];
+
+        // --- STATE MANAGEMENT ---
+        let state = {
+            activeCategory: 'Todos',
+            searchTerm: '',
+            mobileMenuOpen: false,
+            workoutLogs: JSON.parse(localStorage.getItem('academiaPro_logs_v1')) || {},
+            expandedCards: {},
+            timer: {
+                active: false,
+                seconds: 60,
+                intervalId: null
+            }
+        };
+
+        // --- PERSISTENCE HELPER ---
+        function saveLogs() {
+            localStorage.setItem('academiaPro_logs_v1', JSON.stringify(state.workoutLogs));
+            renderHeader(); // Update progress bar
+            renderExerciseList(); // Refresh visuals (e.g. checkmarks)
+        }
+
+        // --- SVG COMPONENT LOGIC ---
+        function getBodyHighlightSVG(target, className) {
+            const activeColor = "#34d399";
+            const baseColor = "#334155";
+            const outlineColor = "#1e293b";
+            
+            const normalizedTarget = target.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+            
+            const map = {
+                'peito': ['chest'],
+                'costas': ['lats', 'traps'],
+                'ombros': ['shoulders', 'traps'],
+                'bracos': ['biceps', 'forearms', 'triceps'],
+                'pernas': ['quads', 'calves'],
+                'abdomen': ['abs', 'obliques']
+            };
+            
+            const targetParts = map[normalizedTarget] || [];
+            const getColor = (part) => targetParts.includes(part) ? activeColor : baseColor;
+
+            return `
+            <svg viewBox="0 0 200 300" class="${className}" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+                    <feGaussianBlur stdDeviation="2" result="blur" />
+                    <feComposite in="SourceGraphic" in2="blur" operator="over" />
+                    </filter>
+                </defs>
+                <g stroke="${outlineColor}" stroke-width="2">
+                    <path d="M100,25 C110,25 115,35 115,45 C115,58 108,65 100,65 C92,65 85,58 85,45 C85,35 90,25 100,25 Z" fill="${baseColor}" />
+                    <path d="M85,55 L70,65 L130,65 L115,55 Z" fill="${getColor('traps')}" />
+                    <path d="M70,65 Q55,70 50,90 L70,95 Z" fill="${getColor('shoulders')}" />
+                    <path d="M130,65 Q145,70 150,90 L130,95 Z" fill="${getColor('shoulders')}" />
+                    <path d="M70,95 L100,95 L100,125 Q80,125 70,110 Z" fill="${getColor('chest')}" />
+                    <path d="M130,95 L100,95 L100,125 Q120,125 130,110 Z" fill="${getColor('chest')}" />
+                    <path d="M70,110 L55,140 L70,150 L75,120 Z" fill="${getColor('lats')}" />
+                    <path d="M130,110 L145,140 L130,150 L125,120 Z" fill="${getColor('lats')}" />
+                    <path d="M50,90 L45,130 L65,130 L70,95 Z" fill="${getColor('biceps')}" />
+                    <path d="M150,90 L155,130 L135,130 L130,95 Z" fill="${getColor('biceps')}" />
+                    <path d="M45,130 L40,170 L60,170 L65,130 Z" fill="${getColor('forearms')}" />
+                    <path d="M155,130 L160,170 L140,170 L135,130 Z" fill="${getColor('forearms')}" />
+                    <path d="M75,125 L100,125 L100,170 L75,160 Z" fill="${getColor('abs')}" />
+                    <path d="M125,125 L100,125 L100,170 L125,160 Z" fill="${getColor('abs')}" />
+                    <path d="M75,120 L70,150 L75,170 L80,125 Z" fill="${getColor('obliques')}" />
+                    <path d="M125,120 L130,150 L125,170 L120,125 Z" fill="${getColor('obliques')}" />
+                    <path d="M75,170 L65,240 L95,240 L100,170 Z" fill="${getColor('quads')}" />
+                    <path d="M125,170 L135,240 L105,240 L100,170 Z" fill="${getColor('quads')}" />
+                    <path d="M65,240 L60,285 L90,285 L95,240 Z" fill="${getColor('calves')}" />
+                    <path d="M135,240 L140,285 L110,285 L105,240 Z" fill="${getColor('calves')}" />
+                </g>
+            </svg>`;
+        }
+
+        // --- TIMER LOGIC ---
+        function startTimer(seconds = 60) {
+            if (state.timer.intervalId) clearInterval(state.timer.intervalId);
+            state.timer.active = true;
+            state.timer.seconds = seconds;
+            renderTimer();
+            
+            state.timer.intervalId = setInterval(() => {
+                state.timer.seconds--;
+                if (state.timer.seconds <= 0) {
+                    clearInterval(state.timer.intervalId);
+                    state.timer.active = false;
+                    renderTimer();
+                    
+                    // Feedback
+                    if (navigator.vibrate) navigator.vibrate([500, 200, 500]);
+                    try {
+                        const audio = new Audio('https://actions.google.com/sounds/v1/alarms/beep_short.ogg');
+                        audio.volume = 0.5;
+                        audio.play().catch(e => {});
+                    } catch(e) {}
+                } else {
+                    // Update only text content to avoid full re-render flickering
+                    const display = document.getElementById('timer-display-text');
+                    if (display) {
+                        display.textContent = formatTime(state.timer.seconds);
+                        if (state.timer.seconds < 10) display.classList.add('text-red-400');
+                    }
+                }
+            }, 1000);
+        }
+
+        function stopTimer() {
+            if (state.timer.intervalId) clearInterval(state.timer.intervalId);
+            state.timer.active = false;
+            renderTimer();
+        }
+
+        function adjustTimer(amount) {
+            state.timer.seconds = Math.max(0, state.timer.seconds + amount);
+            const display = document.getElementById('timer-display-text');
+            if (display) display.textContent = formatTime(state.timer.seconds);
+        }
+
+        function formatTime(s) {
+            return `${Math.floor(s / 60)}:${(s % 60).toString().padStart(2, '0')}`;
+        }
+
+        // --- ACTIONS ---
+        function setActiveCategory(cat) {
+            state.activeCategory = cat;
+            renderHeader(); // Re-render nav pills
+            renderExerciseList();
+            renderMobileNav();
+        }
+
+        function setSearchTerm(term) {
+            state.searchTerm = term;
+            renderExerciseList();
+        }
+
+        function toggleCard(id) {
+            state.expandedCards[id] = !state.expandedCards[id];
+            
+            // Init logs if needed
+            if (!state.workoutLogs[id]) {
+                const exercise = exerciseData.find(e => e.id === id);
+                state.workoutLogs[id] = Array(exercise.sets).fill({ weight: '', reps: '', done: false });
+            }
+            renderExerciseList();
+        }
+
+        function updateSet(exId, index, field, value) {
+            if (!state.workoutLogs[exId]) return;
+            state.workoutLogs[exId][index][field] = value;
+            saveLogs();
+            // Don't re-render entire list to keep focus
+        }
+
+        function toggleSetDone(exId, index) {
+            if (!state.workoutLogs[exId]) return;
+            const isCompleting = !state.workoutLogs[exId][index].done;
+            state.workoutLogs[exId][index].done = isCompleting;
+            saveLogs();
+            
+            if (isCompleting) startTimer(60);
+        }
+
+        function resetWorkout() {
+            if (confirm("Tem certeza que deseja finalizar e limpar todo o treino de hoje?")) {
+                state.workoutLogs = {};
+                state.expandedCards = {};
+                stopTimer();
+                saveLogs();
+                renderExerciseList();
+            }
+        }
+
+        function openVideo(query, e) {
+            if(e) e.stopPropagation();
+            const url = `https://www.youtube.com/results?search_query=${encodeURIComponent(query)}`;
+            window.open(url, '_blank');
+        }
+
+        function toggleMobileMenu() {
+            state.mobileMenuOpen = !state.mobileMenuOpen;
+            renderHeader();
+        }
+
+        // --- RENDERING ---
+        
+        function renderHeader() {
+            // Calculate Progress
+            const allExerciseIds = exerciseData.map(e => e.id);
+            let totalSets = 0;
+            let completedSets = 0;
+            
+            allExerciseIds.forEach(id => {
+                const ex = exerciseData.find(e => e.id === id);
+                if (ex) {
+                    totalSets += ex.sets;
+                    if (state.workoutLogs[id]) {
+                        completedSets += state.workoutLogs[id].filter(s => s.done).length;
+                    }
+                }
+            });
+            const progress = totalSets > 0 ? Math.round((completedSets / totalSets) * 100) : 0;
+
+            const html = `
+            <header class="sticky top-0 z-40 bg-slate-900/90 backdrop-blur-md border-b border-slate-800 shadow-xl">
+                <div class="container mx-auto px-4 py-3">
+                    <div class="flex items-center justify-between mb-3">
+                        <div class="flex items-center space-x-2">
+                            <div class="bg-emerald-500 p-2 rounded-lg shadow-lg shadow-emerald-500/20">
+                                <i data-lucide="dumbbell" class="h-6 w-6 text-slate-900"></i>
+                            </div>
+                            <div>
+                                <h1 class="text-xl font-bold tracking-tight text-white leading-none">
+                                    Academia<span class="text-emerald-500">Pro</span>
+                                </h1>
+                                <p class="text-[10px] text-slate-400 font-medium">Seu Personal Digital</p>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center gap-3">
+                            <button onclick="resetWorkout()" class="text-xs bg-red-500/10 text-red-400 border border-red-500/20 px-3 py-1.5 rounded-full hover:bg-red-500/20 transition-colors flex items-center gap-1">
+                                <i data-lucide="trash-2" class="h-3 w-3"></i> Resetar
+                            </button>
+                            <button class="md:hidden text-slate-300 p-1" onclick="toggleMobileMenu()">
+                                <i data-lucide="${state.mobileMenuOpen ? 'x' : 'menu'}"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Progress Bar -->
+                    <div class="w-full bg-slate-800 h-2 rounded-full overflow-hidden mb-3 shadow-inner">
+                        <div class="bg-gradient-to-r from-emerald-600 to-emerald-400 h-full transition-all duration-1000 ease-out" style="width: ${progress}%"></div>
+                    </div>
+                    <div class="flex justify-between text-xs text-slate-400 px-1">
+                        <span>Progresso do Treino</span>
+                        <span class="text-emerald-400 font-bold">${progress}%</span>
+                    </div>
+
+                    <!-- Mobile Search (Visible only on mobile) -->
+                    <div class="md:hidden mt-3 ${state.mobileMenuOpen ? 'block' : 'hidden md:block'}">
+                        <div class="relative">
+                            <input type="text" placeholder="Buscar exercício..." 
+                                class="w-full bg-slate-800/80 border border-slate-700 rounded-lg py-2 pl-9 pr-4 focus:outline-none focus:border-emerald-500 text-sm placeholder-slate-500 transition-colors"
+                                value="${state.searchTerm}"
+                                oninput="setSearchTerm(this.value)"
+                            >
+                            <i data-lucide="search" class="absolute left-3 top-2.5 h-4 w-4 text-slate-500"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Category Nav -->
+                <div class="overflow-x-auto pb-0 scrollbar-hide border-t border-slate-800/50">
+                    <div class="flex px-4 py-2 space-x-2 w-max mx-auto md:mx-0 md:justify-center md:w-full">
+                        ${categories.map(cat => `
+                            <button onclick="setActiveCategory('${cat}')" class="px-4 py-1.5 rounded-full text-xs font-bold transition-all duration-200 whitespace-nowrap border ${state.activeCategory === cat ? 'bg-emerald-500 border-emerald-500 text-slate-900 shadow-lg shadow-emerald-500/20' : 'bg-transparent border-slate-700 text-slate-400 hover:border-slate-500 hover:text-white'}">
+                                ${cat}
+                            </button>
+                        `).join('')}
+                    </div>
+                </div>
+            </header>
+            `;
+            document.getElementById('header-container').innerHTML = html;
+            lucide.createIcons();
+        }
+
+        function renderTimer() {
+            const container = document.getElementById('timer-container');
+            if (!state.timer.active) {
+                container.innerHTML = '';
+                return;
+            }
+
+            const html = `
+            <div class="fixed bottom-24 right-4 z-50 animate-slide-in">
+                 <div class="bg-slate-800/95 backdrop-blur-xl border border-emerald-500/40 p-4 rounded-2xl shadow-2xl flex flex-col gap-3 min-w-[220px] shadow-black/50">
+                    <div class="flex justify-between items-center border-b border-emerald-500/20 pb-2">
+                        <div class="flex items-center gap-2">
+                            <i data-lucide="clock" class="h-4 w-4 text-emerald-400 animate-pulse"></i>
+                            <span class="text-xs font-bold uppercase tracking-wider text-slate-300">Descanso</span>
+                        </div>
+                        <button onclick="stopTimer()" class="text-slate-500 hover:text-white transition-colors">
+                            <i data-lucide="x" class="h-4 w-4"></i>
+                        </button>
+                    </div>
+                    
+                    <div class="flex justify-center items-baseline gap-1 my-1">
+                        <span id="timer-display-text" class="text-5xl font-mono font-bold tracking-tighter tabular-nums ${state.timer.seconds < 10 ? 'text-red-400' : 'text-white'}">
+                            ${formatTime(state.timer.seconds)}
+                        </span>
+                    </div>
+
+                    <div class="grid grid-cols-3 gap-2">
+                        <button onclick="adjustTimer(-10)" class="bg-slate-700 hover:bg-slate-600 text-[10px] py-2 rounded-lg text-white font-medium transition-colors border border-slate-600">-10s</button>
+                        <button onclick="adjustTimer(10)" class="bg-slate-700 hover:bg-slate-600 text-[10px] py-2 rounded-lg text-white font-medium transition-colors border border-slate-600">+10s</button>
+                        <button onclick="stopTimer()" class="bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 text-[10px] py-2 rounded-lg font-medium transition-colors border border-emerald-500/30 flex items-center justify-center gap-1">
+                           Pular <i data-lucide="skip-forward" class="h-3 w-3"></i>
+                        </button>
+                    </div>
+                 </div>
+            </div>
+            `;
+            container.innerHTML = html;
+            lucide.createIcons();
+        }
+
+        function renderExerciseList() {
+            // Filter
+            let filtered = exerciseData;
+            if (state.activeCategory !== 'Todos') {
+                filtered = filtered.filter(ex => ex.category === state.activeCategory);
+            }
+            if (state.searchTerm) {
+                const term = state.searchTerm.toLowerCase();
+                filtered = filtered.filter(ex => 
+                    ex.name.toLowerCase().includes(term) || 
+                    ex.category.toLowerCase().includes(term)
+                );
+            }
+
+            // Update Counts and Title
+            document.getElementById('section-title').innerText = state.activeCategory === 'Todos' ? 'Seu Treino' : state.activeCategory;
+            document.getElementById('exercise-count').innerText = `${filtered.length} exercícios`;
+
+            const grid = document.getElementById('exercise-grid');
+            
+            if (filtered.length === 0) {
+                grid.innerHTML = `
+                <div class="col-span-full py-12 text-center text-slate-500">
+                    <i data-lucide="image" class="h-16 w-16 mx-auto mb-4 opacity-20"></i>
+                    <p class="text-lg font-medium">Nenhum exercício encontrado</p>
+                    <p class="text-sm">Tente buscar por outro termo ou categoria.</p>
+                </div>`;
+                lucide.createIcons();
+                return;
+            }
+
+            grid.innerHTML = filtered.map(exercise => {
+                const isExpanded = state.expandedCards[exercise.id];
+                const logs = state.workoutLogs[exercise.id] || [];
+                const setsDone = logs.filter(l => l.done).length;
+                const isCompleted = setsDone === exercise.sets;
+
+                // Render Logs if expanded
+                let logsHtml = '';
+                if (isExpanded) {
+                    const setsHtml = (state.workoutLogs[exercise.id] || Array(exercise.sets).fill({ weight: '', reps: '', done: false })).map((set, idx) => `
+                        <div class="grid grid-cols-10 gap-2 items-center ${set.done ? 'opacity-50 grayscale' : 'opacity-100'} transition-all">
+                            <!-- Set Number -->
+                            <div class="col-span-2 flex justify-center">
+                                <div class="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${set.done ? 'bg-emerald-900 text-emerald-500' : 'bg-slate-800 text-slate-400'}">
+                                    ${idx + 1}
+                                </div>
+                            </div>
+                            <!-- Weight -->
+                            <div class="col-span-3">
+                                <input type="number" placeholder="-" 
+                                    class="w-full bg-slate-900 border border-slate-700 rounded text-center text-sm py-2 text-white focus:border-emerald-500 focus:outline-none focus:bg-slate-800 transition-colors placeholder:text-slate-700"
+                                    value="${set.weight}"
+                                    oninput="updateSet('${exercise.id}', ${idx}, 'weight', this.value)"
+                                    onclick="event.stopPropagation()"
+                                >
+                            </div>
+                            <!-- Reps -->
+                            <div class="col-span-3">
+                                <input type="number" placeholder="${exercise.reps.replace(/\D/g,'').slice(0,2)}"
+                                    class="w-full bg-slate-900 border border-slate-700 rounded text-center text-sm py-2 text-white focus:border-emerald-500 focus:outline-none focus:bg-slate-800 transition-colors placeholder:text-slate-700"
+                                    value="${set.reps}"
+                                    oninput="updateSet('${exercise.id}', ${idx}, 'reps', this.value)"
+                                    onclick="event.stopPropagation()"
+                                >
+                            </div>
+                            <!-- Check -->
+                            <div class="col-span-2 flex justify-center">
+                                <button onclick="event.stopPropagation(); toggleSetDone('${exercise.id}', ${idx})"
+                                    class="w-9 h-9 rounded-lg flex items-center justify-center transition-all duration-200 ${set.done ? 'bg-emerald-500 text-slate-950 shadow-[0_0_10px_rgba(16,185,129,0.3)] scale-105' : 'bg-slate-800 text-slate-600 hover:bg-slate-700 hover:text-white border border-slate-700'}"
+                                >
+                                    <i data-lucide="check" class="h-5 w-5"></i>
+                                </button>
+                            </div>
+                        </div>
+                    `).join('');
+
+                    logsHtml = `
+                    <div class="bg-slate-950 border-t border-slate-800 p-4 animate-slide-in" onclick="event.stopPropagation()">
+                        <div class="grid grid-cols-10 gap-2 mb-2 text-[10px] text-slate-500 uppercase font-bold text-center tracking-wider">
+                            <div class="col-span-2">Set</div>
+                            <div class="col-span-3">Carga (kg)</div>
+                            <div class="col-span-3">Reps</div>
+                            <div class="col-span-2">Status</div>
+                        </div>
+                        <div class="space-y-2.5">
+                            ${setsHtml}
+                        </div>
+                        <div class="mt-5 p-3 bg-gradient-to-r from-slate-900 to-slate-800 border border-slate-700 rounded-lg flex gap-3 items-start">
+                            <div class="mt-0.5 bg-blue-500/10 p-1.5 rounded-md">
+                                <i data-lucide="flame" class="h-4 w-4 text-blue-400"></i>
+                            </div>
+                            <p class="text-xs text-slate-300 leading-relaxed">
+                                <strong class="text-blue-400 block mb-0.5 uppercase text-[10px] tracking-wide">Dica do Coach</strong>
+                                ${exercise.description}
+                            </p>
+                        </div>
+                    </div>
+                    `;
+                }
+
+                return `
+                <div onclick="toggleCard('${exercise.id}')" 
+                    class="bg-slate-900 rounded-2xl overflow-hidden border transition-all duration-300 cursor-pointer relative group ${isCompleted ? 'border-emerald-500/50' : 'border-slate-800 hover:border-slate-600'} ${isExpanded ? 'ring-2 ring-emerald-500/30 shadow-2xl' : 'shadow-lg'}"
+                >
+                    <!-- Image Section -->
+                    <div class="relative w-full h-48 bg-slate-800 overflow-hidden">
+                        <img src="${exercise.image}" alt="${exercise.name}" class="w-full h-full object-cover transition-transform duration-700 ${isExpanded ? 'scale-105' : 'group-hover:scale-105'} opacity-80 group-hover:opacity-100">
+                        <div class="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/60 to-transparent"></div>
+                        
+                        <div class="absolute top-3 left-3 flex gap-2">
+                            <span class="text-[10px] font-bold uppercase tracking-wider text-white bg-black/50 backdrop-blur-sm px-2 py-1 rounded border border-white/10">
+                                ${exercise.category}
+                            </span>
+                        </div>
+
+                        <div class="absolute top-3 right-3 bg-slate-900/80 backdrop-blur-md rounded-lg p-1 border border-white/10 shadow-lg">
+                            ${getBodyHighlightSVG(exercise.category, 'h-10 w-10')}
+                        </div>
+                    </div>
+
+                    <!-- Content Header -->
+                    <div class="p-5 relative -mt-12 z-10">
+                        <div class="flex justify-between items-end mb-2">
+                            <h3 class="text-xl font-bold text-white leading-tight drop-shadow-md">
+                                ${exercise.name}
+                            </h3>
+                        </div>
+
+                        <!-- Stats Row -->
+                        <div class="flex items-center gap-4 text-sm text-slate-300 mb-4 bg-slate-800/50 p-2 rounded-lg border border-slate-700/50 backdrop-blur-sm">
+                            <div class="flex flex-col items-center flex-1 border-r border-slate-700/50">
+                                <span class="text-xs text-slate-500 uppercase font-bold">Séries</span>
+                                <span class="font-bold text-emerald-400">${exercise.sets}</span>
+                            </div>
+                            <div class="flex flex-col items-center flex-1 border-r border-slate-700/50">
+                                <span class="text-xs text-slate-500 uppercase font-bold">Reps</span>
+                                <span class="font-bold text-white">${exercise.reps}</span>
+                            </div>
+                            <div class="flex flex-col items-center flex-1">
+                                <span class="text-xs text-slate-500 uppercase font-bold">Nível</span>
+                                <span class="font-bold text-white text-[10px]">${exercise.difficulty}</span>
+                            </div>
+                        </div>
+
+                        ${!isExpanded ? `<p class="text-slate-400 text-xs line-clamp-2 mb-4">${exercise.description}</p>` : ''}
+
+                        <!-- Progress Bar Mini -->
+                        <div class="w-full bg-slate-800 h-1.5 rounded-full mb-4 overflow-hidden">
+                            <div class="h-full transition-all duration-500 ${isCompleted ? 'bg-emerald-400' : 'bg-emerald-600'}" style="width: ${(setsDone / exercise.sets) * 100}%"></div>
+                        </div>
+
+                        <!-- Actions -->
+                        <div class="flex items-center gap-2">
+                            <button onclick="openVideo('${exercise.videoQuery}', event)" class="flex-1 bg-slate-800 hover:bg-slate-700 text-emerald-400 text-xs font-bold py-3 rounded-lg flex items-center justify-center transition-colors border border-slate-700 hover:border-emerald-500/30 gap-2 group/btn">
+                                <i data-lucide="play" class="h-3 w-3 fill-current group-hover/btn:scale-110 transition-transform"></i> Ver Execução
+                            </button>
+                            <div class="text-slate-500 p-2">
+                                <i data-lucide="${isExpanded ? 'chevron-up' : 'chevron-down'}" class="h-5 w-5"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Logs -->
+                    ${logsHtml}
+                </div>
+                `;
+            }).join('');
+            
+            lucide.createIcons();
+        }
+
+        function renderMobileNav() {
+            const nav = document.getElementById('mobile-nav');
+            const primaryCats = ['Todos', 'Peito', 'Costas', 'Pernas'];
+            
+            nav.innerHTML = `
+            <div class="grid grid-cols-4 gap-1">
+                ${primaryCats.map(cat => `
+                    <button onclick="setActiveCategory('${cat}')" class="flex flex-col items-center p-2 rounded-xl transition-all ${state.activeCategory === cat ? 'text-emerald-400 bg-emerald-400/5' : 'text-slate-500'}">
+                        ${cat === 'Todos' ? '<i data-lucide="dumbbell" class="h-5 w-5"></i>' : getBodyHighlightSVG(cat, 'h-5 w-5')}
+                        <span class="text-[10px] mt-1 font-medium">${cat}</span>
+                    </button>
+                `).join('')}
+            </div>
+            `;
+            lucide.createIcons();
+        }
+
+        function init() {
+            renderHeader();
+            renderExerciseList();
+            renderMobileNav();
+        }
+
+        // Boot
+        init();
+
+    </script>
+</body>
+</html>
