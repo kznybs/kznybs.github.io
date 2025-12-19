@@ -1,0 +1,966 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Titanium Workout Tracker</title>
+    
+    <!-- LIBRARIES (Mínimo necessário, o resto é engine proprietária abaixo) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+    <!-- CONFIGURAÇÃO TAILWIND & THEME -->
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        bg: { main: '#09090b', surface: '#18181b', highlight: '#27272a' },
+                        primary: { 500: 'var(--color-primary)', 600: 'var(--color-primary-dark)', 900: 'var(--color-primary-fade)' },
+                        success: '#10b981',
+                        warning: '#f59e0b',
+                        danger: '#ef4444',
+                        info: '#3b82f6',
+                        text: { main: '#f4f4f5', muted: '#a1a1aa', dim: '#52525b' }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'Fira Code', 'monospace'],
+                    },
+                    animation: {
+                        'enter': 'enter 0.3s ease-out',
+                        'exit': 'exit 0.2s ease-in',
+                        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                    },
+                    keyframes: {
+                        enter: { '0%': { transform: 'scale(0.95)', opacity: '0' }, '100%': { transform: 'scale(1)', opacity: '1' } },
+                        exit: { '0%': { opacity: '1' }, '100%': { opacity: '0' } }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        :root {
+            --color-primary: #3b82f6; /* Default Blue */
+            --color-primary-dark: #2563eb;
+            --color-primary-fade: #1e3a8a;
+            --safe-area-bottom: env(safe-area-inset-bottom);
+        }
+
+        /* CUSTOM UTILITIES */
+        body { background-color: #09090b; color: #f4f4f5; overflow: hidden; }
+        
+        .theme-blue { --color-primary: #3b82f6; --color-primary-dark: #2563eb; --color-primary-fade: #172554; }
+        .theme-purple { --color-primary: #8b5cf6; --color-primary-dark: #7c3aed; --color-primary-fade: #2e1065; }
+        .theme-emerald { --color-primary: #10b981; --color-primary-dark: #059669; --color-primary-fade: #022c22; }
+        .theme-rose { --color-primary: #f43f5e; --color-primary-dark: #e11d48; --color-primary-fade: #4c0519; }
+        .theme-amber { --color-primary: #f59e0b; --color-primary-dark: #d97706; --color-primary-fade: #451a03; }
+
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        
+        .glass { background: rgba(24, 24, 27, 0.7); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-top: 1px solid rgba(255,255,255,0.05); }
+        .card-hover { transition: transform 0.2s, background-color 0.2s; }
+        .card-hover:active { transform: scale(0.98); background-color: #27272a; }
+
+        /* Custom Range Slider for RPE */
+        input[type=range] { -webkit-appearance: none; width: 100%; background: transparent; }
+        input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; height: 16px; width: 16px; border-radius: 50%; background: var(--color-primary); margin-top: -6px; box-shadow: 0 0 10px rgba(0,0,0,0.5); }
+        input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 4px; background: #27272a; border-radius: 2px; }
+
+        /* Loader */
+        .spinner { border: 3px solid rgba(255,255,255,0.1); border-left-color: var(--color-primary); border-radius: 50%; width: 24px; height: 24px; animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+
+    <!-- APP ROOT -->
+    <div id="root" class="h-full flex flex-col">
+        <!-- Dynamic Content Injected Here by JS Router -->
+    </div>
+
+    <!-- GLOBAL OVERLAYS -->
+    <div id="modal-layer" class="fixed inset-0 z-50 pointer-events-none flex items-end sm:items-center justify-center">
+        <!-- Modals injected here -->
+    </div>
+    
+    <div id="toast-layer" class="fixed top-4 left-0 right-0 z-[60] flex flex-col items-center gap-2 pointer-events-none px-4">
+        <!-- Toasts injected here -->
+    </div>
+
+    <!-- ============================================================================================== -->
+    <!-- MEGA JAVASCRIPT ENGINE START -->
+    <!-- ============================================================================================== -->
+    <script>
+
+    /**
+     * TITANIUM ENGINE CORE v1.0
+     * A lightweight Virtual DOM & State Management Framework implementation.
+     */
+
+    // --- UTILS ---
+    const uuid = () => 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
+        const r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+        return v.toString(16);
+    });
+
+    const formatTime = (seconds) => {
+        const h = Math.floor(seconds / 3600);
+        const m = Math.floor((seconds % 3600) / 60);
+        const s = seconds % 60;
+        return h > 0 
+            ? `${h}:${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`
+            : `${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
+    };
+
+    const formatDate = (dateStr) => {
+        return new Date(dateStr).toLocaleDateString('pt-BR', { weekday: 'short', day: 'numeric', month: 'short' });
+    };
+
+    // --- STATE MANAGEMENT (STORE) ---
+    class Store {
+        constructor(initialState) {
+            this.state = initialState;
+            this.listeners = new Set();
+        }
+
+        getState() { return this.state; }
+
+        setState(partialState) {
+            this.state = { ...this.state, ...partialState };
+            this.notify();
+            Persistence.save(this.state);
+        }
+
+        subscribe(listener) {
+            this.listeners.add(listener);
+            return () => this.listeners.delete(listener);
+        }
+
+        notify() {
+            this.listeners.forEach(listener => listener(this.state));
+        }
+    }
+
+    // --- PERSISTENCE LAYER ---
+    const DB_KEY = 'titanium_app_db_v2';
+    const Persistence = {
+        save: (data) => localStorage.setItem(DB_KEY, JSON.stringify(data)),
+        load: () => {
+            const raw = localStorage.getItem(DB_KEY);
+            return raw ? JSON.parse(raw) : null;
+        },
+        reset: () => localStorage.removeItem(DB_KEY)
+    };
+
+    // --- EXERCISE DATABASE (BIG DATA MOCK) ---
+    const EXERCISE_DB = [
+        // Peito
+        { id: 'bp_bar', name: 'Supino Reto (Barra)', muscle: 'Peito', equipment: 'Barra', type: 'strength' },
+        { id: 'bp_db', name: 'Supino Reto (Halteres)', muscle: 'Peito', equipment: 'Halteres', type: 'strength' },
+        { id: 'inc_bp', name: 'Supino Inclinado', muscle: 'Peito', equipment: 'Barra', type: 'strength' },
+        { id: 'pec_fly', name: 'Crucifixo Máquina', muscle: 'Peito', equipment: 'Máquina', type: 'isolation' },
+        { id: 'cable_cross', name: 'Crossover Polia Alta', muscle: 'Peito', equipment: 'Cabo', type: 'isolation' },
+        { id: 'pushup', name: 'Flexão de Braço', muscle: 'Peito', equipment: 'Peso do Corpo', type: 'calisthenics' },
+        { id: 'dips', name: 'Paralelas', muscle: 'Peito', equipment: 'Peso do Corpo', type: 'compound' },
+        // Costas
+        { id: 'dl', name: 'Levantamento Terra', muscle: 'Costas', equipment: 'Barra', type: 'strength' },
+        { id: 'pullup', name: 'Barra Fixa', muscle: 'Costas', equipment: 'Peso do Corpo', type: 'calisthenics' },
+        { id: 'lat_pd', name: 'Puxada Alta', muscle: 'Costas', equipment: 'Máquina', type: 'isolation' },
+        { id: 'row_bar', name: 'Remada Curvada', muscle: 'Costas', equipment: 'Barra', type: 'strength' },
+        { id: 'row_db', name: 'Remada Unilateral', muscle: 'Costas', equipment: 'Halteres', type: 'isolation' },
+        { id: 'face_pull', name: 'Face Pull', muscle: 'Ombros', equipment: 'Cabo', type: 'isolation' },
+        // Pernas
+        { id: 'squat', name: 'Agachamento Livre', muscle: 'Pernas', equipment: 'Barra', type: 'strength' },
+        { id: 'leg_press', name: 'Leg Press 45', muscle: 'Pernas', equipment: 'Máquina', type: 'compound' },
+        { id: 'leg_ext', name: 'Cadeira Extensora', muscle: 'Pernas', equipment: 'Máquina', type: 'isolation' },
+        { id: 'leg_curl', name: 'Mesa Flexora', muscle: 'Pernas', equipment: 'Máquina', type: 'isolation' },
+        { id: 'lunge', name: 'Afundo', muscle: 'Pernas', equipment: 'Halteres', type: 'compound' },
+        { id: 'calf_raise', name: 'Panturrilha em Pé', muscle: 'Pernas', equipment: 'Máquina', type: 'isolation' },
+        { id: 'rdl', name: 'Stiff (RDL)', muscle: 'Pernas', equipment: 'Barra', type: 'strength' },
+        // Ombros
+        { id: 'ohp', name: 'Desenvolvimento Militar', muscle: 'Ombros', equipment: 'Barra', type: 'strength' },
+        { id: 'ohp_db', name: 'Desenvolvimento Halteres', muscle: 'Ombros', equipment: 'Halteres', type: 'strength' },
+        { id: 'lat_raise', name: 'Elevação Lateral', muscle: 'Ombros', equipment: 'Halteres', type: 'isolation' },
+        { id: 'front_raise', name: 'Elevação Frontal', muscle: 'Ombros', equipment: 'Halteres', type: 'isolation' },
+        // Braços
+        { id: 'curl_bar', name: 'Rosca Direta', muscle: 'Bíceps', equipment: 'Barra', type: 'isolation' },
+        { id: 'curl_db', name: 'Rosca Alternada', muscle: 'Bíceps', equipment: 'Halteres', type: 'isolation' },
+        { id: 'tri_push', name: 'Tríceps Polia', muscle: 'Tríceps', equipment: 'Cabo', type: 'isolation' },
+        { id: 'skull', name: 'Tríceps Testa', muscle: 'Tríceps', equipment: 'Barra W', type: 'isolation' },
+        // Abs
+        { id: 'crunch', name: 'Crunch', muscle: 'Abdômen', equipment: 'Peso do Corpo', type: 'isolation' },
+        { id: 'plank', name: 'Prancha', muscle: 'Abdômen', equipment: 'Peso do Corpo', type: 'isometric' },
+        { id: 'leg_raise', name: 'Elevação de Pernas', muscle: 'Abdômen', equipment: 'Peso do Corpo', type: 'isolation' }
+    ];
+
+    const DEFAULT_STATE = {
+        user: { name: 'Atleta', weight: 80, height: 180, theme: 'theme-blue' },
+        activeWorkout: null, // { id, startTime, exercises: [], name }
+        history: [],
+        templates: [
+            { id: 'tpl_1', name: 'Push Day (Empurrar)', exercises: ['bp_bar', 'ohp_db', 'inc_bp', 'lat_raise', 'tri_push'] },
+            { id: 'tpl_2', name: 'Pull Day (Puxar)', exercises: ['dl', 'pullup', 'row_bar', 'curl_bar', 'face_pull'] },
+            { id: 'tpl_3', name: 'Leg Day (Pernas)', exercises: ['squat', 'leg_press', 'rdl', 'leg_ext', 'calf_raise'] }
+        ],
+        settings: { sound: true, vibration: true, restTimerDefault: 90 },
+        measurements: []
+    };
+
+    // Initialize Store
+    const appStore = new Store(Persistence.load() || DEFAULT_STATE);
+
+    // --- CHART ENGINE (SVG BASED) ---
+    class SVGChart {
+        static createLineChart(data, width, height, color) {
+            // Data format: [{x: label, y: value}, ...]
+            if (!data || data.length < 2) return `<div class="h-full flex items-center justify-center text-text-muted text-xs">Dados insuficientes</div>`;
+            
+            const padding = 20;
+            const maxVal = Math.max(...data.map(d => d.y));
+            const minVal = Math.min(...data.map(d => d.y));
+            const range = maxVal - minVal || 1;
+            
+            const points = data.map((d, i) => {
+                const x = padding + (i / (data.length - 1)) * (width - 2 * padding);
+                const y = height - padding - ((d.y - minVal) / range) * (height - 2 * padding);
+                return `${x},${y}`;
+            }).join(' ');
+
+            return `
+                <svg width="100%" height="100%" viewBox="0 0 ${width} ${height}" class="overflow-visible">
+                    <!-- Grid Lines -->
+                    <line x1="${padding}" y1="${padding}" x2="${width-padding}" y2="${padding}" stroke="#27272a" stroke-width="1" />
+                    <line x1="${padding}" y1="${height-padding}" x2="${width-padding}" y2="${height-padding}" stroke="#27272a" stroke-width="1" />
+                    
+                    <!-- Path -->
+                    <polyline fill="none" stroke="${color}" stroke-width="2" points="${points}" stroke-linecap="round" stroke-linejoin="round" />
+                    
+                    <!-- Dots -->
+                    ${data.map((d, i) => {
+                         const x = padding + (i / (data.length - 1)) * (width - 2 * padding);
+                         const y = height - padding - ((d.y - minVal) / range) * (height - 2 * padding);
+                         return `<circle cx="${x}" cy="${y}" r="3" fill="#09090b" stroke="${color}" stroke-width="2" />`;
+                    }).join('')}
+                </svg>
+            `;
+        }
+    }
+
+    // --- COMPONENT SYSTEM ---
+    class Router {
+        constructor() {
+            this.routes = {};
+            this.currentRoute = null;
+            this.rootEl = document.getElementById('root');
+            
+            // Listen to browser history
+            window.addEventListener('popstate', (e) => this.load(e.state?.route || 'home'));
+        }
+
+        register(name, renderFn) {
+            this.routes[name] = renderFn;
+        }
+
+        navigate(name, params = {}) {
+            history.pushState({ route: name, params }, '', `#${name}`);
+            this.load(name, params);
+        }
+
+        load(name, params = {}) {
+            if (!this.routes[name]) name = 'home';
+            this.currentRoute = name;
+            // Clear root
+            this.rootEl.innerHTML = '';
+            // Render new view
+            const view = this.routes[name](params);
+            this.rootEl.appendChild(view);
+            // Initialize Lucide icons
+            lucide.createIcons();
+            // Scroll to top
+            window.scrollTo(0,0);
+        }
+    }
+
+    const router = new Router();
+
+    // --- UI HELPERS ---
+    const createElement = (tag, classes, innerHTML = '') => {
+        const el = document.createElement(tag);
+        if (classes) el.className = classes;
+        if (innerHTML) el.innerHTML = innerHTML;
+        return el;
+    };
+
+    const showToast = (msg, type = 'info') => {
+        const layer = document.getElementById('toast-layer');
+        const el = createElement('div', `bg-bg-surface border border-white/10 shadow-xl rounded-lg px-4 py-3 text-sm font-medium flex items-center gap-2 animate-enter text-white`, 
+            `<i data-lucide="${type === 'success' ? 'check-circle' : 'info'}" class="w-4 h-4 ${type === 'success' ? 'text-success' : 'text-info'}"></i> ${msg}`);
+        layer.appendChild(el);
+        setTimeout(() => {
+            el.classList.add('animate-exit');
+            el.addEventListener('animationend', () => el.remove());
+        }, 3000);
+        lucide.createIcons();
+    };
+
+    // --- VIEWS (COMPONENTS) ---
+
+    // 1. NAVBAR COMPONENT
+    const NavBar = (activeTab) => {
+        const nav = createElement('nav', 'mt-auto bg-bg-surface/90 backdrop-blur-md border-t border-white/5 pb-[env(safe-area-inset-bottom)] z-40');
+        const grid = createElement('div', 'grid grid-cols-5 h-16');
+        
+        const tabs = [
+            { id: 'home', icon: 'dumbbell', label: 'Treino' },
+            { id: 'history', icon: 'calendar-days', label: 'Histórico' },
+            { id: 'exercises', icon: 'list', label: 'Exercícios' },
+            { id: 'stats', icon: 'bar-chart-3', label: 'Stats' },
+            { id: 'profile', icon: 'user', label: 'Perfil' },
+        ];
+
+        tabs.forEach(tab => {
+            const isActive = activeTab === tab.id;
+            const btn = createElement('button', `flex flex-col items-center justify-center gap-1 w-full h-full transition-colors ${isActive ? 'text-primary-500' : 'text-text-muted hover:text-text-main'}`);
+            btn.innerHTML = `<i data-lucide="${tab.icon}" class="w-5 h-5 ${isActive ? 'fill-primary-500/20' : ''}"></i><span class="text-[10px] font-medium">${tab.label}</span>`;
+            btn.onclick = () => router.navigate(tab.id);
+            grid.appendChild(btn);
+        });
+
+        nav.appendChild(grid);
+        return nav;
+    };
+
+    // 2. HOME VIEW (Active Workout / Dashboard)
+    router.register('home', () => {
+        const state = appStore.getState();
+        const container = createElement('div', 'flex flex-col h-full bg-bg-main');
+
+        // Header
+        const header = createElement('header', 'flex-none p-4 flex justify-between items-center bg-bg-surface border-b border-white/5');
+        header.innerHTML = `
+            <div>
+                <h1 class="text-xl font-bold text-text-main">Titanium</h1>
+                <p class="text-xs text-text-muted">${new Date().toLocaleDateString('pt-BR', {weekday: 'long', day: 'numeric', month: 'long'})}</p>
+            </div>
+            <div class="w-8 h-8 rounded-full bg-primary-600 flex items-center justify-center font-bold text-xs text-white cursor-pointer shadow-lg shadow-primary-500/20" onclick="router.navigate('profile')">
+                ${state.user.name.substring(0,2).toUpperCase()}
+            </div>
+        `;
+        container.appendChild(header);
+
+        // Content
+        const content = createElement('main', 'flex-1 overflow-y-auto p-4 space-y-6 no-scrollbar');
+
+        // Active Workout Status
+        if (state.activeWorkout) {
+            const activeCard = createElement('div', 'bg-primary-900/30 border border-primary-500/30 rounded-2xl p-5 relative overflow-hidden group cursor-pointer');
+            activeCard.innerHTML = `
+                <div class="absolute inset-0 bg-gradient-to-r from-primary-600/10 to-transparent"></div>
+                <div class="relative flex justify-between items-center">
+                    <div>
+                        <div class="flex items-center gap-2 mb-1">
+                            <span class="relative flex h-2 w-2">
+                              <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary-400 opacity-75"></span>
+                              <span class="relative inline-flex rounded-full h-2 w-2 bg-primary-500"></span>
+                            </span>
+                            <span class="text-xs font-bold text-primary-500 uppercase tracking-wider">Treino em Andamento</span>
+                        </div>
+                        <h2 class="text-lg font-bold text-white">${state.activeWorkout.name}</h2>
+                        <p class="text-xs text-text-muted mt-1"><i data-lucide="clock" class="w-3 h-3 inline"></i> Iniciado às ${new Date(state.activeWorkout.startTime).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</p>
+                    </div>
+                    <button class="bg-primary-600 hover:bg-primary-500 text-white px-4 py-2 rounded-lg text-sm font-bold shadow-lg shadow-primary-500/20 transition-all">Retomar</button>
+                </div>
+            `;
+            activeCard.onclick = () => router.navigate('active_workout');
+            content.appendChild(activeCard);
+        } else {
+            // Quick Start Templates
+            const sectionTitle = createElement('h3', 'text-sm font-bold text-text-muted uppercase tracking-wider mb-2', 'Iniciar Treino');
+            content.appendChild(sectionTitle);
+
+            // Empty Workout Button
+            const emptyBtn = createElement('button', 'w-full bg-bg-surface hover:bg-bg-highlight border border-white/5 p-4 rounded-xl flex items-center gap-4 transition-all mb-4 group');
+            emptyBtn.innerHTML = `
+                <div class="w-10 h-10 rounded-full bg-bg-highlight flex items-center justify-center text-primary-500 group-hover:scale-110 transition-transform"><i data-lucide="plus" class="w-5 h-5"></i></div>
+                <div class="text-left">
+                    <h4 class="font-bold text-text-main">Treino Vazio</h4>
+                    <p class="text-xs text-text-muted">Começar do zero</p>
+                </div>
+            `;
+            emptyBtn.onclick = () => startWorkout('Treino Livre');
+            content.appendChild(emptyBtn);
+
+            // Templates List
+            state.templates.forEach(tpl => {
+                const tplBtn = createElement('button', 'w-full bg-bg-surface hover:bg-bg-highlight border border-white/5 p-4 rounded-xl flex items-center gap-4 transition-all mb-2 text-left');
+                tplBtn.innerHTML = `
+                    <div class="w-10 h-10 rounded-lg bg-bg-highlight flex items-center justify-center text-text-dim"><i data-lucide="layout-template" class="w-5 h-5"></i></div>
+                    <div class="flex-1">
+                        <h4 class="font-bold text-text-main">${tpl.name}</h4>
+                        <p class="text-xs text-text-muted truncate">${tpl.exercises.length} exercícios</p>
+                    </div>
+                    <i data-lucide="chevron-right" class="w-4 h-4 text-text-dim"></i>
+                `;
+                tplBtn.onclick = () => startWorkout(tpl.name, tpl.exercises);
+                content.appendChild(tplBtn);
+            });
+        }
+        
+        container.appendChild(content);
+        container.appendChild(NavBar('home'));
+        return container;
+    });
+
+    // 3. ACTIVE WORKOUT VIEW (The Core Logic)
+    router.register('active_workout', () => {
+        const state = appStore.getState();
+        if (!state.activeWorkout) { router.navigate('home'); return createElement('div'); }
+
+        const container = createElement('div', 'flex flex-col h-full bg-bg-main relative');
+
+        // Header
+        const header = createElement('header', 'flex-none bg-bg-surface/90 backdrop-blur-md border-b border-white/5 p-4 z-20 flex justify-between items-center sticky top-0');
+        
+        // Dynamic Timer
+        const updateTimer = () => {
+            const diff = Math.floor((Date.now() - state.activeWorkout.startTime) / 1000);
+            return formatTime(diff);
+        };
+        
+        header.innerHTML = `
+            <div class="flex items-center gap-3">
+                <button onclick="router.navigate('home')" class="text-text-muted hover:text-white"><i data-lucide="chevron-down" class="w-6 h-6"></i></button>
+                <div>
+                    <h1 class="text-sm font-bold text-white leading-tight">${state.activeWorkout.name}</h1>
+                    <div class="flex items-center gap-2">
+                        <span id="wo-timer" class="text-xs font-mono text-primary-500">${updateTimer()}</span>
+                        <span class="text-[10px] text-text-muted">• ${state.activeWorkout.exercises.length} exercícios</span>
+                    </div>
+                </div>
+            </div>
+            <div class="flex gap-2">
+                 <button onclick="WorkoutManager.cancel()" class="p-2 text-danger bg-danger/10 rounded-lg hover:bg-danger/20"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                 <button onclick="WorkoutManager.finish()" class="px-3 py-1.5 bg-success text-white text-xs font-bold rounded-lg shadow-lg shadow-success/20 hover:bg-green-600 transition-colors">FINALIZAR</button>
+            </div>
+        `;
+        
+        // Timer Interval
+        const timerInt = setInterval(() => {
+            const el = document.getElementById('wo-timer');
+            if(el) el.innerText = updateTimer();
+            else clearInterval(timerInt);
+        }, 1000);
+
+        container.appendChild(header);
+
+        // Exercise List
+        const list = createElement('main', 'flex-1 overflow-y-auto p-2 md:p-4 space-y-4 no-scrollbar pb-32');
+        
+        const renderExercises = () => {
+            list.innerHTML = '';
+            state.activeWorkout.exercises.forEach((ex, exIndex) => {
+                const exDetails = EXERCISE_DB.find(e => e.id === ex.id) || { name: 'Desconhecido', muscle: 'Geral' };
+                
+                const card = createElement('div', 'bg-bg-surface rounded-xl border border-white/5 overflow-hidden animate-enter');
+                card.style.animationDelay = `${exIndex * 0.05}s`;
+
+                // Exercise Header
+                card.innerHTML = `
+                    <div class="p-3 flex justify-between items-center border-b border-white/5 bg-bg-highlight/20">
+                        <div class="flex items-center gap-3" onclick="router.navigate('exercise_details', {id: '${ex.id}'})">
+                             <div class="w-8 h-8 rounded bg-bg-highlight flex items-center justify-center text-primary-500 font-bold text-xs border border-white/5">
+                                ${exDetails.name.charAt(0)}
+                             </div>
+                             <div>
+                                <h3 class="text-sm font-bold text-white text-blue-100">${exDetails.name}</h3>
+                                <p class="text-[10px] text-text-muted">${exDetails.muscle}</p>
+                             </div>
+                        </div>
+                        <button onclick="WorkoutManager.removeExercise(${exIndex})" class="text-text-muted hover:text-danger"><i data-lucide="more-horizontal" class="w-4 h-4"></i></button>
+                    </div>
+                    <div class="px-3 py-1 bg-black/20">
+                        <input type="text" placeholder="Notas..." value="${ex.notes || ''}" 
+                            onchange="WorkoutManager.updateNote(${exIndex}, this.value)"
+                            class="w-full bg-transparent border-none text-xs text-text-muted focus:text-white focus:outline-none py-1 placeholder:text-text-dim">
+                    </div>
+                `;
+
+                // Sets Header
+                const setsHeader = createElement('div', 'grid grid-cols-[24px_1fr_1fr_24px_32px] gap-2 px-3 py-1 text-[9px] uppercase font-bold text-text-dim text-center mt-1');
+                setsHeader.innerHTML = `<div>Set</div><div>kg</div><div>Reps</div><div>RPE</div><div><i data-lucide="check" class="w-3 h-3 mx-auto"></i></div>`;
+                card.appendChild(setsHeader);
+
+                // Sets List
+                const setsContainer = createElement('div', 'px-2 pb-2 space-y-1');
+                ex.sets.forEach((set, setIndex) => {
+                    const row = createElement('div', `grid grid-cols-[24px_1fr_1fr_24px_32px] gap-2 items-center rounded-lg p-1 transition-all ${set.done ? 'bg-success/10' : ''}`);
+                    
+                    // Logic to get previous value (fake for now)
+                    const prevVal = "20kg"; 
+
+                    row.innerHTML = `
+                        <!-- Set Type -->
+                        <button class="w-6 h-6 rounded flex items-center justify-center text-[9px] font-bold ${getSetTypeClass(set.type)}" onclick="WorkoutManager.toggleSetType(${exIndex}, ${setIndex})">
+                            ${set.type}
+                        </button>
+                        
+                        <!-- Weight -->
+                        <div class="relative">
+                           <input type="number" value="${set.weight}" placeholder="-" 
+                                onchange="WorkoutManager.updateSet(${exIndex}, ${setIndex}, 'weight', this.value)"
+                                class="w-full bg-bg-highlight rounded h-7 text-center text-sm font-mono text-white focus:ring-1 ring-primary-500 outline-none">
+                        </div>
+
+                        <!-- Reps -->
+                         <div class="relative">
+                           <input type="number" value="${set.reps}" placeholder="0" 
+                                onchange="WorkoutManager.updateSet(${exIndex}, ${setIndex}, 'reps', this.value)"
+                                class="w-full bg-bg-highlight rounded h-7 text-center text-sm font-mono text-white focus:ring-1 ring-primary-500 outline-none">
+                        </div>
+
+                        <!-- RPE -->
+                         <div class="relative">
+                           <input type="number" value="${set.rpe || ''}" placeholder="-" max="10"
+                                onchange="WorkoutManager.updateSet(${exIndex}, ${setIndex}, 'rpe', this.value)"
+                                class="w-full bg-bg-highlight rounded h-7 text-center text-xs font-mono text-text-muted focus:ring-1 ring-primary-500 outline-none">
+                        </div>
+
+                        <!-- Check -->
+                        <button onclick="WorkoutManager.toggleDone(${exIndex}, ${setIndex})" 
+                            class="w-8 h-7 rounded flex items-center justify-center transition-all ${set.done ? 'bg-success text-white' : 'bg-bg-highlight text-text-muted hover:bg-white/10'}">
+                            <i data-lucide="check" class="w-4 h-4"></i>
+                        </button>
+                    `;
+                    setsContainer.appendChild(row);
+                });
+                card.appendChild(setsContainer);
+
+                // Add Set Button
+                const addSetBtn = createElement('button', 'w-full py-2 bg-bg-highlight/30 hover:bg-bg-highlight text-[10px] font-bold text-primary-500 uppercase transition-colors', '+ Adicionar Série');
+                addSetBtn.onclick = () => WorkoutManager.addSet(exIndex);
+                card.appendChild(addSetBtn);
+
+                list.appendChild(card);
+            });
+
+            // Add Exercise Button at bottom
+            const addExBtn = createElement('button', 'w-full py-4 rounded-xl border-2 border-dashed border-white/10 text-text-muted hover:text-white hover:border-primary-500/50 hover:bg-primary-500/5 transition-all flex flex-col items-center justify-center gap-1 mt-4 group');
+            addExBtn.innerHTML = `<i data-lucide="plus-circle" class="w-6 h-6 group-hover:scale-110 transition-transform"></i><span class="text-sm font-bold">Adicionar Exercício</span>`;
+            addExBtn.onclick = () => showExerciseSelector();
+            list.appendChild(addExBtn);
+        };
+        
+        renderExercises();
+        container.appendChild(list);
+
+        // Re-render hook
+        window.renderActiveWorkout = renderExercises; 
+
+        return container;
+    });
+
+    // 4. HISTORY VIEW
+    router.register('history', () => {
+        const state = appStore.getState();
+        const container = createElement('div', 'flex flex-col h-full bg-bg-main');
+        
+        container.innerHTML = `
+            <header class="p-4 border-b border-white/5 bg-bg-surface">
+                <h1 class="text-xl font-bold">Histórico</h1>
+            </header>
+        `;
+
+        const list = createElement('main', 'flex-1 overflow-y-auto p-4 space-y-3 no-scrollbar');
+
+        if (state.history.length === 0) {
+            list.innerHTML = `<div class="h-full flex flex-col items-center justify-center text-text-muted opacity-50"><i data-lucide="ghost" class="w-12 h-12 mb-2"></i><p>Sem treinos ainda</p></div>`;
+        } else {
+            // Calendar visualization (Mockup for now)
+            const calendarCard = createElement('div', 'bg-bg-surface p-4 rounded-xl border border-white/5 mb-4');
+            calendarCard.innerHTML = `<h3 class="text-xs font-bold text-text-muted uppercase mb-2">Este Mês</h3><div class="flex justify-between text-xs text-text-dim"><span>D</span><span>S</span><span>T</span><span>Q</span><span>Q</span><span>S</span><span>S</span></div><div class="grid grid-cols-7 gap-1 mt-2">${Array(30).fill(0).map((_,i) => `<div class="aspect-square rounded-sm ${Math.random() > 0.7 ? 'bg-primary-500' : 'bg-bg-highlight'}"></div>`).join('')}</div>`;
+            list.appendChild(calendarCard);
+
+            // Workout Logs
+            state.history.slice().reverse().forEach(workout => {
+                const card = createElement('div', 'bg-bg-surface rounded-xl border border-white/5 p-4');
+                const duration = Math.floor((workout.endTime - workout.startTime)/60000);
+                const volume = workout.exercises.reduce((acc, ex) => acc + ex.sets.reduce((sAcc, s) => sAcc + (s.done ? s.weight * s.reps : 0), 0), 0);
+                
+                card.innerHTML = `
+                    <div class="flex justify-between items-start mb-3">
+                        <div>
+                            <h3 class="font-bold text-white">${workout.name}</h3>
+                            <p class="text-xs text-text-muted">${formatDate(workout.startTime)} • ${duration} min</p>
+                        </div>
+                        <div class="text-right">
+                             <span class="text-xs font-mono font-bold text-primary-500">${(volume/1000).toFixed(1)}t</span>
+                             <p class="text-[10px] text-text-dim">Volume</p>
+                        </div>
+                    </div>
+                    <div class="space-y-1">
+                        ${workout.exercises.map(ex => `<div class="text-xs text-text-muted flex justify-between"><span>${ex.sets.filter(s=>s.done).length}x ${EXERCISE_DB.find(e=>e.id===ex.id)?.name || 'Exercício'}</span><span class="text-text-dim">Max ${Math.max(...ex.sets.map(s=>s.weight))}kg</span></div>`).join('')}
+                    </div>
+                `;
+                list.appendChild(card);
+            });
+        }
+
+        container.appendChild(list);
+        container.appendChild(NavBar('history'));
+        return container;
+    });
+
+    // 5. EXERCISES LIBRARY VIEW
+    router.register('exercises', () => {
+        const container = createElement('div', 'flex flex-col h-full bg-bg-main');
+        container.innerHTML = `
+            <header class="p-4 border-b border-white/5 bg-bg-surface sticky top-0 z-10">
+                <h1 class="text-xl font-bold mb-2">Exercícios</h1>
+                <div class="relative">
+                    <i data-lucide="search" class="absolute left-3 top-2.5 w-4 h-4 text-text-dim"></i>
+                    <input type="text" placeholder="Buscar..." id="ex-search" class="w-full bg-bg-highlight rounded-lg py-2 pl-9 pr-4 text-sm text-white focus:ring-1 ring-primary-500 outline-none">
+                </div>
+            </header>
+        `;
+        
+        const list = createElement('main', 'flex-1 overflow-y-auto p-2 no-scrollbar');
+        
+        const renderList = (filter = '') => {
+            list.innerHTML = '';
+            const filtered = EXERCISE_DB.filter(e => e.name.toLowerCase().includes(filter.toLowerCase()));
+            
+            // Group by muscle
+            const grouped = {};
+            filtered.forEach(ex => {
+                if(!grouped[ex.muscle]) grouped[ex.muscle] = [];
+                grouped[ex.muscle].push(ex);
+            });
+
+            Object.keys(grouped).forEach(muscle => {
+                const groupTitle = createElement('h3', 'text-xs font-bold text-primary-500 uppercase tracking-wider mt-4 mb-2 ml-2', muscle);
+                list.appendChild(groupTitle);
+                
+                grouped[muscle].forEach(ex => {
+                    const item = createElement('div', 'bg-bg-surface border border-white/5 p-3 rounded-lg mb-2 flex items-center justify-between hover:bg-bg-highlight transition-colors cursor-pointer');
+                    item.innerHTML = `
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded bg-bg-main flex items-center justify-center text-text-dim text-xs font-bold border border-white/5">${ex.name.substring(0,2)}</div>
+                            <div>
+                                <p class="text-sm font-bold text-white">${ex.name}</p>
+                                <p class="text-[10px] text-text-dim">${ex.equipment}</p>
+                            </div>
+                        </div>
+                        <i data-lucide="chevron-right" class="w-4 h-4 text-text-dim"></i>
+                    `;
+                    list.appendChild(item);
+                });
+            });
+        };
+
+        renderList();
+        
+        // Search listener
+        setTimeout(() => {
+            const input = document.getElementById('ex-search');
+            input.oninput = (e) => renderList(e.target.value);
+        }, 0);
+
+        container.appendChild(list);
+        container.appendChild(NavBar('exercises'));
+        return container;
+    });
+
+    // 6. STATS VIEW (Charts)
+    router.register('stats', () => {
+        const container = createElement('div', 'flex flex-col h-full bg-bg-main');
+        container.innerHTML = `<header class="p-4 border-b border-white/5 bg-bg-surface"><h1 class="text-xl font-bold">Estatísticas</h1></header>`;
+        
+        const content = createElement('main', 'flex-1 overflow-y-auto p-4 space-y-6 no-scrollbar');
+        
+        // Generate Fake Data
+        const volData = Array.from({length: 7}, (_, i) => ({ x: `D${i}`, y: Math.floor(Math.random() * 5000) + 10000 + (i*500) }));
+        
+        // Volume Chart Card
+        const volCard = createElement('div', 'bg-bg-surface p-4 rounded-xl border border-white/5');
+        volCard.innerHTML = `
+            <h3 class="text-sm font-bold text-text-muted mb-4">Progresso de Volume (Últimos 7 dias)</h3>
+            <div class="h-48 w-full">
+                ${SVGChart.createLineChart(volData, 300, 150, '#3b82f6')}
+            </div>
+        `;
+        content.appendChild(volCard);
+
+        // Consistency Card
+        const streakCard = createElement('div', 'bg-gradient-to-br from-primary-900/50 to-bg-surface p-4 rounded-xl border border-primary-500/20');
+        streakCard.innerHTML = `
+            <div class="flex items-center gap-4">
+                <div class="w-12 h-12 rounded-full bg-primary-600 flex items-center justify-center"><i data-lucide="flame" class="w-6 h-6 text-white"></i></div>
+                <div>
+                    <h2 class="text-2xl font-bold text-white">3 Dias</h2>
+                    <p class="text-xs text-text-muted">Sequência Atual</p>
+                </div>
+            </div>
+        `;
+        content.appendChild(streakCard);
+
+        container.appendChild(content);
+        container.appendChild(NavBar('stats'));
+        return container;
+    });
+
+    // 7. PROFILE VIEW
+    router.register('profile', () => {
+        const state = appStore.getState();
+        const container = createElement('div', 'flex flex-col h-full bg-bg-main');
+        
+        const content = createElement('main', 'flex-1 overflow-y-auto p-4 no-scrollbar');
+        
+        // Avatar Header
+        content.innerHTML = `
+            <div class="flex flex-col items-center py-8">
+                <div class="w-24 h-24 rounded-full bg-bg-highlight border-4 border-bg-surface shadow-2xl flex items-center justify-center text-3xl font-bold text-primary-500 mb-4">
+                    ${state.user.name.substring(0,2)}
+                </div>
+                <h2 class="text-xl font-bold text-white">${state.user.name}</h2>
+                <p class="text-sm text-text-muted">Membro Pro • ${state.user.weight}kg</p>
+            </div>
+        `;
+
+        // Settings Groups
+        const createGroup = (title, items) => {
+            const group = createElement('div', 'mb-6');
+            group.innerHTML = `<h3 class="text-xs font-bold text-text-dim uppercase tracking-wider mb-2 ml-2">${title}</h3>`;
+            const list = createElement('div', 'bg-bg-surface rounded-xl border border-white/5 overflow-hidden');
+            
+            items.forEach((item, idx) => {
+                const row = createElement('div', `p-4 flex items-center justify-between hover:bg-bg-highlight transition-colors cursor-pointer ${idx !== items.length - 1 ? 'border-b border-white/5' : ''}`);
+                row.innerHTML = `
+                    <div class="flex items-center gap-3">
+                        <div class="p-2 rounded bg-bg-main text-primary-500"><i data-lucide="${item.icon}" class="w-4 h-4"></i></div>
+                        <span class="text-sm font-medium text-white">${item.label}</span>
+                    </div>
+                    ${item.value ? `<span class="text-xs text-text-muted">${item.value}</span>` : '<i data-lucide="chevron-right" class="w-4 h-4 text-text-dim"></i>'}
+                `;
+                if(item.action) row.onclick = item.action;
+                list.appendChild(row);
+            });
+            group.appendChild(list);
+            return group;
+        };
+
+        content.appendChild(createGroup('Aparência', [
+            { icon: 'palette', label: 'Tema', value: 'Azul Titanium', action: () => showThemeSelector() },
+            { icon: 'moon', label: 'Modo Escuro', value: 'Ativado' }
+        ]));
+
+        content.appendChild(createGroup('Dados', [
+            { icon: 'database', label: 'Exportar Dados', action: () => alert('Exportando JSON...') },
+            { icon: 'trash', label: 'Resetar Tudo', action: () => { if(confirm('Apagar tudo?')) { Persistence.reset(); location.reload(); } } }
+        ]));
+
+        container.appendChild(content);
+        container.appendChild(NavBar('profile'));
+        return container;
+    });
+
+    // --- LOGIC MANAGERS ---
+
+    const WorkoutManager = {
+        addSet: (exIndex) => {
+            const state = appStore.getState();
+            const ex = state.activeWorkout.exercises[exIndex];
+            const lastSet = ex.sets[ex.sets.length - 1];
+            ex.sets.push({ 
+                type: 'N', 
+                weight: lastSet ? lastSet.weight : 0, 
+                reps: lastSet ? lastSet.reps : 0, 
+                done: false 
+            });
+            appStore.setState({ activeWorkout: state.activeWorkout });
+            window.renderActiveWorkout();
+        },
+        removeExercise: (exIndex) => {
+            if(!confirm("Remover exercício?")) return;
+            const state = appStore.getState();
+            state.activeWorkout.exercises.splice(exIndex, 1);
+            appStore.setState({ activeWorkout: state.activeWorkout });
+            window.renderActiveWorkout();
+        },
+        updateSet: (exIdx, sIdx, field, val) => {
+            const state = appStore.getState();
+            state.activeWorkout.exercises[exIdx].sets[sIdx][field] = val;
+            appStore.setState({ activeWorkout: state.activeWorkout });
+        },
+        updateNote: (exIdx, val) => {
+            const state = appStore.getState();
+            state.activeWorkout.exercises[exIdx].notes = val;
+            appStore.setState({ activeWorkout: state.activeWorkout });
+        },
+        toggleSetType: (exIdx, sIdx) => {
+            const types = ['N', 'W', 'D', 'F']; // Normal, Warmup, Drop, Failure
+            const state = appStore.getState();
+            const set = state.activeWorkout.exercises[exIdx].sets[sIdx];
+            const currIdx = types.indexOf(set.type);
+            set.type = types[(currIdx + 1) % types.length];
+            appStore.setState({ activeWorkout: state.activeWorkout });
+            window.renderActiveWorkout();
+        },
+        toggleDone: (exIdx, sIdx) => {
+            const state = appStore.getState();
+            const set = state.activeWorkout.exercises[exIdx].sets[sIdx];
+            set.done = !set.done;
+            appStore.setState({ activeWorkout: state.activeWorkout });
+            window.renderActiveWorkout();
+            if(set.done) {
+                if(navigator.vibrate) navigator.vibrate(50);
+                showToast('Série concluída', 'success');
+            }
+        },
+        cancel: () => {
+            if(confirm("Cancelar treino atual? O progresso será perdido.")) {
+                appStore.setState({ activeWorkout: null });
+                router.navigate('home');
+            }
+        },
+        finish: () => {
+            const state = appStore.getState();
+            // Validations could go here
+            const workout = { ...state.activeWorkout, endTime: Date.now() };
+            const history = [...state.history, workout];
+            appStore.setState({ history, activeWorkout: null });
+            
+            confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
+            showToast('Treino salvo no histórico!', 'success');
+            setTimeout(() => router.navigate('history'), 1000);
+        }
+    };
+
+    // --- HELPERS FOR STARTING WORKOUT ---
+    const startWorkout = (name, exerciseIds = []) => {
+        const exercises = exerciseIds.length > 0 
+            ? exerciseIds.map(id => ({ id, sets: [{ type: 'N', weight: 0, reps: 0, done: false }], notes: '' }))
+            : [];
+            
+        const newWorkout = {
+            id: uuid(),
+            name: name,
+            startTime: Date.now(),
+            exercises: exercises
+        };
+        appStore.setState({ activeWorkout: newWorkout });
+        router.navigate('active_workout');
+    };
+
+    // --- MODAL LOGIC ---
+    const showExerciseSelector = () => {
+        const modal = createElement('div', 'fixed inset-0 z-50 flex items-end sm:items-center justify-center');
+        modal.innerHTML = `
+            <div class="absolute inset-0 bg-black/80 backdrop-blur-sm" onclick="this.parentElement.remove()"></div>
+            <div class="relative w-full max-w-md bg-bg-surface rounded-t-2xl sm:rounded-2xl p-4 h-[80vh] flex flex-col animate-enter shadow-2xl border-t border-white/10">
+                <div class="w-12 h-1.5 bg-white/20 rounded-full mx-auto mb-4"></div>
+                <h2 class="text-lg font-bold text-white mb-4">Adicionar Exercício</h2>
+                <div class="relative mb-4">
+                     <i data-lucide="search" class="absolute left-3 top-2.5 w-4 h-4 text-text-dim"></i>
+                     <input type="text" placeholder="Buscar..." oninput="filterSelector(this.value)" class="w-full bg-bg-highlight rounded-lg py-2 pl-9 pr-4 text-sm text-white focus:ring-1 ring-primary-500 outline-none">
+                </div>
+                <div id="selector-list" class="flex-1 overflow-y-auto no-scrollbar space-y-2"></div>
+            </div>
+        `;
+        
+        const list = modal.querySelector('#selector-list');
+        const render = (filter = '') => {
+            list.innerHTML = '';
+            EXERCISE_DB.filter(e => e.name.toLowerCase().includes(filter.toLowerCase())).forEach(ex => {
+                const item = createElement('button', 'w-full text-left p-3 rounded-lg bg-bg-main hover:bg-bg-highlight flex justify-between items-center group');
+                item.innerHTML = `<span>${ex.name}</span> <i data-lucide="plus" class="w-4 h-4 text-primary-500 opacity-0 group-hover:opacity-100 transition-opacity"></i>`;
+                item.onclick = () => {
+                    const state = appStore.getState();
+                    state.activeWorkout.exercises.push({ id: ex.id, sets: [{ type: 'N', weight: 0, reps: 0, done: false }], notes: '' });
+                    appStore.setState({ activeWorkout: state.activeWorkout });
+                    window.renderActiveWorkout(); // Refresh UI
+                    modal.remove();
+                    showToast('Exercício adicionado');
+                };
+                list.appendChild(item);
+            });
+            lucide.createIcons();
+        };
+        
+        window.filterSelector = render; // Expose global
+        render();
+        document.getElementById('modal-layer').appendChild(modal);
+        lucide.createIcons();
+    };
+
+    const showThemeSelector = () => {
+        const themes = [
+            { id: 'theme-blue', color: '#3b82f6', name: 'Titanium Blue' },
+            { id: 'theme-purple', color: '#8b5cf6', name: 'Cyber Purple' },
+            { id: 'theme-emerald', color: '#10b981', name: 'Toxic Green' },
+            { id: 'theme-rose', color: '#f43f5e', name: 'Crimson Red' },
+            { id: 'theme-amber', color: '#f59e0b', name: 'Solar Orange' },
+        ];
+        
+        const modal = createElement('div', 'fixed inset-0 z-50 flex items-center justify-center');
+        modal.innerHTML = `
+            <div class="absolute inset-0 bg-black/80 backdrop-blur-sm" onclick="this.parentElement.remove()"></div>
+            <div class="relative bg-bg-surface p-6 rounded-2xl w-full max-w-xs animate-enter border border-white/10">
+                <h3 class="text-lg font-bold text-white mb-4">Escolha um Tema</h3>
+                <div class="grid grid-cols-1 gap-2">
+                    ${themes.map(t => `
+                        <button onclick="setTheme('${t.id}')" class="flex items-center gap-3 p-3 rounded-xl hover:bg-white/5 transition-colors text-left group">
+                            <div class="w-8 h-8 rounded-full shadow-lg" style="background:${t.color}"></div>
+                            <span class="font-medium text-white group-hover:text-primary-500">${t.name}</span>
+                        </button>
+                    `).join('')}
+                </div>
+            </div>
+        `;
+        document.getElementById('modal-layer').appendChild(modal);
+    };
+
+    window.setTheme = (themeClass) => {
+        document.body.className = themeClass; // Applying CSS var overrides via class
+        // Update user state
+        const state = appStore.getState();
+        state.user.theme = themeClass;
+        appStore.setState({ user: state.user });
+        // Force refresh to apply CSS variable cascade if needed, or rely on CSS selectors
+        document.querySelector('#modal-layer').innerHTML = ''; // Close modal
+    };
+
+    // --- HELPER CLASSES FOR UI ---
+    function getSetTypeClass(type) {
+        switch(type) {
+            case 'W': return 'bg-warning/20 text-warning border border-warning/50';
+            case 'D': return 'bg-purple-500/20 text-purple-400 border border-purple-500/50';
+            case 'F': return 'bg-danger/20 text-danger border border-danger/50';
+            default: return 'bg-bg-highlight text-text-muted';
+        }
+    }
+
+    // --- INITIALIZATION ---
+    (() => {
+        const saved = Persistence.load();
+        if(saved && saved.user.theme) document.body.className = saved.user.theme;
+        
+        // Router Init
+        if (appStore.getState().activeWorkout) {
+            router.navigate('active_workout');
+        } else {
+            router.navigate('home');
+        }
+        
+        console.log("TITANIUM ENGINE INITIALIZED");
+        console.log("Memory Usage: Low | FPS: 60 | Architecture: SPA");
+    })();
+
+    </script>
+</body>
+</html>
