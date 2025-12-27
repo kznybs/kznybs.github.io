@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KZNYBS</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Audiowide & Montserrat -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Audiowide&family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        /* --- Configurações Gerais --- */
+        :root {
+            --primary-red: #ff003c;
+            --dark-red: #3a000d;
+            --bg-color: #050505;
+        }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            color: #e5e7eb;
+            background-color: var(--bg-color);
+            overflow-x: hidden;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            /* Suporte para altura dinâmica mobile (barra de endereço) */
+            min-height: 100dvh; 
+        }
+
+        /* --- Fundo --- */
+        #particles-js {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            z-index: -1;
+            background: radial-gradient(ellipse at center, #1f0505 0%, #000000 100%);
+        }
+
+        /* Scanline Overlay (Efeito CRT sutil) */
+        .scanlines {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,0) 50%, rgba(0,0,0,0.2) 50%, rgba(0,0,0,0.2));
+            background-size: 100% 4px;
+            z-index: 50;
+            pointer-events: none;
+            opacity: 0.15;
+        }
+
+        /* --- Tipografia e Efeito GLITCH --- */
+        h1 {
+            font-family: 'Audiowide', cursive;
+        }
+
+        .glitch-wrapper {
+            position: relative;
+            display: inline-block;
+            /* Garante que o texto não quebre no mobile */
+            white-space: nowrap; 
+        }
+
+        .glitch-text {
+            position: relative;
+            /* Tamanho responsivo: mínimo 3.5rem, ideal 13vw, máximo 7rem */
+            font-size: clamp(3.5rem, 13vw, 7rem);
+            font-weight: 900;
+            letter-spacing: 0.1em;
+            color: #fff;
+            text-shadow: 0 0 10px var(--primary-red);
+            animation: glitch-anim 3s infinite linear alternate-reverse;
+        }
+
+        /* Camadas do Glitch */
+        .glitch-text::before,
+        .glitch-text::after {
+            content: attr(data-text);
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--bg-color); /* Matches bg to hide main text */
+            opacity: 0.8;
+        }
+
+        .glitch-text::before {
+            left: 2px;
+            text-shadow: -2px 0 #ff00c1;
+            clip: rect(44px, 9999px, 56px, 0); /* 9999px garante cobertura total */
+            animation: glitch-anim-2 5s infinite linear alternate-reverse;
+        }
+
+        .glitch-text::after {
+            left: -2px;
+            text-shadow: -2px 0 #00fff9;
+            clip: rect(44px, 9999px, 56px, 0);
+            animation: glitch-anim-3 5s infinite linear alternate-reverse;
+        }
+
+        @keyframes glitch-anim {
+            0% { text-shadow: 4px 4px 0px var(--primary-red); }
+            20% { text-shadow: -4px -4px 0px var(--primary-red); }
+            40% { text-shadow: -4px 4px 0px var(--primary-red); }
+            60% { text-shadow: 4px -4px 0px var(--primary-red); }
+            80% { text-shadow: 4px 0px 0px var(--primary-red); }
+            100% { text-shadow: 0px 4px 0px var(--primary-red); }
+        }
+
+        @keyframes glitch-anim-2 {
+            0% { clip: rect(18px, 9999px, 89px, 0); }
+            20% { clip: rect(74px, 9999px, 6px, 0); }
+            40% { clip: rect(31px, 9999px, 51px, 0); }
+            60% { clip: rect(9px, 9999px, 73px, 0); }
+            80% { clip: rect(82px, 9999px, 4px, 0); }
+            100% { clip: rect(56px, 9999px, 25px, 0); }
+        }
+
+        @keyframes glitch-anim-3 {
+            0% { clip: rect(65px, 9999px, 34px, 0); }
+            20% { clip: rect(4px, 9999px, 86px, 0); }
+            40% { clip: rect(98px, 9999px, 14px, 0); }
+            60% { clip: rect(33px, 9999px, 54px, 0); }
+            80% { clip: rect(12px, 9999px, 92px, 0); }
+            100% { clip: rect(49px, 9999px, 11px, 0); }
+        }
+
+        /* --- Cartão Ultra Glass --- */
+        .profile-card {
+            background: rgba(10, 0, 0, 0.4);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 0, 60, 0.3);
+            box-shadow: 
+                0 0 40px rgba(0, 0, 0, 0.8),
+                inset 0 0 20px rgba(255, 0, 60, 0.1);
+            transform-style: preserve-3d;
+            position: relative;
+            overflow: hidden;
+            transition: box-shadow 0.3s ease;
+        }
+
+        /* Efeito de brilho passando pelo cartão */
+        .profile-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.05), transparent);
+            transition: 0.5s;
+            pointer-events: none;
+        }
+
+        .profile-card:hover::before {
+            left: 100%;
+        }
+
+        .profile-card:hover {
+            box-shadow: 
+                0 0 50px rgba(255, 0, 60, 0.2),
+                inset 0 0 30px rgba(255, 0, 60, 0.2);
+            border-color: rgba(255, 0, 60, 0.6);
+        }
+
+        /* --- Ícones Sociais --- */
+        .icon-container {
+            display: flex;
+            /* Gap responsivo: menor no mobile */
+            gap: 1.5rem; 
+            justify-content: center;
+            align-items: center;
+        }
+
+        @media (min-width: 768px) {
+            .icon-container {
+                gap: 2.5rem;
+            }
+        }
+
+        .icon-link {
+            position: relative;
+            color: rgba(255, 255, 255, 0.6);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            z-index: 10;
+        }
+
+        .icon-link::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            width: 0;
+            height: 2px;
+            background: var(--primary-red);
+            transform: translateX(-50%);
+            transition: width 0.3s ease;
+            box-shadow: 0 0 10px var(--primary-red);
+        }
+
+        .icon-link:hover, .icon-link:active {
+            color: #fff;
+            transform: translateY(-8px) scale(1.1);
+            text-shadow: 
+                0 0 10px var(--primary-red),
+                0 0 20px var(--primary-red),
+                0 0 40px var(--primary-red);
+        }
+
+        .icon-link:hover::after, .icon-link:active::after {
+            width: 80%;
+        }
+
+        /* --- Layout --- */
+        .main-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            z-index: 10;
+            padding: 1rem; /* Padding seguro para mobile */
+        }
+
+        .name-container {
+            margin-bottom: 2rem; /* Menor margem mobile */
+            padding: 0 1rem;
+            width: 100%;
+            text-align: center;
+        }
+        
+        @media (min-width: 768px) {
+            .name-container { margin-bottom: 3rem; }
+        }
+
+    </style>
+</head>
+<body class="antialiased">
+
+    <!-- Efeitos de Fundo -->
+    <div class="scanlines"></div>
+    <div id="particles-js"></div>
+
+    <!-- Container Principal -->
+    <div class="main-content">
+
+        <!-- Título Glitch (Fora do cartão) -->
+        <div class="name-container">
+            <div class="glitch-wrapper">
+                <h1 class="glitch-text" data-text="KZNYBS">KZNYBS</h1>
+            </div>
+        </div>
+
+        <!-- Cartão de Links (Tilt Effect) -->
+        <!-- Ajustado Padding: p-6 (mobile) para p-12 (desktop) -->
+        <div class="w-full max-w-sm md:max-w-xl rounded-2xl p-6 md:p-12 profile-card" data-tilt data-tilt-max="10" data-tilt-speed="400" data-tilt-glare="true" data-tilt-max-glare="0.2">
+            
+            <div class="icon-container transform-gpu" style="transform: translateZ(30px);">
+                <!-- GitHub -->
+                <a href="https://github.com/kznybs" target="_blank" class="icon-link" aria-label="GitHub">
+                    <!-- Classes Tailwind para tamanho responsivo: text-4xl (mobile) -> text-5xl (desktop) -->
+                    <i class="fab fa-github text-4xl md:text-5xl"></i>
+                </a>
+                
+                <!-- Code / Projects -->
+                <a href="https://kznybs.github.io/codes_web/" target="_blank" class="icon-link" aria-label="Meus Projetos" title="Kznybs.codes">
+                    <i class="fas fa-code text-4xl md:text-5xl"></i>
+                </a>
+
+                <!-- Instagram -->
+                <a href="https://www.instagram.com/kznybs/" target="_blank" class="icon-link" aria-label="Instagram">
+                    <i class="fab fa-instagram text-4xl md:text-5xl"></i>
+                </a>
+                
+                <!-- LinkedIn -->
+                <a href="https://www.linkedin.com/in/kznybs/" target="_blank" class="icon-link" aria-label="LinkedIn">
+                    <i class="fab fa-linkedin text-4xl md:text-5xl"></i>
+                </a>
+            </div>
+
+            <!-- Decorative Elements inside card (Ajustado tamanho e posição mobile) -->
+            <div class="absolute bottom-2 right-4 text-[8px] md:text-[10px] text-red-500/40 font-mono tracking-widest pointer-events-none">
+               
+            </div>
+            <div class="absolute top-2 left-4 text-[8px] md:text-[10px] text-red-500/40 font-mono tracking-widest pointer-events-none">
+                
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vanilla-tilt/1.7.2/vanilla-tilt.min.js"></script>
+    
+    <script>
+        // Configuração Particles.js
+        particlesJS('particles-js', {
+            "particles": {
+                // Reduzido levemente quantidade para performance mobile
+                "number": { "value": 100, "density": { "enable": true, "value_area": 900 } },
+                "color": { "value": ["#ff003c", "#ffffff"] },
+                "shape": { 
+                    "type": "circle",
+                    "stroke": { "width": 0, "color": "#000000" }
+                },
+                "opacity": { 
+                    "value": 0.6, 
+                    "random": true, 
+                    "anim": { "enable": true, "speed": 1, "opacity_min": 0.1, "sync": false } 
+                },
+                "size": { 
+                    "value": 3, 
+                    "random": true, 
+                    "anim": { "enable": false } 
+                },
+                "line_linked": { 
+                    "enable": true, 
+                    "distance": 120, 
+                    "color": "#ff003c", 
+                    "opacity": 0.3, 
+                    "width": 1 
+                },
+                "move": { 
+                    "enable": true, 
+                    "speed": 3, 
+                    "direction": "none", 
+                    "random": true, 
+                    "straight": false, 
+                    "out_mode": "out", 
+                    "attract": { "enable": false } 
+                }
+            },
+            "interactivity": {
+                "detect_on": "window",
+                "events": { 
+                    "onhover": { "enable": true, "mode": "grab" }, 
+                    "onclick": { "enable": true, "mode": "push" }, 
+                    "resize": true 
+                },
+                "modes": {
+                    "grab": { "distance": 180, "line_linked": { "opacity": 0.8 } },
+                    "push": { "particles_nb": 4 }
+                }
+            },
+            "retina_detect": true
+        });
+
+        // Configuração Vanilla Tilt
+        VanillaTilt.init(document.querySelector(".profile-card"), {
+            max: 15,
+            speed: 400,
+            glare: true,
+            "max-glare": 0.2,
+            scale: 1.05,
+            perspective: 1000,
+            gyroscope: true
+        });
+    </script>
+
+</body>
+</html>
