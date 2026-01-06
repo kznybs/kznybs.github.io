@@ -8,8 +8,8 @@
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     
-    <!-- Biblioteca PDF -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <!-- Biblioteca de Captura de Imagem -->
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
     
     <!-- Fontes e Ícones -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
@@ -30,135 +30,162 @@
         }
         [contenteditable="true"]:active,
         [contenteditable="true"]:focus {
-            background-color: #ffffff;
+            background-color: rgba(255, 255, 255, 0.1);
             outline: 2px solid #3b82f6;
             box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
         }
 
-        /* --- Layout Responsivo Base --- */
+        /* --- Container Principal --- */
         .page-container {
             width: 100%;
             margin: 0 auto;
-            background: white;
+            background: white; /* Cor padrão */
             padding: 1rem;
             padding-bottom: 6rem; /* Espaço para botão mobile */
+            color: #111827;
+            transition: background-color 0.3s, color 0.3s;
         }
 
-        /* Estilo Desktop (Visualização em telas grandes) */
+        /* Estilo Desktop Visualização */
         @media (min-width: 640px) {
             .page-container {
                 max-width: 210mm;
-                min-height: 297mm;
                 margin: 20px auto;
-                padding: 10mm;
-                padding-bottom: 10mm;
+                padding: 15mm;
                 box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
                 border-radius: 8px;
             }
         }
 
-        /* --- ESTILOS FORÇADOS PARA PDF (A Mágica acontece aqui) --- */
-        /* Essa classe é ativada via JS apenas durante o download */
-        .pdf-mode {
-            width: 210mm !important; /* Força largura A4 */
-            max-width: 210mm !important;
-            padding: 10mm !important;
-            margin: 0 !important;
-            background: white !important;
+        /* --- TEMAS (Cores de Fundo) --- */
+        
+        /* Tema Amarelo (Post-it) */
+        [data-theme="yellow"] {
+            background-color: #fefce8 !important; /* yellow-50 */
+            color: #422006 !important;
+        }
+        [data-theme="yellow"] .accent-box,
+        [data-theme="yellow"] .bg-white {
+            background-color: #fef9c3 !important; /* yellow-100 */
+            border-color: #fde047 !important;
+        }
+        [data-theme="yellow"] .bg-gray-50 {
+            background-color: #fef08a !important; /* yellow-200 */
+            border-color: #facc15 !important;
         }
 
-        /* Força layout de grade no PDF mesmo se estiver no celular */
-        .pdf-mode .grid-responsive {
-            display: grid !important;
-            grid-template-columns: repeat(3, 1fr) !important; /* 3 colunas forçadas */
-            gap: 10px !important;
+        /* Tema Preto (Dark Mode) */
+        [data-theme="dark"] {
+            background-color: #111827 !important; /* gray-900 */
+            color: #f3f4f6 !important;
         }
-        .pdf-mode .grid-responsive-2 {
+        [data-theme="dark"] .accent-box,
+        [data-theme="dark"] .bg-white {
+            background-color: #1f2937 !important; /* gray-800 */
+            border-color: #374151 !important;
+            color: #e5e7eb !important;
+        }
+        [data-theme="dark"] .bg-gray-50 {
+            background-color: #374151 !important;
+            border-color: #4b5563 !important;
+            color: #d1d5db !important;
+        }
+        /* Ajuste de textos no dark mode */
+        [data-theme="dark"] .text-gray-900,
+        [data-theme="dark"] .text-gray-800,
+        [data-theme="dark"] .text-gray-700,
+        [data-theme="dark"] .text-gray-600,
+        [data-theme="dark"] .text-gray-500 {
+            color: #d1d5db !important;
+        }
+        [data-theme="dark"] .bg-blue-50 {
+            background-color: #172554 !important; /* blue-950 */
+            color: #bfdbfe !important;
+            border-color: #1e40af !important;
+        }
+        [data-theme="dark"] .macro-pill {
+            background-color: #374151 !important;
+            color: #bfdbfe !important;
+            border-color: #4b5563 !important;
+        }
+
+        /* --- MODO SCREENSHOT (A Mágica da Imagem) --- */
+        /* Essa classe força o layout a ficar "Largo" (Desktop) na hora da foto */
+        .screenshot-mode {
+            width: 800px !important; /* Largura fixa ideal para leitura */
+            max-width: 800px !important;
+            padding: 40px !important;
+            margin: 0 !important;
+            /* background: white !important;  <-- REMOVIDO para aceitar temas */
+            border-radius: 0 !important;
+            box-shadow: none !important;
+            position: absolute !important; /* Tira do fluxo da tela do cel */
+            top: 0 !important;
+            left: 0 !important;
+            z-index: -100 !important; /* Esconde atrás enquanto gera */
+        }
+
+        /* Força GRID de 2 ou 3 colunas no modo imagem */
+        .screenshot-mode .grid-responsive {
             display: grid !important;
             grid-template-columns: repeat(2, 1fr) !important;
-            gap: 10px !important;
+            gap: 20px !important;
         }
-        .pdf-mode .grid-responsive-4 {
+        .screenshot-mode .grid-responsive-3 {
             display: grid !important;
-            grid-template-columns: repeat(4, 1fr) !important;
-            gap: 10px !important;
+            grid-template-columns: repeat(3, 1fr) !important;
+            gap: 20px !important;
         }
 
-        /* Reduz fontes para caber na folha */
-        .pdf-mode .text-adaptive-base { font-size: 0.7rem !important; line-height: 1rem !important; }
-        .pdf-mode .text-adaptive-lg { font-size: 0.8rem !important; }
-        .pdf-mode .text-adaptive-xl { font-size: 1.2rem !important; }
-        .pdf-mode .section-title { font-size: 0.9rem !important; margin-bottom: 8px !important; }
-        
-        /* Ajusta espaçamentos */
-        .pdf-mode .p-responsive { padding: 0.5rem !important; }
-        .pdf-mode .gap-responsive { gap: 0.25rem !important; }
-        .pdf-mode .mb-responsive { margin-bottom: 0.25rem !important; }
-        
-        /* Esconde elementos desnecessários no PDF */
-        .pdf-mode .hide-on-pdf { display: none !important; }
-        .pdf-mode .show-on-pdf { display: flex !important; }
+        /* Ajuste de fontes para a imagem ficar elegante */
+        .screenshot-mode .text-adaptive-base { font-size: 0.9rem !important; }
+        .screenshot-mode .text-adaptive-lg { font-size: 1.1rem !important; }
+        .screenshot-mode .text-adaptive-xl { font-size: 1.8rem !important; }
+        .screenshot-mode .section-title { font-size: 1.2rem !important; margin-bottom: 15px !important; }
 
-        /* --- Proteção contra cortes de página --- */
-        .no-break {
-            page-break-inside: avoid !important;
-            break-inside: avoid !important;
-        }
+        .no-print { display: block; }
 
         /* Utilitários Visuais */
         .accent-box { border-left: 4px solid #3b82f6; }
-        .pdf-mode .accent-box { border-left-width: 3px !important; }
-
         .meal-time { color: #1e40af; font-weight: 700; }
-        
         .macro-pill { 
-            background: #eff6ff; 
-            color: #1e3a8a; 
-            padding: 4px 10px; 
-            border-radius: 99px; 
-            font-size: 0.75rem; 
-            font-weight: 600; 
-            border: 1px solid #dbeafe; 
-            display: inline-block;
-            margin-top: 4px;
+            background: #eff6ff; color: #1e3a8a; 
+            padding: 2px 8px; border-radius: 99px; 
+            font-size: 0.75rem; font-weight: 600; 
+            border: 1px solid #dbeafe; display: inline-block; margin-top: 2px;
         }
-        .pdf-mode .macro-pill {
-            padding: 1px 6px !important;
-            font-size: 0.6rem !important;
-            margin-top: 0 !important;
-        }
-
-        .no-print { display: block; }
-        @media print { .no-print { display: none !important; } }
     </style>
 </head>
 <body class="bg-gray-100 sm:bg-gray-200">
 
     <!-- Painel Flutuante -->
     <div class="fixed bottom-0 left-0 right-0 p-4 bg-white border-t border-gray-200 flex items-center justify-between gap-3 z-50 no-print shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] sm:bottom-6 sm:left-auto sm:right-6 sm:w-auto sm:rounded-xl sm:border-0 sm:bg-transparent sm:shadow-none sm:p-0">
-        <div class="text-xs text-gray-500 sm:bg-gray-800 sm:text-white sm:px-4 sm:py-2 sm:rounded-lg sm:opacity-90">
-            <span class="hidden sm:inline">💡 Edite antes de baixar</span>
-            <span class="sm:hidden">Toque para editar</span>
+        
+        <!-- Seletor de Cores (Substitui o texto de ajuda) -->
+        <div class="flex items-center gap-2 bg-gray-50 rounded-full px-2 py-1 border border-gray-200 shadow-inner">
+            <button onclick="setTheme('white')" class="w-8 h-8 rounded-full bg-white border-2 border-gray-200 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400 transition transform active:scale-90" title="Branco"></button>
+            <button onclick="setTheme('yellow')" class="w-8 h-8 rounded-full bg-[#fefce8] border-2 border-yellow-200 shadow-sm focus:outline-none focus:ring-2 focus:ring-yellow-400 transition transform active:scale-90" title="Amarelo"></button>
+            <button onclick="setTheme('dark')" class="w-8 h-8 rounded-full bg-gray-900 border-2 border-gray-600 shadow-sm focus:outline-none focus:ring-2 focus:ring-gray-500 transition transform active:scale-90" title="Preto"></button>
         </div>
-        <button onclick="downloadPDF()" class="flex-1 sm:flex-none bg-blue-600 active:bg-blue-700 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg sm:rounded-full shadow-lg flex items-center justify-center gap-2 transition transform active:scale-95 text-sm">
-            <i class="ph ph-file-pdf text-lg"></i> 
-            <span>Baixar PDF</span>
+
+        <button onclick="downloadImage()" class="flex-1 sm:flex-none bg-indigo-600 active:bg-indigo-700 hover:bg-indigo-700 text-white font-bold py-3 px-6 rounded-lg sm:rounded-full shadow-lg flex items-center justify-center gap-2 transition transform active:scale-95 text-sm">
+            <i class="ph ph-image text-lg"></i> 
+            <span>Baixar Imagem</span>
         </button>
     </div>
 
-    <!-- Conteúdo do Documento -->
+    <!-- Container Principal -->
     <div id="document-content" class="page-container">
         
         <!-- Cabeçalho -->
-        <header class="flex flex-col sm:flex-row justify-between items-start sm:items-end mb-6 sm:mb-4 border-b pb-4 sm:gap-3 p-responsive" contenteditable="true">
+        <header class="flex flex-col sm:flex-row justify-between items-start sm:items-end mb-6 border-b pb-4 sm:gap-3" contenteditable="true">
             <div class="w-full sm:w-auto">
-                <h1 class="text-2xl sm:text-2xl font-bold text-gray-900 leading-tight mb-1 text-adaptive-xl">Plano Nutricional</h1>
+                <h1 class="text-2xl font-bold text-gray-900 leading-tight mb-1 text-adaptive-xl">Plano Nutricional</h1>
                 <p class="text-gray-500 text-sm text-adaptive-base">Atleta: <strong class="text-gray-800">Rodrigo Silva</strong></p>
             </div>
             
-            <!-- Resumo -->
-            <div class="w-full sm:w-auto bg-blue-50 text-blue-900 p-3 sm:px-3 sm:py-1.5 rounded-lg border border-blue-100 mt-3 sm:mt-0 p-responsive">
-                <div class="grid grid-cols-2 sm:flex gap-3 text-sm sm:text-xs font-bold text-center sm:text-left text-adaptive-base">
+            <div class="w-full sm:w-auto bg-blue-50 text-blue-900 p-3 rounded-lg border border-blue-100 mt-3 sm:mt-0">
+                <div class="grid grid-cols-2 sm:flex gap-3 text-sm font-bold text-center sm:text-left text-adaptive-base">
                     <span>🔥 2.050 kcal</span>
                     <span>🥩 190g P</span>
                     <span>🍞 130g C</span>
@@ -168,32 +195,27 @@
         </header>
 
         <!-- Rotina Diária -->
-        <section class="mb-8">
+        <section>
             <h2 class="section-title text-lg font-bold uppercase text-gray-800 border-b-2 border-gray-200 pb-1 mb-4 flex items-center gap-2">
                 <i class="ph ph-clock text-blue-600"></i> Rotina Diária
             </h2>
 
-            <!-- Grid que muda para 3 colunas no PDF -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 grid-responsive">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 grid-responsive-3">
                 
-                <!-- Pré-Treino -->
-                <div class="accent-box bg-white p-4 rounded-lg shadow-sm border border-gray-100 no-break p-responsive" contenteditable="true">
-                    <div class="flex justify-between items-baseline mb-2 mb-responsive">
-                        <span class="meal-time text-base text-adaptive-lg">04:40 — Pré-Treino</span>
-                    </div>
-                    <ul class="text-gray-700 mb-3 list-none space-y-1 text-adaptive-base mb-responsive">
+                <!-- Blocos de Refeição -->
+                <div class="accent-box bg-white p-4 rounded-lg shadow-sm border border-gray-100" contenteditable="true">
+                    <span class="meal-time text-base block mb-2 text-adaptive-lg">04:40 — Pré-Treino</span>
+                    <ul class="text-gray-700 mb-2 list-none space-y-1 text-adaptive-base">
                         <li>• 2 ovos inteiros</li>
                         <li>• 50g vegetais (cenoura, folhas)</li>
                     </ul>
-                    <div class="flex flex-wrap gap-2 gap-responsive">
+                    <div class="flex flex-wrap gap-2">
                         <span class="macro-pill">180 kcal</span>
                         <span class="macro-pill">12g P</span>
-                        <span class="macro-pill">4g C</span>
                     </div>
                 </div>
 
-                <!-- Treino -->
-                <div class="bg-blue-600 text-white p-4 rounded-lg shadow-sm flex flex-col justify-center gap-1 no-break p-responsive" contenteditable="true">
+                <div class="bg-blue-600 text-white p-4 rounded-lg shadow-sm flex flex-col justify-center gap-1" contenteditable="true">
                     <div class="flex items-center gap-2 mb-1">
                         <i class="ph ph-barbell text-xl"></i>
                         <span class="font-bold text-base text-adaptive-lg uppercase">05:00 — Treino</span>
@@ -201,10 +223,9 @@
                     <p class="text-sm text-blue-100 leading-tight text-adaptive-base">Hidratação constante. Café/chá opcional.</p>
                 </div>
 
-                <!-- Café da Manhã -->
-                <div class="accent-box bg-white p-4 rounded-lg shadow-sm border border-gray-100 no-break p-responsive" contenteditable="true">
-                    <span class="meal-time text-base block mb-2 text-adaptive-lg mb-responsive">06:30 — Pós-Treino</span>
-                    <ul class="text-gray-700 mb-3 list-none space-y-1 text-adaptive-base mb-responsive">
+                <div class="accent-box bg-white p-4 rounded-lg shadow-sm border border-gray-100" contenteditable="true">
+                    <span class="meal-time text-base block mb-2 text-adaptive-lg">06:30 — Pós-Treino</span>
+                    <ul class="text-gray-700 mb-2 list-none space-y-1 text-adaptive-base">
                         <li>• 3 ovos inteiros</li>
                         <li>• 100g Brócolis + 50g Cenoura</li>
                         <li>• 120g Batata-doce cozida</li>
@@ -212,35 +233,30 @@
                     <span class="macro-pill">520 kcal</span>
                 </div>
 
-                <!-- Lanche Manhã -->
-                <div class="accent-box bg-white p-4 rounded-lg shadow-sm border border-gray-100 no-break p-responsive" contenteditable="true">
-                    <span class="meal-time text-base block mb-2 text-adaptive-lg mb-responsive">09:30 — Lanche</span>
-                    <ul class="text-gray-700 mb-3 list-none space-y-1 text-adaptive-base mb-responsive">
+                <div class="accent-box bg-white p-4 rounded-lg shadow-sm border border-gray-100" contenteditable="true">
+                    <span class="meal-time text-base block mb-2 text-adaptive-lg">09:30 — Lanche</span>
+                    <ul class="text-gray-700 mb-2 list-none space-y-1 text-adaptive-base">
                         <li>• 2 ovos cozidos</li>
                         <li>• 80g Vegetais (cenoura, pepino)</li>
                     </ul>
                     <span class="macro-pill">180 kcal</span>
                 </div>
 
-                <!-- Almoço -->
-                <div class="accent-box bg-white p-4 rounded-lg shadow-sm border border-gray-100 sm:col-span-2 lg:col-span-1 no-break p-responsive" contenteditable="true">
-                    <span class="meal-time text-base block mb-2 text-adaptive-lg mb-responsive">12:30 — Almoço</span>
-                    <ul class="text-gray-700 mb-3 list-none space-y-1 text-adaptive-base mb-responsive">
+                <div class="accent-box bg-white p-4 rounded-lg shadow-sm border border-gray-100" contenteditable="true">
+                    <span class="meal-time text-base block mb-2 text-adaptive-lg">12:30 — Almoço</span>
+                    <ul class="text-gray-700 mb-2 list-none space-y-1 text-adaptive-base">
                         <li>• 180g Patinho</li>
                         <li>• 120g Arroz</li>
                         <li>• 120g Brócolis e Azeite (5ml)</li>
                     </ul>
-                    <div class="flex gap-2 gap-responsive mt-1">
+                    <div class="flex gap-2 mt-1">
                         <span class="macro-pill">670 kcal</span>
-                        <span class="macro-pill">45g P</span>
-                        <span class="macro-pill">45g C</span>
                     </div>
                 </div>
 
-                <!-- Lanche Tarde -->
-                <div class="accent-box bg-white p-4 rounded-lg shadow-sm border border-gray-100 no-break p-responsive" contenteditable="true">
-                    <span class="meal-time text-base block mb-2 text-adaptive-lg mb-responsive">16:00 — Tarde</span>
-                    <ul class="text-gray-700 mb-3 list-none space-y-1 text-adaptive-base mb-responsive">
+                <div class="accent-box bg-white p-4 rounded-lg shadow-sm border border-gray-100" contenteditable="true">
+                    <span class="meal-time text-base block mb-2 text-adaptive-lg">16:00 — Tarde</span>
+                    <ul class="text-gray-700 mb-2 list-none space-y-1 text-adaptive-base">
                         <li>• 150g Frango</li>
                         <li>• 80g Batata</li>
                         <li>• 100g Vegetais</li>
@@ -248,10 +264,9 @@
                     <span class="macro-pill">330 kcal</span>
                 </div>
 
-                <!-- Jantar -->
-                <div class="accent-box bg-white p-4 rounded-lg shadow-sm border border-gray-100 no-break p-responsive" contenteditable="true">
-                    <span class="meal-time text-base block mb-2 text-adaptive-lg mb-responsive">19:00 — Jantar</span>
-                    <ul class="text-gray-700 mb-3 list-none space-y-1 text-adaptive-base mb-responsive">
+                <div class="accent-box bg-white p-4 rounded-lg shadow-sm border border-gray-100" contenteditable="true">
+                    <span class="meal-time text-base block mb-2 text-adaptive-lg">19:00 — Jantar</span>
+                    <ul class="text-gray-700 mb-2 list-none space-y-1 text-adaptive-base">
                         <li>• 200g Carne/Frango</li>
                         <li>• 150g Vegetais</li>
                         <li>(Sem carbo denso)</li>
@@ -259,9 +274,8 @@
                     <span class="macro-pill">350 kcal</span>
                 </div>
 
-                <!-- Ceia -->
-                <div class="bg-gray-50 p-4 rounded-lg border border-gray-200 no-break p-responsive" contenteditable="true">
-                    <span class="meal-time text-sm text-gray-600 block mb-2 text-adaptive-lg mb-responsive">21:30 — Ceia (Opc)</span>
+                <div class="bg-gray-50 p-4 rounded-lg border border-gray-200" contenteditable="true">
+                    <span class="meal-time text-sm text-gray-600 block mb-2 text-adaptive-lg">21:30 — Ceia (Opc)</span>
                     <ul class="text-gray-600 list-none space-y-1 text-adaptive-base">
                         <li>• 2 claras + 1 ovo</li>
                         <li>OU 100g Frango</li>
@@ -271,26 +285,26 @@
         </section>
 
         <!-- Substituições -->
-        <section class="mb-8 no-break">
+        <section class="mt-8 mb-8 border-t border-gray-200 pt-8">
             <h2 class="section-title text-lg font-bold uppercase text-gray-800 border-b-2 border-gray-200 pb-1 mb-4 flex items-center gap-2">
                 <i class="ph ph-arrows-left-right text-green-600"></i> Substituições
             </h2>
             
-            <div class="grid grid-cols-1 sm:grid-cols-4 gap-4 bg-white p-4 rounded-lg border border-gray-200 grid-responsive-4 p-responsive" contenteditable="true">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 bg-white p-4 rounded-lg border border-gray-200 grid-responsive" contenteditable="true">
                 <!-- Proteínas -->
-                <div class="sm:col-span-2 border-b sm:border-b-0 sm:border-r border-gray-100 pb-4 sm:pb-0 sm:pr-2 mb-responsive">
-                    <h3 class="text-base font-bold text-red-600 mb-2 text-adaptive-lg mb-responsive">🥩 Proteínas</h3>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 grid-responsive-2">
+                <div class="border-b sm:border-b-0 sm:border-r border-gray-100 pb-4 sm:pb-0 sm:pr-4">
+                    <h3 class="text-base font-bold text-red-600 mb-2 text-adaptive-lg">🥩 Proteínas</h3>
+                    <div class="space-y-3">
                         <div>
                             <p class="text-sm font-bold text-gray-800 text-adaptive-base">180g Patinho =</p>
-                            <ul class="text-sm text-gray-600 leading-snug text-adaptive-base">
+                            <ul class="text-sm text-gray-600 text-adaptive-base">
                                 <li>200g Acém/Coxão</li>
                                 <li>1 lata Sardinha</li>
                             </ul>
                         </div>
                         <div>
                             <p class="text-sm font-bold text-gray-800 text-adaptive-base">150g Frango =</p>
-                            <ul class="text-sm text-gray-600 leading-snug text-adaptive-base">
+                            <ul class="text-sm text-gray-600 text-adaptive-base">
                                 <li>180g Coxa/Sobre</li>
                                 <li>3 ovos grandes</li>
                             </ul>
@@ -298,48 +312,39 @@
                     </div>
                 </div>
 
-                <!-- Carbos -->
-                <div class="border-b sm:border-b-0 sm:border-r border-gray-100 pb-4 sm:pb-0 sm:pr-2 sm:pl-2 mb-responsive">
-                    <h3 class="text-base font-bold text-yellow-600 mb-2 text-adaptive-lg mb-responsive">🍞 Carbos (120g)</h3>
-                    <ul class="text-sm text-gray-600 leading-snug space-y-1 text-adaptive-base">
-                        <li>130g Batata Inglesa</li>
-                        <li>100g Batata Doce</li>
-                        <li>100g Macarrão</li>
-                        <li>90g Cuscuz</li>
-                    </ul>
-                </div>
-                
-                <!-- Vegetais/Gorduras -->
-                <div class="sm:pl-2">
-                    <h3 class="text-base font-bold text-green-600 mb-2 text-adaptive-lg mb-responsive">🥦 Veg & 🧈 Gord</h3>
-                    <div class="space-y-3">
-                        <p class="text-sm text-gray-600 leading-snug text-adaptive-base"><strong>Veg:</strong> Abobrinha, Chuchu, Repolho, Couve, Alface.</p>
-                        <p class="text-sm text-gray-600 leading-snug border-t border-dashed pt-2 mt-1 text-adaptive-base"><strong>5ml Azeite =</strong> 1 colher chá banha ou 1 gema.</p>
+                <!-- Carbos e Veg -->
+                <div class="sm:pl-4 space-y-4">
+                    <div>
+                        <h3 class="text-base font-bold text-yellow-600 mb-2 text-adaptive-lg">🍞 Carbos (120g)</h3>
+                        <ul class="text-sm text-gray-600 text-adaptive-base">
+                            <li>130g Batata Inglesa</li>
+                            <li>100g Batata Doce</li>
+                            <li>100g Macarrão / 90g Cuscuz</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h3 class="text-base font-bold text-green-600 mb-2 text-adaptive-lg">🥦 Veg & 🧈 Gord</h3>
+                        <p class="text-sm text-gray-600 text-adaptive-base"><strong>5ml Azeite =</strong> 1 colher chá banha/óleo ou 1 gema.</p>
                     </div>
                 </div>
             </div>
         </section>
 
         <!-- Lista de Compras -->
-        <section class="bg-slate-800 text-slate-100 rounded-lg p-4 no-break p-responsive" contenteditable="true">
-             <h2 class="text-sm font-bold uppercase tracking-wide flex items-center gap-2 mb-3 text-white border-b border-slate-600 pb-2 text-adaptive-lg mb-responsive">
+        <section class="bg-slate-800 text-slate-100 rounded-lg p-4" contenteditable="true">
+            <h2 class="text-sm font-bold uppercase tracking-wide flex items-center gap-2 mb-3 text-white border-b border-slate-600 pb-2 text-adaptive-lg">
                 <i class="ph ph-shopping-cart"></i> Lista de Compras
             </h2>
 
-            <div class="grid grid-cols-1 sm:grid-cols-4 gap-6 text-sm grid-responsive-4 gap-responsive">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 text-sm grid-responsive">
                 <!-- Semanal -->
                 <div>
-                    <h3 class="font-bold text-blue-300 mb-2 text-adaptive-base mb-responsive">🥩 Carnes</h3>
+                    <h3 class="font-bold text-blue-300 mb-2 text-adaptive-base">🥩 Base Semanal</h3>
                     <ul class="space-y-1 opacity-90 text-adaptive-base">
                         <li>1.5kg Frango (Peito)</li>
                         <li>1kg Coxa/Sobrecoxa</li>
                         <li>1.2kg Carne Magra</li>
                         <li>30 Ovos</li>
-                    </ul>
-                </div>
-                <div>
-                    <h3 class="font-bold text-blue-300 mb-2 text-adaptive-base mb-responsive">🥔 Base</h3>
-                    <ul class="space-y-1 opacity-90 text-adaptive-base">
                         <li>1.5kg Arroz</li>
                         <li>2kg Batatas</li>
                         <li>Vegetais variados</li>
@@ -347,22 +352,16 @@
                 </div>
                 
                 <!-- Mensal -->
-                <div class="sm:col-span-2 bg-slate-700/50 rounded p-3 p-responsive">
-                    <h3 class="font-bold text-purple-300 mb-2 text-adaptive-base mb-responsive flex justify-between">
-                        <span>📦 Estoque Mensal</span>
-                    </h3>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 grid-responsive-2 gap-responsive">
-                        <ul class="space-y-1 opacity-90 text-adaptive-base">
-                            <li>6kg Peito Frango</li>
-                            <li>4kg Coxa/Sobre</li>
-                            <li>5kg Carne Bovina</li>
-                        </ul>
-                        <ul class="space-y-1 opacity-90 text-adaptive-base">
-                            <li>120 Ovos</li>
-                            <li>6kg Arroz</li>
-                            <li>8kg Batatas</li>
-                        </ul>
-                    </div>
+                <div class="bg-slate-700/50 rounded p-3">
+                    <h3 class="font-bold text-purple-300 mb-2 text-adaptive-base">📦 Estoque Mensal</h3>
+                    <ul class="space-y-1 opacity-90 text-adaptive-base">
+                        <li>6kg Peito Frango</li>
+                        <li>4kg Coxa/Sobre</li>
+                        <li>5kg Carne Bovina</li>
+                        <li>120 Ovos</li>
+                        <li>6kg Arroz</li>
+                        <li>8kg Batatas</li>
+                    </ul>
                 </div>
             </div>
         </section>
@@ -374,53 +373,62 @@
     </div>
 
     <script>
-        function downloadPDF() {
+        function setTheme(theme) {
+            const container = document.getElementById('document-content');
+            if (theme === 'white') {
+                container.removeAttribute('data-theme');
+            } else {
+                container.setAttribute('data-theme', theme);
+            }
+        }
+
+        function downloadImage() {
             const element = document.getElementById('document-content');
-            const btn = document.querySelector('button');
+            const btn = document.querySelector('button[onclick="downloadImage()"]');
             const icon = btn.querySelector('i');
             const span = btn.querySelector('span');
             const originalIconClass = icon.className;
-            
-            // 1. ATIVA O MODO PDF (Força layout desktop e fontes pequenas)
-            element.classList.add('pdf-mode');
-
-            // Configuração A4
-            const opt = {
-                margin:       [5, 5, 5, 5],
-                filename:     'Dieta_Rodrigo_Silva.pdf',
-                image:        { type: 'jpeg', quality: 0.98 },
-                html2canvas:  { 
-                    scale: 2, 
-                    useCORS: true, 
-                    scrollY: 0,
-                    windowWidth: 794 // Largura virtual de A4 em px
-                },
-                jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' },
-                pagebreak:    { mode: ['avoid-all', 'css', 'legacy'] }
-            };
+            const originalText = span.textContent;
 
             // Feedback Visual
             icon.className = 'ph ph-spinner animate-spin text-lg';
             span.textContent = 'Gerando...';
             btn.disabled = true;
-            
-            // Gera o PDF e depois restaura o layout mobile
-            html2pdf().set(opt).from(element).save().then(() => {
-                element.classList.remove('pdf-mode'); // RESTAURA O LAYOUT
-                
-                icon.className = originalIconClass;
-                span.textContent = 'Baixar PDF';
-                btn.disabled = false;
-            }).catch(err => {
-                console.error("Erro:", err);
-                element.classList.remove('pdf-mode'); // Garante que restaura mesmo com erro
-                span.textContent = 'Erro!';
-                setTimeout(() => { 
+
+            // 1. ATIVA O MODO SCREENSHOT (Alarga o layout para desktop)
+            element.classList.add('screenshot-mode');
+
+            // Espera um micro-momento para o navegador redesenhar
+            setTimeout(() => {
+                html2canvas(element, {
+                    scale: 2, // Resolução 2x para nitidez
+                    useCORS: true,
+                    // IMPORTANTE: null permite que o canvas capture a cor de fundo do tema
+                    backgroundColor: null, 
+                    scrollY: -window.scrollY 
+                }).then(canvas => {
+                    // Cria link de download
+                    const link = document.createElement('a');
+                    link.download = 'Dieta_Rodrigo_Silva.png';
+                    link.href = canvas.toDataURL('image/png');
+                    link.click();
+
+                    // Restaura UI
+                    element.classList.remove('screenshot-mode');
                     icon.className = originalIconClass;
-                    span.textContent = 'Baixar PDF';
-                    btn.disabled = false; 
-                }, 2000);
-            });
+                    span.textContent = originalText;
+                    btn.disabled = false;
+                }).catch(err => {
+                    console.error(err);
+                    element.classList.remove('screenshot-mode');
+                    span.textContent = 'Erro!';
+                    setTimeout(() => {
+                        icon.className = originalIconClass;
+                        span.textContent = originalText;
+                        btn.disabled = false;
+                    }, 2000);
+                });
+            }, 100);
         }
     </script>
 </body>
