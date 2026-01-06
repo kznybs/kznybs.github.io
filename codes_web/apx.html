@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Plano Alimentar - Rodrigo Silva</title>
     
     <!-- Tailwind CSS para Estilo -->
@@ -18,185 +18,221 @@
     <style>
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #f3f4f6;
+            background-color: #f3f4f6; /* Cinza claro no fundo mobile */
             -webkit-print-color-adjust: exact;
+            overscroll-behavior-y: none; /* Evita bounce no mobile */
         }
 
-        /* Estilo para áreas editáveis */
-        [contenteditable="true"]:hover {
-            background-color: #f9fafb;
-            outline: 2px dashed #e5e7eb;
-            cursor: text;
+        /* Estilo para áreas editáveis - Melhorado para Touch */
+        [contenteditable="true"] {
+            transition: all 0.2s;
+            border-radius: 6px;
         }
+        [contenteditable="true"]:active,
         [contenteditable="true"]:focus {
             background-color: #ffffff;
             outline: 2px solid #3b82f6;
-            border-radius: 4px;
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
         }
 
-        /* Layout A4 */
+        /* Layout Responsivo Inteligente */
         .page-container {
-            width: 210mm;
-            min-height: 297mm;
-            margin: 20px auto;
+            width: 100%;
+            margin: 0 auto;
             background: white;
-            padding: 10mm;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            padding: 1rem; /* Padding confortável para mobile */
+            padding-bottom: 6rem; /* Espaço para o botão flutuante */
         }
 
-        /* Ocultar elementos na hora de gerar o PDF (botões) */
+        /* Comportamento Desktop/PDF (Simulado pelo html2pdf) */
+        @media (min-width: 640px) {
+            .page-container {
+                max-width: 210mm;
+                min-height: 297mm;
+                margin: 20px auto;
+                padding: 8mm; /* Padding compacto para A4 */
+                padding-bottom: 8mm;
+                box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+                border-radius: 8px;
+            }
+            body {
+                padding-bottom: 0;
+            }
+        }
+
+        /* Ajustes específicos para impressão/PDF */
         .no-print {
             display: block;
         }
         
         @media print {
-            body { background: white; margin: 0; }
-            .page-container { box-shadow: none; margin: 0; width: 100%; padding: 0; }
+            body { background: white; margin: 0; padding: 0; }
+            .page-container { 
+                box-shadow: none; 
+                margin: 0; 
+                width: 100%; 
+                max-width: 100%; 
+                padding: 5mm; 
+            }
             .no-print { display: none !important; }
         }
 
         /* Cores de destaque personalizadas */
-        .accent-box { border-left: 4px solid #3b82f6; }
+        .accent-box { border-left: 4px solid #3b82f6; } /* Borda mais grossa no mobile */
+        @media (min-width: 640px) { .accent-box { border-left-width: 3px; } }
+
         .meal-time { color: #1e40af; font-weight: 700; }
-        .macro-pill { background: #eff6ff; color: #1e3a8a; padding: 2px 8px; border-radius: 999px; font-size: 0.75rem; font-weight: 600; }
+        
+        /* Pills (Etiquetas de macros) */
+        .macro-pill { 
+            background: #eff6ff; 
+            color: #1e3a8a; 
+            padding: 4px 10px; /* Maior no mobile */
+            border-radius: 99px; 
+            font-size: 0.75rem; 
+            font-weight: 600; 
+            border: 1px solid #dbeafe; 
+            display: inline-block;
+            margin-top: 4px;
+        }
+        @media (min-width: 640px) {
+            .macro-pill { padding: 1px 6px; font-size: 0.65rem; border-radius: 4px; margin-top: 0; }
+        }
+        
+        /* Utilitários de texto - Híbridos (Grande no Mobile -> Pequeno no PDF) */
+        .text-adaptive-base { font-size: 0.95rem; line-height: 1.4; } /* Legível no celular */
+        .text-adaptive-sm { font-size: 0.85rem; line-height: 1.3; }
+        
+        @media (min-width: 640px) {
+            .text-adaptive-base { font-size: 0.75rem; line-height: 1.1rem; } /* Compacto no PDF */
+            .text-adaptive-sm { font-size: 0.65rem; line-height: 1rem; }
+        }
+
+        .section-title { 
+            font-size: 1.1rem; /* Grande no mobile */
+            font-weight: 800; 
+            text-transform: uppercase; 
+            letter-spacing: 0.05em; 
+            border-bottom: 2px solid #e5e7eb; 
+            padding-bottom: 4px; 
+            margin-bottom: 12px; 
+            color: #1f2937; 
+        }
+        @media (min-width: 640px) {
+            .section-title { font-size: 0.9rem; border-bottom-width: 1px; padding-bottom: 2px; margin-bottom: 8px; }
+        }
     </style>
 </head>
-<body class="pb-20">
+<body class="bg-gray-100 sm:bg-gray-200">
 
-    <!-- Painel de Controle Flutuante -->
-    <div class="fixed bottom-6 right-6 flex gap-4 z-50 no-print">
-        <div class="bg-gray-800 text-white px-4 py-2 rounded-lg text-sm shadow-lg opacity-90">
-            💡 Clique em qualquer texto para editar
+    <!-- Painel de Controle Flutuante (Mobile Optimized) -->
+    <div class="fixed bottom-0 left-0 right-0 p-4 bg-white border-t border-gray-200 flex flex-row items-center justify-between gap-3 z-50 no-print shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] sm:bottom-6 sm:left-auto sm:right-6 sm:w-auto sm:rounded-xl sm:border-0 sm:bg-transparent sm:shadow-none sm:p-0">
+        <div class="hidden sm:flex bg-gray-800 text-white px-4 py-2 rounded-lg text-xs shadow-lg opacity-90 items-center">
+            💡 Edite antes de baixar
         </div>
-        <button onclick="downloadPDF()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-full shadow-xl flex items-center gap-2 transition transform hover:-translate-y-1">
-            <i class="ph ph-file-pdf text-xl"></i> Baixar PDF
+        <div class="text-xs text-gray-500 sm:hidden">
+            Toque para editar
+        </div>
+        <button onclick="downloadPDF()" class="flex-1 sm:flex-none bg-blue-600 active:bg-blue-700 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg sm:rounded-full shadow-lg flex items-center justify-center gap-2 transition transform active:scale-95 text-base sm:text-sm">
+            <i class="ph ph-file-pdf text-xl sm:text-lg"></i> 
+            <span>Baixar PDF</span>
         </button>
     </div>
 
-    <!-- Área Principal do Documento (A4) -->
-    <div id="document-content" class="page-container mx-auto">
+    <!-- Área Principal do Documento -->
+    <div id="document-content" class="page-container">
         
         <!-- Cabeçalho -->
-        <header class="border-b-2 border-gray-100 pb-6 mb-8 flex justify-between items-start break-inside-avoid" contenteditable="true">
-            <div>
-                <h1 class="text-3xl font-bold text-gray-900 mb-1">Planejamento Nutricional</h1>
-                <p class="text-gray-500 text-sm">Personalizado para <strong class="text-gray-800">Rodrigo Silva</strong></p>
+        <header class="flex flex-col sm:flex-row justify-between items-start sm:items-end mb-6 sm:mb-4 border-b pb-4 sm:pb-3 gap-4 sm:gap-3" contenteditable="true">
+            <div class="w-full sm:w-auto">
+                <h1 class="text-3xl sm:text-2xl font-bold text-gray-900 leading-tight mb-1">Plano Nutricional</h1>
+                <p class="text-gray-500 text-sm sm:text-xs">Atleta: <strong class="text-gray-800 text-lg sm:text-sm">Rodrigo Silva</strong></p>
             </div>
-            <div class="text-right">
-                <div class="bg-blue-50 text-blue-800 px-4 py-2 rounded-lg">
-                    <p class="text-xs font-bold uppercase tracking-wide">Resumo Diário</p>
-                    <div class="flex gap-3 text-sm font-semibold mt-1">
-                        <span>🔥 2.050 kcal</span>
-                        <span>🥩 190g Prot</span>
-                    </div>
-                    <div class="flex gap-3 text-sm font-semibold">
-                        <span>🍞 130g Carb</span>
-                        <span>🧈 70g Gord</span>
-                    </div>
+            <!-- Resumo Mobile: Grid 2x2 / Desktop: Linha -->
+            <div class="w-full sm:w-auto bg-blue-50 text-blue-900 p-3 sm:px-3 sm:py-1.5 rounded-xl sm:rounded-lg border border-blue-100">
+                <div class="grid grid-cols-2 sm:flex gap-x-4 gap-y-2 sm:gap-3 text-sm sm:text-xs font-bold text-center sm:text-left">
+                    <span>🔥 2.050 kcal</span>
+                    <span>🥩 190g P</span>
+                    <span>🍞 130g C</span>
+                    <span>🧈 70g G</span>
                 </div>
             </div>
         </header>
 
         <!-- Cronograma Diário -->
-        <section class="space-y-6">
-            <h2 class="text-lg font-bold text-gray-800 border-b border-gray-200 pb-2 uppercase tracking-wide flex items-center gap-2">
+        <section class="mb-8 sm:mb-5">
+            <h2 class="section-title flex items-center gap-2">
                 <i class="ph ph-clock text-blue-600"></i> Rotina Diária
             </h2>
 
-            <!-- Manhã e Treino -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <!-- Rotina Matinal -->
-                <div class="bg-gray-50 p-4 rounded-lg border border-gray-100 break-inside-avoid" contenteditable="true">
-                    <div class="flex items-center gap-2 mb-2">
-                        <span class="text-2xl">⏰</span>
-                        <div>
-                            <p class="font-bold text-gray-800">04:30 - Despertar</p>
-                            <p class="text-xs text-gray-500">Hidratação imediata</p>
-                        </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-2">
+                
+                <!-- Pré-Treino -->
+                <div class="accent-box bg-white p-4 sm:p-2.5 rounded-lg sm:rounded shadow-sm border border-gray-100" contenteditable="true">
+                    <div class="flex justify-between items-baseline mb-2 sm:mb-1">
+                        <span class="meal-time text-base sm:text-xs">04:40 — Pré-Treino</span>
                     </div>
-                </div>
-
-                <div class="accent-box bg-white p-4 rounded-lg shadow-sm border border-gray-100 break-inside-avoid" contenteditable="true">
-                    <div class="flex justify-between mb-2">
-                        <span class="meal-time">04:40 — Pré-Treino</span>
-                        <span class="text-xs text-gray-400">Energia Rápida</span>
-                    </div>
-                    <ul class="text-sm text-gray-700 space-y-1 mb-2">
+                    <ul class="text-adaptive-base text-gray-700 mb-3 sm:mb-1 list-none space-y-1 sm:space-y-0">
                         <li>• 2 ovos inteiros</li>
                         <li>• 50g vegetais (cenoura, folhas)</li>
                     </ul>
-                    <div class="flex flex-wrap gap-1">
+                    <div class="flex flex-wrap gap-2 sm:gap-1">
                         <span class="macro-pill">180 kcal</span>
                         <span class="macro-pill">12g P</span>
                         <span class="macro-pill">4g C</span>
                     </div>
                 </div>
-            </div>
 
-            <!-- Treino -->
-            <div class="bg-blue-600 text-white p-4 rounded-lg shadow-sm flex items-center gap-4 break-inside-avoid" contenteditable="true">
-                <div class="text-3xl">🏋️</div>
-                <div>
-                    <p class="font-bold">05:00 – 06:00 — TREINO</p>
-                    <p class="text-blue-100 text-sm">Beber água. Café ou chá opcional.</p>
+                <!-- Treino -->
+                <div class="bg-blue-600 text-white p-4 sm:p-2.5 rounded-lg sm:rounded shadow-sm flex flex-col justify-center gap-2 sm:gap-0" contenteditable="true">
+                    <div class="flex items-center gap-3 sm:gap-2 mb-1">
+                        <i class="ph ph-barbell text-2xl sm:text-xl"></i>
+                        <span class="font-bold text-lg sm:text-xs uppercase">05:00 — Treino</span>
+                    </div>
+                    <p class="text-sm sm:text-[10px] text-blue-100 leading-tight">Hidratação constante. Café/chá opcional.</p>
                 </div>
-            </div>
 
-            <!-- Café da Manhã -->
-            <div class="accent-box bg-white p-4 rounded-lg shadow-sm border border-gray-100 break-inside-avoid" contenteditable="true">
-                <div class="flex justify-between mb-2">
-                    <span class="meal-time">06:30 — Café da Manhã (Pós-Treino)</span>
-                    <span class="text-xs text-gray-400">Reposição</span>
-                </div>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <ul class="text-sm text-gray-700 space-y-1">
+                <!-- Café da Manhã -->
+                <div class="accent-box bg-white p-4 sm:p-2.5 rounded-lg sm:rounded shadow-sm border border-gray-100" contenteditable="true">
+                    <span class="meal-time text-base sm:text-xs block mb-2 sm:mb-1">06:30 — Pós-Treino</span>
+                    <ul class="text-adaptive-base text-gray-700 mb-3 sm:mb-1 list-none space-y-1 sm:space-y-0">
                         <li>• 3 ovos inteiros</li>
                         <li>• 100g Brócolis + 50g Cenoura</li>
                         <li>• 120g Batata-doce cozida</li>
                     </ul>
-                    <div class="bg-gray-50 p-2 rounded text-xs space-y-1">
-                        <p class="font-bold text-gray-500">Macros:</p>
-                        <p>🔥 520 kcal | 🥩 27g P | 🍞 35g C | 🧈 26g G</p>
-                    </div>
+                    <span class="macro-pill">520 kcal</span>
                 </div>
-            </div>
 
-            <!-- Lanches e Almoço -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div class="accent-box bg-white p-4 rounded-lg shadow-sm border border-gray-100 break-inside-avoid" contenteditable="true">
-                    <div class="flex justify-between mb-2">
-                        <span class="meal-time">09:30 — Lanche da Manhã</span>
-                    </div>
-                    <ul class="text-sm text-gray-700 space-y-1 mb-2">
+                <!-- Lanche Manhã -->
+                <div class="accent-box bg-white p-4 sm:p-2.5 rounded-lg sm:rounded shadow-sm border border-gray-100" contenteditable="true">
+                    <span class="meal-time text-base sm:text-xs block mb-2 sm:mb-1">09:30 — Lanche</span>
+                    <ul class="text-adaptive-base text-gray-700 mb-3 sm:mb-1 list-none space-y-1 sm:space-y-0">
                         <li>• 2 ovos cozidos</li>
                         <li>• 80g Vegetais (cenoura, pepino)</li>
                     </ul>
-                    <p class="text-xs text-gray-500">🎯 Foco mental e estabilidade.</p>
+                    <span class="macro-pill">180 kcal</span>
                 </div>
 
-                <div class="accent-box bg-white p-4 rounded-lg shadow-sm border border-gray-100 break-inside-avoid" contenteditable="true">
-                    <div class="flex justify-between mb-2">
-                        <span class="meal-time">12:30 — Almoço</span>
-                    </div>
-                    <ul class="text-sm text-gray-700 space-y-1 mb-2">
-                        <li>• 180g Patinho grelhado</li>
-                        <li>• 120g Arroz (branco/integral)</li>
-                        <li>• 120g Brócolis + 100g Beterraba</li>
+                <!-- Almoço -->
+                <div class="accent-box bg-white p-4 sm:p-2.5 rounded-lg sm:rounded shadow-sm border border-gray-100 sm:col-span-2 lg:col-span-1" contenteditable="true">
+                    <span class="meal-time text-base sm:text-xs block mb-2 sm:mb-1">12:30 — Almoço</span>
+                    <ul class="text-adaptive-base text-gray-700 mb-3 sm:mb-1 list-none space-y-1 sm:space-y-0 grid grid-cols-1 sm:grid-cols-2 lg:block">
+                        <li>• 180g Patinho</li>
+                        <li>• 120g Arroz</li>
+                        <li>• 120g Brócolis</li>
                         <li>• 5ml Azeite</li>
                     </ul>
-                    <div class="flex flex-wrap gap-1">
+                    <div class="flex gap-2 sm:gap-1 mt-1">
                         <span class="macro-pill">670 kcal</span>
                         <span class="macro-pill">45g P</span>
                         <span class="macro-pill">45g C</span>
                     </div>
                 </div>
-            </div>
 
-            <!-- Tarde e Noite -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div class="accent-box bg-white p-4 rounded-lg shadow-sm border border-gray-100 break-inside-avoid" contenteditable="true">
-                    <p class="meal-time mb-2">16:00 — Lanche Tarde</p>
-                    <ul class="text-xs text-gray-700 space-y-1 mb-2">
+                <!-- Lanche Tarde -->
+                <div class="accent-box bg-white p-4 sm:p-2.5 rounded-lg sm:rounded shadow-sm border border-gray-100" contenteditable="true">
+                    <span class="meal-time text-base sm:text-xs block mb-2 sm:mb-1">16:00 — Tarde</span>
+                    <ul class="text-adaptive-base text-gray-700 mb-3 sm:mb-1 list-none space-y-1 sm:space-y-0">
                         <li>• 150g Frango</li>
                         <li>• 80g Batata</li>
                         <li>• 100g Vegetais</li>
@@ -204,9 +240,10 @@
                     <span class="macro-pill">330 kcal</span>
                 </div>
 
-                <div class="accent-box bg-white p-4 rounded-lg shadow-sm border border-gray-100 break-inside-avoid" contenteditable="true">
-                    <p class="meal-time mb-2">19:00 — Jantar</p>
-                    <ul class="text-xs text-gray-700 space-y-1 mb-2">
+                <!-- Jantar -->
+                <div class="accent-box bg-white p-4 sm:p-2.5 rounded-lg sm:rounded shadow-sm border border-gray-100" contenteditable="true">
+                    <span class="meal-time text-base sm:text-xs block mb-2 sm:mb-1">19:00 — Jantar</span>
+                    <ul class="text-adaptive-base text-gray-700 mb-3 sm:mb-1 list-none space-y-1 sm:space-y-0">
                         <li>• 200g Carne/Frango</li>
                         <li>• 150g Vegetais</li>
                         <li>(Sem carbo denso)</li>
@@ -214,125 +251,117 @@
                     <span class="macro-pill">350 kcal</span>
                 </div>
 
-                <div class="bg-gray-50 p-4 rounded-lg border border-gray-200 break-inside-avoid" contenteditable="true">
-                    <p class="meal-time text-gray-600 mb-2">21:30 — Ceia (Opcional)</p>
-                    <ul class="text-xs text-gray-600 space-y-1 mb-2">
+                <!-- Ceia -->
+                <div class="bg-gray-50 p-4 sm:p-2.5 rounded-lg sm:rounded border border-gray-200" contenteditable="true">
+                    <span class="meal-time text-sm sm:text-xs text-gray-600 block mb-2 sm:mb-1">21:30 — Ceia (Opc)</span>
+                    <ul class="text-adaptive-base text-gray-600 list-none space-y-1 sm:space-y-0">
                         <li>• 2 claras + 1 ovo</li>
                         <li>OU 100g Frango</li>
                     </ul>
-                    <span class="macro-pill bg-gray-200 text-gray-600">150 kcal</span>
                 </div>
             </div>
         </section>
-
-        <!-- Quebra de Página no PDF se necessário -->
-        <div class="html2pdf__page-break"></div>
-        <br>
 
         <!-- Substituições -->
-        <section class="mt-8">
-            <h2 class="text-lg font-bold text-gray-800 border-b border-gray-200 pb-2 uppercase tracking-wide flex items-center gap-2 mb-4">
-                <i class="ph ph-arrows-left-right text-green-600"></i> Lista de Substituições
+        <section class="mb-8 sm:mb-5">
+            <h2 class="section-title flex items-center gap-2">
+                <i class="ph ph-arrows-left-right text-green-600"></i> Substituições
             </h2>
             
-            <div class="grid grid-cols-2 gap-6">
+            <div class="grid grid-cols-1 sm:grid-cols-4 gap-4 sm:gap-3 bg-white p-4 sm:p-3 rounded-lg border border-gray-200" contenteditable="true">
                 <!-- Proteínas -->
-                <div class="bg-white p-4 rounded-lg border border-gray-200 break-inside-avoid" contenteditable="true">
-                    <h3 class="font-bold text-red-600 flex items-center gap-2 mb-3">🥩 Proteínas</h3>
-                    
-                    <div class="mb-4">
-                        <p class="text-sm font-semibold text-gray-800">Trocar 180g Patinho por:</p>
-                        <ul class="text-xs text-gray-600 list-disc ml-4 space-y-1 mt-1">
-                            <li>200g Acém moído (escorrido)</li>
-                            <li>200g Coxão duro</li>
-                            <li>1 lata grande de sardinha</li>
-                        </ul>
-                    </div>
-                    
-                    <div class="mb-4">
-                        <p class="text-sm font-semibold text-gray-800">Trocar 150g Frango por:</p>
-                        <ul class="text-xs text-gray-600 list-disc ml-4 space-y-1 mt-1">
-                            <li>180g Coxa/Sobrecoxa sem pele</li>
-                            <li>160g Sassami</li>
-                            <li>3 ovos inteiros grandes</li>
-                        </ul>
+                <div class="sm:col-span-2 border-b sm:border-b-0 sm:border-r border-gray-100 pb-4 sm:pb-0 sm:pr-2">
+                    <h3 class="text-base sm:text-xs font-bold text-red-600 mb-2 sm:mb-1">🥩 Proteínas</h3>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-2">
+                        <div>
+                            <p class="text-sm sm:text-[10px] font-bold text-gray-800">180g Patinho =</p>
+                            <ul class="text-sm sm:text-[9px] text-gray-600 leading-snug">
+                                <li>200g Acém/Coxão</li>
+                                <li>1 lata Sardinha</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <p class="text-sm sm:text-[10px] font-bold text-gray-800">150g Frango =</p>
+                            <ul class="text-sm sm:text-[9px] text-gray-600 leading-snug">
+                                <li>180g Coxa/Sobre</li>
+                                <li>3 ovos grandes</li>
+                            </ul>
+                        </div>
                     </div>
                 </div>
 
-                <!-- Carboidratos -->
-                <div class="bg-white p-4 rounded-lg border border-gray-200 break-inside-avoid" contenteditable="true">
-                    <h3 class="font-bold text-yellow-600 flex items-center gap-2 mb-3">🍞 Carboidratos</h3>
-                    
-                    <div class="mb-4">
-                        <p class="text-sm font-semibold text-gray-800">Trocar 120g Arroz por:</p>
-                        <ul class="text-xs text-gray-600 list-disc ml-4 space-y-1 mt-1">
-                            <li>130g Batata Inglesa</li>
-                            <li>100g Batata Doce</li>
-                            <li>100g Macarrão</li>
-                            <li>90g Cuscuz / 80g Mandioca</li>
-                        </ul>
-                    </div>
-                     <div class="mb-4">
-                        <p class="text-sm font-semibold text-gray-800">Trocar 80g Batata por:</p>
-                        <ul class="text-xs text-gray-600 list-disc ml-4 space-y-1 mt-1">
-                            <li>70g Arroz / 60g Macarrão</li>
-                            <li>100g Abóbora Cabotiá</li>
-                        </ul>
-                    </div>
+                <!-- Carbos -->
+                <div class="border-b sm:border-b-0 sm:border-r border-gray-100 pb-4 sm:pb-0 sm:pr-2 sm:pl-2">
+                    <h3 class="text-base sm:text-xs font-bold text-yellow-600 mb-2 sm:mb-1">🍞 Carbos (120g Arroz)</h3>
+                    <ul class="text-sm sm:text-[9px] text-gray-600 leading-snug space-y-1 sm:space-y-0.5">
+                        <li>130g Batata Inglesa</li>
+                        <li>100g Batata Doce</li>
+                        <li>100g Macarrão</li>
+                        <li>90g Cuscuz</li>
+                    </ul>
                 </div>
                 
-                <!-- Vegetais e Gorduras -->
-                <div class="bg-white p-4 rounded-lg border border-gray-200 col-span-2 grid grid-cols-2 gap-6 break-inside-avoid" contenteditable="true">
-                    <div>
-                        <h3 class="font-bold text-green-600 flex items-center gap-2 mb-3">🥦 Vegetais (Livre)</h3>
-                        <p class="text-xs text-gray-500 mb-2">Troque 100g Brócolis por 100-150g de:</p>
-                        <p class="text-xs text-gray-700">Abobrinha, Chuchu, Repolho, Couve, Pepino, Alface, Cenoura crua.</p>
-                    </div>
-                    <div>
-                        <h3 class="font-bold text-yellow-500 flex items-center gap-2 mb-3">🧈 Gorduras (Atenção)</h3>
-                        <p class="text-xs text-gray-500 mb-2">Troque 5ml Azeite por:</p>
-                        <p class="text-xs text-gray-700">1 colher chá banha, 1 gema de ovo, 1 colher chá óleo.</p>
+                <!-- Vegetais/Gorduras -->
+                <div class="sm:pl-2">
+                    <h3 class="text-base sm:text-xs font-bold text-green-600 mb-2 sm:mb-1">🥦 Veg & 🧈 Gord</h3>
+                    <div class="space-y-3 sm:space-y-1">
+                        <p class="text-sm sm:text-[9px] text-gray-600 leading-snug"><strong>Veg:</strong> Abobrinha, Chuchu, Repolho, Couve, Alface.</p>
+                        <p class="text-sm sm:text-[9px] text-gray-600 leading-snug border-t border-dashed pt-2 sm:pt-1 mt-1"><strong>5ml Azeite =</strong> 1 colher chá banha/óleo ou 1 gema.</p>
                     </div>
                 </div>
             </div>
         </section>
 
-        <!-- Lista de Compras -->
-        <section class="mt-8 bg-slate-800 text-slate-100 rounded-xl p-6 break-inside-avoid" contenteditable="true">
-             <h2 class="text-lg font-bold border-b border-slate-600 pb-2 uppercase tracking-wide flex items-center gap-2 mb-4 text-white">
+        <!-- Lista de Compras Horizontal -->
+        <section class="bg-slate-800 text-slate-100 rounded-lg p-4 sm:p-3" contenteditable="true">
+             <h2 class="text-sm sm:text-xs font-bold uppercase tracking-wide flex items-center gap-2 mb-3 sm:mb-2 text-white border-b border-slate-600 pb-2 sm:pb-1">
                 <i class="ph ph-shopping-cart"></i> Lista de Compras
             </h2>
 
-            <div class="grid grid-cols-2 gap-8">
+            <div class="grid grid-cols-1 sm:grid-cols-4 gap-6 sm:gap-4 text-sm sm:text-[10px]">
+                <!-- Semanal -->
                 <div>
-                    <h3 class="font-bold text-blue-300 mb-2">🛒 Semanal</h3>
-                    <ul class="text-xs space-y-2">
-                        <li>• 1.5kg Peito de Frango</li>
-                        <li>• 1kg Coxa/Sobrecoxa</li>
-                        <li>• 1.2kg Carne Bovina Magra</li>
-                        <li>• 30 Ovos</li>
-                        <li>• 1.5kg Arroz (cru)</li>
-                        <li>• 2kg Batata (Inglesa ou Doce)</li>
-                        <li>• Vegetais variados (Brócolis, Cenoura, etc.)</li>
-                        <li>• Azeite, Sal, Temperos</li>
+                    <h3 class="font-bold text-blue-300 mb-2 sm:mb-1">🥩 Carnes (Semana)</h3>
+                    <ul class="space-y-1 sm:space-y-0.5 opacity-90">
+                        <li>1.5kg Frango (Peito)</li>
+                        <li>1kg Coxa/Sobrecoxa</li>
+                        <li>1.2kg Carne Magra</li>
+                        <li>30 Ovos</li>
                     </ul>
                 </div>
                 <div>
-                    <h3 class="font-bold text-purple-300 mb-2">📦 Mensal (Estoque)</h3>
-                    <ul class="text-xs space-y-2">
-                        <li>• 6kg Peito de Frango</li>
-                        <li>• 4kg Coxa/Sobrecoxa</li>
-                        <li>• 5kg Carne Bovina</li>
-                        <li>• 120 Ovos (10 dúzias)</li>
-                        <li>• 6kg Arroz</li>
-                        <li>• 8kg Batata</li>
+                    <h3 class="font-bold text-blue-300 mb-2 sm:mb-1">🥔 Base (Semana)</h3>
+                    <ul class="space-y-1 sm:space-y-0.5 opacity-90">
+                        <li>1.5kg Arroz</li>
+                        <li>2kg Batatas</li>
+                        <li>Vegetais variados</li>
+                        <li>Azeite/Temperos</li>
                     </ul>
-                    <p class="text-[10px] text-slate-400 mt-2 italic">*Pode congelar as proteínas.</p>
+                </div>
+                
+                <!-- Mensal -->
+                <div class="sm:col-span-2 bg-slate-700/50 rounded p-3 sm:p-2">
+                    <h3 class="font-bold text-purple-300 mb-2 sm:mb-1 flex justify-between">
+                        <span>📦 Estoque Mensal</span>
+                        <span class="text-xs sm:text-[9px] italic opacity-70">Congelar Proteínas</span>
+                    </h3>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-2">
+                        <ul class="space-y-1 sm:space-y-0.5 opacity-90">
+                            <li>6kg Peito Frango</li>
+                            <li>4kg Coxa/Sobre</li>
+                            <li>5kg Carne Bovina</li>
+                        </ul>
+                        <ul class="space-y-1 sm:space-y-0.5 opacity-90">
+                            <li>120 Ovos</li>
+                            <li>6kg Arroz</li>
+                            <li>8kg Batatas</li>
+                        </ul>
+                    </div>
                 </div>
             </div>
         </section>
 
-        <footer class="mt-10 text-center text-xs text-gray-400 border-t pt-4 no-print">
+        <footer class="mt-8 sm:mt-4 text-center text-xs sm:text-[9px] text-gray-400 no-print pb-20 sm:pb-0">
             <p>Se não está na lista, não está na dieta.</p>
         </footer>
 
@@ -340,42 +369,45 @@
 
     <script>
         function downloadPDF() {
-            // Seleciona o elemento que será convertido
             const element = document.getElementById('document-content');
+            const btn = document.querySelector('button');
+            const icon = btn.querySelector('i');
+            const span = btn.querySelector('span');
+            const originalIconClass = icon.className;
             
-            // Configurações do PDF (Ajustadas para corrigir cortes)
+            // Configurações otimizadas para Single Page A4
             const opt = {
-                margin:       [10, 10, 10, 10], // Margem Superior, Esquerda, Inferior, Direita (mm)
+                margin:       [5, 5, 5, 5],
                 filename:     'Dieta_Rodrigo_Silva.pdf',
                 image:        { type: 'jpeg', quality: 0.98 },
                 html2canvas:  { 
-                    scale: 2, // Melhora a resolução
+                    scale: 2, 
                     useCORS: true, 
-                    scrollY: 0, // Garante que começa do topo da página
-                    letterRendering: true
+                    scrollY: 0,
+                    // TRUQUE: Força o html2canvas a renderizar como se fosse um Desktop de 794px
+                    // Isso ativa as classes 'sm:' do Tailwind, compactando o layout para o PDF
+                    windowWidth: 794 
                 },
                 jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' },
-                // Configuração crítica para não cortar elementos ao meio
-                pagebreak:    { mode: ['avoid-all', 'css', 'legacy'] } 
+                pagebreak:    { mode: ['avoid-all', 'css', 'legacy'] }
             };
 
-            // Gera o PDF
-            const btn = document.querySelector('button');
-            const originalText = btn.innerHTML;
-            
             // Feedback visual
-            btn.innerHTML = '<i class="ph ph-spinner animate-spin text-xl"></i> Gerando...';
+            icon.className = 'ph ph-spinner animate-spin text-xl sm:text-lg';
+            span.textContent = 'Gerando...';
             btn.disabled = true;
             
             html2pdf().set(opt).from(element).save().then(() => {
-                btn.innerHTML = originalText;
+                icon.className = originalIconClass;
+                span.textContent = 'Baixar PDF';
                 btn.disabled = false;
             }).catch(err => {
-                console.error("Erro ao gerar PDF:", err);
-                btn.innerHTML = 'Erro!';
-                setTimeout(() => {
-                     btn.innerHTML = originalText;
-                     btn.disabled = false;
+                console.error("Erro:", err);
+                span.textContent = 'Erro!';
+                setTimeout(() => { 
+                    icon.className = originalIconClass;
+                    span.textContent = 'Baixar PDF';
+                    btn.disabled = false; 
                 }, 2000);
             });
         }
