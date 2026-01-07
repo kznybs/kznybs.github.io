@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Plano Alimentar - Rodrigo Silva</title>
+    <title>Plano Alimentar Completo - Rodrigo Silva</title>
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;700;800&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet">
     <style>
@@ -26,7 +26,7 @@
         /* Container Principal */
         .plan-container {
             width: 100%;
-            max-width: 450px;
+            max-width: 500px; /* Levemente mais largo para caber as tabelas */
             background-color: #1e1e1e;
             border-radius: 20px;
             overflow: hidden;
@@ -95,29 +95,23 @@
             border-radius: 4px;
         }
 
-        /* Stats */
-        .stats-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-            padding: 10px 20px 20px;
+        /* Seções Gerais */
+        .section-title {
+            text-align: center;
+            color: #daa520;
+            font-family: 'Montserrat', sans-serif;
+            font-size: 16px;
+            font-weight: 800;
+            text-transform: uppercase;
+            margin: 30px 0 15px;
+            letter-spacing: 1px;
+            border-top: 1px solid #333;
+            border-bottom: 1px solid #333;
+            padding: 10px;
+            background: #252525;
         }
 
-        .stat-card {
-            background-color: #2a2a2a;
-            padding: 12px;
-            border-radius: 12px;
-            border-left: 3px solid #daa520;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-        }
-
-        .stat-icon { font-size: 18px; margin-bottom: 4px; }
-        .stat-title { font-size: 10px; text-transform: uppercase; color: #888; font-weight: 700; }
-        .stat-value { font-size: 13px; font-weight: 600; color: #fff; }
-
-        /* Timeline */
+        /* Timeline (Dieta Diária) */
         .timeline {
             padding: 10px 20px 20px;
             position: relative;
@@ -168,12 +162,14 @@
             white-space: nowrap;
         }
 
+        /* Cards de Conteúdo */
         .card-content {
             background-color: #252525;
             border-radius: 0 12px 12px 12px;
             padding: 15px;
             border: 1px solid #333;
             width: 100%;
+            margin-bottom: 10px;
         }
         
         .is-workout .card-content {
@@ -185,7 +181,7 @@
 
         .item-title {
             font-family: 'Montserrat', sans-serif;
-            font-size: 14px;
+            font-size: 13px;
             font-weight: 700;
             color: #fff;
             text-transform: uppercase;
@@ -193,6 +189,16 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+        }
+        
+        .sub-title {
+            font-size: 11px;
+            color: #daa520;
+            font-weight: 700;
+            margin-top: 10px;
+            margin-bottom: 4px;
+            text-transform: uppercase;
+            display: block;
         }
 
         .item-list {
@@ -238,23 +244,78 @@
             color: #888;
         }
         
-        .macro-item {
-            text-align: center;
-        }
-        
-        .macro-item span {
-            color: #daa520;
-            font-weight: 700;
-            display: block;
-            font-size: 11px;
+        .macro-item { text-align: center; }
+        .macro-item span { color: #daa520; font-weight: 700; display: block; font-size: 11px; }
+
+        /* Estilos para Substituições e Lista de Compras */
+        .extra-content {
+            padding: 0 20px 20px;
         }
 
-        /* Footer */
+        .substitution-card {
+            background-color: #252525;
+            border-radius: 8px;
+            padding: 15px;
+            border: 1px solid #333;
+            margin-bottom: 15px;
+        }
+
+        .subst-header {
+            color: #fff;
+            font-weight: 700;
+            font-size: 14px;
+            border-bottom: 1px solid #daa520;
+            padding-bottom: 5px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .subst-info {
+            font-size: 11px;
+            color: #888;
+            margin-bottom: 8px;
+            background: rgba(0,0,0,0.2);
+            padding: 5px;
+            border-radius: 4px;
+        }
+
+        .shopping-list-grid {
+            display: grid;
+            gap: 15px;
+        }
+
+        .shopping-category {
+            margin-bottom: 10px;
+        }
+        
+        .cat-name {
+            color: #daa520;
+            font-size: 12px;
+            font-weight: 800;
+            text-transform: uppercase;
+            margin-bottom: 5px;
+            display: block;
+        }
+
+        .final-rule {
+            background-color: #333;
+            color: #fff;
+            text-align: center;
+            padding: 20px;
+            margin: 20px;
+            border-radius: 12px;
+            border: 1px dashed #daa520;
+        }
+
+        /* Resumo Final */
         .footer-summary {
             background-color: #000;
             padding: 20px;
             text-align: center;
             border-top: 2px solid #daa520;
+            margin-top: 0; /* Remove margem extra */
         }
 
         .summary-title {
@@ -283,27 +344,20 @@
         .sum-val { display: block; font-size: 13px; font-weight: 700; color: #fff; }
         .sum-lbl { display: block; font-size: 9px; color: #666; text-transform: uppercase; margin-top: 2px; }
 
-        /* --- CORREÇÃO DO BUG DE EDIÇÃO --- */
+        /* Edição e Controles */
         .editable-area {
             min-width: 5px;
             transition: all 0.2s;
             outline: none;
-            /* REMOVIDO: display: inline-block; - Isso causava o bug */
         }
-        
         .is-editing .editable-area {
             border: 1px dashed #555;
             background: rgba(255,255,255,0.05);
             padding: 0 4px;
             border-radius: 3px;
         }
+        span.editable-area { display: inline-block; }
 
-        /* Aplica inline-block apenas onde necessário (textos pequenos) */
-        span.editable-area {
-            display: inline-block;
-        }
-
-        /* Botões */
         .fab-container {
             position: fixed;
             bottom: 20px;
@@ -347,21 +401,7 @@
             </div>
         </header>
 
-        <!-- Stats Rápidos -->
-        <div class="stats-grid">
-            <div class="stat-card">
-                <div class="stat-icon">🔥</div>
-                <span class="stat-title">Objetivo</span>
-                <span class="stat-value editable-area">Performance / Definição</span>
-            </div>
-            <div class="stat-card">
-                <div class="stat-icon">💧</div>
-                <span class="stat-title">Hidratação</span>
-                <span class="stat-value editable-area">3.0L+ Diários</span>
-            </div>
-        </div>
-
-        <!-- Linha do Tempo -->
+        <!-- Timeline Diária -->
         <div class="timeline">
             
             <!-- Pré Treino -->
@@ -372,7 +412,7 @@
                     <div class="item-title editable-area">🌄 PRÉ-TREINO</div>
                     <ul class="item-list editable-area">
                         <li>2 ovos inteiros</li>
-                        <li>50g Vegetais (cenoura, folhas)</li>
+                        <li>50g Vegetais (cenoura crua, folhas)</li>
                     </ul>
                     <span class="meal-function editable-area">🎯 Ativar sistema nervoso e preservar massa.</span>
                     <div class="macros-row">
@@ -524,7 +564,7 @@
 
         </div>
 
-        <!-- Footer Resumo -->
+        <!-- Footer Resumo Diário -->
         <div class="footer-summary">
             <div class="summary-title">🔥 Resumo Diário Final</div>
             <div class="summary-grid">
@@ -545,6 +585,177 @@
                     <span class="sum-lbl">Gord</span>
                 </div>
             </div>
+        </div>
+
+        <!-- SEÇÃO: SUBSTITUIÇÕES -->
+        <div class="section-title">📊 SUBSTITUIÇÕES</div>
+        <div class="extra-content">
+            
+            <!-- Proteínas -->
+            <div class="substitution-card">
+                <div class="subst-header">🥩 PROTEÍNAS ANIMAIS</div>
+                
+                <div class="subst-info editable-area">
+                    🔁 180g Patinho ≈ 42-45g P | 8-10g G | ~250kcal
+                </div>
+                <span class="sub-title">Trocar por:</span>
+                <ul class="item-list editable-area">
+                    <li>200g Acém moído (escorrido)</li>
+                    <li>200g Coxão duro</li>
+                    <li>220g Músculo cozido/desfiado</li>
+                    <li>1 lata gde Sardinha (170g)</li>
+                </ul>
+
+                <br>
+                <div class="subst-info editable-area">
+                    🔁 150g Frango ≈ 32-35g P | 3-4g G | ~165kcal
+                </div>
+                <span class="sub-title">Trocar por:</span>
+                <ul class="item-list editable-area">
+                    <li>180g Coxa/Sobrecoxa s/ pele</li>
+                    <li>160g Sassami</li>
+                    <li>3 ovos inteiros (Gordura maior)</li>
+                    <li>120g Carne moída magra</li>
+                </ul>
+
+                <br>
+                <div class="subst-info editable-area">
+                    🔁 2 Ovos ≈ 12g P | 10g G | ~140kcal
+                </div>
+                <span class="sub-title">Trocar por:</span>
+                <ul class="item-list editable-area">
+                    <li>1 lata sardinha pequena (120g)</li>
+                    <li>100g Frango cozido</li>
+                    <li>120g Músculo desfiado</li>
+                </ul>
+            </div>
+
+            <!-- Carboidratos -->
+            <div class="substitution-card">
+                <div class="subst-header">🍞 CARBOIDRATOS</div>
+                
+                <div class="subst-info editable-area">
+                    🔁 120g Arroz ≈ 28-30g C | ~130kcal
+                </div>
+                <span class="sub-title">Trocar por:</span>
+                <ul class="item-list editable-area">
+                    <li>130g Batata inglesa cozida</li>
+                    <li>100g Batata-doce cozida</li>
+                    <li>100g Macarrão cozido</li>
+                    <li>90g Cuscuz pronto</li>
+                    <li>80g Mandioca cozida</li>
+                </ul>
+
+                <br>
+                <div class="subst-info editable-area">
+                    🔁 80g Batata (Lanche) ≈ 18-20g C
+                </div>
+                <span class="sub-title">Trocar por:</span>
+                <ul class="item-list editable-area">
+                    <li>70g Arroz cozido</li>
+                    <li>60g Cuscuz / Macarrão</li>
+                    <li>100g Abóbora cabotiá</li>
+                </ul>
+            </div>
+
+            <!-- Vegetais e Gorduras -->
+            <div class="substitution-card">
+                <div class="subst-header">🥦 VEGETAIS & GORDURAS</div>
+                
+                <div class="subst-info editable-area">
+                    🔁 100g Brócolis (Livre)
+                </div>
+                <ul class="item-list editable-area">
+                    <li>Abobrinha, Chuchu, Repolho</li>
+                    <li>Couve, Pepino, Alface, Cenoura</li>
+                </ul>
+
+                <br>
+                <div class="subst-info editable-area">
+                    🔁 5ml Azeite (Troca Controlada)
+                </div>
+                <ul class="item-list editable-area">
+                    <li>1 colher chá rasa banha</li>
+                    <li>1 gema de ovo</li>
+                    <li>1 colher chá óleo comum</li>
+                </ul>
+            </div>
+
+        </div>
+
+        <!-- SEÇÃO: LISTA DE COMPRAS -->
+        <div class="section-title">🛒 LISTA DE COMPRAS</div>
+        <div class="extra-content">
+
+            <!-- Semanal -->
+            <div class="substitution-card">
+                <div class="subst-header">📆 SEMANAL (7 DIAS)</div>
+                
+                <div class="shopping-list-grid">
+                    <div class="shopping-category">
+                        <span class="cat-name">🥩 Proteínas</span>
+                        <ul class="item-list editable-area">
+                            <li>Peito frango: 1,5 kg</li>
+                            <li>Coxa/sobrecoxa: 1 kg</li>
+                            <li>Carne magra: 1,2 kg</li>
+                            <li>Ovos: 30 un. (2½ dúzias)</li>
+                            <li>Sardinha: 5 un.</li>
+                        </ul>
+                    </div>
+
+                    <div class="shopping-category">
+                        <span class="cat-name">🍞 Carboidratos</span>
+                        <ul class="item-list editable-area">
+                            <li>Arroz: 1,5 kg (cru)</li>
+                            <li>Batata (inglesa/doce): 2 kg</li>
+                            <li>Cuscuz/Mandioca: 1 kg</li>
+                        </ul>
+                    </div>
+
+                    <div class="shopping-category">
+                        <span class="cat-name">🥦 Vegetais</span>
+                        <ul class="item-list editable-area">
+                            <li>Brócolis: 1 kg | Cenoura: 1,5 kg</li>
+                            <li>Abobrinha/Chuchu: 1 kg</li>
+                            <li>Beterraba: 1 kg</li>
+                            <li>Repolho/Couve: 2 un.</li>
+                            <li>Pepino/Alface: 2 un.</li>
+                        </ul>
+                    </div>
+
+                    <div class="shopping-category">
+                        <span class="cat-name">🧈 Básicos</span>
+                        <ul class="item-list editable-area">
+                            <li>Azeite (250ml), Óleo/Banha</li>
+                            <li>Sal, Alho, Cebola, Café</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Mensal -->
+            <div class="substitution-card">
+                <div class="subst-header">📆 MENSAL (ESTOQUE)</div>
+                <div class="shopping-list-grid">
+                    <div class="shopping-category">
+                        <ul class="item-list editable-area">
+                            <li>Peito frango: 6 kg</li>
+                            <li>Coxa/sobrecoxa: 4 kg</li>
+                            <li>Carne magra: 5 kg</li>
+                            <li>Ovos: 120 un. (10 dúzias)</li>
+                            <li>Sardinha: 20 latas</li>
+                            <li>Arroz: 6 kg | Batatas: 8 kg</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Regra Final -->
+            <div class="final-rule editable-area">
+                🧠 REGRA ESSENCIAL:<br>
+                <strong>Se não está na lista,<br>não está na dieta.</strong>
+            </div>
+
         </div>
 
     </div>
