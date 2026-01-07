@@ -2,433 +2,206 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Plano Alimentar - Rodrigo Silva</title>
-    
-    <!-- Tailwind CSS -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plano Nutricional - Rodrigo Silva</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    
-    <!-- Biblioteca de Captura de Imagem -->
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
-    
-    <!-- Fontes e Ícones -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@500;700;800;900&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
-
     <style>
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: #f3f4f6;
-            -webkit-print-color-adjust: exact;
-            overscroll-behavior-y: none;
-        }
-
-        /* --- Estilos de Edição --- */
-        [contenteditable="true"] {
-            transition: all 0.2s;
-            border-radius: 6px;
-        }
-        [contenteditable="true"]:active,
-        [contenteditable="true"]:focus {
-            background-color: rgba(255, 255, 255, 0.1);
-            outline: 2px solid #3b82f6;
-            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
-        }
-
-        /* --- Container Principal --- */
-        .page-container {
-            width: 100%;
-            margin: 0 auto;
-            background: white; /* Cor padrão */
-            padding: 1rem;
-            padding-bottom: 6rem; /* Espaço para botão mobile */
-            color: #111827;
-            transition: background-color 0.3s, color 0.3s;
-        }
-
-        /* Estilo Desktop Visualização */
-        @media (min-width: 640px) {
-            .page-container {
-                max-width: 210mm;
-                margin: 20px auto;
-                padding: 15mm;
-                box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-                border-radius: 8px;
-            }
-        }
-
-        /* --- TEMAS (Cores de Fundo) --- */
-        
-        /* Tema Amarelo (Post-it) */
-        [data-theme="yellow"] {
-            background-color: #fefce8 !important; /* yellow-50 */
-            color: #422006 !important;
-        }
-        [data-theme="yellow"] .accent-box,
-        [data-theme="yellow"] .bg-white {
-            background-color: #fef9c3 !important; /* yellow-100 */
-            border-color: #fde047 !important;
-        }
-        [data-theme="yellow"] .bg-gray-50 {
-            background-color: #fef08a !important; /* yellow-200 */
-            border-color: #facc15 !important;
-        }
-
-        /* Tema Preto (Dark Mode) */
-        [data-theme="dark"] {
-            background-color: #111827 !important; /* gray-900 */
-            color: #f3f4f6 !important;
-        }
-        [data-theme="dark"] .accent-box,
-        [data-theme="dark"] .bg-white {
-            background-color: #1f2937 !important; /* gray-800 */
-            border-color: #374151 !important;
-            color: #e5e7eb !important;
-        }
-        [data-theme="dark"] .bg-gray-50 {
-            background-color: #374151 !important;
-            border-color: #4b5563 !important;
-            color: #d1d5db !important;
-        }
-        /* Ajuste de textos no dark mode */
-        [data-theme="dark"] .text-gray-900,
-        [data-theme="dark"] .text-gray-800,
-        [data-theme="dark"] .text-gray-700,
-        [data-theme="dark"] .text-gray-600,
-        [data-theme="dark"] .text-gray-500 {
-            color: #d1d5db !important;
-        }
-        [data-theme="dark"] .bg-blue-50 {
-            background-color: #172554 !important; /* blue-950 */
-            color: #bfdbfe !important;
-            border-color: #1e40af !important;
-        }
-        [data-theme="dark"] .macro-pill {
-            background-color: #374151 !important;
-            color: #bfdbfe !important;
-            border-color: #4b5563 !important;
-        }
-
-        /* --- MODO SCREENSHOT (A Mágica da Imagem) --- */
-        /* Essa classe força o layout a ficar "Largo" (Desktop) na hora da foto */
-        .screenshot-mode {
-            width: 800px !important; /* Largura fixa ideal para leitura */
-            max-width: 800px !important;
-            padding: 40px !important;
-            margin: 0 !important;
-            /* background: white !important;  <-- REMOVIDO para aceitar temas */
-            border-radius: 0 !important;
-            box-shadow: none !important;
-            position: absolute !important; /* Tira do fluxo da tela do cel */
-            top: 0 !important;
-            left: 0 !important;
-            z-index: -100 !important; /* Esconde atrás enquanto gera */
-        }
-
-        /* Força GRID de 2 ou 3 colunas no modo imagem */
-        .screenshot-mode .grid-responsive {
-            display: grid !important;
-            grid-template-columns: repeat(2, 1fr) !important;
-            gap: 20px !important;
-        }
-        .screenshot-mode .grid-responsive-3 {
-            display: grid !important;
-            grid-template-columns: repeat(3, 1fr) !important;
-            gap: 20px !important;
-        }
-
-        /* Ajuste de fontes para a imagem ficar elegante */
-        .screenshot-mode .text-adaptive-base { font-size: 0.9rem !important; }
-        .screenshot-mode .text-adaptive-lg { font-size: 1.1rem !important; }
-        .screenshot-mode .text-adaptive-xl { font-size: 1.8rem !important; }
-        .screenshot-mode .section-title { font-size: 1.2rem !important; margin-bottom: 15px !important; }
-
-        .no-print { display: block; }
-
-        /* Utilitários Visuais */
-        .accent-box { border-left: 4px solid #3b82f6; }
-        .meal-time { color: #1e40af; font-weight: 700; }
-        .macro-pill { 
-            background: #eff6ff; color: #1e3a8a; 
-            padding: 2px 8px; border-radius: 99px; 
-            font-size: 0.75rem; font-weight: 600; 
-            border: 1px solid #dbeafe; display: inline-block; margin-top: 2px;
-        }
+        :root { --font-heading: 'Outfit', sans-serif; --font-body: 'Inter', sans-serif; }
+        * { -webkit-font-smoothing: antialiased; }
+        body { font-family: var(--font-body); background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; }
+        h1, h2, h3 { font-family: var(--font-heading); }
+        [contenteditable="true"] { transition: all 0.2s; border-radius: 8px; padding: 4px 6px; margin: -4px -6px; border: 2px solid transparent; outline: none; }
+        [contenteditable="true"]:hover { background-color: rgba(99, 102, 241, 0.05); border-color: rgba(99, 102, 241, 0.2); cursor: text; }
+        [contenteditable="true"]:focus { background-color: white; border-color: #6366f1; box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.15); }
+        .page-container { width: 100%; margin: 0 auto; background: white; padding: 1.5rem; padding-bottom: 8rem; color: #1e293b; min-height: 100vh; }
+        @media (min-width: 640px) { .page-container { max-width: 210mm; margin: 2.5rem auto; padding: 3.5rem; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); border-radius: 20px; min-height: auto; } }
+        [data-theme="yellow"] { background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%) !important; color: #78350f !important; }
+        [data-theme="yellow"] .card-style { background: white !important; border: 2px solid #fcd34d !important; }
+        [data-theme="yellow"] .accent-blue { background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%) !important; }
+        [data-theme="dark"] { background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%) !important; color: #e2e8f0 !important; }
+        [data-theme="dark"] .card-style { background: #1e293b !important; border: 2px solid #334155 !important; color: #f1f5f9 !important; }
+        [data-theme="dark"] .text-slate-500, [data-theme="dark"] .text-slate-600, [data-theme="dark"] .text-slate-700 { color: #94a3b8 !important; }
+        [data-theme="dark"] .bg-slate-100 { background: #334155 !important; }
+        .card-style { background: white; border-radius: 16px; border: 2px solid #e2e8f0; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); transition: all 0.3s; }
+        .card-style:hover { transform: translateY(-2px); box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); }
+        .accent-border { border-left: 5px solid #6366f1; }
+        .accent-blue { background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); color: white; border: none !important; box-shadow: 0 10px 25px -5px rgba(99, 102, 241, 0.4); }
+        .macro-pill { display: inline-flex; align-items: center; gap: 4px; padding: 4px 10px; border-radius: 8px; font-size: 0.75rem; font-weight: 700; background-color: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; }
+        .clone-container { position: fixed; top: 0; left: -9999px; width: 900px !important; z-index: 9999; background: white; }
+        .screenshot-mode { width: 900px !important; padding: 60px !important; border-radius: 0 !important; box-shadow: none !important; margin: 0 !important; }
+        .screenshot-mode .grid-responsive-3 { display: grid !important; grid-template-columns: repeat(3, 1fr) !important; gap: 24px !important; }
+        .screenshot-mode .grid-responsive-2 { display: grid !important; grid-template-columns: repeat(2, 1fr) !important; gap: 24px !important; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .animate-spin { animation: spin 1s linear infinite; }
+        @media print { body { background: white !important; } .no-print { display: none !important; } .page-container { box-shadow: none !important; margin: 0 !important; border-radius: 0 !important; } }
     </style>
 </head>
-<body class="bg-gray-100 sm:bg-gray-200">
-
-    <!-- Painel Flutuante -->
-    <div class="fixed bottom-0 left-0 right-0 p-4 bg-white border-t border-gray-200 flex items-center justify-between gap-3 z-50 no-print shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] sm:bottom-6 sm:left-auto sm:right-6 sm:w-auto sm:rounded-xl sm:border-0 sm:bg-transparent sm:shadow-none sm:p-0">
-        
-        <!-- Seletor de Cores (Substitui o texto de ajuda) -->
-        <div class="flex items-center gap-2 bg-gray-50 rounded-full px-2 py-1 border border-gray-200 shadow-inner">
-            <button onclick="setTheme('white')" class="w-8 h-8 rounded-full bg-white border-2 border-gray-200 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400 transition transform active:scale-90" title="Branco"></button>
-            <button onclick="setTheme('yellow')" class="w-8 h-8 rounded-full bg-[#fefce8] border-2 border-yellow-200 shadow-sm focus:outline-none focus:ring-2 focus:ring-yellow-400 transition transform active:scale-90" title="Amarelo"></button>
-            <button onclick="setTheme('dark')" class="w-8 h-8 rounded-full bg-gray-900 border-2 border-gray-600 shadow-sm focus:outline-none focus:ring-2 focus:ring-gray-500 transition transform active:scale-90" title="Preto"></button>
+<body>
+    <div class="fixed bottom-0 left-0 right-0 p-4 bg-white/95 backdrop-blur-xl border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-3 z-50 no-print shadow-[0_-10px_40px_rgba(0,0,0,0.15)] sm:bottom-6 sm:left-1/2 sm:right-auto sm:-translate-x-1/2 sm:w-auto sm:rounded-2xl sm:border sm:px-8 sm:py-4">
+        <div class="flex items-center gap-3 pb-3 sm:pb-0 sm:pr-4 border-b sm:border-b-0 sm:border-r border-slate-200 w-full sm:w-auto justify-center">
+            <span class="text-xs font-bold text-slate-500 uppercase">Tema:</span>
+            <button onclick="setTheme('white')" class="w-10 h-10 rounded-xl bg-white border-2 border-slate-300 hover:ring-2 hover:ring-indigo-300 transition-all shadow-md"></button>
+            <button onclick="setTheme('yellow')" class="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-200 to-yellow-300 border-2 border-amber-400 hover:ring-2 hover:ring-amber-400 transition-all shadow-md"></button>
+            <button onclick="setTheme('dark')" class="w-10 h-10 rounded-xl bg-gradient-to-br from-slate-800 to-slate-900 border-2 border-slate-700 hover:ring-2 hover:ring-slate-600 transition-all shadow-md"></button>
         </div>
-
-        <button onclick="downloadImage()" class="flex-1 sm:flex-none bg-indigo-600 active:bg-indigo-700 hover:bg-indigo-700 text-white font-bold py-3 px-6 rounded-lg sm:rounded-full shadow-lg flex items-center justify-center gap-2 transition transform active:scale-95 text-sm">
-            <i class="ph ph-image text-lg"></i> 
-            <span>Baixar Imagem</span>
-        </button>
+        <div class="flex items-center gap-3 w-full sm:w-auto">
+            <button onclick="downloadImageSafe()" class="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-bold py-3 px-6 rounded-xl shadow-lg transition-all text-sm">
+                <i class="ph-bold ph-image text-xl"></i> <span>Salvar Imagem</span>
+            </button>
+            <button onclick="window.print()" class="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-3 px-6 rounded-xl border-2 border-slate-300 transition-all text-sm">
+                <i class="ph-bold ph-printer text-xl"></i> <span>Imprimir</span>
+            </button>
+        </div>
     </div>
 
-    <!-- Container Principal -->
     <div id="document-content" class="page-container">
-        
-        <!-- Cabeçalho -->
-        <header class="flex flex-col sm:flex-row justify-between items-start sm:items-end mb-6 border-b pb-4 sm:gap-3" contenteditable="true">
-            <div class="w-full sm:w-auto">
-                <h1 class="text-2xl font-bold text-gray-900 leading-tight mb-1 text-adaptive-xl">Plano Nutricional</h1>
-                <p class="text-gray-500 text-sm text-adaptive-base">Atleta: <strong class="text-gray-800">Rodrigo Silva</strong></p>
+        <header class="flex flex-col sm:flex-row justify-between items-start sm:items-end mb-12 border-b-2 border-slate-100 pb-8 gap-6">
+            <div class="w-full sm:w-auto" contenteditable="true">
+                <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-indigo-50 to-purple-50 text-indigo-700 text-xs font-black uppercase mb-4 border border-indigo-100">
+                    <i class="ph-fill ph-lightning"></i> Protocolo Oficial
+                </div>
+                <h1 class="text-4xl sm:text-5xl font-black text-slate-900 mb-2">Plano Nutricional</h1>
+                <p class="text-slate-500 text-base font-semibold">Personalizado para <strong class="text-indigo-600">Rodrigo Silva</strong></p>
             </div>
-            
-            <div class="w-full sm:w-auto bg-blue-50 text-blue-900 p-3 rounded-lg border border-blue-100 mt-3 sm:mt-0">
-                <div class="grid grid-cols-2 sm:flex gap-3 text-sm font-bold text-center sm:text-left text-adaptive-base">
-                    <span>🔥 2.050 kcal</span>
-                    <span>🥩 190g P</span>
-                    <span>🍞 130g C</span>
-                    <span>🧈 70g G</span>
+            <div class="w-full sm:w-auto bg-gradient-to-br from-slate-50 to-slate-100 p-6 rounded-2xl border-2 border-slate-200 shadow-md">
+                <div class="grid grid-cols-2 sm:flex gap-6 text-center">
+                    <div><span class="text-xs text-slate-500 font-black uppercase block mb-1">Calorias</span><span class="text-indigo-600 font-black text-2xl block">2.050</span></div>
+                    <div class="sm:border-l-2 border-slate-300 sm:pl-6"><span class="text-xs text-slate-500 font-black uppercase block mb-1">Prot</span><span class="text-rose-600 font-black text-2xl block">190g</span></div>
+                    <div class="sm:border-l-2 border-slate-300 sm:pl-6"><span class="text-xs text-slate-500 font-black uppercase block mb-1">Carb</span><span class="text-amber-600 font-black text-2xl block">130g</span></div>
+                    <div class="sm:border-l-2 border-slate-300 sm:pl-6"><span class="text-xs text-slate-500 font-black uppercase block mb-1">Gord</span><span class="text-emerald-600 font-black text-2xl block">70g</span></div>
                 </div>
             </div>
         </header>
 
-        <!-- Rotina Diária -->
         <section>
-            <h2 class="section-title text-lg font-bold uppercase text-gray-800 border-b-2 border-gray-200 pb-1 mb-4 flex items-center gap-2">
-                <i class="ph ph-clock text-blue-600"></i> Rotina Diária
-            </h2>
-
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 grid-responsive-3">
-                
-                <!-- Blocos de Refeição -->
-                <div class="accent-box bg-white p-4 rounded-lg shadow-sm border border-gray-100" contenteditable="true">
-                    <span class="meal-time text-base block mb-2 text-adaptive-lg">04:40 — Pré-Treino</span>
-                    <ul class="text-gray-700 mb-2 list-none space-y-1 text-adaptive-base">
-                        <li>• 2 ovos inteiros</li>
-                        <li>• 50g vegetais (cenoura, folhas)</li>
-                    </ul>
-                    <div class="flex flex-wrap gap-2">
-                        <span class="macro-pill">180 kcal</span>
-                        <span class="macro-pill">12g P</span>
-                    </div>
+            <h2 class="text-xl font-black uppercase text-slate-800 border-b-2 border-indigo-200 pb-3 mb-8 flex items-center gap-3"><i class="ph-duotone ph-clock text-indigo-600 text-2xl"></i> Rotina Diária</h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 grid-responsive-3">
+                <div class="card-style accent-border p-6" contenteditable="true">
+                    <div class="flex justify-between mb-4"><span class="text-indigo-700 font-black text-2xl">04:40</span><span class="text-xs font-black text-slate-500 uppercase bg-slate-100 px-3 py-1.5 rounded-lg">Pré-Treino</span></div>
+                    <ul class="text-slate-700 text-sm space-y-2 mb-5"><li>• 2 ovos inteiros</li><li>• 50g vegetais</li></ul>
+                    <span class="macro-pill">🔥 180 kcal</span>
                 </div>
-
-                <div class="bg-blue-600 text-white p-4 rounded-lg shadow-sm flex flex-col justify-center gap-1" contenteditable="true">
-                    <div class="flex items-center gap-2 mb-1">
-                        <i class="ph ph-barbell text-xl"></i>
-                        <span class="font-bold text-base text-adaptive-lg uppercase">05:00 — Treino</span>
-                    </div>
-                    <p class="text-sm text-blue-100 leading-tight text-adaptive-base">Hidratação constante. Café/chá opcional.</p>
+                <div class="card-style accent-blue p-6 flex flex-col justify-center" contenteditable="true">
+                    <div class="flex items-center gap-4 mb-3"><i class="ph-fill ph-barbell text-3xl bg-white/20 p-2 rounded-xl"></i><div><span class="block text-indigo-200 text-xs font-black uppercase">Atividade</span><span class="font-black text-2xl">05:00 — TREINO</span></div></div>
+                    <p class="text-sm text-indigo-100">Hidratação constante. Café/chá opcional.</p>
                 </div>
-
-                <div class="accent-box bg-white p-4 rounded-lg shadow-sm border border-gray-100" contenteditable="true">
-                    <span class="meal-time text-base block mb-2 text-adaptive-lg">06:30 — Pós-Treino</span>
-                    <ul class="text-gray-700 mb-2 list-none space-y-1 text-adaptive-base">
-                        <li>• 3 ovos inteiros</li>
-                        <li>• 100g Brócolis + 50g Cenoura</li>
-                        <li>• 120g Batata-doce cozida</li>
-                    </ul>
-                    <span class="macro-pill">520 kcal</span>
+                <div class="card-style accent-border p-6" contenteditable="true">
+                    <div class="flex justify-between mb-4"><span class="text-indigo-700 font-black text-2xl">06:30</span><span class="text-xs font-black text-slate-500 uppercase bg-slate-100 px-3 py-1.5 rounded-lg">Pós-Treino</span></div>
+                    <ul class="text-slate-700 text-sm space-y-2 mb-5"><li>• 3 ovos inteiros</li><li>• 100g Brócolis + 50g Cenoura</li><li>• 120g Batata-doce</li></ul>
+                    <span class="macro-pill">🔥 520 kcal</span>
                 </div>
-
-                <div class="accent-box bg-white p-4 rounded-lg shadow-sm border border-gray-100" contenteditable="true">
-                    <span class="meal-time text-base block mb-2 text-adaptive-lg">09:30 — Lanche</span>
-                    <ul class="text-gray-700 mb-2 list-none space-y-1 text-adaptive-base">
-                        <li>• 2 ovos cozidos</li>
-                        <li>• 80g Vegetais (cenoura, pepino)</li>
-                    </ul>
-                    <span class="macro-pill">180 kcal</span>
+                <div class="card-style accent-border p-6" contenteditable="true">
+                    <div class="flex justify-between mb-4"><span class="text-indigo-700 font-black text-2xl">09:30</span><span class="text-xs font-black text-slate-500 uppercase bg-slate-100 px-3 py-1.5 rounded-lg">Lanche</span></div>
+                    <ul class="text-slate-700 text-sm space-y-2 mb-5"><li>• 2 ovos cozidos</li><li>• 80g Vegetais</li></ul>
+                    <span class="macro-pill">🔥 180 kcal</span>
                 </div>
-
-                <div class="accent-box bg-white p-4 rounded-lg shadow-sm border border-gray-100" contenteditable="true">
-                    <span class="meal-time text-base block mb-2 text-adaptive-lg">12:30 — Almoço</span>
-                    <ul class="text-gray-700 mb-2 list-none space-y-1 text-adaptive-base">
-                        <li>• 180g Patinho</li>
-                        <li>• 120g Arroz</li>
-                        <li>• 120g Brócolis e Azeite (5ml)</li>
-                    </ul>
-                    <div class="flex gap-2 mt-1">
-                        <span class="macro-pill">670 kcal</span>
-                    </div>
+                <div class="card-style accent-border p-6" contenteditable="true">
+                    <div class="flex justify-between mb-4"><span class="text-indigo-700 font-black text-2xl">12:30</span><span class="text-xs font-black text-slate-500 uppercase bg-slate-100 px-3 py-1.5 rounded-lg">Almoço</span></div>
+                    <ul class="text-slate-700 text-sm space-y-2 mb-5"><li>• 180g Patinho</li><li>• 120g Arroz</li><li>• 120g Brócolis + 5ml Azeite</li></ul>
+                    <span class="macro-pill">🔥 670 kcal</span>
                 </div>
-
-                <div class="accent-box bg-white p-4 rounded-lg shadow-sm border border-gray-100" contenteditable="true">
-                    <span class="meal-time text-base block mb-2 text-adaptive-lg">16:00 — Tarde</span>
-                    <ul class="text-gray-700 mb-2 list-none space-y-1 text-adaptive-base">
-                        <li>• 150g Frango</li>
-                        <li>• 80g Batata</li>
-                        <li>• 100g Vegetais</li>
-                    </ul>
-                    <span class="macro-pill">330 kcal</span>
+                <div class="card-style accent-border p-6" contenteditable="true">
+                    <div class="flex justify-between mb-4"><span class="text-indigo-700 font-black text-2xl">16:00</span><span class="text-xs font-black text-slate-500 uppercase bg-slate-100 px-3 py-1.5 rounded-lg">Tarde</span></div>
+                    <ul class="text-slate-700 text-sm space-y-2 mb-5"><li>• 150g Frango</li><li>• 80g Batata + 100g Vegetais</li></ul>
+                    <span class="macro-pill">🔥 330 kcal</span>
                 </div>
-
-                <div class="accent-box bg-white p-4 rounded-lg shadow-sm border border-gray-100" contenteditable="true">
-                    <span class="meal-time text-base block mb-2 text-adaptive-lg">19:00 — Jantar</span>
-                    <ul class="text-gray-700 mb-2 list-none space-y-1 text-adaptive-base">
-                        <li>• 200g Carne/Frango</li>
-                        <li>• 150g Vegetais</li>
-                        <li>(Sem carbo denso)</li>
-                    </ul>
-                    <span class="macro-pill">350 kcal</span>
+                <div class="card-style accent-border p-6" contenteditable="true">
+                    <div class="flex justify-between mb-4"><span class="text-indigo-700 font-black text-2xl">19:00</span><span class="text-xs font-black text-slate-500 uppercase bg-slate-100 px-3 py-1.5 rounded-lg">Jantar</span></div>
+                    <ul class="text-slate-700 text-sm space-y-2 mb-5"><li>• 200g Carne/Frango</li><li>• 150g Vegetais</li></ul>
+                    <span class="macro-pill">🔥 350 kcal</span>
                 </div>
-
-                <div class="bg-gray-50 p-4 rounded-lg border border-gray-200" contenteditable="true">
-                    <span class="meal-time text-sm text-gray-600 block mb-2 text-adaptive-lg">21:30 — Ceia (Opc)</span>
-                    <ul class="text-gray-600 list-none space-y-1 text-adaptive-base">
-                        <li>• 2 claras + 1 ovo</li>
-                        <li>OU 100g Frango</li>
-                    </ul>
+                <div class="card-style p-6 bg-gradient-to-br from-slate-50 to-slate-100" contenteditable="true">
+                    <div class="flex justify-between mb-4"><span class="text-slate-600 font-black text-2xl">21:30</span><span class="text-xs font-black text-slate-400 uppercase bg-white px-3 py-1.5 rounded-lg border border-slate-200">Ceia (Opc)</span></div>
+                    <ul class="text-slate-600 text-sm space-y-2"><li>• 2 claras + 1 ovo</li><li>• OU 100g Frango</li></ul>
                 </div>
             </div>
         </section>
 
-        <!-- Substituições -->
-        <section class="mt-8 mb-8 border-t border-gray-200 pt-8">
-            <h2 class="section-title text-lg font-bold uppercase text-gray-800 border-b-2 border-gray-200 pb-1 mb-4 flex items-center gap-2">
-                <i class="ph ph-arrows-left-right text-green-600"></i> Substituições
-            </h2>
-            
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 bg-white p-4 rounded-lg border border-gray-200 grid-responsive" contenteditable="true">
-                <!-- Proteínas -->
-                <div class="border-b sm:border-b-0 sm:border-r border-gray-100 pb-4 sm:pb-0 sm:pr-4">
-                    <h3 class="text-base font-bold text-red-600 mb-2 text-adaptive-lg">🥩 Proteínas</h3>
-                    <div class="space-y-3">
-                        <div>
-                            <p class="text-sm font-bold text-gray-800 text-adaptive-base">180g Patinho =</p>
-                            <ul class="text-sm text-gray-600 text-adaptive-base">
-                                <li>200g Acém/Coxão</li>
-                                <li>1 lata Sardinha</li>
-                            </ul>
-                        </div>
-                        <div>
-                            <p class="text-sm font-bold text-gray-800 text-adaptive-base">150g Frango =</p>
-                            <ul class="text-sm text-gray-600 text-adaptive-base">
-                                <li>180g Coxa/Sobre</li>
-                                <li>3 ovos grandes</li>
-                            </ul>
-                        </div>
+        <section class="mt-14 border-t-2 border-slate-100 pt-10">
+            <h2 class="text-xl font-black uppercase text-slate-800 border-b-2 border-emerald-200 pb-3 mb-8 flex items-center gap-3"><i class="ph-duotone ph-arrows-left-right text-emerald-600 text-2xl"></i> Substituições</h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-8 grid-responsive-2">
+                <div class="card-style p-8 border-l-[6px] border-l-rose-500" contenteditable="true">
+                    <h3 class="text-lg font-black text-rose-600 mb-6 uppercase flex items-center gap-3"><i class="ph-fill ph-paw-print"></i> Proteínas</h3>
+                    <div class="space-y-5">
+                        <div class="bg-gradient-to-br from-rose-50 to-pink-50 p-4 rounded-xl border border-rose-100"><p class="text-sm font-black text-rose-800 mb-2">180g Patinho =</p><p class="text-sm text-rose-700">200g Acém/Coxão <strong>ou</strong> 1 lata Sardinha</p></div>
+                        <div class="bg-gradient-to-br from-rose-50 to-pink-50 p-4 rounded-xl border border-rose-100"><p class="text-sm font-black text-rose-800 mb-2">150g Frango =</p><p class="text-sm text-rose-700">180g Coxa/Sobrecoxa <strong>ou</strong> 3 ovos</p></div>
                     </div>
                 </div>
-
-                <!-- Carbos e Veg -->
-                <div class="sm:pl-4 space-y-4">
-                    <div>
-                        <h3 class="text-base font-bold text-yellow-600 mb-2 text-adaptive-lg">🍞 Carbos (120g)</h3>
-                        <ul class="text-sm text-gray-600 text-adaptive-base">
-                            <li>130g Batata Inglesa</li>
-                            <li>100g Batata Doce</li>
-                            <li>100g Macarrão / 90g Cuscuz</li>
-                        </ul>
-                    </div>
-                    <div>
-                        <h3 class="text-base font-bold text-green-600 mb-2 text-adaptive-lg">🥦 Veg & 🧈 Gord</h3>
-                        <p class="text-sm text-gray-600 text-adaptive-base"><strong>5ml Azeite =</strong> 1 colher chá banha/óleo ou 1 gema.</p>
+                <div class="card-style p-8 border-l-[6px] border-l-amber-500" contenteditable="true">
+                    <h3 class="text-lg font-black text-amber-600 mb-6 uppercase flex items-center gap-3"><i class="ph-fill ph-grains"></i> Carbos & Gorduras</h3>
+                    <div class="space-y-5">
+                        <div class="bg-gradient-to-br from-amber-50 to-yellow-50 p-4 rounded-xl border border-amber-100"><p class="text-sm font-black text-amber-800 mb-2">120g Arroz =</p><p class="text-sm text-amber-700">130g Batata Inglesa <strong>ou</strong> 100g Batata Doce <strong>ou</strong> 90g Cuscuz</p></div>
+                        <div class="bg-gradient-to-br from-emerald-50 to-teal-50 p-4 rounded-xl border border-emerald-200"><p class="text-sm font-black text-emerald-800 mb-2">5ml Azeite =</p><p class="text-sm text-emerald-700">1 colher chá banha/óleo <strong>ou</strong> 1 gema</p></div>
                     </div>
                 </div>
             </div>
         </section>
 
-        <!-- Lista de Compras -->
-        <section class="bg-slate-800 text-slate-100 rounded-lg p-4" contenteditable="true">
-            <h2 class="text-sm font-bold uppercase tracking-wide flex items-center gap-2 mb-3 text-white border-b border-slate-600 pb-2 text-adaptive-lg">
-                <i class="ph ph-shopping-cart"></i> Lista de Compras
-            </h2>
-
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 text-sm grid-responsive">
-                <!-- Semanal -->
-                <div>
-                    <h3 class="font-bold text-blue-300 mb-2 text-adaptive-base">🥩 Base Semanal</h3>
-                    <ul class="space-y-1 opacity-90 text-adaptive-base">
-                        <li>1.5kg Frango (Peito)</li>
-                        <li>1kg Coxa/Sobrecoxa</li>
-                        <li>1.2kg Carne Magra</li>
-                        <li>30 Ovos</li>
-                        <li>1.5kg Arroz</li>
-                        <li>2kg Batatas</li>
-                        <li>Vegetais variados</li>
-                    </ul>
+        <section class="mt-14 bg-gradient-to-br from-slate-800 to-slate-900 text-slate-100 rounded-3xl p-10 shadow-2xl" contenteditable="true">
+            <h2 class="text-base font-black uppercase flex items-center gap-3 mb-8 text-white border-b-2 border-slate-600 pb-5"><i class="ph-fill ph-shopping-cart text-2xl text-indigo-400"></i> Lista de Compras</h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-10 text-sm grid-responsive-2">
+                <div><h3 class="font-black text-indigo-300 mb-5 text-lg uppercase"><i class="ph-fill ph-calendar-check"></i> Semanal</h3>
+                    <ul class="space-y-3 text-slate-300"><li>✓ 1,5kg Frango (Peito)</li><li>✓ 1kg Coxa/Sobrecoxa</li><li>✓ 1,2kg Carne Magra</li><li>✓ 30 Ovos</li><li>✓ Vegetais variados</li><li>✓ 3kg Batatas</li><li>✓ 2kg Arroz</li></ul>
                 </div>
-                
-                <!-- Mensal -->
-                <div class="bg-slate-700/50 rounded p-3">
-                    <h3 class="font-bold text-purple-300 mb-2 text-adaptive-base">📦 Estoque Mensal</h3>
-                    <ul class="space-y-1 opacity-90 text-adaptive-base">
-                        <li>6kg Peito Frango</li>
-                        <li>4kg Coxa/Sobre</li>
-                        <li>5kg Carne Bovina</li>
-                        <li>120 Ovos</li>
-                        <li>6kg Arroz</li>
-                        <li>8kg Batatas</li>
-                    </ul>
+                <div class="bg-gradient-to-br from-slate-700/60 to-slate-700/40 rounded-2xl p-6 border-2 border-slate-600"><h3 class="font-black text-purple-300 mb-5 text-lg uppercase"><i class="ph-fill ph-package"></i> Estoque Mensal</h3>
+                    <ul class="space-y-3 text-slate-300"><li>• 6kg Peito Frango</li><li>• 4kg Coxa/Sobrecoxa</li><li>• 5kg Carne Bovina</li><li>• 120 Ovos</li><li>• 6kg Arroz</li><li>• 8kg Batatas</li><li>• Azeite (500ml)</li></ul>
                 </div>
             </div>
+            <div class="mt-8 bg-indigo-900/30 border border-indigo-700/50 rounded-xl p-5"><p class="text-sm text-indigo-200 flex items-start gap-3"><i class="ph-fill ph-lightbulb text-yellow-400 text-lg"></i><span><strong>Dica:</strong> Congele proteínas em porções individuais.</span></p></div>
         </section>
 
-        <footer class="mt-8 text-center text-xs text-gray-400 no-print pb-20">
-            <p>Se não está na lista, não está na dieta.</p>
+        <footer class="mt-14 pt-8 border-t-2 border-slate-100 text-center">
+            <div class="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-indigo-100 to-purple-100 rounded-full mb-4"><i class="ph-fill ph-seal-check text-indigo-600"></i><span class="text-sm font-bold text-indigo-900">Plano Validado</span></div>
+            <p class="text-slate-500 text-sm">Dúvidas? Entre em contato com seu nutricionista</p>
         </footer>
-
     </div>
 
     <script>
         function setTheme(theme) {
             const container = document.getElementById('document-content');
-            if (theme === 'white') {
-                container.removeAttribute('data-theme');
-            } else {
-                container.setAttribute('data-theme', theme);
-            }
+            if (theme === 'white') { container.removeAttribute('data-theme'); document.body.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'; }
+            else if (theme === 'yellow') { container.setAttribute('data-theme', 'yellow'); document.body.style.background = 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)'; }
+            else if (theme === 'dark') { container.setAttribute('data-theme', 'dark'); document.body.style.background = 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)'; }
         }
 
-        function downloadImage() {
-            const element = document.getElementById('document-content');
-            const btn = document.querySelector('button[onclick="downloadImage()"]');
+        function downloadImageSafe() {
+            const originalElement = document.getElementById('document-content');
+            const btn = document.querySelector('button[onclick="downloadImageSafe()"]');
             const icon = btn.querySelector('i');
             const span = btn.querySelector('span');
-            const originalIconClass = icon.className;
             const originalText = span.textContent;
-
-            // Feedback Visual
-            icon.className = 'ph ph-spinner animate-spin text-lg';
+            icon.className = 'ph-bold ph-spinner animate-spin text-xl';
             span.textContent = 'Gerando...';
             btn.disabled = true;
-
-            // 1. ATIVA O MODO SCREENSHOT (Alarga o layout para desktop)
-            element.classList.add('screenshot-mode');
-
-            // Espera um micro-momento para o navegador redesenhar
+            const clone = originalElement.cloneNode(true);
+            const container = document.createElement('div');
+            container.className = 'clone-container';
+            if(originalElement.hasAttribute('data-theme')) { clone.setAttribute('data-theme', originalElement.getAttribute('data-theme')); }
+            clone.classList.add('screenshot-mode');
+            container.appendChild(clone);
+            document.body.appendChild(container);
             setTimeout(() => {
-                html2canvas(element, {
-                    scale: 2, // Resolução 2x para nitidez
-                    useCORS: true,
-                    // IMPORTANTE: null permite que o canvas capture a cor de fundo do tema
-                    backgroundColor: null, 
-                    scrollY: -window.scrollY 
-                }).then(canvas => {
-                    // Cria link de download
+                html2canvas(clone, { scale: 2.5, useCORS: true, logging: false, windowWidth: 900, width: 900, backgroundColor: null }).then(canvas => {
                     const link = document.createElement('a');
-                    link.download = 'Dieta_Rodrigo_Silva.png';
-                    link.href = canvas.toDataURL('image/png');
+                    const timestamp = new Date().toISOString().slice(0,10);
+                    link.download = `Plano_Nutricional_Rodrigo_${timestamp}.png`;
+                    link.href = canvas.toDataURL('image/png', 1.0);
                     link.click();
-
-                    // Restaura UI
-                    element.classList.remove('screenshot-mode');
-                    icon.className = originalIconClass;
-                    span.textContent = originalText;
-                    btn.disabled = false;
+                    document.body.removeChild(container);
+                    icon.className = 'ph-fill ph-check-circle text-xl';
+                    span.textContent = 'Salvo!';
+                    setTimeout(() => { icon.className = 'ph-bold ph-image text-xl'; span.textContent = originalText; btn.disabled = false; }, 2000);
                 }).catch(err => {
-                    console.error(err);
-                    element.classList.remove('screenshot-mode');
+                    console.error('Erro:', err);
+                    document.body.removeChild(container);
+                    icon.className = 'ph-fill ph-x-circle text-xl';
                     span.textContent = 'Erro!';
-                    setTimeout(() => {
-                        icon.className = originalIconClass;
-                        span.textContent = originalText;
-                        btn.disabled = false;
-                    }, 2000);
+                    setTimeout(() => { icon.className = 'ph-bold ph-image text-xl'; span.textContent = originalText; btn.disabled = false; }, 2500);
                 });
-            }, 100);
+            }, 800);
         }
     </script>
 </body>
