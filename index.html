@@ -13,17 +13,17 @@
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
-        /* --- Configurações Gerais --- */
+        /* --- Configurações Gerais "Monster Storm" Theme --- */
         :root {
-            --neon-red: #ff003c;
-            --neon-blue: #00f3ff;
-            --bg-dark: #020202;
+            --blood-red: #8a0000; 
+            --bright-red: #ff0000;
+            --void-black: #050000;
         }
 
         body {
             font-family: 'Montserrat', sans-serif;
-            color: #e5e7eb;
-            background-color: var(--bg-dark);
+            color: #d1d5db;
+            background-color: var(--void-black);
             overflow-x: hidden;
             margin: 0;
             display: flex;
@@ -33,19 +33,42 @@
             min-height: 100dvh; 
         }
 
-        /* --- Fundo com Gradiente Sutil --- */
+        /* --- Camada de Raios (Strobe Effect) --- */
+        .lightning-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.1);
+            z-index: 1; 
+            pointer-events: none;
+            opacity: 0;
+            mix-blend-mode: overlay;
+            animation: lightning-flash 5s infinite;
+        }
+
+        @keyframes lightning-flash {
+            0%, 90% { opacity: 0; background-color: rgba(255, 0, 0, 0.1); }
+            92% { opacity: 0.6; background-color: rgba(255, 255, 255, 0.2); }
+            93% { opacity: 0; }
+            94% { opacity: 0.4; background-color: rgba(255, 0, 0, 0.3); }
+            96% { opacity: 0; }
+            100% { opacity: 0; }
+        }
+
+        /* --- Fundo --- */
         #particles-js {
             position: fixed;
             width: 100%;
             height: 100%;
             top: 0;
             left: 0;
-            z-index: -1;
-            /* Mistura sutil de azul e vermelho no fundo preto */
-            background: radial-gradient(circle at center, #0a0005 0%, #000000 100%); 
+            z-index: 0;
+            background: radial-gradient(circle at center, #1a0000 0%, #000000 100%); 
         }
 
-        /* Efeito Vignette para focar no centro */
+        /* Vignette Pulsante */
         body::after {
             content: "";
             position: fixed;
@@ -53,221 +76,38 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: radial-gradient(circle, transparent 50%, #000 150%);
+            background: radial-gradient(circle, transparent 30%, #000 110%);
             pointer-events: none;
-            z-index: -1;
+            z-index: 2;
+            animation: vignette-pulse 3s infinite ease-in-out;
         }
 
-        /* Scanline Overlay */
+        @keyframes vignette-pulse {
+            0%, 100% { background: radial-gradient(circle, transparent 30%, #000 110%); }
+            50% { background: radial-gradient(circle, transparent 40%, #000 100%); }
+        }
+
+        /* Scanline Rápido */
         .scanlines {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,0) 50%, rgba(0,0,0,0.3) 50%, rgba(0,0,0,0.3));
+            background: linear-gradient(to bottom, rgba(20,0,0,0), rgba(20,0,0,0) 50%, rgba(0,0,0,0.5) 50%, rgba(0,0,0,0.5));
             background-size: 100% 4px;
             z-index: 50;
             pointer-events: none;
-            opacity: 0.3;
+            opacity: 0.15;
+            animation: scanline-move 0.2s linear infinite;
         }
 
-        /* --- Tipografia e Efeito GLITCH DUPLO --- */
-        h1 {
-            font-family: 'Audiowide', cursive;
+        @keyframes scanline-move {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(4px); }
         }
 
-        .glitch-wrapper {
-            position: relative;
-            display: inline-block;
-            white-space: nowrap; 
-        }
-
-        .glitch-text {
-            position: relative;
-            font-size: clamp(3.5rem, 13vw, 7rem);
-            font-weight: 900;
-            letter-spacing: 0.1em;
-            color: #fff;
-            /* Sombra base dupla */
-            text-shadow: 2px 2px 0px var(--neon-red), -2px -2px 0px var(--neon-blue);
-            animation: glitch-anim 2.5s infinite linear alternate-reverse;
-        }
-
-        .glitch-text::before,
-        .glitch-text::after {
-            content: attr(data-text);
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: var(--bg-dark);
-            opacity: 0.8;
-        }
-
-        .glitch-text::before {
-            left: 3px;
-            text-shadow: -2px 0 var(--neon-red);
-            clip: rect(44px, 9999px, 56px, 0);
-            animation: glitch-anim-2 3s infinite linear alternate-reverse;
-        }
-
-        .glitch-text::after {
-            left: -3px;
-            text-shadow: -2px 0 var(--neon-blue);
-            clip: rect(44px, 9999px, 56px, 0);
-            animation: glitch-anim-3 2s infinite linear alternate-reverse;
-        }
-
-        @keyframes glitch-anim {
-            0% { text-shadow: 3px 3px 0px var(--neon-red), -3px -3px 0px var(--neon-blue); }
-            20% { text-shadow: -3px -3px 0px var(--neon-red), 3px 3px 0px var(--neon-blue); }
-            40% { text-shadow: -3px 3px 0px var(--neon-blue), -3px -3px 0px var(--neon-red); }
-            60% { text-shadow: 3px -3px 0px var(--neon-blue), 3px 3px 0px var(--neon-red); }
-            80% { text-shadow: 2px 0px 0px var(--neon-red), -2px 0px 0px var(--neon-blue); }
-            100% { text-shadow: 0px 3px 0px var(--neon-blue), 0px -3px 0px var(--neon-red); }
-        }
-
-        @keyframes glitch-anim-2 {
-            0% { clip: rect(18px, 9999px, 89px, 0); }
-            20% { clip: rect(74px, 9999px, 6px, 0); }
-            40% { clip: rect(31px, 9999px, 51px, 0); }
-            60% { clip: rect(9px, 9999px, 73px, 0); }
-            80% { clip: rect(82px, 9999px, 4px, 0); }
-            100% { clip: rect(56px, 9999px, 25px, 0); }
-        }
-
-        @keyframes glitch-anim-3 {
-            0% { clip: rect(65px, 9999px, 34px, 0); }
-            20% { clip: rect(4px, 9999px, 86px, 0); }
-            40% { clip: rect(98px, 9999px, 14px, 0); }
-            60% { clip: rect(33px, 9999px, 54px, 0); }
-            80% { clip: rect(12px, 9999px, 92px, 0); }
-            100% { clip: rect(49px, 9999px, 11px, 0); }
-        }
-
-        /* --- Cartão Cyberpunk --- */
-        .profile-card {
-            background: rgba(10, 10, 12, 0.6);
-            backdrop-filter: blur(25px);
-            -webkit-backdrop-filter: blur(25px);
-            
-            /* Borda Gradiente (Simulada com box-shadow e border) */
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            
-            /* Brilho Duplo: Vermelho e Azul */
-            box-shadow: 
-                0 0 20px rgba(255, 0, 60, 0.15),
-                0 0 40px rgba(0, 243, 255, 0.1),
-                inset 0 0 20px rgba(255, 255, 255, 0.05);
-
-            transform-style: preserve-3d;
-            position: relative;
-            overflow: hidden;
-            transition: all 0.3s ease;
-        }
-
-        .profile-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            /* Brilho metálico ao passar o mouse */
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
-            transition: 0.5s;
-            pointer-events: none;
-            z-index: 20;
-        }
-
-        .profile-card:hover::before {
-            left: 100%;
-        }
-
-        .profile-card:hover {
-            /* Brilho intensificado no hover */
-            box-shadow: 
-                -5px 0 60px rgba(255, 0, 60, 0.3),
-                5px 0 60px rgba(0, 243, 255, 0.3),
-                inset 0 0 30px rgba(255, 255, 255, 0.1);
-            border-color: rgba(255, 255, 255, 0.3);
-        }
-
-        /* Linhas Neon decorativas no cartão */
-        .card-line-top {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 2px;
-            background: linear-gradient(90deg, var(--neon-red), var(--neon-blue));
-            opacity: 0.7;
-            box-shadow: 0 0 10px var(--neon-blue);
-        }
-        .card-line-bottom {
-            position: absolute;
-            bottom: 0;
-            right: 0;
-            width: 100%;
-            height: 2px;
-            background: linear-gradient(90deg, var(--neon-blue), var(--neon-red));
-            opacity: 0.7;
-            box-shadow: 0 0 10px var(--neon-red);
-        }
-
-        /* --- Ícones Sociais --- */
-        .icon-container {
-            display: flex;
-            gap: 1.5rem; 
-            justify-content: center;
-            align-items: center;
-        }
-
-        @media (min-width: 768px) {
-            .icon-container {
-                gap: 2.5rem;
-            }
-        }
-
-        .icon-link {
-            position: relative;
-            color: rgba(255, 255, 255, 0.7);
-            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            z-index: 10;
-        }
-
-        /* Hover Effect: Gradient Text & Glow */
-        .icon-link:hover, .icon-link:active {
-            color: #fff;
-            transform: translateY(-5px) scale(1.1);
-            
-            /* Sombra alternada para dar efeito 3D neon */
-            text-shadow: 
-                2px 2px 10px var(--neon-red),
-                -2px -2px 10px var(--neon-blue);
-        }
-        
-        /* Barra inferior do ícone com gradiente */
-        .icon-link::after {
-            content: '';
-            position: absolute;
-            bottom: -10px;
-            left: 50%;
-            width: 0;
-            height: 2px;
-            background: linear-gradient(90deg, var(--neon-red), var(--neon-blue));
-            transform: translateX(-50%);
-            transition: width 0.3s ease;
-            box-shadow: 0 0 10px var(--neon-blue);
-        }
-
-        .icon-link:hover::after {
-            width: 100%;
-        }
-
-        /* --- Layout --- */
+        /* --- Layout Instável --- */
         .main-content {
             display: flex;
             flex-direction: column;
@@ -276,108 +116,182 @@
             width: 100%;
             z-index: 10;
             padding: 1rem;
+            animation: storm-shake 0.3s infinite;
         }
 
-        .name-container {
-            margin-bottom: 2rem;
-            padding: 0 1rem;
-            width: 100%;
-            text-align: center;
+        @keyframes storm-shake {
+            0% { transform: translate(0, 0); }
+            25% { transform: translate(1px, 1px); }
+            50% { transform: translate(-1px, 0); }
+            75% { transform: translate(0, -1px); }
+            100% { transform: translate(0, 0); }
         }
+
+        /* --- Tipografia Glitch --- */
+        h1 { font-family: 'Audiowide', cursive; }
         
-        @media (min-width: 768px) {
-            .name-container { margin-bottom: 3rem; }
+        .glitch-wrapper { position: relative; display: inline-block; white-space: nowrap; }
+
+        .glitch-text {
+            position: relative;
+            font-size: clamp(3.5rem, 13vw, 7rem);
+            font-weight: 900;
+            letter-spacing: 0.1em;
+            color: #fff;
+            text-shadow: 4px 4px 0px var(--blood-red);
+            animation: glitch-anim 0.2s infinite alternate-reverse; 
         }
+
+        .glitch-text::before, .glitch-text::after {
+            content: attr(data-text);
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: var(--void-black);
+            opacity: 1;
+        }
+
+        .glitch-text::before {
+            left: 3px;
+            text-shadow: -2px 0 red;
+            clip: rect(44px, 9999px, 56px, 0);
+            animation: glitch-anim-2 2s infinite linear alternate-reverse;
+        }
+
+        .glitch-text::after {
+            left: -3px;
+            text-shadow: -2px 0 darkred;
+            clip: rect(44px, 9999px, 56px, 0);
+            animation: glitch-anim-3 1.5s infinite linear alternate-reverse;
+        }
+
+        @keyframes glitch-anim {
+            0% { text-shadow: 4px 4px 0px var(--blood-red); transform: skew(0deg); }
+            20% { text-shadow: -4px -4px 0px var(--blood-red); transform: skew(-2deg); }
+            40% { text-shadow: -4px 4px 0px var(--blood-red); transform: skew(0deg); }
+            60% { text-shadow: 4px -4px 0px var(--blood-red); transform: skew(2deg); }
+            80% { text-shadow: 4px 0px 0px var(--blood-red); transform: skew(0deg); }
+            100% { text-shadow: 0px 4px 0px var(--blood-red); transform: skew(0deg); }
+        }
+        @keyframes glitch-anim-2 {
+            0% { clip: rect(12px, 9999px, 5px, 0); }
+            100% { clip: rect(95px, 9999px, 100px, 0); }
+        }
+        @keyframes glitch-anim-3 {
+            0% { clip: rect(5px, 9999px, 15px, 0); }
+            100% { clip: rect(100px, 9999px, 95px, 0); }
+        }
+
+        /* --- Cartão Cyberpunk Polygon --- */
+        .profile-card {
+            background: rgba(10, 0, 0, 0.85);
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            
+            /* Recorte Polygon Agressivo */
+            clip-path: polygon(
+                30px 0, 
+                100% 0, 
+                100% calc(100% - 30px), 
+                calc(100% - 30px) 100%, 
+                0 100%, 
+                0 30px
+            );
+            
+            /* Bordas não funcionam bem com clip-path, usando box-shadow interno */
+            box-shadow: 
+                inset 0 0 0 1px rgba(138, 0, 0, 0.6), 
+                inset 0 0 60px rgba(0, 0, 0, 1);
+            
+            /* Drop shadow aplicado via filtro para seguir o formato */
+            filter: drop-shadow(0 0 20px rgba(138, 0, 0, 0.4));
+            
+            transform-style: preserve-3d;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.1s ease;
+        }
+
+        /* Ícones */
+        .icon-container { display: flex; gap: 1.5rem; justify-content: center; align-items: center; }
+        @media (min-width: 768px) { .icon-container { gap: 2.5rem; } }
+
+        .icon-link {
+            position: relative;
+            color: rgba(200, 200, 200, 0.6);
+            transition: all 0.2s ease;
+            z-index: 10;
+        }
+        .icon-link:hover { color: #fff; transform: scale(1.1); text-shadow: 0 0 20px var(--bright-red); }
+        .icon-link::after {
+            content: ''; position: absolute; bottom: -10px; left: 50%; width: 0; height: 2px;
+            background: var(--bright-red); transform: translateX(-50%); transition: width 0.2s ease;
+            box-shadow: 0 0 10px var(--blood-red);
+        }
+        .icon-link:hover::after { width: 100%; }
+
+        .name-container { margin-bottom: 2rem; padding: 0 1rem; width: 100%; text-align: center; }
+        @media (min-width: 768px) { .name-container { margin-bottom: 3rem; } }
 
     </style>
 </head>
 <body class="antialiased">
 
-    <!-- Efeitos de Fundo -->
+    <div class="lightning-overlay"></div>
     <div class="scanlines"></div>
     <div id="particles-js"></div>
 
     <div class="main-content">
-
-        <!-- Título -->
         <div class="name-container">
             <div class="glitch-wrapper">
                 <h1 class="glitch-text" data-text="KZNYBS">KZNYBS</h1>
             </div>
         </div>
 
-        <!-- Cartão -->
-        <div class="w-full max-w-sm md:max-w-xl rounded-2xl p-6 md:p-12 profile-card" 
-             data-tilt data-tilt-max="12" data-tilt-speed="400" data-tilt-glare="true" data-tilt-max-glare="0.3">
+        <!-- Removido 'rounded-sm' para usar o clip-path customizado -->
+        <div class="w-full max-w-sm md:max-w-xl p-6 md:p-12 profile-card" 
+             data-tilt data-tilt-max="5" data-tilt-speed="1000" data-tilt-glare="true" data-tilt-max-glare="0.2">
             
-            <!-- Linhas Decorativas Neon -->
-            <div class="card-line-top"></div>
-            <div class="card-line-bottom"></div>
-
             <div class="icon-container transform-gpu" style="transform: translateZ(30px);">
-                <!-- GitHub -->
                 <a href="https://github.com/kznybs" target="_blank" class="icon-link" aria-label="GitHub">
                     <i class="fab fa-github text-4xl md:text-5xl"></i>
                 </a>
-                
-                <!-- Instagram -->
                 <a href="https://www.instagram.com/kznybs/" target="_blank" class="icon-link" aria-label="Instagram">
                     <i class="fab fa-instagram text-4xl md:text-5xl"></i>
                 </a>
-                
-                <!-- LinkedIn -->
                 <a href="https://www.linkedin.com/in/kznybs/" target="_blank" class="icon-link" aria-label="LinkedIn">
                     <i class="fab fa-linkedin text-4xl md:text-5xl"></i>
                 </a>
             </div>
 
-            <!-- Detalhes de texto decorativos (Red & Blue) -->
-            <div class="absolute bottom-2 right-4 text-[8px] md:text-[10px] font-mono tracking-widest pointer-events-none" style="color: var(--neon-blue); opacity: 0.5;">
-                
+            <div class="absolute bottom-3 right-4 text-[9px] font-mono tracking-[0.2em] pointer-events-none text-red-600/60 animate-pulse">
+                SYSTEM FAILURE // 666
             </div>
-            <div class="absolute top-2 left-4 text-[8px] md:text-[10px] font-mono tracking-widest pointer-events-none" style="color: var(--neon-red); opacity: 0.5;">
-               
-            </div>
-
         </div>
-
     </div>
 
-    <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/vanilla-tilt/1.7.2/vanilla-tilt.min.js"></script>
     
     <script>
         particlesJS('particles-js', {
             "particles": {
-                "number": { "value": 120, "density": { "enable": true, "value_area": 900 } },
-                // Array de cores: Vermelho Neon e Azul Neon
-                "color": { "value": ["#ff003c", "#00f3ff"] },
-                "shape": { 
-                    "type": "circle",
-                    "stroke": { "width": 0, "color": "#000000" }
-                },
+                // Tempestade de detritos
+                "number": { "value": 150, "density": { "enable": true, "value_area": 800 } },
+                "color": { "value": ["#8a0000", "#550000", "#000000"] },
+                "shape": { "type": "circle" },
                 "opacity": { 
-                    "value": 0.7, 
-                    "random": true, 
-                    "anim": { "enable": true, "speed": 1.5, "opacity_min": 0.1, "sync": false } 
+                    "value": 0.8, "random": true, 
+                    "anim": { "enable": true, "speed": 5, "opacity_min": 0.1, "sync": false } 
                 },
                 "size": { 
-                    "value": 3, 
-                    "random": true, 
-                    "anim": { "enable": true, "speed": 3, "size_min": 0.1, "sync": false } 
+                    "value": 4, "random": true, 
+                    "anim": { "enable": false } 
                 },
-                "line_linked": { 
-                    "enable": true, 
-                    "distance": 110, 
-                    "color": "#ffffff", /* Linhas brancas conectando as cores ficam clean */
-                    "opacity": 0.15, 
-                    "width": 1 
-                },
+                "line_linked": { "enable": false },
                 "move": { 
                     "enable": true, 
-                    "speed": 2, 
-                    "direction": "none", 
+                    "speed": 25, 
+                    "direction": "right", 
                     "random": true, 
                     "straight": false, 
                     "out_mode": "out", 
@@ -400,11 +314,11 @@
         });
 
         VanillaTilt.init(document.querySelector(".profile-card"), {
-            max: 15,
-            speed: 400,
+            max: 5,
+            speed: 1000, 
             glare: true,
             "max-glare": 0.3,
-            scale: 1.05,
+            scale: 1.02,
             perspective: 1000,
             gyroscope: true
         });
