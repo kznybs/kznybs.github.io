@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Protocolo - Rodrigo Silva</title>
+    <!-- Bibliotecas para geração de Imagem e PDF -->
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        :root {
+            /* Paleta de Cores (Baseada no Gusta 2) */
+            --bg-body: #0f172a;       /* Slate 900 */
+            --bg-card: #1e293b;       /* Slate 800 */
+            --bg-block: #334155;      /* Slate 700 */
+            --accent: #38bdf8;        /* Sky 400 */
+            --accent-dark: #0284c7;   /* Sky 600 */
+            --text-main: #f1f5f9;     /* Slate 100 */
+            --text-muted: #94a3b8;    /* Slate 400 */
+            --danger-bg: rgba(239, 68, 68, 0.1);
+            --danger-border: #ef4444;
+        }
+
+        body {
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            font-family: 'Inter', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+
+        /* Container Principal */
+        .plan-container {
+            width: 100%;
+            max-width: 500px;
+            background-color: var(--bg-card);
+            border-radius: 24px;
+            overflow: hidden;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            position: relative;
+            border: 1px solid #475569;
+        }
+
+        /* Cabeçalho */
+        .header {
+            background-color: var(--accent-dark);
+            background-image: linear-gradient(160deg, var(--accent-dark) 0%, #0369a1 100%);
+            padding: 35px 25px 30px;
+            color: #fff;
+            text-align: left;
+            position: relative;
+        }
+        
+        .instructor-tag {
+            background-color: rgba(255,255,255,0.2);
+            color: #fff;
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            display: inline-block;
+            margin-bottom: 12px;
+        }
+
+        .student-name {
+            font-family: 'Poppins', sans-serif;
+            font-size: 26px;
+            font-weight: 800;
+            margin: 0;
+            text-transform: uppercase;
+            line-height: 1.1;
+            letter-spacing: -0.5px;
+        }
+
+        .student-details {
+            font-size: 12px;
+            font-weight: 500;
+            margin-top: 10px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .detail-badge {
+            background: #fff;
+            color: var(--accent-dark);
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-weight: 700;
+        }
+
+        /* Títulos de Seção */
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 25px 20px 15px;
+        }
+        .section-line { flex-grow: 1; height: 1px; background: #475569; }
+        .section-title {
+            color: var(--accent);
+            font-family: 'Poppins', sans-serif;
+            font-size: 14px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .content-padding {
+            padding: 0 20px 10px;
+        }
+
+        /* Cards */
+        .info-card {
+            background-color: var(--bg-block);
+            border-radius: 16px;
+            padding: 18px;
+            border: 1px solid rgba(255,255,255,0.05);
+            margin-bottom: 15px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .card-header {
+            color: var(--accent);
+            font-weight: 700;
+            font-size: 12px;
+            text-transform: uppercase;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border-bottom: 2px solid rgba(255,255,255,0.1);
+            padding-bottom: 8px;
+        }
+
+        /* Grid de Estatísticas */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            font-size: 12px;
+        }
+
+        .stat-item {
+            background: rgba(15, 23, 42, 0.5);
+            padding: 10px;
+            border-radius: 10px;
+            color: var(--text-muted);
+            border: 1px solid rgba(255,255,255,0.03);
+            display: flex;
+            flex-direction: column;
+        }
+        .stat-item strong { color: #fff; margin-bottom: 4px; font-size: 11px; text-transform: uppercase; opacity: 0.7; }
+        .stat-val { font-size: 13px; font-weight: 600; color: var(--accent); }
+
+        /* Lista de Refeições */
+        .meal-stack {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            padding: 0 20px 20px;
+        }
+
+        .meal-block {
+            background-color: var(--bg-block);
+            border-radius: 16px;
+            overflow: hidden;
+            border: 1px solid rgba(255,255,255,0.05);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .meal-header-strip {
+            background: rgba(56, 189, 248, 0.1);
+            padding: 8px 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .meal-name {
+            font-weight: 800;
+            color: #fff;
+            font-size: 13px;
+            text-transform: uppercase;
+        }
+
+        .meal-icon { font-size: 14px; }
+
+        .meal-body { padding: 15px; }
+
+        .meal-option {
+            font-size: 13px;
+            color: var(--text-main);
+            margin-bottom: 6px;
+            padding-left: 14px;
+            position: relative;
+        }
+        .meal-option::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 6px;
+            width: 6px;
+            height: 6px;
+            background-color: var(--accent);
+            border-radius: 50%;
+        }
+
+        .meal-note {
+            background: rgba(0,0,0,0.2);
+            padding: 6px 10px;
+            border-radius: 6px;
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-top: 8px;
+            display: inline-block;
+        }
+
+        /* Macro Pill */
+        .macro-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 4px 10px;
+            border-radius: 8px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            background-color: rgba(15, 23, 42, 0.5);
+            color: var(--accent);
+            border: 1px solid rgba(255,255,255,0.1);
+            margin-top: 8px;
+        }
+
+        /* Check List (para compras/substituições) */
+        .check-list { list-style: none; padding: 0; margin: 0; }
+        .check-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            margin-bottom: 8px;
+            font-size: 12px;
+            color: var(--text-muted);
+            background: rgba(15, 23, 42, 0.3);
+            padding: 8px;
+            border-radius: 8px;
+        }
+        .check-icon { color: var(--accent); font-weight: bold; min-width: 15px; }
+
+        /* Footer Metas */
+        .footer-goals {
+            background: #0f172a;
+            padding: 25px 20px;
+            border-top: 1px solid #475569;
+        }
+        
+        .goals-wrapper {
+            display: flex;
+            gap: 10px;
+            overflow-x: auto;
+        }
+
+        .goal-card {
+            background: var(--bg-card);
+            min-width: 30%;
+            flex: 1;
+            padding: 12px;
+            border-radius: 12px;
+            border: 1px solid #475569;
+            text-align: center;
+        }
+        .goal-card-title { color: var(--accent); font-size: 10px; font-weight: 700; text-transform: uppercase; margin-bottom: 4px; }
+        .goal-card-value { color: #fff; font-size: 11px; font-weight: 600; line-height: 1.3; }
+
+        /* Caixa de Validação */
+        .validation-box {
+            margin: 20px 20px 0;
+            background: rgba(56, 189, 248, 0.1);
+            border: 1px solid var(--accent-dark);
+            border-radius: 12px;
+            padding: 15px;
+            text-align: center;
+        }
+        .validation-title {
+            color: var(--accent);
+            font-weight: 800;
+            font-size: 12px;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+        .validation-text {
+            color: #fff;
+            font-size: 13px;
+            font-style: italic;
+        }
+
+        /* Edição */
+        .editable-area { outline: none; min-width: 5px; transition: 0.2s; }
+        .is-editing .editable-area { border: 1px dashed var(--accent); background: rgba(56, 189, 248, 0.1); padding: 2px; }
+
+        /* Botões */
+        .fab-container { position: fixed; bottom: 20px; right: 20px; display: flex; flex-direction: column; gap: 12px; z-index: 100; }
+        .fab-btn { width: 50px; height: 50px; border-radius: 14px; border: none; background: var(--bg-block); color: #fff; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5); cursor: pointer; display: flex; align-items: center; justify-content: center; border: 1px solid rgba(255,255,255,0.1); transition: 0.2s; }
+        .fab-btn:hover { background: var(--accent-dark); transform: translateY(-2px); }
+        .fab-btn svg { width: 20px; height: 20px; }
+        .pdf-btn { background: #ef4444; } .pdf-btn:hover { background: #dc2626; }
+
+        /* Temas */
+        [data-theme="yellow"] { background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%) !important; color: #78350f !important; }
+        [data-theme="yellow"] .card-style { background: white !important; border: 2px solid #fcd34d !important; }
+        [data-theme="yellow"] .accent-blue { background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%) !important; }
+        [data-theme="dark"] { background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%) !important; color: #e2e8f0 !important; }
+        [data-theme="dark"] .card-style { background: #1e293b !important; border: 2px solid #334155 !important; color: #f1f5f9 !important; }
+        [data-theme="white"] { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important; }
+
+        @media print { .fab-container { display: none; } }
+    </style>
+</head>
+<body>
+
+    <div class="plan-container" id="captureTarget">
+        
+        <!-- Header -->
+        <header class="header">
+            <div class="instructor-tag editable-area">🏷️ GUSTAVOTRAINER CONSULTORIA</div>
+            <h1 class="student-name editable-area">RODRIGO SILVA</h1>
+            <div class="student-details">
+                <span class="detail-badge editable-area">⏰ ACORDA: 04:30</span>
+                <span class="detail-badge editable-area">🏋️ TREINO: 05:00</span>
+            </div>
+        </header>
+
+        <!-- Stats Resumo -->
+        <div class="content-padding" style="padding-top: 20px;">
+            <div class="info-card">
+                <div class="card-header">📊 METAS DIÁRIAS</div>
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <strong>Calorias</strong>
+                        <span class="stat-val editable-area">~2.050 kcal</span>
+                    </div>
+                    <div class="stat-item">
+                        <strong>Proteína</strong>
+                        <span class="stat-val editable-area">~190 g</span>
+                    </div>
+                    <div class="stat-item">
+                        <strong>Carboidratos</strong>
+                        <span class="stat-val editable-area">~130 g</span>
+                    </div>
+                    <div class="stat-item">
+                        <strong>Gorduras</strong>
+                        <span class="stat-val editable-area">~70 g</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Cardápio Base (Blocos Separados) -->
+        <div class="section-header">
+            <span class="section-title">ROTINA ALIMENTAR</span>
+            <div class="section-line"></div>
+        </div>
+
+        <div class="meal-stack">
+            
+            <!-- Pré Treino -->
+            <div class="meal-block">
+                <div class="meal-header-strip">
+                    <span class="meal-name editable-area">04:40 - PRÉ-TREINO</span>
+                    <span class="meal-icon">⚡</span>
+                </div>
+                <div class="meal-body">
+                    <div class="meal-option editable-area">2 ovos inteiros</div>
+                    <div class="meal-option editable-area">50 g Vegetais (cenoura crua, folhas)</div>
+                    <div class="meal-note editable-area">🎯 Ativar sistema nervoso e preservar massa.</div>
+                    <div class="macro-pill">🔥 180 kcal | P: 12g | G: 10g</div>
+                </div>
+            </div>
+
+            <!-- Treino -->
+            <div class="meal-block" style="border-color: var(--accent);">
+                <div class="meal-header-strip" style="background: rgba(56, 189, 248, 0.2);">
+                    <span class="meal-name editable-area">05:00 - TREINO</span>
+                    <span class="meal-icon">🏋️</span>
+                </div>
+                <div class="meal-body">
+                    <div class="meal-option editable-area">Água</div>
+                    <div class="meal-option editable-area">Café ou chá opcional</div>
+                    <div class="meal-note editable-area">🎯 Estímulo metabólico.</div>
+                </div>
+            </div>
+
+            <!-- Pós Treino -->
+            <div class="meal-block">
+                <div class="meal-header-strip">
+                    <span class="meal-name editable-area">06:30 - CAFÉ/PÓS-TREINO</span>
+                    <span class="meal-icon">🌅</span>
+                </div>
+                <div class="meal-body">
+                    <div class="meal-option editable-area">3 ovos inteiros</div>
+                    <div class="meal-option editable-area">100 g Brócolis + 50 g Cenoura</div>
+                    <div class="meal-option editable-area">120 g Batata-doce cozida</div>
+                    <div class="meal-note editable-area">🎯 Reposição de glicogênio.</div>
+                    <div class="macro-pill">🔥 520 kcal | P: 27g | C: 35g</div>
+                </div>
+            </div>
+
+            <!-- Lanche Manhã -->
+            <div class="meal-block">
+                <div class="meal-header-strip">
+                    <span class="meal-name editable-area">09:30 - LANCHE DA MANHÃ</span>
+                    <span class="meal-icon">☕</span>
+                </div>
+                <div class="meal-body">
+                    <div class="meal-option editable-area">2 ovos cozidos</div>
+                    <div class="meal-option editable-area">80 g Vegetais (cenoura, pepino, folhas)</div>
+                    <div class="meal-note editable-area">🎯 Estabilidade energética e foco.</div>
+                    <div class="macro-pill">🔥 180 kcal | P: 12g | G: 10g</div>
+                </div>
+            </div>
+
+            <!-- Almoço -->
+            <div class="meal-block">
+                <div class="meal-header-strip">
+                    <span class="meal-name editable-area">12:30 - ALMOÇO</span>
+                    <span class="meal-icon">🍛</span>
+                </div>
+                <div class="meal-body">
+                    <div class="meal-option editable-area">180 g Patinho grelhado</div>
+                    <div class="meal-option editable-area">120 g Arroz (branco/integral)</div>
+                    <div class="meal-option editable-area">120 g Brócolis + 100 g Beterraba</div>
+                    <div class="meal-option editable-area">80 g Cenoura + 5 ml Azeite</div>
+                    <div class="meal-note editable-area">🎯 Principal refeição de sustentação.</div>
+                    <div class="macro-pill">🔥 670 kcal | P: 45g | C: 45g</div>
+                </div>
+            </div>
+
+            <!-- Lanche Tarde -->
+            <div class="meal-block">
+                <div class="meal-header-strip">
+                    <span class="meal-name editable-area">16:00 - LANCHE DA TARDE</span>
+                    <span class="meal-icon">⚡</span>
+                </div>
+                <div class="meal-body">
+                    <div class="meal-option editable-area">150 g Frango grelhado/desfiado</div>
+                    <div class="meal-option editable-area">80 g Batata inglesa ou doce</div>
+                    <div class="meal-option editable-area">100 g Vegetais (salada crua)</div>
+                    <div class="meal-note editable-area">🎯 Evitar queda de energia.</div>
+                    <div class="macro-pill">🔥 330 kcal | P: 35g | C: 20g</div>
+                </div>
+            </div>
+
+            <!-- Jantar -->
+            <div class="meal-block" style="border-color: var(--accent);">
+                <div class="meal-header-strip" style="background: rgba(56, 189, 248, 0.2);">
+                    <span class="meal-name editable-area">19:00 - JANTAR</span>
+                    <span class="meal-icon">🌙</span>
+                </div>
+                <div class="meal-body">
+                    <div class="meal-option editable-area">200 g Frango ou patinho</div>
+                    <div class="meal-option editable-area">150 g Vegetais (brócolis, abobrinha)</div>
+                    <div class="meal-note editable-area">🎯 Manutenção muscular e controle.</div>
+                    <div class="macro-pill">🔥 350 kcal | P: 42g | Low Carb</div>
+                </div>
+            </div>
+
+            <!-- Ceia -->
+            <div class="meal-block">
+                <div class="meal-header-strip">
+                    <span class="meal-name editable-area">21:30 - CEIA (OPCIONAL)</span>
+                    <span class="meal-icon">🌌</span>
+                </div>
+                <div class="meal-body">
+                    <div class="meal-option editable-area">2 claras + 1 ovo inteiro</div>
+                    <div class="meal-option editable-area">OU 100 g Frango</div>
+                    <div class="meal-note editable-area">🎯 Preservar massa magra.</div>
+                    <div class="macro-pill">🔥 150 kcal</div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Substituições e Lista -->
+        <div class="section-header">
+            <span class="section-title">GUIA DE APOIO</span>
+            <div class="section-line"></div>
+        </div>
+
+        <div class="content-padding">
+            <div class="info-card">
+                <div class="card-header">🔄 SUBSTITUIÇÕES</div>
+                <ul class="check-list editable-area">
+                    <li class="check-item"><span class="check-icon">🥩</span> <strong>180g Patinho</strong> ≈ 200g Acém/Coxão ou 1 lata Sardinha (gde).</li>
+                    <li class="check-item"><span class="check-icon">🍗</span> <strong>150g Frango</strong> ≈ 180g Coxa s/ pele ou 3 ovos inteiros.</li>
+                    <li class="check-item"><span class="check-icon">🍳</span> <strong>2 Ovos</strong> ≈ 1 lata sardinha pequena ou 100g frango.</li>
+                    <li class="check-item"><span class="check-icon">🍚</span> <strong>120g Arroz</strong> ≈ 130g Batata Inglesa, 100g Doce ou 90g Cuscuz.</li>
+                    <li class="check-item"><span class="check-icon">🥦</span> <strong>100g Brócolis</strong> ≈ Abobrinha, Chuchu, Repolho, Couve (Livre).</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="content-padding">
+            <div class="info-card" style="background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); border-color: #475569;">
+                <div class="card-header" style="border-color: #334155;">🛒 LISTA DE COMPRAS</div>
+                <div class="stats-grid">
+                    <div class="stat-item" style="background: rgba(15, 23, 42, 0.6);">
+                        <strong>SEMANAL</strong>
+                        <ul class="check-list editable-area" style="margin-top: 5px;">
+                            <li>• 1,5 kg Peito de Frango</li>
+                            <li>• 1 kg Coxa/Sobrecoxa</li>
+                            <li>• 1,2 kg Carne Magra</li>
+                            <li>• 30 Ovos</li>
+                            <li>• 5 latas Sardinha</li>
+                            <li>• Vegetais da semana</li>
+                        </ul>
+                    </div>
+                    <div class="stat-item" style="background: rgba(15, 23, 42, 0.6);">
+                        <strong>MENSAL</strong>
+                        <ul class="check-list editable-area" style="margin-top: 5px;">
+                            <li>• 6 kg Peito Frango</li>
+                            <li>• 4 kg Coxa/Sobrecoxa</li>
+                            <li>• 5 kg Carne Bovina</li>
+                            <li>• 120 Ovos</li>
+                            <li>• 6 kg Arroz</li>
+                            <li>• 8 kg Batatas</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Caixa de Validação -->
+        <div class="validation-box">
+            <div class="validation-title">
+                <i class="ph-fill ph-seal-check text-xl"></i> PLANO VALIDADO
+            </div>
+            <div class="validation-text editable-area">
+                "Regra Final: Se não está na lista, não está na dieta."
+            </div>
+        </div>
+
+        <footer class="mt-14 pt-8 border-t-2 border-slate-100 text-center">
+            
+        </footer>
+    </div>
+
+    <!-- Controles -->
+    <div class="fab-container no-print">
+        <div class="flex items-center gap-2 mb-2 p-2 bg-slate-800 rounded-lg justify-center">
+            <button onclick="setTheme('white')" class="w-6 h-6 rounded-full bg-gradient-to-br from-indigo-100 to-purple-100 border border-slate-400" title="Tema Claro"></button>
+            <button onclick="setTheme('yellow')" class="w-6 h-6 rounded-full bg-yellow-300 border border-yellow-500" title="Tema Amarelo"></button>
+            <button onclick="setTheme('dark')" class="w-6 h-6 rounded-full bg-slate-900 border border-slate-600" title="Tema Escuro"></button>
+        </div>
+        
+        <button onclick="downloadPDF()" class="fab-btn pdf-btn" title="Baixar PDF">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 16 16">
+                <path d="M14 14V4.5L9.5 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2zM9.5 3A1.5 1.5 0 0 0 11 4.5h2V14a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1h5.5v2z"/>
+                <path d="M4.603 14.087a.81.81 0 0 1-.438-.42c-.195-.388-.13-.776.08-1.102.198-.307.526-.568.897-.787a7.68 7.68 0 0 1 1.482-.645 19.697 19.697 0 0 0 1.062-2.227 7.269 7.269 0 0 1-.43-1.295c-.086-.4-.119-.796-.046-1.136.075-.354.274-.672.65-.823.192-.077.4-.12.602-.077a.7.7 0 0 1 .477.365c.088.164.12.356.127.538.007.188-.012.396-.047.614-.084.51-.27 1.134-.52 1.794a10.954 10.954 0 0 0 .98 1.686 5.753 5.753 0 0 1 1.334.05c.364.066.734.195.96.465.12.144.193.32.2.518.007.192-.047.382-.138.563a1.04 1.04 0 0 1-.354.416.856.856 0 0 1-.51.138c-.331-.014-.654-.196-.933-.417a5.712 5.712 0 0 1-.911-.95 11.651 11.651 0 0 0-1.997.406 11.307 11.307 0 0 1-1.02 1.51c-.292.35-.609.656-.927.787a.793.793 0 0 1-.58.029zm1.379-1.901c-.166.076-.32.156-.459.238-.328.194-.541.383-.647.545-.094.145-.096.25-.04.361.01.022.02.036.026.044a.266.266 0 0 0 .035-.012c.137-.056.355-.235.635-.572a8.18 8.18 0 0 0 .45-.606zm1.64-1.33a12.71 12.71 0 0 1 1.01-.193 11.744 11.744 0 0 1-.51-.858 20.801 20.801 0 0 1-.5 1.05zm2.446.45c.15.163.296.3.435.41.24.19.407.253.498.256a.107.107 0 0 0 .07-.015.307.307 0 0 0 .094-.125.436.436 0 0 0 .059-.2.095.095 0 0 0-.026-.063c-.052-.062-.2-.152-.518-.209a3.876 3.876 0 0 0-.612-.053zM8.097 12.06c.528-1.48 1.03-3.06 1.03-3.06l-.288-.411s-.597 1.847-1.328 3.511c-.086.194-.176.386-.264.577.625.048 1.15-.316 1.15-.316.004-.001-.304-.301-.3-.301zm2.368-7.942c-.31-.057-.61.123-.674.457-.04.209-.013.43.037.608.064.218.172.392.274.506.12.135.292.203.456.203.22 0 .445-.122.563-.374.072-.154.088-.35.05-.568-.024-.138-.076-.264-.139-.371-.137-.234-.326-.402-.567-.461z"/>
+            </svg>
+        </button>
+
+        <button onclick="downloadImage()" class="fab-btn" title="Baixar PNG">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 16 16">
+                <path d="M6.002 5.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0z"/>
+                <path d="M2.002 1a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V3a2 2 0 0 0-2-2h-12zm12 1a1 1 0 0 1 1 1v6.5l-3.777-1.947a.5.5 0 0 0-.577.093l-3.71 3.71-2.66-1.772a.5.5 0 0 0-.63.062L1.002 12V3a1 1 0 0 1 1-1h12z"/>
+            </svg>
+        </button>
+
+        <button id="editBtn" onclick="toggleEditMode()" class="fab-btn" title="Editar">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 16 16">
+                <path d="M12.146.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1 0 .708l-10 10a.5.5 0 0 1-.168.11l-5 2a.5.5 0 0 1-.65-.65l2-5a.5.5 0 0 1 .11-.168l10-10zM11.207 2.5 13.5 4.793 14.793 3.5 12.5 1.207 11.207 2.5zm1.586 3L10.5 3.207 4 9.707V10h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.293l6.5-6.5zm-9.761 5.175-.106.106-1.528 3.821 3.821-1.528.106-.106A.5.5 0 0 1 5 12.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.468-.325z"/>
+            </svg>
+        </button>
+    </div>
+
+    <script>
+        let isEditMode = false;
+        const editBtn = document.getElementById('editBtn');
+        const container = document.getElementById('captureTarget');
+
+        function toggleEditMode() {
+            isEditMode = !isEditMode;
+            const editableElements = document.querySelectorAll('.editable-area');
+            
+            if (isEditMode) {
+                container.classList.add('is-editing');
+                editBtn.classList.add('active');
+                editableElements.forEach(el => el.contentEditable = "true");
+            } else {
+                container.classList.remove('is-editing');
+                editBtn.classList.remove('active');
+                editableElements.forEach(el => el.contentEditable = "false");
+            }
+        }
+
+        function setTheme(theme) {
+            const container = document.getElementById('document-content');
+            if (theme === 'white') { container.removeAttribute('data-theme'); document.body.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'; }
+            else if (theme === 'yellow') { container.setAttribute('data-theme', 'yellow'); document.body.style.background = 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)'; }
+            else if (theme === 'dark') { container.setAttribute('data-theme', 'dark'); document.body.style.background = 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)'; }
+        }
+
+        async function downloadImage() {
+            if(isEditMode) toggleEditMode();
+            window.scrollTo(0,0);
+            
+            const canvas = await html2canvas(container, {
+                scale: 2,
+                backgroundColor: "#1e293b",
+                useCORS: true
+            });
+            
+            const link = document.createElement('a');
+            link.download = 'plano-rodrigo-layout-gusta2.png';
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        }
+
+        async function downloadPDF() {
+            if(isEditMode) toggleEditMode();
+            window.scrollTo(0,0);
+            
+            const canvas = await html2canvas(container, {
+                scale: 2,
+                backgroundColor: "#1e293b",
+                useCORS: true
+            });
+
+            const imgData = canvas.toDataURL('image/png');
+            const { jsPDF } = window.jspdf;
+            
+            const imgWidth = canvas.width * 0.264583;
+            const imgHeight = canvas.height * 0.264583;
+
+            const pdf = new jsPDF({
+                orientation: imgWidth > imgHeight ? 'l' : 'p',
+                unit: 'mm',
+                format: [imgWidth, imgHeight]
+            });
+
+            pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
+            pdf.save('plano-rodrigo-layout-gusta2.pdf');
+        }
+        
+        document.addEventListener('paste', function (e) {
+            if (isEditMode) {
+                e.preventDefault();
+                var text = (e.originalEvent || e).clipboardData.getData('text/plain');
+                document.execCommand("insertHTML", false, text);
+            }
+        });
+    </script>
+</body>
+</html>
