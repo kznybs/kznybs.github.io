@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Consultoria Online - Plano Diário</title>
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;700;800&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        body {
+            background-color: #121212;
+            color: #e0e0e0;
+            font-family: 'Open Sans', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+
+        /* Container Principal (A "Folha" do Plano) */
+        .plan-container {
+            width: 100%;
+            max-width: 450px; /* Largura ideal para mobile/stories */
+            background-color: #1e1e1e;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+            position: relative;
+            border: 1px solid #333;
+        }
+
+        /* Cabeçalho Premium */
+        .header {
+            background: linear-gradient(135deg, #b8860b 0%, #daa520 100%);
+            padding: 30px 20px 25px;
+            color: #000;
+            text-align: center;
+            position: relative;
+        }
+        
+        .header::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 0;
+            right: 0;
+            height: 20px;
+            background-color: #1e1e1e;
+            border-radius: 20px 20px 0 0;
+        }
+
+        .instructor-tag {
+            background-color: #000;
+            color: #daa520;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 10px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            display: inline-block;
+            margin-bottom: 10px;
+        }
+
+        .student-name {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 24px;
+            font-weight: 800;
+            margin: 0;
+            text-transform: uppercase;
+            line-height: 1.1;
+        }
+
+        .student-details {
+            font-size: 12px;
+            font-weight: 600;
+            margin-top: 8px;
+            opacity: 0.8;
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .detail-badge {
+            background: rgba(255,255,255,0.2);
+            padding: 2px 8px;
+            border-radius: 4px;
+        }
+
+        /* Seção de Resumo (Água/Sono) */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            padding: 10px 20px 20px;
+        }
+
+        .stat-card {
+            background-color: #2a2a2a;
+            padding: 12px;
+            border-radius: 12px;
+            border-left: 3px solid #daa520;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .stat-icon { font-size: 18px; margin-bottom: 4px; }
+        .stat-title { font-size: 10px; text-transform: uppercase; color: #888; font-weight: 700; }
+        .stat-value { font-size: 14px; font-weight: 600; color: #fff; }
+
+        /* Linha do Tempo */
+        .timeline {
+            padding: 0 20px 20px;
+            position: relative;
+        }
+
+        /* Linha Vertical */
+        .timeline::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: 34px; /* Posição da linha */
+            width: 2px;
+            background: #333;
+        }
+
+        .timeline-item {
+            position: relative;
+            margin-bottom: 25px;
+            padding-left: 30px; /* Espaço para o horário */
+        }
+
+        /* Bolinha do Tempo */
+        .time-dot {
+            position: absolute;
+            left: 8px;
+            top: 0;
+            width: 12px;
+            height: 12px;
+            background-color: #daa520;
+            border-radius: 50%;
+            border: 3px solid #1e1e1e;
+            z-index: 2;
+        }
+
+        .time-label {
+            position: absolute;
+            left: -10px; /* Ajuste fino */
+            top: -20px;
+            font-size: 11px;
+            font-weight: 800;
+            color: #daa520;
+            background-color: #1e1e1e;
+            padding: 0 4px;
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        .card-content {
+            background-color: #252525;
+            border-radius: 0 12px 12px 12px;
+            padding: 15px;
+            border: 1px solid #333;
+        }
+        
+        /* Destaque para TREINO */
+        .is-workout .card-content {
+            background: linear-gradient(45deg, #252525 0%, #333 100%);
+            border-left: 4px solid #fff;
+        }
+        .is-workout .time-dot { background-color: #fff; }
+        .is-workout .time-label { color: #fff; }
+
+        .item-title {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 14px;
+            font-weight: 700;
+            color: #fff;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .item-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            font-size: 13px;
+            color: #ccc;
+        }
+        
+        .item-list li {
+            margin-bottom: 4px;
+            position: relative;
+            padding-left: 12px;
+            line-height: 1.4;
+        }
+        
+        .item-list li::before {
+            content: '•';
+            color: #daa520;
+            position: absolute;
+            left: 0;
+            font-weight: bold;
+        }
+
+        .macros-row {
+            margin-top: 10px;
+            padding-top: 8px;
+            border-top: 1px dashed #444;
+            display: flex;
+            justify-content: space-between;
+            font-size: 10px;
+            color: #888;
+        }
+        
+        .macro-item span {
+            color: #daa520;
+            font-weight: 700;
+        }
+
+        /* Rodapé de Resumo */
+        .footer-summary {
+            background-color: #000;
+            padding: 20px;
+            text-align: center;
+            border-top: 2px solid #daa520;
+        }
+
+        .summary-title {
+            color: #daa520;
+            font-size: 12px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 10px;
+        }
+
+        .summary-grid {
+            display: flex;
+            justify-content: space-between;
+            gap: 5px;
+        }
+
+        .summary-box {
+            flex: 1;
+            background: #1e1e1e;
+            padding: 8px 4px;
+            border-radius: 8px;
+        }
+        
+        .sum-val { display: block; font-size: 14px; font-weight: 700; color: #fff; }
+        .sum-lbl { display: block; font-size: 9px; color: #666; text-transform: uppercase; margin-top: 2px; }
+
+        /* Edição */
+        .editable-area {
+            min-width: 10px;
+            display: inline-block;
+            transition: all 0.2s;
+        }
+        .is-editing .editable-area {
+            border: 1px dashed #555;
+            background: rgba(255,255,255,0.05);
+            padding: 0 4px;
+            border-radius: 3px;
+        }
+        .is-editing .editable-area:focus { outline: none; background: rgba(255,255,255,0.1); }
+
+        /* Botões Flutuantes */
+        .fab-container {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            z-index: 100;
+        }
+        .fab-btn {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            border: none;
+            background: #333;
+            color: #fff;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.2s;
+        }
+        .fab-btn:hover { background: #444; }
+        .fab-btn.active { background: #daa520; color: #000; }
+
+        @media print { .fab-container { display: none; } }
+    </style>
+</head>
+<body>
+
+    <div class="plan-container" id="captureTarget">
+        
+        <!-- Header -->
+        <header class="header">
+            <div class="instructor-tag editable-area">🔥 CONSULTORIA ON-LINE — INSTRUTOR GUSTAVO</div>
+            <h1 class="student-name editable-area">LEONARDO ANDRADE</h1>
+            <div class="student-details">
+                <span class="detail-badge editable-area">📍 CLT</span>
+                <span class="detail-badge editable-area">🏋️ MANHÃ</span>
+                <span class="detail-badge editable-area">🎯 DÉFICIT + PRESERVAÇÃO</span>
+            </div>
+        </header>
+
+        <!-- Stats Rápidos -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon">🛌</div>
+                <span class="stat-title">Sono Meta</span>
+                <span class="stat-value editable-area">22:30 - 05:30 (7h)</span>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">💧</div>
+                <span class="stat-title">Hidratação</span>
+                <span class="stat-value editable-area">3.0L a 3.5L Diários</span>
+            </div>
+        </div>
+
+        <!-- Linha do Tempo -->
+        <div class="timeline">
+            
+            <!-- Pré Treino -->
+            <div class="timeline-item">
+                <div class="time-dot"></div>
+                <div class="time-label editable-area">05:45</div>
+                <div class="card-content">
+                    <div class="item-title editable-area">⚡ Pré-Treino (Ativação)</div>
+                    <ul class="item-list editable-area">
+                        <li>2 ovos inteiros</li>
+                        <li>Cenoura crua ou folhas verdes</li>
+                        <li>(Opcional) Café preto + 5g Creatina</li>
+                    </ul>
+                    <div class="macros-row">
+                        <div class="macro-item">P: <span class="editable-area">12g</span></div>
+                        <div class="macro-item">C: <span class="editable-area">4g</span></div>
+                        <div class="macro-item">G: <span class="editable-area">10g</span></div>
+                        <div class="macro-item">Cal: <span class="editable-area">180</span></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Treino -->
+            <div class="timeline-item is-workout">
+                <div class="time-dot"></div>
+                <div class="time-label editable-area">06:30</div>
+                <div class="card-content">
+                    <div class="item-title editable-area">🏋️‍♂️ TREINO DE FORÇA</div>
+                    <ul class="item-list editable-area">
+                        <li>Beber água durante todo o treino</li>
+                        <li>Treino em jejum quebrado (Estratégico)</li>
+                        <li>Foco Total e Intensidade</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Café / Pós -->
+            <div class="timeline-item">
+                <div class="time-dot"></div>
+                <div class="time-label editable-area">07:45</div>
+                <div class="card-content">
+                    <div class="item-title editable-area">🌅 Café / Pós-Treino</div>
+                    <ul class="item-list editable-area">
+                        <li>3 ovos inteiros</li>
+                        <li>100g Brócolis + 50g Cenoura</li>
+                        <li>Função: Recuperação Muscular</li>
+                    </ul>
+                    <div class="macros-row">
+                        <div class="macro-item">P: <span class="editable-area">27g</span></div>
+                        <div class="macro-item">C: <span class="editable-area">12g</span></div>
+                        <div class="macro-item">G: <span class="editable-area">26g</span></div>
+                        <div class="macro-item">Cal: <span class="editable-area">390</span></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Lanche Manhã -->
+            <div class="timeline-item">
+                <div class="time-dot"></div>
+                <div class="time-label editable-area">10:30</div>
+                <div class="card-content">
+                    <div class="item-title editable-area">☕ Lanche da Manhã</div>
+                    <ul class="item-list editable-area">
+                        <li>2 ovos cozidos</li>
+                        <li>Folhas verdes ou cenoura crua</li>
+                        <li>Evitar catabolismo</li>
+                    </ul>
+                    <div class="macros-row">
+                        <div class="macro-item">P: <span class="editable-area">12g</span></div>
+                        <div class="macro-item">C: <span class="editable-area">4g</span></div>
+                        <div class="macro-item">G: <span class="editable-area">10g</span></div>
+                        <div class="macro-item">Cal: <span class="editable-area">180</span></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Almoço -->
+            <div class="timeline-item">
+                <div class="time-dot"></div>
+                <div class="time-label editable-area">13:00</div>
+                <div class="card-content">
+                    <div class="item-title editable-area">🍛 Almoço (CLT)</div>
+                    <ul class="item-list editable-area">
+                        <li>180g Patinho grelhado</li>
+                        <li>100g Beterraba + 80g Cenoura</li>
+                        <li>Brócolis à vontade + 5ml Azeite</li>
+                    </ul>
+                    <div class="macros-row">
+                        <div class="macro-item">P: <span class="editable-area">45g</span></div>
+                        <div class="macro-item">C: <span class="editable-area">28g</span></div>
+                        <div class="macro-item">G: <span class="editable-area">18g</span></div>
+                        <div class="macro-item">Cal: <span class="editable-area">520</span></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Lanche Tarde -->
+            <div class="timeline-item">
+                <div class="time-dot"></div>
+                <div class="time-label editable-area">16:30</div>
+                <div class="card-content">
+                    <div class="item-title editable-area">⚡ Lanche da Tarde</div>
+                    <ul class="item-list editable-area">
+                        <li>150g Frango grelhado/desfiado</li>
+                        <li>Salada crua ou cenoura</li>
+                        <li>Manter metabolismo ativo</li>
+                    </ul>
+                    <div class="macros-row">
+                        <div class="macro-item">P: <span class="editable-area">35g</span></div>
+                        <div class="macro-item">C: <span class="editable-area">6g</span></div>
+                        <div class="macro-item">G: <span class="editable-area">5g</span></div>
+                        <div class="macro-item">Cal: <span class="editable-area">260</span></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Jantar -->
+            <div class="timeline-item">
+                <div class="time-dot"></div>
+                <div class="time-label editable-area">20:00</div>
+                <div class="card-content">
+                    <div class="item-title editable-area">🌙 Jantar Low Carb</div>
+                    <ul class="item-list editable-area">
+                        <li>200g Frango ou Patinho</li>
+                        <li>Legumes verdes à vontade</li>
+                        <li>Facilitar sono profundo</li>
+                    </ul>
+                    <div class="macros-row">
+                        <div class="macro-item">P: <span class="editable-area">42g</span></div>
+                        <div class="macro-item">C: <span class="editable-area">10g</span></div>
+                        <div class="macro-item">G: <span class="editable-area">8g</span></div>
+                        <div class="macro-item">Cal: <span class="editable-area">350</span></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Ceia -->
+            <div class="timeline-item">
+                <div class="time-dot"></div>
+                <div class="time-label editable-area">22:00</div>
+                <div class="card-content">
+                    <div class="item-title editable-area">🌌 Ceia (Opcional)</div>
+                    <ul class="item-list editable-area">
+                        <li>2 Claras + 1 Ovo inteiro</li>
+                        <li>OU 100g Frango</li>
+                    </ul>
+                    <div class="macros-row">
+                        <div class="macro-item">P: <span class="editable-area">20g</span></div>
+                        <div class="macro-item">C: <span class="editable-area">2g</span></div>
+                        <div class="macro-item">G: <span class="editable-area">5g</span></div>
+                        <div class="macro-item">Cal: <span class="editable-area">150</span></div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Footer Resumo -->
+        <div class="footer-summary">
+            <div class="summary-title">🔥 Resumo Diário de Macros</div>
+            <div class="summary-grid">
+                <div class="summary-box">
+                    <span class="sum-val editable-area">1850</span>
+                    <span class="sum-lbl">Kcal</span>
+                </div>
+                <div class="summary-box">
+                    <span class="sum-val editable-area">190g</span>
+                    <span class="sum-lbl">Prot</span>
+                </div>
+                <div class="summary-box">
+                    <span class="sum-val editable-area">70g</span>
+                    <span class="sum-lbl">Carb</span>
+                </div>
+                <div class="summary-box">
+                    <span class="sum-val editable-area">70g</span>
+                    <span class="sum-lbl">Gord</span>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Controles -->
+    <div class="fab-container no-print">
+        <button onclick="downloadImage()" class="fab-btn" title="Baixar PNG">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 16 16">
+                <path d="M6.002 5.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0z"/>
+                <path d="M2.002 1a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V3a2 2 0 0 0-2-2h-12zm12 1a1 1 0 0 1 1 1v6.5l-3.777-1.947a.5.5 0 0 0-.577.093l-3.71 3.71-2.66-1.772a.5.5 0 0 0-.63.062L1.002 12V3a1 1 0 0 1 1-1h12z"/>
+            </svg>
+        </button>
+        <button id="editBtn" onclick="toggleEditMode()" class="fab-btn" title="Editar">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 16 16">
+                <path d="M12.146.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1 0 .708l-10 10a.5.5 0 0 1-.168.11l-5 2a.5.5 0 0 1-.65-.65l2-5a.5.5 0 0 1 .11-.168l10-10zM11.207 2.5 13.5 4.793 14.793 3.5 12.5 1.207 11.207 2.5zm1.586 3L10.5 3.207 4 9.707V10h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.293l6.5-6.5zm-9.761 5.175-.106.106-1.528 3.821 3.821-1.528.106-.106A.5.5 0 0 1 5 12.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.468-.325z"/>
+            </svg>
+        </button>
+    </div>
+
+    <script>
+        let isEditMode = false;
+        const editBtn = document.getElementById('editBtn');
+        const container = document.getElementById('captureTarget');
+
+        function toggleEditMode() {
+            isEditMode = !isEditMode;
+            const editableElements = document.querySelectorAll('.editable-area');
+            
+            if (isEditMode) {
+                container.classList.add('is-editing');
+                editBtn.classList.add('active');
+                editableElements.forEach(el => el.contentEditable = "true");
+            } else {
+                container.classList.remove('is-editing');
+                editBtn.classList.remove('active');
+                editableElements.forEach(el => el.contentEditable = "false");
+            }
+        }
+
+        function downloadImage() {
+            if(isEditMode) toggleEditMode();
+
+            window.scrollTo(0,0);
+            
+            html2canvas(container, {
+                scale: 2,
+                backgroundColor: "#1e1e1e",
+                useCORS: true
+            }).then(canvas => {
+                const link = document.createElement('a');
+                link.download = 'plano-alimentar-leonardo.png';
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+            });
+        }
+        
+        // Bloquear colagem de formatação rica
+        document.addEventListener('paste', function (e) {
+            if (isEditMode) {
+                e.preventDefault();
+                var text = (e.originalEvent || e).clipboardData.getData('text/plain');
+                document.execCommand("insertHTML", false, text);
+            }
+        });
+    </script>
+</body>
+</html>
