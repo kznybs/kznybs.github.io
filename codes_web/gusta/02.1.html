@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Protocolo - Dona Marlene (Atualizado)</title>
+    <!-- Bibliotecas para geração de Imagem e PDF -->
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        :root {
+            /* Paleta de Cores Nova */
+            --bg-body: #0f172a;       /* Slate 900 */
+            --bg-card: #1e293b;       /* Slate 800 */
+            --bg-block: #334155;      /* Slate 700 */
+            --accent: #38bdf8;        /* Sky 400 */
+            --accent-dark: #0284c7;   /* Sky 600 */
+            --text-main: #f1f5f9;     /* Slate 100 */
+            --text-muted: #94a3b8;    /* Slate 400 */
+            --danger-bg: rgba(239, 68, 68, 0.1);
+            --danger-border: #ef4444;
+        }
+
+        body {
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            font-family: 'Inter', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+
+        /* Container Principal */
+        .plan-container {
+            width: 100%;
+            max-width: 500px;
+            background-color: var(--bg-card);
+            border-radius: 24px;
+            overflow: hidden;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            position: relative;
+            border: 1px solid #475569;
+        }
+
+        /* Cabeçalho */
+        .header {
+            background-color: var(--accent-dark);
+            background-image: linear-gradient(160deg, var(--accent-dark) 0%, #0369a1 100%);
+            padding: 35px 25px 30px;
+            color: #fff;
+            text-align: left;
+            position: relative;
+        }
+        
+        .instructor-tag {
+            background-color: rgba(255,255,255,0.2);
+            color: #fff;
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            display: inline-block;
+            margin-bottom: 12px;
+        }
+
+        .student-name {
+            font-family: 'Poppins', sans-serif;
+            font-size: 26px;
+            font-weight: 800;
+            margin: 0;
+            text-transform: uppercase;
+            line-height: 1.1;
+            letter-spacing: -0.5px;
+        }
+
+        .student-details {
+            font-size: 12px;
+            font-weight: 500;
+            margin-top: 10px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .detail-badge {
+            background: #fff;
+            color: var(--accent-dark);
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-weight: 700;
+        }
+
+        /* Títulos de Seção */
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 25px 20px 15px;
+        }
+        .section-line { flex-grow: 1; height: 1px; background: #475569; }
+        .section-title {
+            color: var(--accent);
+            font-family: 'Poppins', sans-serif;
+            font-size: 14px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .content-padding {
+            padding: 0 20px 10px;
+        }
+
+        /* Cards */
+        .info-card {
+            background-color: var(--bg-block);
+            border-radius: 16px;
+            padding: 18px;
+            border: 1px solid rgba(255,255,255,0.05);
+            margin-bottom: 15px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .card-header {
+            color: var(--accent);
+            font-weight: 700;
+            font-size: 12px;
+            text-transform: uppercase;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border-bottom: 2px solid rgba(255,255,255,0.1);
+            padding-bottom: 8px;
+        }
+
+        /* Grid de Estatísticas */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            font-size: 12px;
+        }
+
+        .stat-item {
+            background: rgba(15, 23, 42, 0.5);
+            padding: 10px;
+            border-radius: 10px;
+            color: var(--text-muted);
+            border: 1px solid rgba(255,255,255,0.03);
+            display: flex;
+            flex-direction: column;
+        }
+        .stat-item strong { color: #fff; margin-bottom: 4px; font-size: 11px; text-transform: uppercase; opacity: 0.7; }
+        .stat-val { font-size: 13px; font-weight: 600; color: var(--accent); }
+
+        /* Refeições */
+        .meal-stack {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            padding: 0 20px 20px;
+        }
+
+        .meal-block {
+            background-color: var(--bg-block);
+            border-radius: 16px;
+            overflow: hidden;
+            border: 1px solid rgba(255,255,255,0.05);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .meal-header-strip {
+            background: rgba(56, 189, 248, 0.1);
+            padding: 8px 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .meal-name {
+            font-weight: 800;
+            color: #fff;
+            font-size: 13px;
+            text-transform: uppercase;
+        }
+
+        .meal-icon {
+            font-size: 14px;
+        }
+
+        .meal-body {
+            padding: 15px;
+        }
+
+        .meal-option {
+            font-size: 13px;
+            color: var(--text-main);
+            margin-bottom: 6px;
+            padding-left: 14px;
+            position: relative;
+        }
+        .meal-option::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 6px;
+            width: 6px;
+            height: 6px;
+            background-color: var(--accent);
+            border-radius: 50%;
+        }
+
+        .meal-note {
+            background: rgba(0,0,0,0.2);
+            padding: 6px 10px;
+            border-radius: 6px;
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-top: 8px;
+            display: inline-block;
+        }
+
+        /* Lista Vermelha */
+        .forbidden-card {
+            background: rgba(239, 68, 68, 0.05);
+            border: 1px solid var(--danger-border);
+            border-radius: 16px;
+            padding: 18px;
+        }
+        .forbidden-header { color: #ef4444; font-weight: 800; font-size: 12px; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 1px; }
+        .forbidden-tags { display: flex; flex-wrap: wrap; gap: 8px; }
+        .forbidden-tag {
+            background: rgba(239, 68, 68, 0.15);
+            color: #fca5a5;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        /* Suplementação */
+        .supp-list { list-style: none; padding: 0; margin: 0; }
+        .supp-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            margin-bottom: 8px;
+            font-size: 12px;
+            color: var(--text-muted);
+            background: rgba(15, 23, 42, 0.3);
+            padding: 8px;
+            border-radius: 8px;
+        }
+        .check-icon { color: var(--accent); font-weight: bold; min-width: 15px; }
+
+        /* Footer Metas */
+        .footer-goals {
+            background: #0f172a;
+            padding: 25px 20px;
+            border-top: 1px solid #475569;
+        }
+        
+        .goals-wrapper {
+            display: flex;
+            gap: 10px;
+            overflow-x: auto;
+        }
+
+        .goal-card {
+            background: var(--bg-card);
+            min-width: 30%;
+            flex: 1;
+            padding: 12px;
+            border-radius: 12px;
+            border: 1px solid #475569;
+            text-align: center;
+        }
+        .goal-card-title { color: var(--accent); font-size: 10px; font-weight: 700; text-transform: uppercase; margin-bottom: 4px; }
+        .goal-card-value { color: #fff; font-size: 11px; font-weight: 600; line-height: 1.3; }
+
+        /* Edição e Botões */
+        .editable-area { outline: none; min-width: 5px; transition: 0.2s; }
+        .is-editing .editable-area { border: 1px dashed var(--accent); background: rgba(56, 189, 248, 0.1); padding: 2px; }
+
+        .fab-container { position: fixed; bottom: 20px; right: 20px; display: flex; flex-direction: column; gap: 12px; z-index: 100; }
+        .fab-btn { width: 50px; height: 50px; border-radius: 14px; border: none; background: var(--bg-block); color: #fff; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5); cursor: pointer; display: flex; align-items: center; justify-content: center; border: 1px solid rgba(255,255,255,0.1); transition: 0.2s; }
+        .fab-btn:hover { background: var(--accent-dark); transform: translateY(-2px); }
+        .fab-btn svg { width: 20px; height: 20px; }
+        .pdf-btn { background: #ef4444; } .pdf-btn:hover { background: #dc2626; }
+
+        @media print { .fab-container { display: none; } }
+    </style>
+</head>
+<body>
+
+    <div class="plan-container" id="captureTarget">
+        
+        <!-- Header -->
+        <header class="header">
+            <div class="instructor-tag editable-area">🧬 GUSTAVOTRAINER CONSULTORIA</div>
+            <h1 class="student-name editable-area">DONA MARLENE</h1>
+            <div class="student-details">
+                <span class="detail-badge editable-area">📉 META: –25 a –30 KG</span>
+                <span class="detail-badge editable-area">🗓️ 100% FOCO</span>
+            </div>
+        </header>
+
+        <!-- Diagnóstico InBody -->
+        <div class="section-header">
+            <span class="section-title">DIAGNÓSTICO INBODY</span>
+            <div class="section-line"></div>
+        </div>
+        
+        <div class="content-padding">
+            <div class="info-card">
+                <div class="card-header">📊 RESUMO E PONTOS-CHAVE</div>
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <strong>Peso Atual</strong>
+                        <span class="stat-val editable-area">83,4 kg</span>
+                    </div>
+                    <div class="stat-item">
+                        <strong>IMC</strong>
+                        <span class="stat-val editable-area">35,6 (Obesidade)</span>
+                    </div>
+                    <div class="stat-item">
+                        <strong>Gordura Corp.</strong>
+                        <span class="stat-val editable-area">51,7% (Elevada)</span>
+                    </div>
+                    <div class="stat-item">
+                        <strong>Massa Musc.</strong>
+                        <span class="stat-val editable-area">21,9 kg (Preservar)</span>
+                    </div>
+                    <div class="stat-item">
+                        <strong>Gord. Visceral</strong>
+                        <span class="stat-val editable-area">Nível 23 (Alto)</span>
+                    </div>
+                    <div class="stat-item">
+                        <strong>Retenção</strong>
+                        <span class="stat-val editable-area">Elevada</span>
+                    </div>
+                    <div class="stat-item" style="grid-column: span 2; background: rgba(56, 189, 248, 0.1); border-color: var(--accent);">
+                        <strong style="color: var(--accent);">Peso Ideal Estimado</strong>
+                        <span class="stat-val editable-area">~52 kg</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="info-card">
+                <div class="card-header">🎯 OBJETIVOS DO PROTOCOLO</div>
+                <ul class="supp-list editable-area">
+                    <li class="supp-item"><span class="check-icon">✓</span> Déficit calórico agressivo e seguro (1300-1450 kcal).</li>
+                    <li class="supp-item"><span class="check-icon">✓</span> Alta proteína para evitar flacidez (100-120g/dia).</li>
+                    <li class="supp-item"><span class="check-icon">✓</span> Ação anti-inflamatória e diurética natural.</li>
+                    <li class="supp-item"><span class="check-icon">✓</span> Estímulo muscular obrigatório (Musculação).</li>
+                    <li class="supp-item"><span class="check-icon">✓</span> Saúde intestinal e hormonal otimizada.</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Cardápio Base -->
+        <div class="section-header">
+            <span class="section-title">CARDÁPIO BASE (1300 kcal)</span>
+            <div class="section-line"></div>
+        </div>
+
+        <div class="meal-stack">
+            
+            <!-- Café -->
+            <div class="meal-block">
+                <div class="meal-header-strip">
+                    <span class="meal-name editable-area">☀️ Café da Manhã</span>
+                    <span class="meal-icon">🍳</span>
+                </div>
+                <div class="meal-body">
+                    <div class="meal-option editable-area"><strong>Opção 1:</strong> 2 ovos + 1 fatia de pão integral.</div>
+                    <div class="meal-option editable-area"><strong>Opção 2:</strong> Omelete (2 ovos + legumes).</div>
+                    <div class="meal-option editable-area"><strong>Opção 3:</strong> Iogurte grego natural + chia + morangos.</div>
+                    <div class="meal-note editable-area">☕ Café sem açúcar ou com canela.</div>
+                </div>
+            </div>
+
+            <!-- Lanche Manhã -->
+            <div class="meal-block">
+                <div class="meal-header-strip">
+                    <span class="meal-name editable-area">🍎 Lanche Manhã (Opcional)</span>
+                    <span class="meal-icon">🥜</span>
+                </div>
+                <div class="meal-body">
+                    <div class="meal-option editable-area">1 fruta (maçã, pera, kiwi)</div>
+                    <div class="meal-option editable-area">OU 10 castanhas.</div>
+                </div>
+            </div>
+
+            <!-- Almoço -->
+            <div class="meal-block">
+                <div class="meal-header-strip">
+                    <span class="meal-name editable-area">🍛 Almoço</span>
+                    <span class="meal-icon">🥗</span>
+                </div>
+                <div class="meal-body">
+                    <div class="meal-option editable-area"><strong>Proteína (120-150g):</strong> Frango, Peixe ou Carne magra.</div>
+                    <div class="meal-option editable-area"><strong>Carbo (Escolher 1):</strong> 3 col. arroz integral, 1 batata-doce ou Quinoa.</div>
+                    <div class="meal-option editable-area"><strong>Gordura:</strong> 1 colher azeite.</div>
+                    <div class="meal-note editable-area">🥦 Legumes à vontade (brócolis, folhas, etc).</div>
+                </div>
+            </div>
+
+            <!-- Lanche Tarde -->
+            <div class="meal-block">
+                <div class="meal-header-strip">
+                    <span class="meal-name editable-area">🍵 Lanche Tarde</span>
+                    <span class="meal-icon">🥤</span>
+                </div>
+                <div class="meal-body">
+                    <div class="meal-option editable-area">Shake de proteína (Whey ou Vegetal)</div>
+                    <div class="meal-option editable-area">OU Ovo cozido + fruta pequena.</div>
+                </div>
+            </div>
+
+            <!-- Jantar -->
+            <div class="meal-block" style="border-color: var(--accent);">
+                <div class="meal-header-strip" style="background: rgba(56, 189, 248, 0.2);">
+                    <span class="meal-name editable-area">🌙 Jantar (LOW CARB)</span>
+                    <span class="meal-icon">🐟</span>
+                </div>
+                <div class="meal-body">
+                    <div class="meal-option editable-area"><strong>Proteína (150g):</strong> Frango, Peixe ou Carne magra.</div>
+                    <div class="meal-option editable-area">Legumes e verduras à vontade.</div>
+                    <div class="meal-note editable-area">🚫 ZERO arroz, pão, massa ou farinha à noite.</div>
+                </div>
+            </div>
+
+            <!-- Ceia -->
+            <div class="meal-block">
+                <div class="meal-header-strip">
+                    <span class="meal-name editable-area">🌜 Ceia (Se necessário)</span>
+                    <span class="meal-icon">🍵</span>
+                </div>
+                <div class="meal-body">
+                    <div class="meal-option editable-area">Chá diurético (hibisco, cavalinha, dente-de-leão)</div>
+                    <div class="meal-option editable-area">OU Gelatina zero açúcar.</div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Lista de Cortes -->
+        <div class="content-padding">
+            <div class="forbidden-card">
+                <div class="forbidden-header">🚫 O QUE CORTAR (Essencial)</div>
+                <div class="forbidden-tags editable-area">
+                    <span class="forbidden-tag">Açúcar</span>
+                    <span class="forbidden-tag">Refrigerante</span>
+                    <span class="forbidden-tag">Álcool</span>
+                    <span class="forbidden-tag">Embutidos</span>
+                    <span class="forbidden-tag">Farinha Branca</span>
+                    <span class="forbidden-tag">Ultraprocessados</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Suplementação -->
+        <div class="section-header">
+            <span class="section-title">SUPLEMENTAÇÃO ESTRATÉGICA</span>
+            <div class="section-line"></div>
+        </div>
+
+        <div class="content-padding">
+            <div class="info-card">
+                <div class="card-header">💊 BÁSICOS (QUASE OBRIGATÓRIOS)</div>
+                <ul class="supp-list editable-area">
+                    <li class="supp-item"><span class="check-icon">▸</span> Multivitamínico completo (1x/dia)</li>
+                    <li class="supp-item"><span class="check-icon">▸</span> Vitamina D3 (2.000–5.000 UI/dia)</li>
+                    <li class="supp-item"><span class="check-icon">▸</span> Magnésio glicinato (300–400 mg)</li>
+                    <li class="supp-item"><span class="check-icon">▸</span> Ômega 3 (2–3 g/dia)</li>
+                    <li class="supp-item"><span class="check-icon">▸</span> Colágeno tipo I + III (10g) c/ Vit C</li>
+                </ul>
+            </div>
+
+             <div class="info-card">
+                <div class="card-header">💧 RETENÇÃO & FLACIDEZ</div>
+                <ul class="supp-list editable-area">
+                    <li class="supp-item"><span class="check-icon">▸</span> Potássio (banana, abacate, água de coco)</li>
+                    <li class="supp-item"><span class="check-icon">▸</span> Vitamina C (500–1.000 mg)</li>
+                    <li class="supp-item"><span class="check-icon">▸</span> Zinco (15–30 mg)</li>
+                    <li class="supp-item"><span class="check-icon">▸</span> Silício orgânico (Opcional - Pele)</li>
+                </ul>
+            </div>
+             <div class="info-card">
+                <div class="card-header">🦠 INTESTINO (CHAVE P/ EMAGRECER)</div>
+                <ul class="supp-list editable-area">
+                    <li class="supp-item"><span class="check-icon">▸</span> Probiótico (10–20 bilhões UFC)</li>
+                    <li class="supp-item"><span class="check-icon">▸</span> Fibras: psyllium ou alimentos naturais</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Treino e Estilo de Vida -->
+        <div class="section-header">
+            <span class="section-title">TREINO & ESTILO DE VIDA</span>
+            <div class="section-line"></div>
+        </div>
+
+        <div class="content-padding">
+             <div class="info-card">
+                <div class="card-header">🏋️‍♀️ PROTOCOLO FÍSICO</div>
+                <ul class="supp-list editable-area">
+                    <li class="supp-item"><span class="check-icon">🟢</span> <strong>Musculação 4x/semana:</strong> Essencial para "colar" a pele.</li>
+                    <li class="supp-item"><span class="check-icon">🔥</span> <strong>Cardio:</strong> 20-30 min pós-treino ou caminhada diária.</li>
+                    <li class="supp-item"><span class="check-icon">💧</span> <strong>Anti-Retenção:</strong> 3L água/dia + chás diuréticos.</li>
+                    <li class="supp-item"><span class="check-icon">🧠</span> <strong>Hormonal:</strong> Dormir 7-8h e reduzir estresse.</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Expectativa -->
+        <div class="footer-goals">
+            <div class="goals-wrapper">
+                <div class="goal-card">
+                    <div class="goal-card-title">1ª FASE (30 DIAS)</div>
+                    <div class="goal-card-value editable-area">–4 a –6 kg<br>Grande Desinchaço</div>
+                </div>
+                <div class="goal-card">
+                    <div class="goal-card-title">3 MESES</div>
+                    <div class="goal-card-value editable-area">–12 a –18 kg</div>
+                </div>
+                <div class="goal-card">
+                    <div class="goal-card-title">TRANSFORMAÇÃO (6-9m)</div>
+                    <div class="goal-card-value editable-area">Total: –25 a –30 kg</div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Controles -->
+    <div class="fab-container no-print">
+        <button onclick="downloadPDF()" class="fab-btn pdf-btn" title="Baixar PDF">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 16 16">
+                <path d="M14 14V4.5L9.5 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2zM9.5 3A1.5 1.5 0 0 0 11 4.5h2V14a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1h5.5v2z"/>
+                <path d="M4.603 14.087a.81.81 0 0 1-.438-.42c-.195-.388-.13-.776.08-1.102.198-.307.526-.568.897-.787a7.68 7.68 0 0 1 1.482-.645 19.697 19.697 0 0 0 1.062-2.227 7.269 7.269 0 0 1-.43-1.295c-.086-.4-.119-.796-.046-1.136.075-.354.274-.672.65-.823.192-.077.4-.12.602-.077a.7.7 0 0 1 .477.365c.088.164.12.356.127.538.007.188-.012.396-.047.614-.084.51-.27 1.134-.52 1.794a10.954 10.954 0 0 0 .98 1.686 5.753 5.753 0 0 1 1.334.05c.364.066.734.195.96.465.12.144.193.32.2.518.007.192-.047.382-.138.563a1.04 1.04 0 0 1-.354.416.856.856 0 0 1-.51.138c-.331-.014-.654-.196-.933-.417a5.712 5.712 0 0 1-.911-.95 11.651 11.651 0 0 0-1.997.406 11.307 11.307 0 0 1-1.02 1.51c-.292.35-.609.656-.927.787a.793.793 0 0 1-.58.029zm1.379-1.901c-.166.076-.32.156-.459.238-.328.194-.541.383-.647.545-.094.145-.096.25-.04.361.01.022.02.036.026.044a.266.266 0 0 0 .035-.012c.137-.056.355-.235.635-.572a8.18 8.18 0 0 0 .45-.606zm1.64-1.33a12.71 12.71 0 0 1 1.01-.193 11.744 11.744 0 0 1-.51-.858 20.801 20.801 0 0 1-.5 1.05zm2.446.45c.15.163.296.3.435.41.24.19.407.253.498.256a.107.107 0 0 0 .07-.015.307.307 0 0 0 .094-.125.436.436 0 0 0 .059-.2.095.095 0 0 0-.026-.063c-.052-.062-.2-.152-.518-.209a3.876 3.876 0 0 0-.612-.053zM8.097 12.06c.528-1.48 1.03-3.06 1.03-3.06l-.288-.411s-.597 1.847-1.328 3.511c-.086.194-.176.386-.264.577.625.048 1.15-.316 1.15-.316.004-.001-.304-.301-.3-.301zm2.368-7.942c-.31-.057-.61.123-.674.457-.04.209-.013.43.037.608.064.218.172.392.274.506.12.135.292.203.456.203.22 0 .445-.122.563-.374.072-.154.088-.35.05-.568-.024-.138-.076-.264-.139-.371-.137-.234-.326-.402-.567-.461z"/>
+            </svg>
+        </button>
+
+        <button onclick="downloadImage()" class="fab-btn" title="Baixar PNG">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 16 16">
+                <path d="M6.002 5.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0z"/>
+                <path d="M2.002 1a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V3a2 2 0 0 0-2-2h-12zm12 1a1 1 0 0 1 1 1v6.5l-3.777-1.947a.5.5 0 0 0-.577.093l-3.71 3.71-2.66-1.772a.5.5 0 0 0-.63.062L1.002 12V3a1 1 0 0 1 1-1h12z"/>
+            </svg>
+        </button>
+
+        <button id="editBtn" onclick="toggleEditMode()" class="fab-btn" title="Editar">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 16 16">
+                <path d="M12.146.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1 0 .708l-10 10a.5.5 0 0 1-.168.11l-5 2a.5.5 0 0 1-.65-.65l2-5a.5.5 0 0 1 .11-.168l10-10zM11.207 2.5 13.5 4.793 14.793 3.5 12.5 1.207 11.207 2.5zm1.586 3L10.5 3.207 4 9.707V10h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.293l6.5-6.5zm-9.761 5.175-.106.106-1.528 3.821 3.821-1.528.106-.106A.5.5 0 0 1 5 12.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.468-.325z"/>
+            </svg>
+        </button>
+    </div>
+
+    <script>
+        let isEditMode = false;
+        const editBtn = document.getElementById('editBtn');
+        const container = document.getElementById('captureTarget');
+
+        function toggleEditMode() {
+            isEditMode = !isEditMode;
+            const editableElements = document.querySelectorAll('.editable-area');
+            
+            if (isEditMode) {
+                container.classList.add('is-editing');
+                editBtn.classList.add('active');
+                editableElements.forEach(el => el.contentEditable = "true");
+            } else {
+                container.classList.remove('is-editing');
+                editBtn.classList.remove('active');
+                editableElements.forEach(el => el.contentEditable = "false");
+            }
+        }
+
+        async function downloadImage() {
+            if(isEditMode) toggleEditMode();
+            window.scrollTo(0,0);
+            
+            // Esperar um pouco para garantir que fontes carregaram
+            await document.fonts.ready;
+            
+            const canvas = await html2canvas(container, {
+                scale: 2,
+                backgroundColor: "#1e293b",
+                useCORS: true,
+                allowTaint: true
+            });
+            
+            const link = document.createElement('a');
+            link.download = 'protocolo-dona-marlene-updated.png';
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        }
+
+        async function downloadPDF() {
+            if(isEditMode) toggleEditMode();
+            window.scrollTo(0,0);
+            
+            await document.fonts.ready;
+            
+            const canvas = await html2canvas(container, {
+                scale: 2,
+                backgroundColor: "#1e293b",
+                useCORS: true
+            });
+
+            const imgData = canvas.toDataURL('image/png');
+            const { jsPDF } = window.jspdf;
+            
+            // Conversão px para mm (A4 approx width)
+            const imgWidth = canvas.width * 0.264583;
+            const imgHeight = canvas.height * 0.264583;
+
+            const pdf = new jsPDF({
+                orientation: imgHeight > imgWidth ? 'p' : 'l',
+                unit: 'mm',
+                format: [imgWidth, imgHeight]
+            });
+
+            pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
+            pdf.save('protocolo-dona-marlene-updated.pdf');
+        }
+        
+        // Melhoria na colagem de texto durante a edição
+        document.addEventListener('paste', function (e) {
+            if (isEditMode) {
+                e.preventDefault();
+                var text = (e.originalEvent || e).clipboardData.getData('text/plain');
+                document.execCommand("insertHTML", false, text);
+            }
+        });
+    </script>
+</body>
+</html>
