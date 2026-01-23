@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Protocolo - GUSTAVOTRAINER</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@500;700;800;900&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <style>
+        :root { --font-heading: 'Outfit', sans-serif; --font-body: 'Inter', sans-serif; }
+        * { -webkit-font-smoothing: antialiased; }
+        body { font-family: var(--font-body); background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; }
+        h1, h2, h3 { font-family: var(--font-heading); }
+        
+        /* Estilos de Edição Controlados */
+        .editable-area { transition: all 0.2s; border-radius: 8px; border: 2px solid transparent; outline: none; }
+        
+        /* Só aplica o visual de edição quando a classe .is-editing estiver no corpo */
+        body.is-editing .editable-area { 
+            border: 2px dashed rgba(99, 102, 241, 0.4); 
+            background-color: rgba(255, 255, 255, 0.5);
+            cursor: text;
+            padding: 4px 6px; 
+            margin: -4px -6px;
+        }
+        body.is-editing .editable-area:hover { 
+            background-color: rgba(99, 102, 241, 0.1); 
+            border-color: #6366f1; 
+        }
+        body.is-editing .editable-area:focus { 
+            background-color: white; 
+            border-color: #6366f1; 
+            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.15); 
+            border-style: solid;
+        }
+
+        .page-container { width: 100%; margin: 0 auto; background: white; padding: 1.5rem; padding-bottom: 8rem; color: #1e293b; min-height: 100vh; }
+        @media (min-width: 640px) { .page-container { max-width: 210mm; margin: 2.5rem auto; padding: 3.5rem; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); border-radius: 20px; min-height: auto; } }
+        
+        [data-theme="yellow"] { background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%) !important; color: #78350f !important; }
+        [data-theme="yellow"] .card-style { background: white !important; border: 2px solid #fcd34d !important; }
+        [data-theme="yellow"] .accent-blue { background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%) !important; }
+        
+        [data-theme="dark"] { background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%) !important; color: #e2e8f0 !important; }
+        [data-theme="dark"] .card-style { background: #1e293b !important; border: 2px solid #334155 !important; color: #f1f5f9 !important; }
+        [data-theme="dark"] .text-slate-500, [data-theme="dark"] .text-slate-600, [data-theme="dark"] .text-slate-700 { color: #94a3b8 !important; }
+        [data-theme="dark"] .bg-slate-100 { background: #334155 !important; }
+        
+        .card-style { background: white; border-radius: 16px; border: 2px solid #e2e8f0; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); transition: all 0.3s; }
+        .card-style:hover { transform: translateY(-2px); box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); }
+        .accent-border { border-left: 5px solid #6366f1; }
+        .accent-blue { background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); color: white; border: none !important; box-shadow: 0 10px 25px -5px rgba(99, 102, 241, 0.4); }
+        .macro-pill { display: inline-flex; align-items: center; gap: 4px; padding: 4px 10px; border-radius: 8px; font-size: 0.75rem; font-weight: 700; background-color: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; }
+        .clone-container { position: fixed; top: 0; left: -9999px; width: 900px !important; z-index: 9999; background: white; }
+        .screenshot-mode { width: 900px !important; padding: 60px !important; border-radius: 0 !important; box-shadow: none !important; margin: 0 !important; }
+        .screenshot-mode .grid-responsive-3 { display: grid !important; grid-template-columns: repeat(3, 1fr) !important; gap: 24px !important; }
+        .screenshot-mode .grid-responsive-2 { display: grid !important; grid-template-columns: repeat(2, 1fr) !important; gap: 24px !important; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .animate-spin { animation: spin 1s linear infinite; }
+        
+        /* Botão Ativo */
+        .btn-active { background-color: #dbeafe !important; color: #1e40af !important; border-color: #3b82f6 !important; }
+        
+        @media print { 
+            body { background: white !important; } 
+            .no-print { display: none !important; } 
+            .page-container { box-shadow: none !important; margin: 0 !important; border-radius: 0 !important; }
+            .editable-area { border: none !important; background: transparent !important; margin: 0 !important; padding: 0 !important; }
+        }
+    </style>
+</head>
+<body>
+    <div class="fixed bottom-0 left-0 right-0 p-4 bg-white/95 backdrop-blur-xl border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-3 z-50 no-print shadow-[0_-10px_40px_rgba(0,0,0,0.15)] sm:bottom-6 sm:left-1/2 sm:right-auto sm:-translate-x-1/2 sm:w-auto sm:rounded-2xl sm:border sm:px-8 sm:py-4">
+        <div class="flex items-center gap-3 pb-3 sm:pb-0 sm:pr-4 border-b sm:border-b-0 sm:border-r border-slate-200 w-full sm:w-auto justify-center">
+            <span class="text-xs font-bold text-slate-500 uppercase">Tema:</span>
+            <button onclick="setTheme('white')" class="w-10 h-10 rounded-xl bg-white border-2 border-slate-300 hover:ring-2 hover:ring-indigo-300 transition-all shadow-md"></button>
+            <button onclick="setTheme('yellow')" class="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-200 to-yellow-300 border-2 border-amber-400 hover:ring-2 hover:ring-amber-400 transition-all shadow-md"></button>
+            <button onclick="setTheme('dark')" class="w-10 h-10 rounded-xl bg-gradient-to-br from-slate-800 to-slate-900 border-2 border-slate-700 hover:ring-2 hover:ring-slate-600 transition-all shadow-md"></button>
+        </div>
+        <div class="flex items-center gap-3 w-full sm:w-auto">
+            <!-- Botão Editar Novo -->
+            <button id="editBtn" onclick="toggleEditMode()" class="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-white hover:bg-slate-50 text-slate-700 font-bold py-3 px-4 rounded-xl border-2 border-slate-300 transition-all text-sm w-12 sm:w-auto" title="Editar Textos">
+                <i class="ph-bold ph-pencil-simple text-xl" id="editIcon"></i> <span class="hidden sm:inline" id="editText">Editar</span>
+            </button>
+            
+            <button onclick="window.print()" class="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-3 px-6 rounded-xl border-2 border-slate-300 transition-all text-sm">
+                <i class="ph-bold ph-printer text-xl"></i> <span>Imprimir</span>
+            </button>
+            <button onclick="downloadImageSafe()" class="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-bold py-3 px-6 rounded-xl shadow-lg transition-all text-sm">
+                <i class="ph-bold ph-image text-xl"></i> <span>Salvar Imagem</span>
+            </button>
+        </div>
+    </div>
+
+    <div id="document-content" class="page-container">
+        <!-- Header Principal -->
+        <header class="flex flex-col sm:flex-row justify-between items-start sm:items-end mb-8 border-b-2 border-slate-100 pb-8 gap-6">
+            <div class="w-full sm:w-auto editable-area">
+                <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-indigo-50 to-purple-50 text-indigo-700 text-xs font-black uppercase mb-4 border border-indigo-100">
+                    <i class="ph-fill ph-dna"></i> GUSTAVOTRAINER CONSULTORIA
+                </div>
+                <h1 class="text-4xl sm:text-5xl font-black text-slate-900 mb-2">Protocolo</h1>
+                <p class="text-slate-500 text-base font-semibold">Meta Inicial: <strong class="text-indigo-600">–25 a –30 kg</strong></p>
+            </div>
+            <!-- Painel de Metas da Dieta -->
+            <div class="w-full sm:w-auto bg-gradient-to-br from-slate-50 to-slate-100 p-6 rounded-2xl border-2 border-slate-200 shadow-md">
+                <div class="grid grid-cols-2 sm:flex gap-6 text-center editable-area">
+                    <div><span class="text-xs text-slate-500 font-black uppercase block mb-1">Calorias</span><span class="text-indigo-600 font-black text-2xl block">1.450</span></div>
+                    <div class="sm:border-l-2 border-slate-300 sm:pl-6"><span class="text-xs text-slate-500 font-black uppercase block mb-1">Prot</span><span class="text-rose-600 font-black text-2xl block">120g</span></div>
+                    <div class="sm:border-l-2 border-slate-300 sm:pl-6"><span class="text-xs text-slate-500 font-black uppercase block mb-1">Carb</span><span class="text-amber-600 font-black text-2xl block">120g</span></div>
+                    <div class="sm:border-l-2 border-slate-300 sm:pl-6"><span class="text-xs text-slate-500 font-black uppercase block mb-1">Gord</span><span class="text-emerald-600 font-black text-2xl block">50g</span></div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Seção de Diagnóstico InBody -->
+        <section class="mb-10">
+            <div class="bg-indigo-50 border border-indigo-100 rounded-2xl p-4 sm:p-6 editable-area">
+                <h3 class="text-xs font-black text-indigo-800 uppercase mb-4 flex items-center gap-2"><i class="ph-bold ph-chart-bar"></i> Resumo do InBody (Inicial)</h3>
+                <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
+                    <div class="bg-white p-3 rounded-xl border border-indigo-50 shadow-sm"><span class="block text-xs text-slate-400 font-bold uppercase">Peso</span><span class="block text-slate-700 font-black text-lg">83,4 kg</span></div>
+                    <div class="bg-white p-3 rounded-xl border border-indigo-50 shadow-sm"><span class="block text-xs text-slate-400 font-bold uppercase">IMC</span><span class="block text-rose-500 font-black text-lg">35,6</span></div>
+                    <div class="bg-white p-3 rounded-xl border border-indigo-50 shadow-sm"><span class="block text-xs text-slate-400 font-bold uppercase">% Gordura</span><span class="block text-rose-500 font-black text-lg">51,7%</span></div>
+                    <div class="bg-white p-3 rounded-xl border border-indigo-50 shadow-sm"><span class="block text-xs text-slate-400 font-bold uppercase">M. Muscular</span><span class="block text-emerald-600 font-black text-lg">21,9 kg</span></div>
+                    <div class="bg-white p-3 rounded-xl border border-indigo-50 shadow-sm"><span class="block text-xs text-slate-400 font-bold uppercase">G. Visceral</span><span class="block text-rose-500 font-black text-lg">Nível 23</span></div>
+                    <div class="bg-white p-3 rounded-xl border border-indigo-50 shadow-sm"><span class="block text-xs text-slate-400 font-bold uppercase">Meta Final</span><span class="block text-indigo-600 font-black text-lg">~52 kg</span></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Seção de Refeições -->
+        <section>
+            <h2 class="text-xl font-black uppercase text-slate-800 border-b-2 border-indigo-200 pb-3 mb-8 flex items-center gap-3"><i class="ph-duotone ph-bowl-food text-indigo-600 text-2xl"></i> Cardápio Diário</h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 grid-responsive-3">
+                
+                <!-- Café da Manhã -->
+                <div class="card-style accent-border p-6 editable-area">
+                    <div class="flex justify-between mb-4"><span class="text-indigo-700 font-black text-2xl">Manhã</span><span class="text-xs font-black text-slate-500 uppercase bg-slate-100 px-3 py-1.5 rounded-lg">Café</span></div>
+                    <p class="text-xs font-bold text-slate-400 uppercase mb-2">Escolha 1 Opção:</p>
+                    <ul class="text-slate-700 text-sm space-y-2 mb-5">
+                        <li>• 2 ovos + 1 fatia pão integral</li>
+                        <li>• OU Omelete (2 ovos + legumes)</li>
+                        <li>• OU Iogurte grego + chia + morango</li>
+                    </ul>
+                    <span class="macro-pill">☕ Café s/ açúcar ou canela</span>
+                </div>
+
+                <!-- Lanche Manhã -->
+                <div class="card-style accent-border p-6 editable-area">
+                    <div class="flex justify-between mb-4"><span class="text-indigo-700 font-black text-2xl">Lanche</span><span class="text-xs font-black text-slate-500 uppercase bg-slate-100 px-3 py-1.5 rounded-lg">Opcional</span></div>
+                    <ul class="text-slate-700 text-sm space-y-2 mb-5">
+                        <li>• 1 Fruta (Maçã, Pera ou Kiwi)</li>
+                        <li>• OU 10 Castanhas</li>
+                    </ul>
+                    <span class="macro-pill">🍎 Antioxidantes</span>
+                </div>
+
+                <!-- Almoço -->
+                <div class="card-style accent-blue p-6 flex flex-col justify-center editable-area">
+                    <div class="flex justify-between mb-4 items-center"><span class="font-black text-2xl text-white">Almoço</span><i class="ph-fill ph-carrot text-2xl bg-white/20 p-1.5 rounded-lg"></i></div>
+                    <ul class="text-indigo-50 text-sm space-y-2 mb-2">
+                        <li><strong>Prot (120-150g):</strong> Frango, Peixe ou Carne Magra.</li>
+                        <li><strong>Carb (Escolha 1):</strong> 3 col. Arroz Integral, 1 Batata Doce ou Quinoa.</li>
+                        <li><strong>Gord:</strong> 1 colher azeite.</li>
+                    </ul>
+                    <p class="text-xs text-indigo-200 mt-2 font-bold uppercase">+ Legumes à vontade</p>
+                </div>
+
+                <!-- Lanche Tarde -->
+                <div class="card-style accent-border p-6 editable-area">
+                    <div class="flex justify-between mb-4"><span class="text-indigo-700 font-black text-2xl">Tarde</span><span class="text-xs font-black text-slate-500 uppercase bg-slate-100 px-3 py-1.5 rounded-lg">Lanche</span></div>
+                    <ul class="text-slate-700 text-sm space-y-2 mb-5">
+                        <li>• Shake de Proteína (Whey/Vegetal)</li>
+                        <li>• OU Ovo cozido + fruta pequena</li>
+                    </ul>
+                    <span class="macro-pill">💪 Proteína Essencial</span>
+                </div>
+
+                <!-- Jantar -->
+                <div class="card-style accent-border p-6 editable-area">
+                    <div class="flex justify-between mb-4"><span class="text-indigo-700 font-black text-2xl">Noite</span><span class="text-xs font-black text-slate-500 uppercase bg-slate-100 px-3 py-1.5 rounded-lg">Jantar Low Carb</span></div>
+                    <ul class="text-slate-700 text-sm space-y-2 mb-5">
+                        <li>• 150g Proteína (Carne/Frango)</li>
+                        <li>• Legumes e verduras à vontade</li>
+                    </ul>
+                    <div class="bg-rose-50 text-rose-700 px-3 py-2 rounded-lg text-xs font-bold border border-rose-100 text-center">🚫 ZERO Arroz/Massa/Pão</div>
+                </div>
+
+                <!-- Ceia -->
+                <div class="card-style p-6 bg-gradient-to-br from-slate-50 to-slate-100 editable-area">
+                    <div class="flex justify-between mb-4"><span class="text-slate-600 font-black text-2xl">Ceia</span><span class="text-xs font-black text-slate-400 uppercase bg-white px-3 py-1.5 rounded-lg border border-slate-200">Se necessário</span></div>
+                    <ul class="text-slate-600 text-sm space-y-2">
+                        <li>• Chá Diurético (Hibisco/Cavalinha)</li>
+                        <li>• OU Gelatina sem açúcar</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- Seção de Cortes e Suplementação -->
+        <section class="mt-14 border-t-2 border-slate-100 pt-10">
+            <h2 class="text-xl font-black uppercase text-slate-800 border-b-2 border-emerald-200 pb-3 mb-8 flex items-center gap-3"><i class="ph-duotone ph-shield-check text-emerald-600 text-2xl"></i> Estratégia Avançada</h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-8 grid-responsive-2">
+                <!-- Coluna Cortes -->
+                <div class="card-style p-8 border-l-[6px] border-l-rose-500 editable-area">
+                    <h3 class="text-lg font-black text-rose-600 mb-6 uppercase flex items-center gap-3"><i class="ph-fill ph-prohibit"></i> O Que Cortar (Essencial)</h3>
+                    <div class="flex flex-wrap gap-3">
+                        <span class="bg-rose-50 text-rose-700 px-3 py-1 rounded-full text-xs font-bold border border-rose-100">Açúcar</span>
+                        <span class="bg-rose-50 text-rose-700 px-3 py-1 rounded-full text-xs font-bold border border-rose-100">Refrigerante</span>
+                        <span class="bg-rose-50 text-rose-700 px-3 py-1 rounded-full text-xs font-bold border border-rose-100">Álcool</span>
+                        <span class="bg-rose-50 text-rose-700 px-3 py-1 rounded-full text-xs font-bold border border-rose-100">Embutidos</span>
+                        <span class="bg-rose-50 text-rose-700 px-3 py-1 rounded-full text-xs font-bold border border-rose-100">Farinha Branca</span>
+                        <span class="bg-rose-50 text-rose-700 px-3 py-1 rounded-full text-xs font-bold border border-rose-100">Ultraprocessados</span>
+                    </div>
+                    <p class="mt-4 text-xs text-rose-800 font-semibold bg-rose-100 p-3 rounded-lg">⚠️ Estes itens travam a queima de gordura e aumentam a inflamação.</p>
+                </div>
+
+                <!-- Coluna Suplementos -->
+                <div class="card-style p-8 border-l-[6px] border-l-emerald-500 editable-area">
+                    <h3 class="text-lg font-black text-emerald-600 mb-6 uppercase flex items-center gap-3"><i class="ph-fill ph-pill"></i> Suplementação</h3>
+                    <div class="space-y-3 text-sm text-slate-700">
+                        <div class="flex items-start gap-2"><i class="ph-bold ph-check text-emerald-500 mt-1"></i><span><strong>Básicos:</strong> Multivitamínico, Vitamina D3, Magnésio, Ômega 3.</span></div>
+                        <div class="flex items-start gap-2"><i class="ph-bold ph-check text-emerald-500 mt-1"></i><span><strong>Pele/Flacidez:</strong> Colágeno I+III, Vitamina C, Zinco, Silício.</span></div>
+                        <div class="flex items-start gap-2"><i class="ph-bold ph-check text-emerald-500 mt-1"></i><span><strong>Intestino:</strong> Probióticos + Fibras (Psyllium).</span></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Seção Final: Treino e Lifestyle -->
+        <section class="mt-14 bg-gradient-to-br from-slate-800 to-slate-900 text-slate-100 rounded-3xl p-8 sm:p-10 shadow-2xl editable-area">
+            <h2 class="text-base font-black uppercase flex items-center gap-3 mb-8 text-white border-b-2 border-slate-600 pb-5"><i class="ph-fill ph-heartbeat text-2xl text-indigo-400"></i> Protocolo de Estilo de Vida</h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-10 text-sm grid-responsive-2">
+                <div>
+                    <h3 class="font-black text-indigo-300 mb-4 text-lg uppercase flex items-center gap-2"><i class="ph-fill ph-barbell"></i> Treino (Obrigatório)</h3>
+                    <ul class="space-y-3 text-slate-300 mb-6">
+                        <li>🔥 <strong>Musculação:</strong> 4x/semana (Essencial p/ evitar flacidez).</li>
+                        <li>🏃‍♀️ <strong>Cardio:</strong> 20-30 min pós-treino ou caminhada rápida diária.</li>
+                    </ul>
+                    <div class="bg-indigo-900/50 border border-indigo-500/30 p-3 rounded-xl">
+                        <p class="text-xs text-indigo-200">Musculação é o que "cola" a pele de volta no músculo.</p>
+                    </div>
+                </div>
+                <div>
+                    <h3 class="font-black text-emerald-300 mb-4 text-lg uppercase flex items-center gap-2"><i class="ph-fill ph-drop"></i> Anti-Retenção & Hormônios</h3>
+                    <ul class="space-y-3 text-slate-300">
+                        <li>💧 <strong>Hidratação:</strong> 3 Litros de água/dia.</li>
+                        <li>🧂 <strong>Sódio:</strong> Reduzir sal refinado.</li>
+                        <li>💤 <strong>Sono:</strong> Dormir 7-8h (Cortisol trava gordura).</li>
+                        <li>🍵 <strong>Chás:</strong> Diuréticos 1-2x ao dia.</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <!-- Barra de Expectativa -->
+            <div class="mt-8 pt-8 border-t border-slate-700 grid grid-cols-1 sm:grid-cols-3 gap-4 text-center">
+                <div class="bg-slate-700/50 p-3 rounded-xl border border-slate-600">
+                    <span class="block text-xs text-slate-400 uppercase font-bold">1ª Fase (30 dias)</span>
+                    <span class="block text-white font-black text-lg">–4 a –6 kg</span>
+                    <span class="block text-[10px] text-emerald-400 uppercase">Desinchaço Grande</span>
+                </div>
+                <div class="bg-slate-700/50 p-3 rounded-xl border border-slate-600">
+                    <span class="block text-xs text-slate-400 uppercase font-bold">3 Meses</span>
+                    <span class="block text-white font-black text-lg">–12 a –18 kg</span>
+                    <span class="block text-[10px] text-emerald-400 uppercase">Evolução Constante</span>
+                </div>
+                <div class="bg-slate-700/50 p-3 rounded-xl border border-slate-600">
+                    <span class="block text-xs text-slate-400 uppercase font-bold">6-9 Meses</span>
+                    <span class="block text-white font-black text-lg">Transformação</span>
+                    <span class="block text-[10px] text-emerald-400 uppercase">Meta Atingida</span>
+                </div>
+            </div>
+        </section>
+
+        <footer class="mt-14 pt-8 border-t-2 border-slate-100 text-center">
+            <div class="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-indigo-100 to-purple-100 rounded-full mb-4"><i class="ph-fill ph-seal-check text-indigo-600"></i><span class="text-sm font-bold text-indigo-900">Protocolo Validado</span></div>
+            <p class="text-slate-500 text-sm">Dúvidas? Entre em contato com seu consultor.</p>
+        </footer>
+    </div>
+
+    <script>
+        let isEditMode = false;
+
+        function toggleEditMode() {
+            isEditMode = !isEditMode;
+            const btn = document.getElementById('editBtn');
+            const icon = document.getElementById('editIcon');
+            const text = document.getElementById('editText');
+            const editableElements = document.querySelectorAll('.editable-area');
+            
+            if (isEditMode) {
+                // Ativar Edição
+                document.body.classList.add('is-editing');
+                btn.classList.add('btn-active');
+                icon.className = 'ph-bold ph-check text-xl'; // Muda ícone para Check
+                text.textContent = 'Salvar';
+                editableElements.forEach(el => el.contentEditable = "true");
+            } else {
+                // Desativar Edição
+                document.body.classList.remove('is-editing');
+                btn.classList.remove('btn-active');
+                icon.className = 'ph-bold ph-pencil-simple text-xl'; // Volta para Lápis
+                text.textContent = 'Editar';
+                editableElements.forEach(el => el.contentEditable = "false");
+            }
+        }
+
+        function setTheme(theme) {
+            const container = document.getElementById('document-content');
+            if (theme === 'white') { container.removeAttribute('data-theme'); document.body.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'; }
+            else if (theme === 'yellow') { container.setAttribute('data-theme', 'yellow'); document.body.style.background = 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)'; }
+            else if (theme === 'dark') { container.setAttribute('data-theme', 'dark'); document.body.style.background = 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)'; }
+        }
+
+        function downloadImageSafe() {
+            // Garante que sai do modo edição antes de salvar
+            if(isEditMode) toggleEditMode();
+
+            const originalElement = document.getElementById('document-content');
+            const btn = document.querySelector('button[onclick="downloadImageSafe()"]');
+            const icon = btn.querySelector('i');
+            const span = btn.querySelector('span');
+            const originalText = span.textContent;
+            icon.className = 'ph-bold ph-spinner animate-spin text-xl';
+            span.textContent = 'Gerando...';
+            btn.disabled = true;
+            const clone = originalElement.cloneNode(true);
+            const container = document.createElement('div');
+            container.className = 'clone-container';
+            if(originalElement.hasAttribute('data-theme')) { clone.setAttribute('data-theme', originalElement.getAttribute('data-theme')); }
+            clone.classList.add('screenshot-mode');
+            container.appendChild(clone);
+            document.body.appendChild(container);
+            setTimeout(() => {
+                html2canvas(clone, { scale: 2.5, useCORS: true, logging: false, windowWidth: 900, width: 900, backgroundColor: null }).then(canvas => {
+                    const link = document.createElement('a');
+                    const timestamp = new Date().toISOString().slice(0,10);
+                    link.download = `Plano_GustavoTrainer_${timestamp}.png`;
+                    link.href = canvas.toDataURL('image/png', 1.0);
+                    link.click();
+                    document.body.removeChild(container);
+                    icon.className = 'ph-fill ph-check-circle text-xl';
+                    span.textContent = 'Salvo!';
+                    setTimeout(() => { icon.className = 'ph-bold ph-image text-xl'; span.textContent = originalText; btn.disabled = false; }, 2000);
+                }).catch(err => {
+                    console.error('Erro:', err);
+                    document.body.removeChild(container);
+                    icon.className = 'ph-fill ph-x-circle text-xl';
+                    span.textContent = 'Erro!';
+                    setTimeout(() => { icon.className = 'ph-bold ph-image text-xl'; span.textContent = originalText; btn.disabled = false; }, 2500);
+                });
+            }, 800);
+        }
+    </script>
+</body>
+</html>
