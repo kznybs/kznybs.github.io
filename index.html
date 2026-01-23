@@ -13,17 +13,17 @@
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
-        /* --- Configurações Gerais "Monster Storm" Theme --- */
+        /* --- Configurações Gerais "Bio Forest" Theme --- */
         :root {
-            --blood-red: #8a0000; 
-            --bright-red: #ff0000;
-            --void-black: #050000;
+            --toxic-green: #2ecc71; /* Verde mais natural */
+            --forest-green: #006400;
+            --deep-dark: #010a01;
         }
 
         body {
             font-family: 'Montserrat', sans-serif;
             color: #d1d5db;
-            background-color: var(--void-black);
+            background-color: var(--deep-dark);
             overflow-x: hidden;
             margin: 0;
             display: flex;
@@ -33,31 +33,26 @@
             min-height: 100dvh; 
         }
 
-        /* --- Camada de Raios (Strobe Effect) --- */
-        .lightning-overlay {
+        /* --- Fundo com Bio-Fog (Neblina) --- */
+        body::before {
+            content: "";
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(255, 255, 255, 0.1);
-            z-index: 1; 
+            background: radial-gradient(circle at 50% 120%, rgba(20, 90, 30, 0.2), transparent 70%);
+            z-index: -1;
             pointer-events: none;
-            opacity: 0;
-            mix-blend-mode: overlay;
-            animation: lightning-flash 5s infinite;
+            animation: fog-pulse 8s infinite alternate;
         }
 
-        @keyframes lightning-flash {
-            0%, 90% { opacity: 0; background-color: rgba(255, 0, 0, 0.1); }
-            92% { opacity: 0.6; background-color: rgba(255, 255, 255, 0.2); }
-            93% { opacity: 0; }
-            94% { opacity: 0.4; background-color: rgba(255, 0, 0, 0.3); }
-            96% { opacity: 0; }
-            100% { opacity: 0; }
+        @keyframes fog-pulse {
+            0% { opacity: 0.4; }
+            100% { opacity: 0.8; }
         }
 
-        /* --- Fundo --- */
+        /* --- Fundo Particles --- */
         #particles-js {
             position: fixed;
             width: 100%;
@@ -65,10 +60,10 @@
             top: 0;
             left: 0;
             z-index: 0;
-            background: radial-gradient(circle at center, #1a0000 0%, #000000 100%); 
+            background: radial-gradient(circle at center, #051a05 0%, #000000 100%); 
         }
 
-        /* Vignette Pulsante */
+        /* Vignette Verde */
         body::after {
             content: "";
             position: fixed;
@@ -76,25 +71,19 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: radial-gradient(circle, transparent 30%, #000 110%);
+            background: radial-gradient(circle, transparent 40%, #000500 110%);
             pointer-events: none;
             z-index: 2;
-            animation: vignette-pulse 3s infinite ease-in-out;
         }
 
-        @keyframes vignette-pulse {
-            0%, 100% { background: radial-gradient(circle, transparent 30%, #000 110%); }
-            50% { background: radial-gradient(circle, transparent 40%, #000 100%); }
-        }
-
-        /* Scanline Rápido */
+        /* Scanline Digital - Mais sutil */
         .scanlines {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: linear-gradient(to bottom, rgba(20,0,0,0), rgba(20,0,0,0) 50%, rgba(0,0,0,0.5) 50%, rgba(0,0,0,0.5));
+            background: linear-gradient(to bottom, rgba(0,20,0,0), rgba(0,20,0,0) 50%, rgba(0,20,0,0.1) 50%, rgba(0,20,0,0.1));
             background-size: 100% 4px;
             z-index: 50;
             pointer-events: none;
@@ -107,7 +96,7 @@
             100% { transform: translateY(4px); }
         }
 
-        /* --- Layout Instável --- */
+        /* --- Layout Flutuante --- */
         .main-content {
             display: flex;
             flex-direction: column;
@@ -116,18 +105,15 @@
             width: 100%;
             z-index: 10;
             padding: 1rem;
-            animation: storm-shake 0.3s infinite;
+            animation: levitate 6s ease-in-out infinite;
         }
 
-        @keyframes storm-shake {
-            0% { transform: translate(0, 0); }
-            25% { transform: translate(1px, 1px); }
-            50% { transform: translate(-1px, 0); }
-            75% { transform: translate(0, -1px); }
-            100% { transform: translate(0, 0); }
+        @keyframes levitate {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
         }
 
-        /* --- Tipografia Glitch --- */
+        /* --- Tipografia Glitch Verde --- */
         h1 { font-family: 'Audiowide', cursive; }
         
         .glitch-wrapper { position: relative; display: inline-block; white-space: nowrap; }
@@ -138,39 +124,39 @@
             font-weight: 900;
             letter-spacing: 0.1em;
             color: #fff;
-            text-shadow: 4px 4px 0px var(--blood-red);
-            animation: glitch-anim 0.2s infinite alternate-reverse; 
+            text-shadow: 0 0 10px var(--toxic-green);
+            animation: glitch-anim 3s infinite alternate-reverse; 
         }
 
         .glitch-text::before, .glitch-text::after {
             content: attr(data-text);
             position: absolute;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: var(--void-black);
-            opacity: 1;
+            background: var(--deep-dark);
+            opacity: 0.8;
         }
 
         .glitch-text::before {
-            left: 3px;
-            text-shadow: -2px 0 red;
+            left: 2px;
+            text-shadow: -2px 0 var(--forest-green);
             clip: rect(44px, 9999px, 56px, 0);
-            animation: glitch-anim-2 2s infinite linear alternate-reverse;
+            animation: glitch-anim-2 4s infinite linear alternate-reverse;
         }
 
         .glitch-text::after {
-            left: -3px;
-            text-shadow: -2px 0 darkred;
+            left: -2px;
+            text-shadow: -2px 0 var(--toxic-green);
             clip: rect(44px, 9999px, 56px, 0);
-            animation: glitch-anim-3 1.5s infinite linear alternate-reverse;
+            animation: glitch-anim-3 2s infinite linear alternate-reverse;
         }
 
         @keyframes glitch-anim {
-            0% { text-shadow: 4px 4px 0px var(--blood-red); transform: skew(0deg); }
-            20% { text-shadow: -4px -4px 0px var(--blood-red); transform: skew(-2deg); }
-            40% { text-shadow: -4px 4px 0px var(--blood-red); transform: skew(0deg); }
-            60% { text-shadow: 4px -4px 0px var(--blood-red); transform: skew(2deg); }
-            80% { text-shadow: 4px 0px 0px var(--blood-red); transform: skew(0deg); }
-            100% { text-shadow: 0px 4px 0px var(--blood-red); transform: skew(0deg); }
+            0% { text-shadow: 4px 4px 0px var(--forest-green); }
+            20% { text-shadow: -4px -4px 0px var(--toxic-green); }
+            40% { text-shadow: -4px 4px 0px var(--forest-green); }
+            60% { text-shadow: 4px -4px 0px var(--toxic-green); }
+            80% { text-shadow: 4px 0px 0px var(--forest-green); }
+            100% { text-shadow: 0px 4px 0px var(--toxic-green); }
         }
         @keyframes glitch-anim-2 {
             0% { clip: rect(12px, 9999px, 5px, 0); }
@@ -181,13 +167,13 @@
             100% { clip: rect(100px, 9999px, 95px, 0); }
         }
 
-        /* --- Cartão Cyberpunk Polygon --- */
+        /* --- Cartão Bio-Tech --- */
         .profile-card {
-            background: rgba(10, 0, 0, 0.85);
-            backdrop-filter: blur(5px);
-            -webkit-backdrop-filter: blur(5px);
+            background: rgba(0, 20, 5, 0.6);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
             
-            /* Recorte Polygon Agressivo */
+            /* Recorte poligonal */
             clip-path: polygon(
                 30px 0, 
                 100% 0, 
@@ -197,18 +183,23 @@
                 0 30px
             );
             
-            /* Bordas não funcionam bem com clip-path, usando box-shadow interno */
             box-shadow: 
-                inset 0 0 0 1px rgba(138, 0, 0, 0.6), 
-                inset 0 0 60px rgba(0, 0, 0, 1);
+                inset 0 0 0 1px rgba(46, 204, 113, 0.3), 
+                inset 0 0 40px rgba(0, 20, 0, 0.8);
             
-            /* Drop shadow aplicado via filtro para seguir o formato */
-            filter: drop-shadow(0 0 20px rgba(138, 0, 0, 0.4));
+            filter: drop-shadow(0 0 15px rgba(46, 204, 113, 0.15));
             
             transform-style: preserve-3d;
             position: relative;
             overflow: hidden;
-            transition: all 0.1s ease;
+            transition: all 0.3s ease;
+        }
+
+        .profile-card:hover {
+            filter: drop-shadow(0 0 25px rgba(46, 204, 113, 0.3));
+            box-shadow: 
+                inset 0 0 0 1px rgba(46, 204, 113, 0.6), 
+                inset 0 0 50px rgba(0, 40, 0, 0.9);
         }
 
         /* Ícones */
@@ -217,15 +208,16 @@
 
         .icon-link {
             position: relative;
-            color: rgba(200, 200, 200, 0.6);
-            transition: all 0.2s ease;
+            color: rgba(200, 255, 200, 0.6);
+            transition: all 0.3s ease;
             z-index: 10;
         }
-        .icon-link:hover { color: #fff; transform: scale(1.1); text-shadow: 0 0 20px var(--bright-red); }
+        .icon-link:hover { color: #fff; transform: scale(1.1); text-shadow: 0 0 20px var(--toxic-green); }
+        
         .icon-link::after {
             content: ''; position: absolute; bottom: -10px; left: 50%; width: 0; height: 2px;
-            background: var(--bright-red); transform: translateX(-50%); transition: width 0.2s ease;
-            box-shadow: 0 0 10px var(--blood-red);
+            background: var(--toxic-green); transform: translateX(-50%); transition: width 0.3s ease;
+            box-shadow: 0 0 10px var(--toxic-green);
         }
         .icon-link:hover::after { width: 100%; }
 
@@ -236,7 +228,6 @@
 </head>
 <body class="antialiased">
 
-    <div class="lightning-overlay"></div>
     <div class="scanlines"></div>
     <div id="particles-js"></div>
 
@@ -247,7 +238,6 @@
             </div>
         </div>
 
-        <!-- Removido 'rounded-sm' para usar o clip-path customizado -->
         <div class="w-full max-w-sm md:max-w-xl p-6 md:p-12 profile-card" 
              data-tilt data-tilt-max="5" data-tilt-speed="1000" data-tilt-glare="true" data-tilt-max-glare="0.2">
             
@@ -268,8 +258,8 @@
                 </a>
             </div>
 
-            <div class="absolute bottom-3 right-4 text-[9px] font-mono tracking-[0.2em] pointer-events-none text-red-600/60 animate-pulse">
-          
+            <div class="absolute bottom-3 right-4 text-[9px] font-mono tracking-[0.2em] pointer-events-none text-green-500/60 animate-pulse">
+                Z
             </div>
         </div>
     </div>
@@ -278,26 +268,39 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/vanilla-tilt/1.7.2/vanilla-tilt.min.js"></script>
     
     <script>
+        // Imagem de folha SVG codificada em Base64
+        const leafImage = "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0iIzJlY2M3MSI+PHBhdGggZD0iTTEyLDJDMjAsMiw1LDIyLDUsMjJzNC02LDQtMTJjMC0yLDIuNS01LDUuNS01QzE2LDUuNSwxOSwzLjUsMjIsMUMyMiwxLDEyLDIgMTIsMnoiLz48cGF0aCBkPSJNMTIsMmMwLDAsOCw4LDgsMTRjMCw0LTQsNi04LDZDMjAsMjIsMTIsMiAxMiwyWiIgb3BhY2l0eT0iMC42Ii8+PC9zdmc+";
+
         particlesJS('particles-js', {
             "particles": {
-                // Tempestade de detritos
-                "number": { "value": 150, "density": { "enable": true, "value_area": 800 } },
-                "color": { "value": ["#8a0000", "#550000", "#000000"] },
-                "shape": { "type": "circle" },
+                "number": { 
+                    "value": 40, /* Menos partículas pois as folhas são maiores */
+                    "density": { "enable": true, "value_area": 800 } 
+                },
+                "color": { "value": "#ffffff" }, /* A cor é definida no SVG */
+                "shape": { 
+                    "type": "image", 
+                    "image": {
+                        "src": leafImage,
+                        "width": 100,
+                        "height": 100
+                    }
+                },
                 "opacity": { 
                     "value": 0.8, "random": true, 
-                    "anim": { "enable": true, "speed": 5, "opacity_min": 0.1, "sync": false } 
+                    "anim": { "enable": true, "speed": 1, "opacity_min": 0.4, "sync": false } 
                 },
                 "size": { 
-                    "value": 4, "random": true, 
+                    "value": 20, /* Tamanho grande para ver o formato da folha */
+                    "random": true, 
                     "anim": { "enable": false } 
                 },
-                "line_linked": { "enable": false },
+                "line_linked": { "enable": false }, 
                 "move": { 
                     "enable": true, 
-                    "speed": 25, 
-                    "direction": "right", 
-                    "random": true, 
+                    "speed": 2, 
+                    "direction": "bottom", /* Caindo para baixo */
+                    "random": false, 
                     "straight": false, 
                     "out_mode": "out", 
                     "attract": { "enable": false } 
@@ -306,23 +309,23 @@
             "interactivity": {
                 "detect_on": "window",
                 "events": { 
-                    "onhover": { "enable": true, "mode": "repulse" }, 
-                    "onclick": { "enable": true, "mode": "push" }, 
+                    "onhover": { "enable": true, "mode": "bubble" }, 
+                    "onclick": { "enable": true, "mode": "repulse" }, 
                     "resize": true 
                 },
                 "modes": {
-                    "repulse": { "distance": 100, "duration": 0.4 },
-                    "push": { "particles_nb": 4 }
+                    "bubble": { "distance": 200, "size": 25, "duration": 2, "opacity": 1, "speed": 3 },
+                    "repulse": { "distance": 150, "duration": 0.4 }
                 }
             },
             "retina_detect": true
         });
 
         VanillaTilt.init(document.querySelector(".profile-card"), {
-            max: 5,
+            max: 8,
             speed: 1000, 
             glare: true,
-            "max-glare": 0.3,
+            "max-glare": 0.2,
             scale: 1.02,
             perspective: 1000,
             gyroscope: true
