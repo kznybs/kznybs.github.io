@@ -13,11 +13,12 @@
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
-        /* --- Configurações Gerais "Monochrome Noir" Theme --- */
+        /* --- Configurações Gerais "Monochrome Noir + Red" Theme --- */
         :root {
             --pure-white: #ffffff;
             --mid-gray: #888888;
             --void-black: #050505;
+            --blood-red: #ff0000; /* Novo destaque */
         }
 
         body {
@@ -94,7 +95,7 @@
             50% { transform: translateY(-8px); }
         }
 
-        /* --- Tipografia Glitch Monocromática --- */
+        /* --- Tipografia Glitch Monocromática + Red Z --- */
         h1 { font-family: 'Audiowide', cursive; }
         
         .glitch-wrapper { position: relative; display: inline-block; white-space: nowrap; }
@@ -109,12 +110,22 @@
             animation: glitch-anim 4s infinite step-end; 
         }
 
+        /* Classe especial para o Z Vermelho */
+        .red-z {
+            color: var(--blood-red);
+            text-shadow: 0 0 20px var(--blood-red);
+            display: inline-block; /* Garante renderização correta */
+        }
+
         .glitch-text::before, .glitch-text::after {
             content: attr(data-text);
             position: absolute;
             top: 0; left: 0; width: 100%; height: 100%;
             background: var(--void-black);
             opacity: 1;
+            /* Nota: Os pseudo-elementos pegarão o texto puro. 
+               O efeito de glitch ficará interessante pois as "falhas" serão brancas/cinzas,
+               enquanto a letra real parada é vermelha. */
         }
 
         .glitch-text::before {
@@ -215,7 +226,8 @@
     <div class="main-content">
         <div class="name-container">
             <div class="glitch-wrapper">
-                <h1 class="glitch-text" data-text="KZNYBS">KZNYBS</h1>
+                <!-- Modificado: Z envolto em span com classe red-z -->
+                <h1 class="glitch-text" data-text="KZNYBS">K<span class="red-z">Z</span>NYBS</h1>
             </div>
         </div>
 
@@ -240,7 +252,7 @@
             </div>
 
             <div class="absolute bottom-3 right-4 text-[9px] font-mono tracking-[0.2em] pointer-events-none text-white/40 animate-pulse">
-              
+               
             </div>
         </div>
     </div>
@@ -249,13 +261,13 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/vanilla-tilt/1.7.2/vanilla-tilt.min.js"></script>
     
     <script>
-        // Ícone "Z" em SVG convertido para Base64
-        const zIcon = "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJ3aGl0ZSI+PHBhdGggZD0iTTIxIDNIM3YzaDEzLjVMMyAxOC41VjIxaDE4di0zSDcuNUwyMSA1LjVWM3oiLz48L3N2Zz4=";
+        // Ícone "Z" em SVG convertido para Base64 (AGORA VERMELHO - fill="#ff0000")
+        const zIcon = "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSIjZmYwMDAwIj48cGF0aCBkPSJNMjEgM0gzdjNoMTMuNUwzIDE4LjVWMjFoMTh2LTNINy41TDIxIDUuNVYzXCIvPjwvc3ZnPg==";
 
         particlesJS('particles-js', {
             "particles": {
                 "number": { "value": 60, "density": { "enable": true, "value_area": 800 } },
-                "color": { "value": "#ffffff" }, 
+                "color": { "value": "#ff0000" }, /* Cor de fallback */
                 "shape": { 
                     "type": "image", 
                     "image": {
@@ -265,11 +277,11 @@
                     }
                 },
                 "opacity": { 
-                    "value": 0.7, "random": true, 
+                    "value": 0.8, "random": true, 
                     "anim": { "enable": true, "speed": 1, "opacity_min": 0.2, "sync": false } 
                 },
                 "size": { 
-                    "value": 12, /* Tamanho aumentado para o Z ficar legível */
+                    "value": 14, 
                     "random": true, 
                     "anim": { "enable": false } 
                 },
@@ -277,7 +289,7 @@
                     "enable": true, 
                     "distance": 150, 
                     "color": "#ffffff", 
-                    "opacity": 0.1, 
+                    "opacity": 0.05, 
                     "width": 1 
                 },
                 "move": { 
