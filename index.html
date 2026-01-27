@@ -13,17 +13,17 @@
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
-        /* --- Configurações Gerais "Bio Forest" Theme --- */
+        /* --- Configurações Gerais "Monochrome Noir" Theme --- */
         :root {
-            --toxic-green: #2ecc71; /* Verde mais natural */
-            --forest-green: #006400;
-            --deep-dark: #010a01;
+            --pure-white: #ffffff;
+            --mid-gray: #888888;
+            --void-black: #050505;
         }
 
         body {
             font-family: 'Montserrat', sans-serif;
-            color: #d1d5db;
-            background-color: var(--deep-dark);
+            color: #e5e5e5;
+            background-color: var(--void-black);
             overflow-x: hidden;
             margin: 0;
             display: flex;
@@ -31,25 +31,6 @@
             align-items: center;
             min-height: 100vh;
             min-height: 100dvh; 
-        }
-
-        /* --- Fundo com Bio-Fog (Neblina) --- */
-        body::before {
-            content: "";
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: radial-gradient(circle at 50% 120%, rgba(20, 90, 30, 0.2), transparent 70%);
-            z-index: -1;
-            pointer-events: none;
-            animation: fog-pulse 8s infinite alternate;
-        }
-
-        @keyframes fog-pulse {
-            0% { opacity: 0.4; }
-            100% { opacity: 0.8; }
         }
 
         /* --- Fundo Particles --- */
@@ -60,10 +41,10 @@
             top: 0;
             left: 0;
             z-index: 0;
-            background: radial-gradient(circle at center, #051a05 0%, #000000 100%); 
+            background: radial-gradient(circle at center, #1a1a1a 0%, #000000 100%); 
         }
 
-        /* Vignette Verde */
+        /* Vignette Escura */
         body::after {
             content: "";
             position: fixed;
@@ -71,29 +52,29 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: radial-gradient(circle, transparent 40%, #000500 110%);
+            background: radial-gradient(circle, transparent 40%, #000000 110%);
             pointer-events: none;
             z-index: 2;
         }
 
-        /* Scanline Digital - Mais sutil */
+        /* Scanline Digital - Branco/Cinza */
         .scanlines {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: linear-gradient(to bottom, rgba(0,20,0,0), rgba(0,20,0,0) 50%, rgba(0,20,0,0.1) 50%, rgba(0,20,0,0.1));
-            background-size: 100% 4px;
+            background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,0) 50%, rgba(255,255,255,0.02) 50%, rgba(255,255,255,0.02));
+            background-size: 100% 3px;
             z-index: 50;
             pointer-events: none;
-            opacity: 0.15;
+            opacity: 0.3;
             animation: scanline-move 0.2s linear infinite;
         }
 
         @keyframes scanline-move {
             0% { transform: translateY(0); }
-            100% { transform: translateY(4px); }
+            100% { transform: translateY(3px); }
         }
 
         /* --- Layout Flutuante --- */
@@ -105,15 +86,15 @@
             width: 100%;
             z-index: 10;
             padding: 1rem;
-            animation: levitate 6s ease-in-out infinite;
+            animation: levitate 8s ease-in-out infinite;
         }
 
         @keyframes levitate {
             0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-10px); }
+            50% { transform: translateY(-8px); }
         }
 
-        /* --- Tipografia Glitch Verde --- */
+        /* --- Tipografia Glitch Monocromática --- */
         h1 { font-family: 'Audiowide', cursive; }
         
         .glitch-wrapper { position: relative; display: inline-block; white-space: nowrap; }
@@ -124,39 +105,39 @@
             font-weight: 900;
             letter-spacing: 0.1em;
             color: #fff;
-            text-shadow: 0 0 10px var(--toxic-green);
-            animation: glitch-anim 3s infinite alternate-reverse; 
+            text-shadow: 0 0 5px rgba(255, 255, 255, 0.8);
+            animation: glitch-anim 4s infinite step-end; 
         }
 
         .glitch-text::before, .glitch-text::after {
             content: attr(data-text);
             position: absolute;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: var(--deep-dark);
-            opacity: 0.8;
+            background: var(--void-black);
+            opacity: 1;
         }
 
         .glitch-text::before {
             left: 2px;
-            text-shadow: -2px 0 var(--forest-green);
+            text-shadow: -1px 0 #888;
             clip: rect(44px, 9999px, 56px, 0);
-            animation: glitch-anim-2 4s infinite linear alternate-reverse;
+            animation: glitch-anim-2 5s infinite linear alternate-reverse;
         }
 
         .glitch-text::after {
             left: -2px;
-            text-shadow: -2px 0 var(--toxic-green);
+            text-shadow: -1px 0 #ccc;
             clip: rect(44px, 9999px, 56px, 0);
-            animation: glitch-anim-3 2s infinite linear alternate-reverse;
+            animation: glitch-anim-3 3s infinite linear alternate-reverse;
         }
 
         @keyframes glitch-anim {
-            0% { text-shadow: 4px 4px 0px var(--forest-green); }
-            20% { text-shadow: -4px -4px 0px var(--toxic-green); }
-            40% { text-shadow: -4px 4px 0px var(--forest-green); }
-            60% { text-shadow: 4px -4px 0px var(--toxic-green); }
-            80% { text-shadow: 4px 0px 0px var(--forest-green); }
-            100% { text-shadow: 0px 4px 0px var(--toxic-green); }
+            0% { text-shadow: 2px 2px 0px #fff; }
+            20% { text-shadow: -2px -2px 0px #888; }
+            40% { text-shadow: -2px 2px 0px #ccc; }
+            60% { text-shadow: 2px -2px 0px #fff; }
+            80% { text-shadow: 2px 0px 0px #888; }
+            100% { text-shadow: 0px 2px 0px #ccc; }
         }
         @keyframes glitch-anim-2 {
             0% { clip: rect(12px, 9999px, 5px, 0); }
@@ -167,11 +148,11 @@
             100% { clip: rect(100px, 9999px, 95px, 0); }
         }
 
-        /* --- Cartão Bio-Tech --- */
+        /* --- Cartão Noir --- */
         .profile-card {
-            background: rgba(0, 20, 5, 0.6);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
+            background: rgba(15, 15, 15, 0.8);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
             
             /* Recorte poligonal */
             clip-path: polygon(
@@ -184,10 +165,10 @@
             );
             
             box-shadow: 
-                inset 0 0 0 1px rgba(46, 204, 113, 0.3), 
-                inset 0 0 40px rgba(0, 20, 0, 0.8);
+                inset 0 0 0 1px rgba(255, 255, 255, 0.2), 
+                inset 0 0 50px rgba(0, 0, 0, 0.9);
             
-            filter: drop-shadow(0 0 15px rgba(46, 204, 113, 0.15));
+            filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.1));
             
             transform-style: preserve-3d;
             position: relative;
@@ -196,10 +177,10 @@
         }
 
         .profile-card:hover {
-            filter: drop-shadow(0 0 25px rgba(46, 204, 113, 0.3));
+            filter: drop-shadow(0 0 20px rgba(255, 255, 255, 0.2));
             box-shadow: 
-                inset 0 0 0 1px rgba(46, 204, 113, 0.6), 
-                inset 0 0 50px rgba(0, 40, 0, 0.9);
+                inset 0 0 0 1px rgba(255, 255, 255, 0.5), 
+                inset 0 0 60px rgba(0, 0, 0, 1);
         }
 
         /* Ícones */
@@ -208,16 +189,16 @@
 
         .icon-link {
             position: relative;
-            color: rgba(200, 255, 200, 0.6);
+            color: rgba(150, 150, 150, 0.6);
             transition: all 0.3s ease;
             z-index: 10;
         }
-        .icon-link:hover { color: #fff; transform: scale(1.1); text-shadow: 0 0 20px var(--toxic-green); }
+        .icon-link:hover { color: #fff; transform: scale(1.1); text-shadow: 0 0 15px #fff; }
         
         .icon-link::after {
             content: ''; position: absolute; bottom: -10px; left: 50%; width: 0; height: 2px;
-            background: var(--toxic-green); transform: translateX(-50%); transition: width 0.3s ease;
-            box-shadow: 0 0 10px var(--toxic-green);
+            background: #fff; transform: translateX(-50%); transition: width 0.3s ease;
+            box-shadow: 0 0 10px #fff;
         }
         .icon-link:hover::after { width: 100%; }
 
@@ -258,8 +239,8 @@
                 </a>
             </div>
 
-            <div class="absolute bottom-3 right-4 text-[9px] font-mono tracking-[0.2em] pointer-events-none text-green-500/60 animate-pulse">
-                
+            <div class="absolute bottom-3 right-4 text-[9px] font-mono tracking-[0.2em] pointer-events-none text-white/40 animate-pulse">
+              
             </div>
         </div>
     </div>
@@ -268,39 +249,42 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/vanilla-tilt/1.7.2/vanilla-tilt.min.js"></script>
     
     <script>
-        // Imagem de folha SVG codificada em Base64
-        const leafImage = "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0iIzJlY2M3MSI+PHBhdGggZD0iTTEyLDJDMjAsMiw1LDIyLDUsMjJzNC02LDQtMTJjMC0yLDIuNS01LDUuNS01QzE2LDUuNSwxOSwzLjUsMjIsMUMyMiwxLDEyLDIgMTIsMnoiLz48cGF0aCBkPSJNMTIsMmMwLDAsOCw4LDgsMTRjMCw0LTQsNi04LDZDMjAsMjIsMTIsMiAxMiwyWiIgb3BhY2l0eT0iMC42Ii8+PC9zdmc+";
+        // Ícone "Z" em SVG convertido para Base64
+        const zIcon = "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJ3aGl0ZSI+PHBhdGggZD0iTTIxIDNIM3YzaDEzLjVMMyAxOC41VjIxaDE4di0zSDcuNUwyMSA1LjVWM3oiLz48L3N2Zz4=";
 
         particlesJS('particles-js', {
             "particles": {
-                "number": { 
-                    "value": 40, /* Menos partículas pois as folhas são maiores */
-                    "density": { "enable": true, "value_area": 800 } 
-                },
-                "color": { "value": "#ffffff" }, /* A cor é definida no SVG */
+                "number": { "value": 60, "density": { "enable": true, "value_area": 800 } },
+                "color": { "value": "#ffffff" }, 
                 "shape": { 
                     "type": "image", 
                     "image": {
-                        "src": leafImage,
+                        "src": zIcon,
                         "width": 100,
                         "height": 100
                     }
                 },
                 "opacity": { 
-                    "value": 0.8, "random": true, 
-                    "anim": { "enable": true, "speed": 1, "opacity_min": 0.4, "sync": false } 
+                    "value": 0.7, "random": true, 
+                    "anim": { "enable": true, "speed": 1, "opacity_min": 0.2, "sync": false } 
                 },
                 "size": { 
-                    "value": 20, /* Tamanho grande para ver o formato da folha */
+                    "value": 12, /* Tamanho aumentado para o Z ficar legível */
                     "random": true, 
                     "anim": { "enable": false } 
                 },
-                "line_linked": { "enable": false }, 
+                "line_linked": { 
+                    "enable": true, 
+                    "distance": 150, 
+                    "color": "#ffffff", 
+                    "opacity": 0.1, 
+                    "width": 1 
+                },
                 "move": { 
                     "enable": true, 
                     "speed": 2, 
-                    "direction": "bottom", /* Caindo para baixo */
-                    "random": false, 
+                    "direction": "none", 
+                    "random": true, 
                     "straight": false, 
                     "out_mode": "out", 
                     "attract": { "enable": false } 
@@ -309,23 +293,23 @@
             "interactivity": {
                 "detect_on": "window",
                 "events": { 
-                    "onhover": { "enable": true, "mode": "bubble" }, 
-                    "onclick": { "enable": true, "mode": "repulse" }, 
+                    "onhover": { "enable": true, "mode": "repulse" }, 
+                    "onclick": { "enable": true, "mode": "push" }, 
                     "resize": true 
                 },
                 "modes": {
-                    "bubble": { "distance": 200, "size": 25, "duration": 2, "opacity": 1, "speed": 3 },
-                    "repulse": { "distance": 150, "duration": 0.4 }
+                    "repulse": { "distance": 100, "duration": 0.4 },
+                    "push": { "particles_nb": 4 }
                 }
             },
             "retina_detect": true
         });
 
         VanillaTilt.init(document.querySelector(".profile-card"), {
-            max: 8,
+            max: 5,
             speed: 1000, 
             glare: true,
-            "max-glare": 0.2,
+            "max-glare": 0.1,
             scale: 1.02,
             perspective: 1000,
             gyroscope: true
