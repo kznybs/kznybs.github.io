@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agenda Instrutor Gustavo</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0f172a; /* Slate 900 */
+            color: #f1f5f9;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #1e293b; 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #10b981; 
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #059669; 
+        }
+
+        .glass-panel {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .slot-card {
+            transition: all 0.2s ease;
+        }
+        .slot-card:active {
+            transform: scale(0.98);
+        }
+        
+        /* Mobile Tabs hide scrollbar */
+        .hide-scroll::-webkit-scrollbar {
+            display: none;
+        }
+        .hide-scroll {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+    <!-- Header -->
+    <header class="bg-slate-900 border-b border-slate-800 sticky top-0 z-40 shadow-lg">
+        <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-emerald-500 rounded-lg flex items-center justify-center text-slate-900 font-bold text-xl shadow-[0_0_15px_rgba(16,185,129,0.5)]">
+                    <i class="fa-solid fa-dumbbell"></i>
+                </div>
+                <div>
+                    <h1 class="text-lg font-bold text-white leading-tight">Instrutor Gustavo</h1>
+                    <p class="text-xs text-emerald-400 font-medium">Agenda Semanal Fixa</p>
+                </div>
+            </div>
+            
+            <button onclick="resetData()" class="text-xs text-slate-500 hover:text-red-400 transition-colors" title="Restaurar Padrão">
+                <i class="fa-solid fa-rotate-left mr-1"></i> Resetar
+            </button>
+        </div>
+
+        <!-- Mobile Day Navigation (Visible on mobile only) -->
+        <div class="md:hidden border-t border-slate-800 bg-slate-900/95 backdrop-blur">
+            <div class="flex overflow-x-auto hide-scroll px-2 py-2 gap-2" id="mobileTabs">
+                <!-- Tabs injected by JS -->
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-grow p-4 md:p-8 max-w-7xl mx-auto w-full">
+        
+        <!-- Desktop Grid / Mobile Container -->
+        <div id="scheduleContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
+            <!-- Columns injected by JS -->
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="text-center py-6 text-slate-500 text-xs border-t border-slate-800">
+        <p>Desenvolvido para alta performance • Alterações salvas automaticamente</p>
+    </footer>
+
+    <!-- Edit Modal -->
+    <div id="editModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4">
+        <div class="bg-slate-800 border border-slate-700 rounded-2xl w-full max-w-md shadow-2xl transform transition-all scale-100">
+            <div class="p-6">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-xl font-bold text-white flex items-center gap-2">
+                        <i class="fa-solid fa-pen-to-square text-emerald-500"></i>
+                        Editar Horário
+                    </h3>
+                    <button onclick="closeModal()" class="text-slate-400 hover:text-white transition-colors">
+                        <i class="fa-solid fa-xmark text-xl"></i>
+                    </button>
+                </div>
+
+                <form id="editForm" onsubmit="saveSlot(event)" class="space-y-4">
+                    <input type="hidden" id="editDay">
+                    <input type="hidden" id="editPeriod">
+                    <input type="hidden" id="editIndex">
+
+                    <div>
+                        <label class="block text-xs font-semibold text-emerald-400 uppercase tracking-wider mb-1">Horário</label>
+                        <input type="text" id="inputTime" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-3 text-white focus:outline-none focus:border-emerald-500 transition-colors placeholder-slate-600" placeholder="Ex: 07h às 08h">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold text-emerald-400 uppercase tracking-wider mb-1">Aluno / Atividade</label>
+                        <input type="text" id="inputStudent" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-3 text-white focus:outline-none focus:border-emerald-500 transition-colors placeholder-slate-600" placeholder="Nome do aluno">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold text-emerald-400 uppercase tracking-wider mb-1">Detalhes (Opcional)</label>
+                        <input type="text" id="inputDetails" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-3 text-slate-300 focus:outline-none focus:border-emerald-500 transition-colors placeholder-slate-600" placeholder="Ex: Musculação, Pago, etc.">
+                    </div>
+                    
+                    <div class="pt-4 flex gap-3">
+                        <button type="button" onclick="clearSlotData()" class="flex-1 bg-red-500/10 text-red-400 border border-red-500/20 py-3 rounded-lg font-semibold hover:bg-red-500/20 transition-all">
+                            Vagar Horário
+                        </button>
+                        <button type="submit" class="flex-[2] bg-emerald-500 hover:bg-emerald-600 text-slate-900 py-3 rounded-lg font-bold shadow-[0_0_15px_rgba(16,185,129,0.3)] transition-all transform hover:-translate-y-0.5">
+                            Salvar Alterações
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed bottom-4 right-4 bg-emerald-500 text-slate-900 px-4 py-3 rounded-lg shadow-lg transform translate-y-20 opacity-0 transition-all duration-300 flex items-center gap-2 font-bold z-50">
+        <i class="fa-solid fa-check-circle"></i>
+        <span>Salvo com sucesso!</span>
+    </div>
+
+    <script>
+        // --- DATA STRUCTURE ---
+        const defaultData = {
+            "Segunda": {
+                "Manhã": [
+                    { time: "05h às 06h", student: "Rodrigo", details: "Musculação" },
+                    { time: "06h às 07h", student: "Horário Vago", details: "Livre" },
+                    { time: "07h às 08h", student: "Edilane", details: "" },
+                    { time: "08h às 09h", student: "Dona Nilva", details: "" },
+                    { time: "09h às 10h", student: "Rose", details: "" }
+                ],
+                "Tarde": [
+                    { time: "15h30", student: "Jaqueline", details: "" }
+                ],
+                "Noite": [
+                    { time: "17h às 18h", student: "Bruna", details: "" },
+                    { time: "18h às 19h", student: "Luana", details: "" },
+                    { time: "19h às 20h", student: "Luísa", details: "" }
+                ]
+            },
+            "Terça": {
+                "Manhã": [
+                    { time: "05h às 06h", student: "Rodrigo", details: "Musculação" },
+                    { time: "06h às 07h", student: "Horário Vago", details: "Osman / Edilane / Wesleyne" },
+                    { time: "07h às 08h", student: "Dona Marlene", details: "" },
+                    { time: "08h às 09h", student: "Dona Nilva", details: "" }
+                ],
+                "Tarde": [
+                    { time: "15h30", student: "Jaqueline", details: "" }
+                ],
+                "Noite": [
+                    { time: "17h às 18h", student: "Bruna", details: "" }
+                ]
+            },
+            "Quarta": {
+                "Manhã": [
+                    { time: "05h às 06h", student: "Rodrigo", details: "Musculação" },
+                    { time: "07h às 08h", student: "Dona Marlene", details: "" },
+                    { time: "08h às 09h", student: "Dona Nilva", details: "" },
+                    { time: "09h às 10h", student: "Rose", details: "" }
+                ],
+                "Tarde": [
+                    { time: "15h30", student: "Jaqueline", details: "" }
+                ],
+                "Noite": [
+                    { time: "17h às 18h", student: "Bruna", details: "" },
+                    { time: "18h às 19h", student: "Luana", details: "" },
+                    { time: "19h às 20h", student: "Luísa", details: "" }
+                ]
+            },
+            "Quinta": {
+                "Manhã": [
+                    { time: "05h às 06h", student: "Rodrigo", details: "Musculação" },
+                    { time: "06h às 07h", student: "Horário Vago", details: "" },
+                    { time: "07h às 08h", student: "Dona Marlene", details: "" },
+                    { time: "08h às 09h", student: "Horário Vago", details: "" }
+                ],
+                "Tarde": [
+                    { time: "15h30", student: "Jaqueline", details: "" }
+                ],
+                "Noite": [
+                    { time: "17h às 18h", student: "Bruna", details: "" }
+                ]
+            },
+            "Sexta": {
+                "Manhã": [
+                    { time: "05h às 06h", student: "Rodrigo", details: "Musculação" },
+                    { time: "06h às 07h", student: "Osman ou Edilane", details: "" },
+                    { time: "07h às 08h", student: "Edilane", details: "" },
+                    { time: "08h às 09h", student: "Dona Nilva", details: "" },
+                    { time: "09h às 10h", student: "Rose", details: "" }
+                ],
+                "Tarde": [
+                    { time: "15h30", student: "Jaqueline", details: "" }
+                ],
+                "Noite": [
+                    { time: "17h às 18h", student: "Bruna", details: "" },
+                    { time: "18h às 19h", student: "Luana", details: "" },
+                    { time: "19h às 20h", student: "Luísa", details: "" }
+                ]
+            }
+        };
+
+        const days = ["Segunda", "Terça", "Quarta", "Quinta", "Sexta"];
+        let scheduleData = {};
+        let activeMobileDay = "Segunda"; // Only relevant for mobile view
+
+        // --- APP INITIALIZATION ---
+
+        function init() {
+            loadData();
+            renderMobileTabs();
+            renderSchedule();
+            
+            // Set current day based on real date (optional logic)
+            const today = new Date().getDay(); // 0=Sun, 1=Mon...
+            if(today >= 1 && today <= 5) {
+                activeMobileDay = days[today - 1];
+            } else {
+                activeMobileDay = "Segunda";
+            }
+            updateMobileTabsUI();
+            
+            // Check screen size to handle responsive rendering
+            window.addEventListener('resize', renderSchedule);
+        }
+
+        function loadData() {
+            const saved = localStorage.getItem('agendaGustavoData');
+            if (saved) {
+                scheduleData = JSON.parse(saved);
+            } else {
+                scheduleData = JSON.parse(JSON.stringify(defaultData)); // Deep copy
+            }
+        }
+
+        function saveData() {
+            localStorage.setItem('agendaGustavoData', JSON.stringify(scheduleData));
+            showToast();
+        }
+
+        function resetData() {
+            if(confirm("Tem certeza que deseja resetar para a agenda original? Todas as alterações serão perdidas.")) {
+                localStorage.removeItem('agendaGustavoData');
+                loadData();
+                renderSchedule();
+                showToast("Agenda resetada!");
+            }
+        }
+
+        // --- RENDERING ---
+
+        function renderMobileTabs() {
+            const container = document.getElementById('mobileTabs');
+            container.innerHTML = days.map(day => `
+                <button onclick="switchMobileDay('${day}')" 
+                    id="tab-${day}"
+                    class="px-4 py-2 rounded-full text-sm font-bold whitespace-nowrap transition-all
+                    ${activeMobileDay === day ? 'bg-emerald-500 text-slate-900 shadow-md' : 'bg-slate-800 text-slate-400 border border-slate-700'}">
+                    ${day.toUpperCase()}
+                </button>
+            `).join('');
+        }
+
+        function switchMobileDay(day) {
+            activeMobileDay = day;
+            updateMobileTabsUI();
+            renderSchedule();
+        }
+
+        function updateMobileTabsUI() {
+            days.forEach(day => {
+                const btn = document.getElementById(`tab-${day}`);
+                if (day === activeMobileDay) {
+                    btn.className = "px-4 py-2 rounded-full text-sm font-bold whitespace-nowrap transition-all bg-emerald-500 text-slate-900 shadow-lg scale-105";
+                } else {
+                    btn.className = "px-4 py-2 rounded-full text-sm font-bold whitespace-nowrap transition-all bg-slate-800 text-slate-400 border border-slate-700 hover:bg-slate-700";
+                }
+            });
+        }
+
+        function renderSchedule() {
+            const container = document.getElementById('scheduleContainer');
+            container.innerHTML = '';
+            
+            const isMobile = window.innerWidth < 768;
+            
+            // Filter days to render: All if desktop, only active if mobile
+            const daysToRender = isMobile ? [activeMobileDay] : days;
+
+            daysToRender.forEach(day => {
+                const dayData = scheduleData[day];
+                if(!dayData) return;
+
+                const dayCard = document.createElement('div');
+                dayCard.className = "bg-slate-800/50 rounded-2xl border border-slate-700 overflow-hidden flex flex-col h-full animate-fade-in";
+                
+                // Day Header
+                dayCard.innerHTML = `
+                    <div class="bg-slate-800 p-4 border-b border-slate-700 flex justify-between items-center sticky top-0">
+                        <h2 class="text-xl font-black text-white uppercase tracking-wider">${day}</h2>
+                        <i class="fa-regular fa-calendar text-slate-500"></i>
+                    </div>
+                    <div class="p-3 space-y-4 overflow-y-auto custom-scrollbar flex-grow">
+                        ${renderPeriod(day, 'Manhã', dayData['Manhã'])}
+                        ${renderPeriod(day, 'Tarde', dayData['Tarde'])}
+                        ${renderPeriod(day, 'Noite', dayData['Noite'])}
+                    </div>
+                `;
+                container.appendChild(dayCard);
+            });
+        }
+
+        function renderPeriod(day, periodName, slots) {
+            if (!slots || slots.length === 0) return '';
+            
+            let icon = '';
+            if (periodName === 'Manhã') icon = '<i class="fa-solid fa-sun text-yellow-500 mr-2"></i>';
+            if (periodName === 'Tarde') icon = '<i class="fa-solid fa-cloud-sun text-orange-400 mr-2"></i>';
+            if (periodName === 'Noite') icon = '<i class="fa-solid fa-moon text-indigo-400 mr-2"></i>';
+
+            let html = `
+                <div class="mb-2">
+                    <h3 class="text-xs font-bold text-slate-500 uppercase mb-2 flex items-center">${icon} ${periodName}</h3>
+                    <div class="space-y-2">
+            `;
+
+            slots.forEach((slot, index) => {
+                const isVago = slot.student.toLowerCase().includes('vago') || slot.student.trim() === '';
+                const statusColor = isVago ? 'border-slate-600 bg-slate-800/30 text-slate-500' : 'border-emerald-500/30 bg-slate-700/50 hover:bg-slate-700';
+                const statusText = isVago ? 'text-slate-500 italic' : 'text-white font-bold';
+                const accent = isVago ? '' : '<div class="absolute left-0 top-0 bottom-0 w-1 bg-emerald-500 rounded-l-lg"></div>';
+
+                html += `
+                    <div onclick="openModal('${day}', '${periodName}', ${index})" 
+                         class="slot-card relative cursor-pointer p-3 rounded-lg border ${statusColor} group">
+                        ${accent}
+                        <div class="flex justify-between items-start pl-2">
+                            <div>
+                                <div class="text-xs text-emerald-400 font-mono mb-0.5">${slot.time}</div>
+                                <div class="${statusText} text-sm">${slot.student || 'Horário Vago'}</div>
+                                ${slot.details ? `<div class="text-xs text-slate-400 mt-1">${slot.details}</div>` : ''}
+                            </div>
+                            <i class="fa-solid fa-pen text-xs text-slate-600 group-hover:text-emerald-400 transition-colors mt-1"></i>
+                        </div>
+                    </div>
+                `;
+            });
+
+            html += `</div></div>`;
+            return html;
+        }
+
+        // --- MODAL LOGIC ---
+
+        function openModal(day, period, index) {
+            const slot = scheduleData[day][period][index];
+            
+            document.getElementById('editDay').value = day;
+            document.getElementById('editPeriod').value = period;
+            document.getElementById('editIndex').value = index;
+            
+            document.getElementById('inputTime').value = slot.time;
+            document.getElementById('inputStudent').value = slot.student;
+            document.getElementById('inputDetails').value = slot.details || '';
+
+            const modal = document.getElementById('editModal');
+            modal.classList.remove('hidden');
+            // Small timeout to allow removing display:none before adding opacity
+            setTimeout(() => {
+                modal.classList.remove('opacity-0');
+            }, 10);
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('editModal');
+            modal.classList.add('opacity-0');
+            setTimeout(() => {
+                modal.classList.add('hidden');
+            }, 300);
+        }
+
+        // Close modal when clicking outside
+        document.getElementById('editModal').addEventListener('click', (e) => {
+            if (e.target.id === 'editModal') closeModal();
+        });
+
+        function clearSlotData() {
+            document.getElementById('inputStudent').value = 'Horário Vago';
+            document.getElementById('inputDetails').value = '';
+            // We don't submit immediately, let user confirm by clicking save
+        }
+
+        function saveSlot(e) {
+            e.preventDefault();
+            
+            const day = document.getElementById('editDay').value;
+            const period = document.getElementById('editPeriod').value;
+            const index = parseInt(document.getElementById('editIndex').value);
+            
+            scheduleData[day][period][index] = {
+                time: document.getElementById('inputTime').value,
+                student: document.getElementById('inputStudent').value,
+                details: document.getElementById('inputDetails').value
+            };
+
+            saveData();
+            renderSchedule();
+            closeModal();
+        }
+
+        // --- UTILS ---
+
+        function showToast(message = "Salvo com sucesso!") {
+            const toast = document.getElementById('toast');
+            toast.querySelector('span').innerText = message;
+            toast.classList.remove('translate-y-20', 'opacity-0');
+            
+            setTimeout(() => {
+                toast.classList.add('translate-y-20', 'opacity-0');
+            }, 2500);
+        }
+
+        // Run Init
+        init();
+
+    </script>
+</body>
+</html>
