@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KZNYBS</title>
+    <title></title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Google Fonts -->
@@ -32,6 +32,7 @@
             min-height: 100vh;
             min-height: 100dvh; 
             overflow: hidden; /* Necessário para o Canvas */
+            cursor: pointer; /* Indica que é clicável */
         }
 
         /* --- NOVO MOTOR DE FUNDO (CANVAS) --- */
@@ -253,7 +254,7 @@
             </div>
 
             <div class="absolute bottom-3 right-4 text-[9px] font-mono tracking-[0.2em] pointer-events-none text-white/50 animate-pulse">
-             
+            
             </div>
         </div>
     </div>
@@ -370,6 +371,11 @@
                 mainContent.classList.remove('thunder-shake');
             }, 500);
         }
+
+        // Evento de clique na tela inteira
+        window.addEventListener('click', () => {
+            createLightning();
+        });
 
         function loop() {
             // Atualizar posição do holofote (Spotlight)
