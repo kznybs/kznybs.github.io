@@ -13,11 +13,11 @@
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
-        /* --- Configurações Gerais "Monochrome Noir" Theme --- */
+        /* --- Configurações Gerais (Layout Original Noir Storm) --- */
         :root {
             --pure-white: #ffffff;
-            --mid-gray: #888888;
-            --void-black: #050505;
+            --storm-gray: #4a4a4a;
+            --void-black: #0a0a0a;
         }
 
         body {
@@ -31,20 +31,22 @@
             align-items: center;
             min-height: 100vh;
             min-height: 100dvh; 
+            overflow: hidden; /* Necessário para o Canvas */
         }
 
-        /* --- Fundo Particles --- */
-        #particles-js {
+        /* --- NOVO MOTOR DE FUNDO (CANVAS) --- */
+        #storm-canvas {
             position: fixed;
-            width: 100%;
-            height: 100%;
             top: 0;
             left: 0;
-            z-index: 0;
-            background: radial-gradient(circle at center, #1a1a1a 0%, #000000 100%); 
+            width: 100%;
+            height: 100%;
+            z-index: 0; /* Atrás de tudo */
         }
 
-        /* Vignette Escura */
+        /* --- Overlays do Layout Original --- */
+        
+        /* Vignette (Suavizada) */
         body::after {
             content: "";
             position: fixed;
@@ -52,32 +54,32 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: radial-gradient(circle, transparent 40%, #000000 110%);
+            background: radial-gradient(circle, transparent 45%, rgba(0,0,0,0.9) 110%);
             pointer-events: none;
             z-index: 2;
         }
 
-        /* Scanline Digital - Branco/Cinza */
+        /* Scanline Chuvisco */
         .scanlines {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,0) 50%, rgba(255,255,255,0.02) 50%, rgba(255,255,255,0.02));
-            background-size: 100% 3px;
+            background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,0) 50%, rgba(255,255,255,0.03) 50%, rgba(255,255,255,0.03));
+            background-size: 100% 2px;
             z-index: 50;
             pointer-events: none;
-            opacity: 0.3;
-            animation: scanline-move 0.2s linear infinite;
+            opacity: 0.15;
+            animation: scanline-move 0.1s linear infinite;
         }
 
         @keyframes scanline-move {
             0% { transform: translateY(0); }
-            100% { transform: translateY(3px); }
+            100% { transform: translateY(2px); }
         }
 
-        /* --- Layout Flutuante --- */
+        /* --- Layout Instável (Vento Forte) --- */
         .main-content {
             display: flex;
             flex-direction: column;
@@ -86,15 +88,23 @@
             width: 100%;
             z-index: 10;
             padding: 1rem;
-            animation: levitate 8s ease-in-out infinite;
+            /* O JS vai adicionar a classe .thunder-shake aqui quando cair um raio */
+            transition: transform 0.1s; 
         }
 
-        @keyframes levitate {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-8px); }
+        /* Animação de tremor ativada pelo raio */
+        .thunder-shake {
+            animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
         }
 
-        /* --- Tipografia Glitch Monocromática --- */
+        @keyframes shake {
+            10%, 90% { transform: translate3d(-2px, 0, 0); }
+            20%, 80% { transform: translate3d(4px, 0, 0); }
+            30%, 50%, 70% { transform: translate3d(-6px, 0, 0); }
+            40%, 60% { transform: translate3d(6px, 0, 0); }
+        }
+
+        /* --- Tipografia Glitch (Design Original) --- */
         h1 { font-family: 'Audiowide', cursive; }
         
         .glitch-wrapper { position: relative; display: inline-block; white-space: nowrap; }
@@ -105,39 +115,39 @@
             font-weight: 900;
             letter-spacing: 0.1em;
             color: #fff;
-            text-shadow: 0 0 5px rgba(255, 255, 255, 0.8);
-            animation: glitch-anim 4s infinite step-end; 
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+            animation: glitch-storm 0.2s infinite alternate-reverse; 
         }
 
         .glitch-text::before, .glitch-text::after {
             content: attr(data-text);
             position: absolute;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: var(--void-black);
+            background: transparent; /* Alterado para transparente para não cobrir o fundo Canvas incorretamente */
             opacity: 1;
         }
 
         .glitch-text::before {
             left: 2px;
-            text-shadow: -1px 0 #888;
+            text-shadow: -1px 0 #777;
             clip: rect(44px, 9999px, 56px, 0);
-            animation: glitch-anim-2 5s infinite linear alternate-reverse;
+            animation: glitch-anim-2 3s infinite linear alternate-reverse;
         }
 
         .glitch-text::after {
             left: -2px;
-            text-shadow: -1px 0 #ccc;
+            text-shadow: -1px 0 #bbb;
             clip: rect(44px, 9999px, 56px, 0);
-            animation: glitch-anim-3 3s infinite linear alternate-reverse;
+            animation: glitch-anim-3 2s infinite linear alternate-reverse;
         }
 
-        @keyframes glitch-anim {
-            0% { text-shadow: 2px 2px 0px #fff; }
-            20% { text-shadow: -2px -2px 0px #888; }
-            40% { text-shadow: -2px 2px 0px #ccc; }
-            60% { text-shadow: 2px -2px 0px #fff; }
-            80% { text-shadow: 2px 0px 0px #888; }
-            100% { text-shadow: 0px 2px 0px #ccc; }
+        @keyframes glitch-storm {
+            0% { transform: translate(0); text-shadow: 2px 2px 0px #fff; }
+            20% { transform: translate(-1px, 1px); }
+            40% { transform: translate(-1px, -1px); }
+            60% { transform: translate(1px, 1px); }
+            80% { transform: translate(1px, -1px); }
+            100% { transform: translate(0); }
         }
         @keyframes glitch-anim-2 {
             0% { clip: rect(12px, 9999px, 5px, 0); }
@@ -148,38 +158,37 @@
             100% { clip: rect(100px, 9999px, 95px, 0); }
         }
 
-        /* --- Cartão Noir --- */
+        /* --- Cartão Sólido (Design Original) --- */
         .profile-card {
-            background: rgba(15, 15, 15, 0.8);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
+            background: rgba(20, 20, 20, 0.85);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
             
-            /* Recorte poligonal */
             clip-path: polygon(
-                30px 0, 
+                20px 0, 
                 100% 0, 
-                100% calc(100% - 30px), 
-                calc(100% - 30px) 100%, 
+                100% calc(100% - 20px), 
+                calc(100% - 20px) 100%, 
                 0 100%, 
-                0 30px
+                0 20px
             );
             
             box-shadow: 
-                inset 0 0 0 1px rgba(255, 255, 255, 0.2), 
-                inset 0 0 50px rgba(0, 0, 0, 0.9);
+                inset 0 0 0 1px rgba(120, 120, 120, 0.3), 
+                inset 0 0 80px rgba(10, 10, 10, 0.9);
             
-            filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.1));
+            filter: drop-shadow(0 0 15px rgba(255, 255, 255, 0.05));
             
             transform-style: preserve-3d;
             position: relative;
             overflow: hidden;
-            transition: all 0.3s ease;
+            transition: all 0.1s ease;
         }
 
         .profile-card:hover {
-            filter: drop-shadow(0 0 20px rgba(255, 255, 255, 0.2));
+            filter: drop-shadow(0 0 30px rgba(255, 255, 255, 0.15));
             box-shadow: 
-                inset 0 0 0 1px rgba(255, 255, 255, 0.5), 
+                inset 0 0 0 1px rgba(255, 255, 255, 0.6), 
                 inset 0 0 60px rgba(0, 0, 0, 1);
         }
 
@@ -189,15 +198,15 @@
 
         .icon-link {
             position: relative;
-            color: rgba(150, 150, 150, 0.6);
-            transition: all 0.3s ease;
+            color: rgba(180, 180, 180, 0.8);
+            transition: all 0.2s ease;
             z-index: 10;
         }
         .icon-link:hover { color: #fff; transform: scale(1.1); text-shadow: 0 0 15px #fff; }
         
         .icon-link::after {
             content: ''; position: absolute; bottom: -10px; left: 50%; width: 0; height: 2px;
-            background: #fff; transform: translateX(-50%); transition: width 0.3s ease;
+            background: #fff; transform: translateX(-50%); transition: width 0.2s ease;
             box-shadow: 0 0 10px #fff;
         }
         .icon-link:hover::after { width: 100%; }
@@ -209,10 +218,14 @@
 </head>
 <body class="antialiased">
 
+    <!-- Fundo de Tempestade (Canvas) -->
+    <canvas id="storm-canvas"></canvas>
+    
+    <!-- Overlays -->
     <div class="scanlines"></div>
-    <div id="particles-js"></div>
 
-    <div class="main-content">
+    <!-- Conteúdo Principal (Layout Original) -->
+    <div class="main-content" id="main-content">
         <div class="name-container">
             <div class="glitch-wrapper">
                 <h1 class="glitch-text" data-text="KZNYBS">KZNYBS</h1>
@@ -239,69 +252,198 @@
                 </a>
             </div>
 
-            <div class="absolute bottom-3 right-4 text-[9px] font-mono tracking-[0.2em] pointer-events-none text-white/40 animate-pulse">
-                
+            <div class="absolute bottom-3 right-4 text-[9px] font-mono tracking-[0.2em] pointer-events-none text-white/50 animate-pulse">
+             
             </div>
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
+    <!-- Scripts -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/vanilla-tilt/1.7.2/vanilla-tilt.min.js"></script>
     
     <script>
-        particlesJS('particles-js', {
-            "particles": {
-                // Configuração "Normal" (Círculos e Linhas conectadas)
-                "number": { "value": 80, "density": { "enable": true, "value_area": 800 } },
-                "color": { "value": ["#ffffff", "#888888"] }, 
-                "shape": { 
-                    "type": "circle", 
-                },
-                "opacity": { 
-                    "value": 0.5, "random": true, 
-                    "anim": { "enable": true, "speed": 1, "opacity_min": 0.1, "sync": false } 
-                },
-                "size": { 
-                    "value": 3, "random": true, 
-                    "anim": { "enable": false } 
-                },
-                "line_linked": { 
-                    "enable": true, 
-                    "distance": 150, 
-                    "color": "#ffffff", 
-                    "opacity": 0.15, 
-                    "width": 1 
-                },
-                "move": { 
-                    "enable": true, 
-                    "speed": 2, 
-                    "direction": "none", 
-                    "random": true, 
-                    "straight": false, 
-                    "out_mode": "out", 
-                    "attract": { "enable": false } 
-                }
-            },
-            "interactivity": {
-                "detect_on": "window",
-                "events": { 
-                    "onhover": { "enable": true, "mode": "grab" }, 
-                    "onclick": { "enable": true, "mode": "push" }, 
-                    "resize": true 
-                },
-                "modes": {
-                    "grab": { "distance": 180, "line_linked": { "opacity": 0.6 } },
-                    "push": { "particles_nb": 4 }
-                }
-            },
-            "retina_detect": true
-        });
+        // --- MOTOR DE TEMPESTADE (CANVAS) ---
+        const canvas = document.getElementById('storm-canvas');
+        const ctx = canvas.getContext('2d');
+        const mainContent = document.getElementById('main-content');
+        const body = document.body;
 
+        let width, height;
+        let rain = [];
+        let lightning = [];
+        let flashOpacity = 0;
+
+        // Variáveis do Holofote (Movimento do Background)
+        let spotX, spotY;
+        let spotVX, spotVY;
+
+        // Configuração
+        const rainCount = 400;
+        const rainSpeed = 15;
+        const rainAngle = 0.2; // Chuva diagonal
+
+        function resize() {
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight;
+            
+            // Inicializar holofote se necessário
+            if (spotX === undefined) {
+                spotX = width / 2;
+                spotY = height / 2;
+                // Velocidade aleatória para o movimento
+                spotVX = (Math.random() - 0.5) * 3;
+                spotVY = (Math.random() - 0.5) * 3;
+            }
+        }
+        window.addEventListener('resize', resize);
+        resize();
+
+        // Classe Gotas de Chuva
+        class Drop {
+            constructor() {
+                this.reset();
+                this.y = Math.random() * height;
+            }
+
+            reset() {
+                this.x = Math.random() * width;
+                this.y = -Math.random() * 100;
+                this.z = Math.random() * 0.5 + 0.5; // Profundidade
+                this.len = Math.random() * 20 + 10;
+                this.speed = (Math.random() * 10 + 20) * this.z;
+            }
+
+            update() {
+                this.x += rainAngle * 2;
+                this.y += this.speed;
+
+                if (this.y > height) {
+                    this.reset();
+                }
+            }
+
+            draw() {
+                ctx.beginPath();
+                ctx.strokeStyle = `rgba(180, 180, 180, ${0.15 * this.z})`; // Cor da chuva
+                ctx.lineWidth = 1.5 * this.z;
+                ctx.moveTo(this.x, this.y);
+                ctx.lineTo(this.x + rainAngle * 5, this.y + this.len);
+                ctx.stroke();
+            }
+        }
+
+        // Criar gotas
+        for (let i = 0; i < rainCount; i++) {
+            rain.push(new Drop());
+        }
+
+        // Gerador de Raio Procedural
+        function createLightning() {
+            const x = Math.random() * width;
+            const y = 0;
+            const segments = [];
+            let currentX = x;
+            let currentY = y;
+
+            while (currentY < height) {
+                const nextX = currentX + (Math.random() - 0.5) * 100; // Ziguezague
+                const nextY = currentY + Math.random() * 50 + 20;     // Descida
+                segments.push({x1: currentX, y1: currentY, x2: nextX, y2: nextY});
+                currentX = nextX;
+                currentY = nextY;
+            }
+            
+            lightning.push({
+                segments: segments,
+                life: 10,
+                opacity: 1
+            });
+
+            // Flash e Tremor
+            flashOpacity = 0.4; 
+            triggerShake();
+        }
+
+        function triggerShake() {
+            mainContent.classList.add('thunder-shake');
+            setTimeout(() => {
+                mainContent.classList.remove('thunder-shake');
+            }, 500);
+        }
+
+        function loop() {
+            // Atualizar posição do holofote (Spotlight)
+            spotX += spotVX;
+            spotY += spotVY;
+
+            // Rebater nas bordas
+            if (spotX < 0 || spotX > width) spotVX *= -1;
+            if (spotY < 0 || spotY > height) spotVY *= -1;
+
+            // Limpar tela desenhando o gradiente dinâmico
+            // O centro do gradiente agora usa spotX e spotY
+            const gradient = ctx.createRadialGradient(spotX, spotY, 0, spotX, spotY, Math.max(width, height) * 0.8);
+            gradient.addColorStop(0, "#2a2a2a"); // Centro mais claro (cinza escuro)
+            gradient.addColorStop(1, "#050505"); // Bordas pretas
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, width, height);
+
+            // 1. Desenhar Chuva
+            rain.forEach(drop => {
+                drop.update();
+                drop.draw();
+            });
+
+            // 2. Controlar Raios
+            if (Math.random() < 0.008) { // Frequência dos raios
+                createLightning();
+            }
+
+            // 3. Desenhar Raios
+            ctx.save();
+            ctx.shadowBlur = 20;
+            ctx.shadowColor = "white";
+            ctx.strokeStyle = "white";
+            ctx.lineWidth = 2;
+            
+            for (let i = lightning.length - 1; i >= 0; i--) {
+                const bolt = lightning[i];
+                ctx.globalAlpha = bolt.opacity;
+                
+                ctx.beginPath();
+                bolt.segments.forEach(seg => {
+                    ctx.moveTo(seg.x1, seg.y1);
+                    ctx.lineTo(seg.x2, seg.y2);
+                });
+                ctx.stroke();
+
+                bolt.life--;
+                bolt.opacity = Math.random(); 
+                
+                if (bolt.life <= 0) {
+                    lightning.splice(i, 1);
+                }
+            }
+            ctx.restore();
+
+            // 4. Desenhar Flash Global
+            if (flashOpacity > 0) {
+                ctx.fillStyle = `rgba(255, 255, 255, ${flashOpacity})`;
+                ctx.fillRect(0, 0, width, height);
+                flashOpacity *= 0.85; 
+            }
+
+            requestAnimationFrame(loop);
+        }
+
+        loop();
+
+        // Vanilla Tilt
         VanillaTilt.init(document.querySelector(".profile-card"), {
             max: 5,
             speed: 1000, 
             glare: true,
-            "max-glare": 0.1,
+            "max-glare": 0.2,
             scale: 1.02,
             perspective: 1000,
             gyroscope: true
@@ -310,5 +452,3 @@
 
 </body>
 </html>
-
-
