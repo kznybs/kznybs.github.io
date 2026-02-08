@@ -1,197 +1,500 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Contagem Regressiva para 10 de Setembro de 2025</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
-  <style>
-    :root {
-      --primary-color: #ffffff;
-      --secondary-color: #e0e0e0;
-      --background-start: #1d2b64;
-      --background-end: #f8cdda;
-      --shadow-color: rgba(0, 0, 0, 0.1);
-      --glass-bg: rgba(255, 255, 255, 0.1);
-      --glass-border: rgba(255, 255, 255, 0.2);
-    }
-
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-
-    body {
-      font-family: 'Poppins', sans-serif;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      min-height: 100vh;
-      background: linear-gradient(135deg, var(--background-start), var(--background-end));
-      color: var(--primary-color);
-      text-align: center;
-      padding: 20px;
-      overflow: hidden;
-    }
-
-    .container {
-      max-width: 800px;
-      width: 100%;
-      animation: fadeIn 1.5s ease-in-out;
-    }
-
-    h1 {
-      font-size: clamp(2rem, 5vw, 3.5rem); /* Fonte responsiva */
-      font-weight: 700;
-      text-shadow: 2px 2px 10px var(--shadow-color);
-      margin-bottom: 40px;
-    }
-
-    #contador {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      gap: 20px;
-      flex-wrap: wrap;
-    }
-
-    .time-unit {
-      background: var(--glass-bg);
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-      border: 1px solid var(--glass-border);
-      border-radius: 15px;
-      padding: 20px;
-      min-width: 140px;
-      display: flex;
-      flex-direction: column;
-      box-shadow: 0 8px 32px 0 var(--shadow-color);
-      transition: transform 0.3s ease, box-shadow 0.3s ease;
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VolleyPro Scoreboard</title>
     
-    .time-unit:hover {
-        transform: translateY(-10px);
-        box-shadow: 0 12px 40px 0 var(--shadow-color);
-    }
-
-    .time-unit span {
-      display: block;
-    }
-
-    .time-unit .numero {
-      font-size: clamp(2.5rem, 8vw, 4.5rem);
-      font-weight: 600;
-      line-height: 1.1;
-    }
-
-    .time-unit .rotulo {
-      font-size: clamp(0.8rem, 2vw, 1rem);
-      font-weight: 400;
-      color: var(--secondary-color);
-      text-transform: uppercase;
-      letter-spacing: 2px;
-    }
-
-    #mensagem-final {
-      font-size: clamp(2.5rem, 8vw, 5rem);
-      font-weight: 700;
-      display: none; /* Escondido por padrão */
-      animation: popIn 0.8s cubic-bezier(0.68, -0.55, 0.27, 1.55);
-    }
-
-    /* Animações */
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(20px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
     
-    @keyframes popIn {
-      0% { opacity: 0; transform: scale(0.5); }
-      100% { opacity: 1; transform: scale(1); }
-    }
-
-    /* Media query para telas menores */
-    @media (max-width: 600px) {
-      #contador {
-        flex-direction: column;
-        gap: 15px;
-      }
-      .time-unit {
-        min-width: 250px;
-        width: 80%;
-      }
-    }
-  </style>
-</head>
-<body>
-
-  <main class="container">
-    <h1>Contagem Regressiva para <br>10 de Setembro de 2025</h1>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
-    <div id="contador">
-      <div class="time-unit">
-        <span id="dias" class="numero">0</span>
-        <span class="rotulo">Dias</span>
-      </div>
-      <div class="time-unit">
-        <span id="horas" class="numero">0</span>
-        <span class="rotulo">Horas</span>
-      </div>
-      <div class="time-unit">
-        <span id="minutos" class="numero">0</span>
-        <span class="rotulo">Minutos</span>
-      </div>
-      <div class="time-unit">
-        <span id="segundos" class="numero">0</span>
-        <span class="rotulo">Segundos</span>
-      </div>
-    </div>
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700;900&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
 
-    <div id="mensagem-final">🎉 Chegou o grande dia!</div>
-  </main>
-
-  <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      const diasEl = document.getElementById("dias");
-      const horasEl = document.getElementById("horas");
-      const minutosEl = document.getElementById("minutos");
-      const segundosEl = document.getElementById("segundos");
-      const contadorEl = document.getElementById("contador");
-      const mensagemFinalEl = document.getElementById("mensagem-final");
-
-      const destino = new Date("2025-09-10T00:00:00").getTime();
-
-      const formatarNumero = (num) => String(num).padStart(2, '0');
-
-      const atualizarContador = () => {
-        const agora = new Date().getTime();
-        const distancia = destino - agora;
-
-        if (distancia < 0) {
-          clearInterval(intervalo);
-          contadorEl.style.display = "none";
-          mensagemFinalEl.style.display = "block";
-          return;
+    <style>
+        :root {
+            --primary-bg: #0f172a;
+            --glass-bg: rgba(255, 255, 255, 0.05);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --neon-blue: #0ea5e9;
+            --neon-pink: #ec4899;
+            --neon-gold: #fbbf24;
         }
 
-        const dias = Math.floor(distancia / (1000 * 60 * 60 * 24));
-        const horas = Math.floor((distancia % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-        const minutos = Math.floor((distancia % (1000 * 60 * 60)) / (1000 * 60));
-        const segundos = Math.floor((distancia % (1000 * 60)) / 1000);
+        body {
+            background-color: var(--primary-bg);
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(14, 165, 233, 0.15) 0%, transparent 40%),
+                radial-gradient(circle at 90% 80%, rgba(236, 72, 153, 0.15) 0%, transparent 40%);
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+            min-height: 100vh;
+            color: white;
+        }
+
+        .glass-panel {
+            background: var(--glass-bg);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--glass-border);
+            border-radius: 1rem;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        }
+
+        .digital-font {
+            font-family: 'Orbitron', sans-serif;
+            letter-spacing: 2px;
+        }
+
+        /* Animação de pulso para quem está sacando */
+        .serving-indicator {
+            animation: pulse-glow 2s infinite;
+        }
+
+        @keyframes pulse-glow {
+            0% { box-shadow: 0 0 0 0 rgba(251, 191, 36, 0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(251, 191, 36, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(251, 191, 36, 0); }
+        }
+
+        /* Transição suave para números */
+        .score-transition {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .score-change {
+            transform: scale(1.2);
+            filter: brightness(1.5);
+        }
+
+        /* Cores dos Times */
+        .team-a-accent { color: var(--neon-blue); text-shadow: 0 0 10px rgba(14, 165, 233, 0.5); }
+        .team-b-accent { color: var(--neon-pink); text-shadow: 0 0 10px rgba(236, 72, 153, 0.5); }
+
+        /* Controles - Scrollbar customizada */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); }
+        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.3); }
+
+        .btn-control {
+            transition: all 0.2s;
+        }
+        .btn-control:active {
+            transform: scale(0.95);
+        }
+    </style>
+</head>
+<body class="flex flex-col h-screen overflow-hidden">
+
+    <!-- Navegação / Topo -->
+    <nav class="flex justify-between items-center p-4 z-10">
+        <div class="flex items-center gap-2">
+            <i class="fa-solid fa-volleyball text-yellow-400 text-2xl animate-spin-slow"></i>
+            <span class="font-bold text-xl tracking-wider text-white/90">VOLLEY<span class="text-yellow-400">PRO</span></span>
+        </div>
         
-        diasEl.innerText = dias;
-        horasEl.innerText = formatarNumero(horas);
-        minutosEl.innerText = formatarNumero(minutos);
-        segundosEl.innerText = formatarNumero(segundos);
-      };
+        <div class="glass-panel px-4 py-2 flex items-center gap-4">
+            <input type="text" id="tournamentName" value="FINAL REGIONAL 2026" 
+                class="bg-transparent border-none text-center text-sm font-bold tracking-widest uppercase text-white/60 focus:text-white focus:outline-none w-64"
+                onchange="updateData('tournament', this.value)">
+            
+            <button onclick="toggleControls()" class="text-white/50 hover:text-white transition-colors" title="Alternar Painel de Controle">
+                <i class="fa-solid fa-sliders"></i>
+            </button>
+        </div>
 
-      const intervalo = setInterval(atualizarContador, 1000);
-      atualizarContador(); // Chama a função uma vez para não haver atraso inicial
-    });
-  </script>
+        <div class="text-xs text-white/40 font-mono">
+            LIVE SYNC <span id="syncStatus" class="w-2 h-2 rounded-full bg-green-500 inline-block ml-1"></span>
+        </div>
+    </nav>
 
+    <!-- Área Principal do Placar -->
+    <main class="flex-grow flex items-center justify-center p-4 relative">
+        
+        <!-- Fundo decorativo central -->
+        <div class="absolute inset-0 flex items-center justify-center pointer-events-none opacity-20">
+            <div class="w-[80vw] h-[1px] bg-gradient-to-r from-transparent via-white to-transparent"></div>
+        </div>
+
+        <div class="w-full max-w-7xl grid grid-cols-1 md:grid-cols-[1fr_auto_1fr] gap-8 items-center">
+            
+            <!-- TIME A (Esquerda) -->
+            <div class="flex flex-col items-center gap-4 relative group">
+                <!-- Indicador de Saque A -->
+                <div id="serveA" class="opacity-0 transition-opacity duration-300 absolute -top-12 text-yellow-400 text-3xl serving-indicator rounded-full p-2">
+                    <i class="fa-solid fa-volleyball"></i>
+                </div>
+
+                <div class="glass-panel p-8 w-full flex flex-col items-center relative overflow-hidden border-t-4 border-t-sky-500">
+                    <!-- Input Nome Time A -->
+                    <input type="text" id="nameA" value="THUNDERBOLTS" 
+                        class="bg-transparent text-center text-2xl md:text-3xl font-black uppercase tracking-tighter w-full focus:outline-none focus:bg-white/5 rounded team-a-accent mb-2"
+                        onchange="updateData('nameA', this.value)">
+                    
+                    <!-- Pontuação A -->
+                    <div class="relative">
+                        <span id="scoreA" class="digital-font text-[8rem] md:text-[12rem] leading-none font-bold text-white score-transition cursor-pointer select-none" onclick="increment('scoreA')">00</span>
+                    </div>
+
+                    <!-- Indicadores de Tempo (Timeouts) -->
+                    <div class="flex gap-2 mt-4">
+                        <div class="text-xs uppercase tracking-widest text-white/40 mb-1">TEMPOS</div>
+                        <div id="timeoutsA" class="flex gap-2">
+                            <button onclick="toggleTimeout('A', 0)" class="w-4 h-4 rounded-full border border-sky-500/50 hover:bg-sky-500 transition-colors bg-transparent"></button>
+                            <button onclick="toggleTimeout('A', 1)" class="w-4 h-4 rounded-full border border-sky-500/50 hover:bg-sky-500 transition-colors bg-transparent"></button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CENTRO (Sets e Info) -->
+            <div class="flex flex-col items-center justify-center gap-6 z-10">
+                <div class="glass-panel px-6 py-4 flex flex-col items-center min-w-[180px]">
+                    <span class="text-white/40 text-xs font-bold uppercase tracking-[0.3em] mb-2">SETS</span>
+                    <div class="flex items-center gap-4 digital-font text-5xl font-bold">
+                        <span id="setsA" class="text-sky-400">0</span>
+                        <span class="text-white/20 text-3xl">-</span>
+                        <span id="setsB" class="text-pink-400">0</span>
+                    </div>
+                </div>
+
+                <!-- Histórico de Sets (Pequeno) -->
+                <div class="glass-panel px-4 py-2 flex flex-col gap-1 w-full text-center">
+                    <span class="text-[10px] text-white/30 uppercase">Parciais</span>
+                    <div id="setHistory" class="flex justify-center gap-3 text-sm font-mono text-white/70">
+                        <span>-</span>
+                    </div>
+                </div>
+
+                <div class="mt-4">
+                    <button id="swapSidesBtn" onclick="swapSides()" class="text-white/30 hover:text-white transition-colors text-xl" title="Inverter Lados">
+                        <i class="fa-solid fa-arrow-right-arrow-left"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- TIME B (Direita) -->
+            <div class="flex flex-col items-center gap-4 relative group">
+                <!-- Indicador de Saque B -->
+                <div id="serveB" class="opacity-0 transition-opacity duration-300 absolute -top-12 text-yellow-400 text-3xl serving-indicator rounded-full p-2">
+                    <i class="fa-solid fa-volleyball"></i>
+                </div>
+
+                <div class="glass-panel p-8 w-full flex flex-col items-center relative overflow-hidden border-t-4 border-t-pink-500">
+                    <!-- Input Nome Time B -->
+                    <input type="text" id="nameB" value="FIREHAWKS" 
+                        class="bg-transparent text-center text-2xl md:text-3xl font-black uppercase tracking-tighter w-full focus:outline-none focus:bg-white/5 rounded team-b-accent mb-2"
+                        onchange="updateData('nameB', this.value)">
+                    
+                    <!-- Pontuação B -->
+                    <div class="relative">
+                        <span id="scoreB" class="digital-font text-[8rem] md:text-[12rem] leading-none font-bold text-white score-transition cursor-pointer select-none" onclick="increment('scoreB')">00</span>
+                    </div>
+
+                    <!-- Indicadores de Tempo (Timeouts) -->
+                    <div class="flex gap-2 mt-4">
+                        <div class="text-xs uppercase tracking-widest text-white/40 mb-1">TEMPOS</div>
+                        <div id="timeoutsB" class="flex gap-2">
+                            <button onclick="toggleTimeout('B', 0)" class="w-4 h-4 rounded-full border border-pink-500/50 hover:bg-pink-500 transition-colors bg-transparent"></button>
+                            <button onclick="toggleTimeout('B', 1)" class="w-4 h-4 rounded-full border border-pink-500/50 hover:bg-pink-500 transition-colors bg-transparent"></button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Painel de Controle (Fixo na parte inferior, retrátil) -->
+    <div id="controlPanel" class="fixed bottom-0 left-0 right-0 transform transition-transform duration-300 z-50 translate-y-0">
+        <div class="glass-panel mx-4 mb-4 p-4 border-t border-white/20 shadow-2xl bg-[#0f172ae6]">
+            
+            <!-- Handle para fechar mobile -->
+            <div class="w-12 h-1 bg-white/20 rounded-full mx-auto mb-4 cursor-pointer md:hidden" onclick="toggleControls()"></div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                
+                <!-- Controles Time A -->
+                <div class="flex flex-col gap-2">
+                    <div class="text-xs text-sky-400 font-bold uppercase tracking-wider mb-1 text-center">Controles Time A</div>
+                    <div class="flex justify-center gap-2">
+                        <button onclick="adjustScore('A', 1)" class="btn-control flex-1 py-3 bg-sky-600 hover:bg-sky-500 rounded font-bold text-xl shadow-lg shadow-sky-900/50">+1</button>
+                        <button onclick="adjustScore('A', -1)" class="btn-control w-12 py-3 bg-white/10 hover:bg-white/20 rounded font-bold text-xl">-1</button>
+                    </div>
+                    <div class="flex justify-center gap-2 mt-1">
+                        <button onclick="adjustSets('A', 1)" class="btn-control px-3 py-1 bg-white/5 hover:bg-white/10 rounded text-xs text-sky-300 border border-sky-500/30">Set +1</button>
+                        <button onclick="setServe('A')" class="btn-control px-3 py-1 bg-yellow-500/20 hover:bg-yellow-500/40 rounded text-xs text-yellow-300 border border-yellow-500/30 w-full flex justify-center items-center gap-2">
+                            <i class="fa-solid fa-volleyball"></i> Sacar
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Controles Centrais -->
+                <div class="flex flex-col items-center justify-center gap-2 border-l border-r border-white/10 px-4">
+                    <div class="text-xs text-white/50 font-bold uppercase tracking-wider mb-1">Geral</div>
+                    <button onclick="newSet()" class="btn-control w-full py-2 bg-gradient-to-r from-purple-600 to-indigo-600 rounded font-bold text-sm shadow-lg tracking-wide">NOVO SET / ZERAR PLACAR</button>
+                    <button onclick="resetMatch()" class="btn-control w-full py-2 bg-red-500/20 hover:bg-red-500/40 text-red-300 rounded font-bold text-xs border border-red-500/30">RESETAR PARTIDA</button>
+                    <div class="text-[10px] text-white/30 mt-1 text-center">
+                        Atalhos: [1] Ponto A | [2] Ponto B | [S] Trocar Saque
+                    </div>
+                </div>
+
+                <!-- Controles Time B -->
+                <div class="flex flex-col gap-2">
+                    <div class="text-xs text-pink-400 font-bold uppercase tracking-wider mb-1 text-center">Controles Time B</div>
+                    <div class="flex justify-center gap-2">
+                        <button onclick="adjustScore('B', 1)" class="btn-control flex-1 py-3 bg-pink-600 hover:bg-pink-500 rounded font-bold text-xl shadow-lg shadow-pink-900/50">+1</button>
+                        <button onclick="adjustScore('B', -1)" class="btn-control w-12 py-3 bg-white/10 hover:bg-white/20 rounded font-bold text-xl">-1</button>
+                    </div>
+                    <div class="flex justify-center gap-2 mt-1">
+                        <button onclick="setServe('B')" class="btn-control px-3 py-1 bg-yellow-500/20 hover:bg-yellow-500/40 rounded text-xs text-yellow-300 border border-yellow-500/30 w-full flex justify-center items-center gap-2">
+                            <i class="fa-solid fa-volleyball"></i> Sacar
+                        </button>
+                        <button onclick="adjustSets('B', 1)" class="btn-control px-3 py-1 bg-white/5 hover:bg-white/10 rounded text-xs text-pink-300 border border-pink-500/30">Set +1</button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- Script Lógico -->
+    <script>
+        // Estado Inicial
+        const defaultState = {
+            tournament: "FINAL REGIONAL 2026",
+            teamA: { name: "THUNDERBOLTS", score: 0, sets: 0, timeouts: [false, false] },
+            teamB: { name: "FIREHAWKS", score: 0, sets: 0, timeouts: [false, false] },
+            serving: 'A', // 'A' ou 'B'
+            history: [], // Histórico de sets ex: "25-20"
+            isControlsVisible: true
+        };
+
+        // Carregar estado ou usar padrão
+        let state = JSON.parse(localStorage.getItem('volleyBoardState')) || defaultState;
+
+        // Elementos do DOM
+        const els = {
+            scoreA: document.getElementById('scoreA'),
+            scoreB: document.getElementById('scoreB'),
+            setsA: document.getElementById('setsA'),
+            setsB: document.getElementById('setsB'),
+            nameA: document.getElementById('nameA'),
+            nameB: document.getElementById('nameB'),
+            serveA: document.getElementById('serveA'),
+            serveB: document.getElementById('serveB'),
+            tournament: document.getElementById('tournamentName'),
+            controlPanel: document.getElementById('controlPanel'),
+            setHistory: document.getElementById('setHistory')
+        };
+
+        // Renderização
+        function render() {
+            // Textos
+            els.tournament.value = state.tournament;
+            els.nameA.value = state.teamA.name;
+            els.nameB.value = state.teamB.name;
+            
+            // Placar (com animação se mudou)
+            updateNumber(els.scoreA, state.teamA.score);
+            updateNumber(els.scoreB, state.teamB.score);
+            els.setsA.textContent = state.teamA.sets;
+            els.setsB.textContent = state.teamB.sets;
+
+            // Saque
+            if (state.serving === 'A') {
+                els.serveA.style.opacity = '1';
+                els.serveB.style.opacity = '0';
+            } else {
+                els.serveA.style.opacity = '0';
+                els.serveB.style.opacity = '1';
+            }
+
+            // Timeouts (Renderizar bolinhas)
+            renderTimeouts('A', state.teamA.timeouts);
+            renderTimeouts('B', state.teamB.timeouts);
+
+            // Histórico
+            renderHistory();
+
+            // Painel
+            if(state.isControlsVisible) {
+                els.controlPanel.classList.remove('translate-y-[120%]');
+            } else {
+                els.controlPanel.classList.add('translate-y-[120%]');
+            }
+
+            saveState();
+        }
+
+        function updateNumber(el, newVal) {
+            const current = parseInt(el.textContent);
+            if (current !== newVal) {
+                el.classList.add('score-change');
+                // Adiciona zero à esquerda se for menor que 10
+                el.textContent = newVal < 10 ? `0${newVal}` : newVal;
+                setTimeout(() => el.classList.remove('score-change'), 300);
+            }
+        }
+
+        function renderTimeouts(team, timeouts) {
+            const container = document.getElementById(`timeouts${team}`);
+            const buttons = container.querySelectorAll('button');
+            
+            timeouts.forEach((used, index) => {
+                const colorClass = team === 'A' ? 'bg-sky-500' : 'bg-pink-500';
+                if (used) {
+                    buttons[index].classList.add(colorClass);
+                    buttons[index].classList.remove('bg-transparent');
+                } else {
+                    buttons[index].classList.remove(colorClass);
+                    buttons[index].classList.add('bg-transparent');
+                }
+            });
+        }
+
+        function renderHistory() {
+            if(state.history.length === 0) {
+                els.setHistory.innerHTML = '<span>-</span>';
+                return;
+            }
+            els.setHistory.innerHTML = state.history.map((h, i) => 
+                `<span class="bg-white/10 px-2 rounded">${i+1}º: ${h}</span>`
+            ).join('');
+        }
+
+        // Lógica de Estado
+        function saveState() {
+            localStorage.setItem('volleyBoardState', JSON.stringify(state));
+        }
+
+        // Listener para sincronização entre abas (O SEGREDO DO "TEMPO REAL" LOCAL)
+        window.addEventListener('storage', (e) => {
+            if (e.key === 'volleyBoardState') {
+                state = JSON.parse(e.newValue);
+                render();
+            }
+        });
+
+        // Ações
+        function updateData(key, value) {
+            if (key === 'tournament') state.tournament = value;
+            if (key === 'nameA') state.teamA.name = value;
+            if (key === 'nameB') state.teamB.name = value;
+            render();
+        }
+
+        function adjustScore(team, delta) {
+            if (team === 'A') {
+                state.teamA.score = Math.max(0, state.teamA.score + delta);
+                // Auto-set serve on point
+                if (delta > 0) state.serving = 'A'; 
+            } else {
+                state.teamB.score = Math.max(0, state.teamB.score + delta);
+                if (delta > 0) state.serving = 'B';
+            }
+            render();
+        }
+
+        // Clique direto no número
+        function increment(id) {
+            if (id === 'scoreA') adjustScore('A', 1);
+            if (id === 'scoreB') adjustScore('B', 1);
+        }
+
+        function setServe(team) {
+            state.serving = team;
+            render();
+        }
+
+        function adjustSets(team, delta) {
+            if (team === 'A') state.teamA.sets = Math.max(0, state.teamA.sets + delta);
+            else state.teamB.sets = Math.max(0, state.teamB.sets + delta);
+            render();
+        }
+
+        function toggleTimeout(team, index) {
+            if (team === 'A') state.teamA.timeouts[index] = !state.teamA.timeouts[index];
+            else state.teamB.timeouts[index] = !state.teamB.timeouts[index];
+            render();
+        }
+
+        function newSet() {
+            // Salva o histórico do set atual
+            if(state.teamA.score > 0 || state.teamB.score > 0) {
+                state.history.push(`${state.teamA.score}-${state.teamB.score}`);
+            }
+            
+            // Reseta pontos e tempos, mantém sets
+            state.teamA.score = 0;
+            state.teamB.score = 0;
+            state.teamA.timeouts = [false, false];
+            state.teamB.timeouts = [false, false];
+            render();
+        }
+
+        function resetMatch() {
+            if(confirm("Tem certeza que deseja resetar toda a partida?")) {
+                state = JSON.parse(JSON.stringify(defaultState)); // Deep copy reset
+                state.isControlsVisible = true; // Força controles visíveis
+                render();
+            }
+        }
+
+        function swapSides() {
+            // Troca nomes
+            const tempName = state.teamA.name;
+            state.teamA.name = state.teamB.name;
+            state.teamB.name = tempName;
+
+            // Troca Sets
+            const tempSets = state.teamA.sets;
+            state.teamA.sets = state.teamB.sets;
+            state.teamB.sets = tempSets;
+            
+            // Troca Scores (Opcional, geralmente se troca no inicio do set, então é 0-0)
+            const tempScore = state.teamA.score;
+            state.teamA.score = state.teamB.score;
+            state.teamB.score = tempScore;
+
+            // Troca Saque
+            state.serving = state.serving === 'A' ? 'B' : 'A';
+
+            render();
+        }
+
+        function toggleControls() {
+            state.isControlsVisible = !state.isControlsVisible;
+            render();
+        }
+
+        // Atalhos de Teclado
+        document.addEventListener('keydown', (e) => {
+            // Evita disparar se estiver digitando em input
+            if(e.target.tagName === 'INPUT') return;
+
+            switch(e.key) {
+                case '1': adjustScore('A', 1); break;
+                case '2': adjustScore('B', 1); break;
+                case 'q': adjustScore('A', -1); break;
+                case 'w': adjustScore('B', -1); break;
+                case 's': 
+                case 'S': 
+                    setServe(state.serving === 'A' ? 'B' : 'A'); 
+                    break;
+                case 'h': toggleControls(); break;
+            }
+        });
+
+        // Inicialização
+        render();
+
+    </script>
 </body>
 </html>
