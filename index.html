@@ -3,84 +3,68 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title></title>
+    <title>KZNYBS | QUANTUM NEXUS</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Audiowide&family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Audiowide&family=Montserrat:wght@300;400;700;900&display=swap" rel="stylesheet">
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
-        /* --- Configurações Gerais (Layout Original Noir Storm) --- */
+        /* --- HIGH-END QUANTUM SETTINGS --- */
         :root {
-            --pure-white: #ffffff;
-            --storm-gray: #4a4a4a;
-            --void-black: #0a0a0a;
+            --void-deep: #00020a; /* Abismo absoluto */
+            --cyan-core: #00f0ff;
+            --purple-nebula: #7000ff;
+            --blue-plasma: #0044ff;
         }
 
         body {
             font-family: 'Montserrat', sans-serif;
-            color: #e5e5e5;
-            background-color: var(--void-black);
-            overflow-x: hidden;
+            color: #ffffff;
+            background-color: var(--void-deep);
+            overflow: hidden; 
             margin: 0;
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
             min-height: 100dvh; 
-            overflow: hidden; /* Necessário para o Canvas */
-            cursor: pointer; /* Indica que é clicável */
+            cursor: crosshair;
+            perspective: 1200px;
         }
 
-        /* --- NOVO MOTOR DE FUNDO (CANVAS) --- */
-        #storm-canvas {
+        /* --- CANVAS ENGINE --- */
+        #quantum-canvas {
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 0; /* Atrás de tudo */
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            z-index: 0;
+            filter: contrast(1.2) saturate(1.5);
         }
 
-        /* --- Overlays do Layout Original --- */
-        
-        /* Vignette (Suavizada) */
-        body::after {
-            content: "";
+        /* --- IMMERSIVE OVERLAYS --- */
+        .vignette {
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: radial-gradient(circle, transparent 45%, rgba(0,0,0,0.9) 110%);
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(circle at 50% 50%, transparent 10%, rgba(0,2,10,0.6) 70%, #000105 100%);
             pointer-events: none;
             z-index: 2;
         }
 
-        /* Scanline Chuvisco */
-        .scanlines {
+        .film-grain {
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,0) 50%, rgba(255,255,255,0.03) 50%, rgba(255,255,255,0.03));
-            background-size: 100% 2px;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+            opacity: 0.04;
             z-index: 50;
             pointer-events: none;
-            opacity: 0.15;
-            animation: scanline-move 0.1s linear infinite;
+            mix-blend-mode: overlay;
         }
 
-        @keyframes scanline-move {
-            0% { transform: translateY(0); }
-            100% { transform: translateY(2px); }
-        }
-
-        /* --- Layout Instável (Vento Forte) --- */
+        /* --- PHYSICS & SHOCKWAVE FX --- */
         .main-content {
             display: flex;
             flex-direction: column;
@@ -89,143 +73,255 @@
             width: 100%;
             z-index: 10;
             padding: 1rem;
-            /* O JS vai adicionar a classe .thunder-shake aqui quando cair um raio */
-            transition: transform 0.1s; 
+            transition: transform 0.1s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
+            transform-style: preserve-3d;
         }
 
-        /* Animação de tremor ativada pelo raio */
-        .thunder-shake {
-            animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
+        .shockwave-active .main-content {
+            animation: quantum-pulse 0.8s cubic-bezier(0.1, 1, 0.2, 1) forwards;
         }
 
-        @keyframes shake {
-            10%, 90% { transform: translate3d(-2px, 0, 0); }
-            20%, 80% { transform: translate3d(4px, 0, 0); }
-            30%, 50%, 70% { transform: translate3d(-6px, 0, 0); }
-            40%, 60% { transform: translate3d(6px, 0, 0); }
+        @keyframes quantum-pulse {
+            0% { transform: scale(1) translateZ(0); filter: blur(0) brightness(1); }
+            10% { transform: scale(1.08) translateZ(50px); filter: blur(2px) brightness(2); }
+            40% { transform: scale(0.95) translateZ(-20px); filter: blur(0) brightness(0.8); }
+            100% { transform: scale(1) translateZ(0); filter: blur(0) brightness(1); }
         }
 
-        /* --- Tipografia Glitch (Design Original) --- */
-        h1 { font-family: 'Audiowide', cursive; }
+        /* --- TYPOGRAPHY (HOLOGRAPHIC GLITCH) --- */
+        .name-container { 
+            margin-bottom: 3.5rem; 
+            perspective: 800px;
+        }
+
+        h1 { 
+            font-family: 'Audiowide', cursive; 
+        }
         
-        .glitch-wrapper { position: relative; display: inline-block; white-space: nowrap; }
+        .glitch-wrapper { 
+            position: relative; 
+            display: inline-block; 
+            white-space: nowrap; 
+        }
 
         .glitch-text {
             position: relative;
-            font-size: clamp(3.5rem, 13vw, 7rem);
+            font-size: clamp(4rem, 15vw, 9rem);
             font-weight: 900;
-            letter-spacing: 0.1em;
+            letter-spacing: 0.08em;
+            color: transparent;
+            -webkit-text-stroke: 1px rgba(255,255,255,0.1);
+            background: linear-gradient(180deg, #ffffff 0%, #b3d4ff 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            filter: drop-shadow(0 0 20px rgba(0, 240, 255, 0.4));
+            transition: all 0.3s ease;
+        }
+
+        .glitch-text:hover {
             color: #fff;
-            text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
-            animation: glitch-storm 0.2s infinite alternate-reverse; 
+            -webkit-text-stroke: 0;
+            text-shadow: 
+                -3px 0 var(--cyan-core),
+                3px 0 var(--purple-nebula),
+                0 0 40px var(--cyan-core);
+            animation: hologram-flicker 0.1s infinite;
+        }
+
+        @keyframes hologram-flicker {
+            0% { opacity: 1; transform: skewX(0deg); }
+            50% { opacity: 0.8; transform: skewX(-2deg); }
+            100% { opacity: 1; transform: skewX(2deg); }
         }
 
         .glitch-text::before, .glitch-text::after {
             content: attr(data-text);
             position: absolute;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: transparent; /* Alterado para transparente para não cobrir o fundo Canvas incorretamente */
+            background: transparent;
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .shockwave-active .glitch-text::before {
             opacity: 1;
-        }
-
-        .glitch-text::before {
-            left: 2px;
-            text-shadow: -1px 0 #777;
+            left: 4px;
+            color: var(--cyan-core);
+            text-shadow: -2px 0 var(--cyan-core);
             clip: rect(44px, 9999px, 56px, 0);
-            animation: glitch-anim-2 3s infinite linear alternate-reverse;
+            animation: hardcore-glitch 0.4s steps(2) infinite alternate-reverse;
+            z-index: 2;
         }
 
-        .glitch-text::after {
-            left: -2px;
-            text-shadow: -1px 0 #bbb;
+        .shockwave-active .glitch-text::after {
+            opacity: 1;
+            left: -4px;
+            color: var(--purple-nebula);
+            text-shadow: 2px 0 var(--purple-nebula);
             clip: rect(44px, 9999px, 56px, 0);
-            animation: glitch-anim-3 2s infinite linear alternate-reverse;
+            animation: hardcore-glitch 0.3s steps(3) infinite alternate;
+            z-index: -1;
         }
 
-        @keyframes glitch-storm {
-            0% { transform: translate(0); text-shadow: 2px 2px 0px #fff; }
-            20% { transform: translate(-1px, 1px); }
-            40% { transform: translate(-1px, -1px); }
-            60% { transform: translate(1px, 1px); }
-            80% { transform: translate(1px, -1px); }
-            100% { transform: translate(0); }
-        }
-        @keyframes glitch-anim-2 {
-            0% { clip: rect(12px, 9999px, 5px, 0); }
-            100% { clip: rect(95px, 9999px, 100px, 0); }
-        }
-        @keyframes glitch-anim-3 {
-            0% { clip: rect(5px, 9999px, 15px, 0); }
-            100% { clip: rect(100px, 9999px, 95px, 0); }
+        @keyframes hardcore-glitch {
+            0% { clip-path: inset(10% 0 80% 0); transform: translateX(-4px); }
+            20% { clip-path: inset(80% 0 5% 0); transform: translateX(4px); }
+            40% { clip-path: inset(30% 0 40% 0); transform: translateX(-2px); }
+            60% { clip-path: inset(60% 0 10% 0); transform: translateX(6px); }
+            80% { clip-path: inset(5% 0 70% 0); transform: translateX(-6px); }
+            100% { clip-path: inset(40% 0 30% 0); transform: translateX(2px); }
         }
 
-        /* --- Cartão Sólido (Design Original) --- */
+        /* --- BEYOND ULTRA-PREMIUM GLASS CARD --- */
         .profile-card {
-            background: rgba(20, 20, 20, 0.85);
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
+            background: linear-gradient(135deg, rgba(5, 15, 30, 0.4) 0%, rgba(2, 5, 10, 0.6) 100%);
+            backdrop-filter: blur(40px) saturate(180%);
+            -webkit-backdrop-filter: blur(40px) saturate(180%);
             
-            clip-path: polygon(
-                20px 0, 
-                100% 0, 
-                100% calc(100% - 20px), 
-                calc(100% - 20px) 100%, 
-                0 100%, 
-                0 20px
-            );
+            border-radius: 40px; 
+            border: 1px solid rgba(0, 240, 255, 0.1);
             
             box-shadow: 
-                inset 0 0 0 1px rgba(120, 120, 120, 0.3), 
-                inset 0 0 80px rgba(10, 10, 10, 0.9);
-            
-            filter: drop-shadow(0 0 15px rgba(255, 255, 255, 0.05));
+                inset 0 1px 1px rgba(255, 255, 255, 0.3), /* Highlight extremo no topo */
+                inset 0 -2px 5px rgba(0, 0, 0, 0.8), /* Sombra volumétrica interna */
+                0 40px 100px rgba(0, 0, 0, 0.99), /* Sombra projetada */
+                0 0 0 1px rgba(255, 255, 255, 0.05), /* Halo */
+                0 0 60px rgba(0, 240, 255, 0.05); /* Glow radiante do card */
             
             transform-style: preserve-3d;
             position: relative;
             overflow: hidden;
-            transition: all 0.1s ease;
+            transition: all 0.6s cubic-bezier(0.165, 0.84, 0.44, 1);
         }
 
-        .profile-card:hover {
-            filter: drop-shadow(0 0 30px rgba(255, 255, 255, 0.15));
+        /* Efeito de Lente Prismática (Sweep) */
+        .profile-card::before {
+            content: "";
+            position: absolute;
+            top: -100%; left: -100%;
+            width: 300%; height: 300%;
+            background: linear-gradient(
+                115deg,
+                transparent 0%,
+                rgba(0, 240, 255, 0.03) 45%,
+                rgba(255, 255, 255, 0.2) 50%,
+                rgba(112, 0, 255, 0.03) 55%,
+                transparent 100%
+            );
+            transform: translateY(-100%);
+            transition: transform 0.8s cubic-bezier(0.19, 1, 0.22, 1);
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .profile-card:hover::before {
+            transform: translateY(100%);
+        }
+
+        /* Iluminação Interna Reativa */
+        .profile-card::after {
+            content: "";
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: radial-gradient(circle at var(--mouse-x, 50%) var(--mouse-y, -20%), rgba(0, 240, 255, 0.15) 0%, transparent 60%);
+            pointer-events: none;
+            z-index: 0;
+            transition: background 0.2s;
+        }
+
+        .shockwave-active .profile-card {
+            border-color: rgba(0, 240, 255, 0.6);
             box-shadow: 
-                inset 0 0 0 1px rgba(255, 255, 255, 0.6), 
-                inset 0 0 60px rgba(0, 0, 0, 1);
+                inset 0 2px 10px rgba(0, 240, 255, 0.8), 
+                0 40px 100px rgba(0, 0, 0, 1),
+                0 0 100px rgba(0, 240, 255, 0.4); 
+            background: linear-gradient(135deg, rgba(10, 30, 60, 0.6) 0%, rgba(5, 10, 20, 0.8) 100%);
         }
 
-        /* Ícones */
-        .icon-container { display: flex; gap: 1.5rem; justify-content: center; align-items: center; }
-        @media (min-width: 768px) { .icon-container { gap: 2.5rem; } }
+        /* --- ICONS (HOLOGRAPHIC) --- */
+        .icon-container { 
+            display: flex; 
+            gap: 2.5rem; 
+            justify-content: center; 
+            align-items: center; 
+            z-index: 2;
+            position: relative;
+        }
+        @media (min-width: 768px) { .icon-container { gap: 4rem; } }
 
         .icon-link {
             position: relative;
-            color: rgba(180, 180, 180, 0.8);
-            transition: all 0.2s ease;
-            z-index: 10;
+            color: rgba(255, 255, 255, 0.3);
+            transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
-        .icon-link:hover { color: #fff; transform: scale(1.1); text-shadow: 0 0 15px #fff; }
         
-        .icon-link::after {
-            content: ''; position: absolute; bottom: -10px; left: 50%; width: 0; height: 2px;
-            background: #fff; transform: translateX(-50%); transition: width 0.2s ease;
-            box-shadow: 0 0 10px #fff;
+        .icon-link:hover { 
+            color: #fff; 
+            transform: translateY(-12px) scale(1.25); 
+            text-shadow: 
+                0 0 10px var(--cyan-core),
+                0 0 30px var(--blue-plasma);
         }
-        .icon-link:hover::after { width: 100%; }
+        
+        /* Singularidade sob o ícone */
+        .icon-link::after {
+            content: ''; 
+            position: absolute; 
+            bottom: -20px; 
+            width: 6px; 
+            height: 6px;
+            border-radius: 50%;
+            background: var(--cyan-core); 
+            opacity: 0;
+            transform: scale(0); 
+            transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            box-shadow: 
+                0 0 10px 2px var(--cyan-core),
+                0 0 20px 5px var(--blue-plasma);
+        }
+        .icon-link:hover::after { 
+            opacity: 1; 
+            transform: scale(1);
+        }
 
-        .name-container { margin-bottom: 2rem; padding: 0 1rem; width: 100%; text-align: center; }
-        @media (min-width: 768px) { .name-container { margin-bottom: 3rem; } }
+        /* --- HUD DATA OVERLAYS --- */
+        .hud-text {
+            position: absolute;
+            font-family: 'Courier New', Courier, monospace;
+            font-weight: 700;
+            letter-spacing: 0.5em;
+            font-size: 0.6rem;
+            color: rgba(0, 240, 255, 0.3);
+            pointer-events: none;
+            transition: all 0.3s;
+            z-index: 2;
+        }
+
+        .shockwave-active .hud-text {
+            color: var(--cyan-core);
+            text-shadow: 0 0 10px var(--cyan-core);
+            letter-spacing: 0.8em;
+        }
+
+        .hud-bottom-right { bottom: 2rem; right: 2.5rem; }
+        .hud-top-left { top: 2rem; left: 2.5rem; opacity: 0.6; }
 
     </style>
 </head>
 <body class="antialiased">
 
-    <!-- Fundo de Tempestade (Canvas) -->
-    <canvas id="storm-canvas"></canvas>
+    <!-- Motor de Fluido Quântico -->
+    <canvas id="quantum-canvas"></canvas>
     
     <!-- Overlays -->
-    <div class="scanlines"></div>
+    <div class="vignette"></div>
+    <div class="film-grain"></div>
 
-    <!-- Conteúdo Principal (Layout Original) -->
+    <!-- Interface -->
     <div class="main-content" id="main-content">
         <div class="name-container">
             <div class="glitch-wrapper">
@@ -233,28 +329,33 @@
             </div>
         </div>
 
-        <div class="w-full max-w-sm md:max-w-xl p-6 md:p-12 profile-card" 
-             data-tilt data-tilt-max="5" data-tilt-speed="1000" data-tilt-glare="true" data-tilt-max-glare="0.2">
+        <div class="w-full max-w-sm md:max-w-3xl p-8 md:p-16 profile-card" id="card"
+             data-tilt data-tilt-max="12" data-tilt-speed="800" data-tilt-glare="true" data-tilt-max-glare="0.2">
             
-            <div class="icon-container transform-gpu" style="transform: translateZ(30px);">
+            <div class="hud-text hud-top-left transform-gpu" style="transform: translateZ(20px);">
+                QNX // 99.9%
+            </div>
+
+            <div class="icon-container transform-gpu" style="transform: translateZ(50px);">
                 <a href="https://github.com/kznybs" target="_blank" class="icon-link" aria-label="GitHub">
-                    <i class="fab fa-github text-4xl md:text-5xl"></i>
+                    <i class="fab fa-github text-5xl md:text-6xl"></i>
                 </a>
 
                 <a href="https://steamcommunity.com/id/kznybs/" target="_blank" class="icon-link" aria-label="Steam">
-                    <i class="fab fa-steam text-4xl md:text-5xl"></i>
+                    <i class="fab fa-steam text-5xl md:text-6xl"></i>
                 </a>
 
                 <a href="https://www.instagram.com/kznybs/" target="_blank" class="icon-link" aria-label="Instagram">
-                    <i class="fab fa-instagram text-4xl md:text-5xl"></i>
+                    <i class="fab fa-instagram text-5xl md:text-6xl"></i>
                 </a>
+                
                 <a href="https://www.linkedin.com/in/kznybs/" target="_blank" class="icon-link" aria-label="LinkedIn">
-                    <i class="fab fa-linkedin text-4xl md:text-5xl"></i>
+                    <i class="fab fa-linkedin text-5xl md:text-6xl"></i>
                 </a>
             </div>
 
-            <div class="absolute bottom-3 right-4 text-[9px] font-mono tracking-[0.2em] pointer-events-none text-white/50 animate-pulse">
-            
+            <div class="hud-text hud-bottom-right transform-gpu" style="transform: translateZ(30px);">
+                QUANTUM_FIELD // ENGAGED
             </div>
         </div>
     </div>
@@ -263,198 +364,191 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/vanilla-tilt/1.7.2/vanilla-tilt.min.js"></script>
     
     <script>
-        // --- MOTOR DE TEMPESTADE (CANVAS) ---
-        const canvas = document.getElementById('storm-canvas');
-        const ctx = canvas.getContext('2d');
-        const mainContent = document.getElementById('main-content');
+        // --- NEXT-GEN QUANTUM FLOW FIELD ENGINE ---
+        // Cria um campo de plasma/energia super premium com milhares de partículas que reagem à matemática e ao mouse
+        const canvas = document.getElementById('quantum-canvas');
+        const ctx = canvas.getContext('2d', { alpha: false });
         const body = document.body;
+        const card = document.getElementById('card');
 
         let width, height;
-        let rain = [];
-        let lightning = [];
-        let flashOpacity = 0;
+        let particles = [];
+        let mouseX = 0, mouseY = 0;
+        let targetMouseX = 0, targetMouseY = 0;
+        let time = 0;
+        let isShockwave = false;
+        let shockwaveRadius = 0;
 
-        // Variáveis do Holofote (Movimento do Background)
-        let spotX, spotY;
-        let spotVX, spotVY;
-
-        // Configuração
-        const rainCount = 400;
-        const rainSpeed = 15;
-        const rainAngle = 0.2; // Chuva diagonal
+        // Configurações Extrema Qualidade
+        const PARTICLE_COUNT = window.innerWidth > 768 ? 1200 : 600;
 
         function resize() {
             width = canvas.width = window.innerWidth;
             height = canvas.height = window.innerHeight;
-            
-            // Inicializar holofote se necessário
-            if (spotX === undefined) {
-                spotX = width / 2;
-                spotY = height / 2;
-                // Velocidade aleatória para o movimento
-                spotVX = (Math.random() - 0.5) * 3;
-                spotVY = (Math.random() - 0.5) * 3;
+            if (mouseX === 0) {
+                mouseX = targetMouseX = width / 2;
+                mouseY = targetMouseY = height / 2;
             }
         }
         window.addEventListener('resize', resize);
         resize();
 
-        // Classe Gotas de Chuva
-        class Drop {
-            constructor() {
-                this.reset();
-                this.y = Math.random() * height;
-            }
+        // Rastreamento Suave do Mouse para Iluminação do Cartão e Gravidade do Canvas
+        window.addEventListener('mousemove', (e) => {
+            targetMouseX = e.clientX;
+            targetMouseY = e.clientY;
 
-            reset() {
+            // Calcula posição do mouse relativa ao cartão para iluminação interna
+            const rect = card.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            card.style.setProperty('--mouse-x', `${x}px`);
+            card.style.setProperty('--mouse-y', `${y}px`);
+        });
+
+        // Evento de Supernova (Clique)
+        window.addEventListener('click', () => {
+            isShockwave = true;
+            shockwaveRadius = 0;
+            body.classList.add('shockwave-active');
+            
+            // Dá um pulso massivo de energia nas partículas
+            particles.forEach(p => {
+                const dx = p.x - mouseX;
+                const dy = p.y - mouseY;
+                const dist = Math.sqrt(dx * dx + dy * dy);
+                const force = Math.max(0, 1000 - dist) / 20; // Força explosiva
+                p.vx += (dx / dist) * force;
+                p.vy += (dy / dist) * force;
+            });
+
+            setTimeout(() => {
+                body.classList.remove('shockwave-active');
+            }, 800);
+        });
+
+        // Classe de Partícula de Energia Quântica
+        class QuantumParticle {
+            constructor() {
                 this.x = Math.random() * width;
-                this.y = -Math.random() * 100;
-                this.z = Math.random() * 0.5 + 0.5; // Profundidade
-                this.len = Math.random() * 20 + 10;
-                this.speed = (Math.random() * 10 + 20) * this.z;
+                this.y = Math.random() * height;
+                this.vx = 0;
+                this.vy = 0;
+                this.baseSpeed = Math.random() * 0.5 + 0.1;
+                this.size = Math.random() * 1.5 + 0.5;
+                // Cores variando de ciano para roxo profundo
+                this.hue = Math.random() > 0.5 ? 180 + Math.random() * 30 : 250 + Math.random() * 40;
             }
 
             update() {
-                this.x += rainAngle * 2;
-                this.y += this.speed;
-
-                if (this.y > height) {
-                    this.reset();
+                // Matemática do Campo de Fluxo (Simplex Noise simulado com Trigonometria complexa)
+                // Isso cria o efeito "Aurora" ou fluido magnético
+                let angle = Math.sin(this.x * 0.002 + time) * Math.cos(this.y * 0.002 + time) * Math.PI * 4;
+                
+                // Força Magnética do Cursor
+                let dx = mouseX - this.x;
+                let dy = mouseY - this.y;
+                let dist = Math.sqrt(dx * dx + dy * dy);
+                
+                if (dist < 400) {
+                    // Puxa suavemente para o mouse criando um vórtice
+                    let gravityAngle = Math.atan2(dy, dx);
+                    // Adiciona rotação
+                    angle = gravityAngle + (dist * 0.005);
                 }
+
+                // Aplica forças
+                this.vx += Math.cos(angle) * this.baseSpeed;
+                this.vy += Math.sin(angle) * this.baseSpeed;
+                
+                // Fricção para manter a suavidade como um fluido
+                this.vx *= 0.92;
+                this.vy *= 0.92;
+
+                this.x += this.vx;
+                this.y += this.vy;
+
+                // Loop contínuo pelas bordas
+                if (this.x < 0) this.x = width;
+                if (this.x > width) this.x = 0;
+                if (this.y < 0) this.y = height;
+                if (this.y > height) this.y = 0;
             }
 
             draw() {
-                ctx.beginPath();
-                ctx.strokeStyle = `rgba(180, 180, 180, ${0.15 * this.z})`; // Cor da chuva
-                ctx.lineWidth = 1.5 * this.z;
-                ctx.moveTo(this.x, this.y);
-                ctx.lineTo(this.x + rainAngle * 5, this.y + this.len);
-                ctx.stroke();
+                // Velocidade afeta o brilho
+                let speed = Math.sqrt(this.vx * this.vx + this.vy * this.vy);
+                let alpha = Math.min(speed * 0.3, 0.8) + 0.1;
+
+                ctx.fillStyle = `hsla(${this.hue}, 100%, 60%, ${alpha})`;
+                ctx.fillRect(this.x, this.y, this.size, this.size);
             }
         }
 
-        // Criar gotas
-        for (let i = 0; i < rainCount; i++) {
-            rain.push(new Drop());
+        for (let i = 0; i < PARTICLE_COUNT; i++) {
+            particles.push(new QuantumParticle());
         }
 
-        // Gerador de Raio Procedural
-        function createLightning() {
-            const x = Math.random() * width;
-            const y = 0;
-            const segments = [];
-            let currentX = x;
-            let currentY = y;
-
-            while (currentY < height) {
-                const nextX = currentX + (Math.random() - 0.5) * 100; // Ziguezague
-                const nextY = currentY + Math.random() * 50 + 20;     // Descida
-                segments.push({x1: currentX, y1: currentY, x2: nextX, y2: nextY});
-                currentX = nextX;
-                currentY = nextY;
-            }
-            
-            lightning.push({
-                segments: segments,
-                life: 10,
-                opacity: 1
-            });
-
-            // Flash e Tremor
-            flashOpacity = 0.4; 
-            triggerShake();
-        }
-
-        function triggerShake() {
-            mainContent.classList.add('thunder-shake');
-            setTimeout(() => {
-                mainContent.classList.remove('thunder-shake');
-            }, 500);
-        }
-
-        // Evento de clique na tela inteira
-        window.addEventListener('click', () => {
-            createLightning();
-        });
-
+        // Loop de Renderização
         function loop() {
-            // Atualizar posição do holofote (Spotlight)
-            spotX += spotVX;
-            spotY += spotVY;
+            // Suaviza a posição do mouse
+            mouseX += (targetMouseX - mouseX) * 0.1;
+            mouseY += (targetMouseY - mouseY) * 0.1;
+            time += 0.001;
 
-            // Rebater nas bordas
-            if (spotX < 0 || spotX > width) spotVX *= -1;
-            if (spotY < 0 || spotY > height) spotVY *= -1;
-
-            // Limpar tela desenhando o gradiente dinâmico
-            // O centro do gradiente agora usa spotX e spotY
-            const gradient = ctx.createRadialGradient(spotX, spotY, 0, spotX, spotY, Math.max(width, height) * 0.8);
-            gradient.addColorStop(0, "#2a2a2a"); // Centro mais claro (cinza escuro)
-            gradient.addColorStop(1, "#050505"); // Bordas pretas
-            ctx.fillStyle = gradient;
+            // Rastro de luz (Light Painting) - Alpha muito baixo cria os fios de energia
+            ctx.globalCompositeOperation = 'source-over';
+            ctx.fillStyle = 'rgba(0, 2, 10, 0.08)'; 
             ctx.fillRect(0, 0, width, height);
 
-            // 1. Desenhar Chuva
-            rain.forEach(drop => {
-                drop.update();
-                drop.draw();
-            });
+            // Desenhar Glow Central (Núcleo Quântico)
+            ctx.globalCompositeOperation = 'screen';
+            let coreSize = 300 + Math.sin(time * 50) * 20; // Respiração
+            const coreGradient = ctx.createRadialGradient(mouseX, mouseY, 0, mouseX, mouseY, coreSize);
+            coreGradient.addColorStop(0, "rgba(0, 240, 255, 0.15)");
+            coreGradient.addColorStop(0.5, "rgba(112, 0, 255, 0.05)");
+            coreGradient.addColorStop(1, "transparent");
+            ctx.fillStyle = coreGradient;
+            ctx.fillRect(0, 0, width, height);
 
-            // 2. Controlar Raios
-            if (Math.random() < 0.008) { // Frequência dos raios
-                createLightning();
-            }
-
-            // 3. Desenhar Raios
-            ctx.save();
-            ctx.shadowBlur = 20;
-            ctx.shadowColor = "white";
-            ctx.strokeStyle = "white";
-            ctx.lineWidth = 2;
-            
-            for (let i = lightning.length - 1; i >= 0; i--) {
-                const bolt = lightning[i];
-                ctx.globalAlpha = bolt.opacity;
-                
+            // Shockwave Expansão
+            if (isShockwave) {
+                shockwaveRadius += 30;
                 ctx.beginPath();
-                bolt.segments.forEach(seg => {
-                    ctx.moveTo(seg.x1, seg.y1);
-                    ctx.lineTo(seg.x2, seg.y2);
-                });
+                ctx.arc(mouseX, mouseY, shockwaveRadius, 0, Math.PI * 2);
+                ctx.strokeStyle = `rgba(0, 240, 255, ${Math.max(0, 1 - shockwaveRadius/1000)})`;
+                ctx.lineWidth = 10;
                 ctx.stroke();
-
-                bolt.life--;
-                bolt.opacity = Math.random(); 
                 
-                if (bolt.life <= 0) {
-                    lightning.splice(i, 1);
+                if (shockwaveRadius > 1500) {
+                    isShockwave = false;
                 }
             }
-            ctx.restore();
 
-            // 4. Desenhar Flash Global
-            if (flashOpacity > 0) {
-                ctx.fillStyle = `rgba(255, 255, 255, ${flashOpacity})`;
-                ctx.fillRect(0, 0, width, height);
-                flashOpacity *= 0.85; 
-            }
+            // Atualizar e Desenhar Partículas
+            ctx.globalCompositeOperation = 'screen';
+            particles.forEach(p => {
+                p.update();
+                p.draw();
+            });
 
             requestAnimationFrame(loop);
         }
 
-        loop();
+        // Iniciar
+        requestAnimationFrame(loop);
 
-        // Vanilla Tilt
+        // Vanilla Tilt Setup
         VanillaTilt.init(document.querySelector(".profile-card"), {
-            max: 5,
+            max: 10,
             speed: 1000, 
             glare: true,
             "max-glare": 0.2,
-            scale: 1.02,
-            perspective: 1000,
-            gyroscope: true
+            scale: 1.04,
+            perspective: 1200,
+            gyroscope: true,
+            easing: "cubic-bezier(.03,.98,.52,.99)"
         });
     </script>
-
 </body>
 </html>
