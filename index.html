@@ -22,11 +22,10 @@
 
         /* --- HIGH-END CINEMATIC SETTINGS (BLUE/OCEAN) --- */
         :root {
-            --void-black: #000414; /* Azul oceano profundo */
+            --void-black: #000414;
             --glass-base: rgba(10, 30, 60, 0.4);
             --glass-border: rgba(255, 255, 255, 0.08);
             --glass-glow: rgba(0, 150, 255, 0.05);
-            --thunder-glow: rgba(100, 200, 255, 0.8); /* Brilho cyan elétrico */
         }
 
         body {
@@ -41,7 +40,12 @@
             min-height: 100vh;
             min-height: 100dvh; 
             perspective: 1000px;
-            cursor: none; /* Cursor personalizado */
+            cursor: none; /* Cursor totalmente invisível */
+        }
+
+        /* Oculta todos os cursores interativos para garantir que não aparece nenhum */
+        a, button, input {
+            cursor: none !important;
         }
 
         /* --- WEBGL BACKGROUND --- */
@@ -51,17 +55,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            z-index: -1; /* Fica atrás de tudo */
-        }
-
-        /* --- CANVAS ENGINE --- */
-        #storm-canvas {
-            position: fixed;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            z-index: 0;
-            filter: contrast(1.1);
-            pointer-events: none; /* Permite que os toques cheguem ao WebGL */
+            z-index: -1;
         }
 
         /* --- IMMERSIVE OVERLAYS --- */
@@ -110,7 +104,6 @@
             width: 100%;
             z-index: 10;
             padding: 1rem;
-            transition: transform 0.05s ease-out; 
             transform-style: preserve-3d;
         }
 
@@ -139,7 +132,6 @@
             -webkit-background-clip: text;
             background-clip: text;
             filter: drop-shadow(0 10px 20px rgba(0,0,0,0.8));
-            transition: all 0.2s ease;
         }
 
         /* --- ULTRA-PREMIUM GLASS CARD --- */
@@ -219,173 +211,25 @@
         .hud-text {
             position: absolute; font-family: 'Courier New', Courier, monospace; font-weight: 700;
             letter-spacing: 0.4em; font-size: 0.65rem; color: rgba(255, 255, 255, 0.2); pointer-events: none;
-            transition: color 0.2s; z-index: 2;
+            z-index: 2;
         }
 
         .hud-bottom-right { bottom: 1.5rem; right: 2rem; }
         .hud-top-left { top: 1.5rem; left: 2rem; opacity: 0.5; }
-
-        /* --- COLOR CONTROLS & FLUID UI --- */
-        .color-controls {
-            position: fixed; top: 2rem; right: 2rem; z-index: 100; display: flex; gap: 1rem; pointer-events: auto;
-        }
-        .color-btn {
-            min-width: 48px; height: 48px; padding: 0.75rem 1.25rem; background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.3); border-radius: 24px; color: white;
-            font-family: "Syne", sans-serif; font-size: 0.75rem; font-weight: 500; letter-spacing: 0.05em;
-            text-transform: uppercase; cursor: pointer; transition: all 0.3s ease; backdrop-filter: blur(10px);
-            display: flex; align-items: center; justify-content: center; white-space: nowrap;
-        }
-        .color-btn:hover { background: rgba(255, 255, 255, 0.2); border-color: rgba(255, 255, 255, 0.5); transform: translateY(-2px); }
-        .color-btn.active { background: rgba(255, 255, 255, 0.25); border-color: rgba(255, 255, 255, 0.6); }
-
-        .color-adjuster-panel {
-            position: fixed; top: 2rem; left: 2rem; z-index: 100; background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 16px; padding: 1.5rem; min-width: 320px; max-width: 400px; pointer-events: auto;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1); transition: all 0.3s ease; display: none;
-        }
-        .color-adjuster-panel.open { display: block; }
-
-        .color-adjuster-header {
-            display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;
-            padding-bottom: 1rem; border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        }
-        .color-adjuster-title {
-            color: white; font-family: "Syne", sans-serif; font-size: 1rem; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase;
-        }
-        .color-adjuster-close {
-            background: none; border: none; color: white; font-size: 1.5rem; cursor: pointer; padding: 0; width: 24px; height: 24px;
-            display: flex; align-items: center; justify-content: center; transition: opacity 0.3s ease;
-        }
-        .color-adjuster-close:hover { opacity: 0.7; }
-
-        .color-picker-group { margin-bottom: 1.25rem; }
-        .color-picker-label { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem; color: white; font-family: "Inter", sans-serif; font-size: 0.875rem; font-weight: 500; }
-        .color-picker-wrapper { display: flex; gap: 0.75rem; align-items: center; }
-        .color-picker-input {
-            width: 60px; height: 40px; border: 2px solid rgba(255, 255, 255, 0.3); border-radius: 8px; cursor: pointer; background: none; padding: 0; -webkit-appearance: none; appearance: none;
-        }
-        .color-picker-input::-webkit-color-swatch-wrapper { padding: 0; }
-        .color-picker-input::-webkit-color-swatch { border: none; border-radius: 6px; }
-
-        .color-value-display {
-            flex: 1; background: rgba(0, 0, 0, 0.2); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 6px; padding: 0.5rem 0.75rem;
-            color: white; font-family: "Inter", monospace; font-size: 0.75rem; font-weight: 500; letter-spacing: 0.05em; cursor: text; user-select: all; transition: all 0.3s ease;
-        }
-        .color-value-display:hover { background: rgba(0, 0, 0, 0.3); border-color: rgba(255, 255, 255, 0.4); }
-        .color-value-display:focus { outline: none; background: rgba(0, 0, 0, 0.4); border-color: rgba(255, 255, 255, 0.5); }
-
-        .copy-btn {
-            background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.3); border-radius: 6px; padding: 0.5rem 0.75rem; color: white; font-family: "Inter", sans-serif; font-size: 0.75rem; font-weight: 500; cursor: pointer; transition: all 0.3s ease; backdrop-filter: blur(10px);
-        }
-        .copy-btn:hover { background: rgba(255, 255, 255, 0.2); border-color: rgba(255, 255, 255, 0.5); }
-        .copy-btn.copied { background: rgba(76, 175, 80, 0.3); border-color: rgba(76, 175, 80, 0.5); }
-
-        .color-adjuster-actions { margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid rgba(255, 255, 255, 0.1); display: flex; gap: 0.75rem; }
-        .export-btn {
-            flex: 1; background: rgba(255, 255, 255, 0.15); border: 1px solid rgba(255, 255, 255, 0.3); border-radius: 8px; padding: 0.75rem; color: white; font-family: "Syne", sans-serif; font-size: 0.875rem; font-weight: 500; letter-spacing: 0.05em; text-transform: uppercase; cursor: pointer; transition: all 0.3s ease; backdrop-filter: blur(10px);
-        }
-        .export-btn:hover { background: rgba(255, 255, 255, 0.25); border-color: rgba(255, 255, 255, 0.5); transform: translateY(-2px); }
-
-        .toggle-adjuster-btn {
-            position: fixed; top: 2rem; left: 2rem; z-index: 100; padding: 0.75rem 1.5rem; background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.3); color: white; font-family: "Syne", sans-serif; font-size: 0.875rem; font-weight: 500; letter-spacing: 0.05em; text-transform: uppercase; cursor: pointer; transition: all 0.3s ease; backdrop-filter: blur(10px); border-radius: 8px; pointer-events: auto;
-        }
-        .toggle-adjuster-btn:hover { background: rgba(255, 255, 255, 0.2); border-color: rgba(255, 255, 255, 0.5); transform: translateY(-2px); }
 
         .footer {
             position: fixed; bottom: 2rem; left: 50%; transform: translateX(-50%); z-index: 10; color: white; font-family: "Syne", sans-serif; font-size: clamp(0.875rem, 1.5vw, 1.125rem); font-weight: 500; letter-spacing: 0.05em; text-transform: uppercase; text-align: center; pointer-events: auto;
         }
         .footer a { color: white; text-decoration: none; transition: opacity 0.3s ease; }
         .footer a:hover { opacity: 0.7; }
-
-        .custom-cursor {
-            position: fixed; width: 40px; height: 40px; border: 2px solid white; border-radius: 50%; pointer-events: none; z-index: 1000; transform: translate(-50%, -50%); transition: width 0.2s ease, height 0.2s ease, border-width 0.2s ease; background: transparent; will-change: transform;
-        }
-        .custom-cursor::before {
-            content: ""; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 8px; height: 8px; background: white; border-radius: 50%;
-        }
     </style>
 </head>
 <body class="antialiased">
-
-    <!-- Fundo de Tempestade Avançado (Canvas 2D) -->
-    <canvas id="storm-canvas"></canvas>
     
     <!-- Overlays Cinemáticos -->
     <div class="vignette"></div>
     <div class="film-grain"></div>
     <div class="scanlines"></div>
-
-    <!-- UI: Fundo Fluido WebGL e Controlos -->
-    <div id="customCursor" class="custom-cursor"></div>
-    
-    <div class="color-controls">
-        
-    </div>
-
-    <button class="toggle-adjuster-btn" id="toggleAdjusterBtn">Cores</button>
-
-    <div id="colorAdjusterPanel" class="color-adjuster-panel">
-        <div class="color-adjuster-header">
-            <h3 class="color-adjuster-title">Ajustador de Cores</h3>
-            <button id="closeAdjusterBtn" class="color-adjuster-close">&times;</button>
-        </div>
-        
-        <!-- Seletores de Cores Gerados Dinamicamente (1 a 6) -->
-        <div class="color-picker-group">
-            <div class="color-picker-label">Cor 1</div>
-            <div class="color-picker-wrapper">
-                <input type="color" id="colorPicker1" class="color-picker-input">
-                <input type="text" id="colorValue1" class="color-value-display" readonly>
-                <button class="copy-btn" data-copy="1">Copiar</button>
-            </div>
-        </div>
-        <div class="color-picker-group">
-            <div class="color-picker-label">Cor 2</div>
-            <div class="color-picker-wrapper">
-                <input type="color" id="colorPicker2" class="color-picker-input">
-                <input type="text" id="colorValue2" class="color-value-display" readonly>
-                <button class="copy-btn" data-copy="2">Copiar</button>
-            </div>
-        </div>
-        <div class="color-picker-group">
-            <div class="color-picker-label">Cor 3</div>
-            <div class="color-picker-wrapper">
-                <input type="color" id="colorPicker3" class="color-picker-input">
-                <input type="text" id="colorValue3" class="color-value-display" readonly>
-                <button class="copy-btn" data-copy="3">Copiar</button>
-            </div>
-        </div>
-        <div class="color-picker-group">
-            <div class="color-picker-label">Cor 4</div>
-            <div class="color-picker-wrapper">
-                <input type="color" id="colorPicker4" class="color-picker-input">
-                <input type="text" id="colorValue4" class="color-value-display" readonly>
-                <button class="copy-btn" data-copy="4">Copiar</button>
-            </div>
-        </div>
-        <div class="color-picker-group">
-            <div class="color-picker-label">Cor 5</div>
-            <div class="color-picker-wrapper">
-                <input type="color" id="colorPicker5" class="color-picker-input">
-                <input type="text" id="colorValue5" class="color-value-display" readonly>
-                <button class="copy-btn" data-copy="5">Copiar</button>
-            </div>
-        </div>
-        <div class="color-picker-group">
-            <div class="color-picker-label">Cor 6</div>
-            <div class="color-picker-wrapper">
-                <input type="color" id="colorPicker6" class="color-picker-input">
-                <input type="text" id="colorValue6" class="color-value-display" readonly>
-                <button class="copy-btn" data-copy="6">Copiar</button>
-            </div>
-        </div>
-
-        <div class="color-adjuster-actions">
-            <button id="exportAllBtn" class="export-btn">Exportar Todas as Cores</button>
-        </div>
-    </div>
 
     <!-- Interface Principal (Cartão) -->
     <div class="main-content" id="main-content">
@@ -399,7 +243,7 @@
              data-tilt data-tilt-max="8" data-tilt-speed="600" data-tilt-glare="true" data-tilt-max-glare="0.15">
             
             <div class="hud-text hud-top-left transform-gpu" style="transform: translateZ(10px);">
-             
+         
             </div>
 
             <div class="icon-container transform-gpu" style="transform: translateZ(40px);">
@@ -421,7 +265,7 @@
             </div>
 
             <div class="hud-text hud-bottom-right transform-gpu" style="transform: translateZ(20px);">
-                
+             
             </div>
         </div>
     </div>
@@ -444,7 +288,7 @@
                 this.size = 64;
                 this.width = this.height = this.size;
                 this.maxAge = 64;
-                this.radius = 0.25 * this.size; // Raio de toque muito maior para um efeito mais evidente
+                this.radius = 0.25 * this.size;
                 this.speed = 1 / this.maxAge;
                 this.trail = [];
                 this.last = null;
@@ -464,7 +308,6 @@
             update() {
                 this.clear();
                 let speed = this.speed;
-                // Iteração inversa para remover itens de forma segura
                 for (let i = this.trail.length - 1; i >= 0; i--) {
                     const point = this.trail[i];
                     let f = point.force * speed * (1 - point.age / this.maxAge);
@@ -498,7 +341,7 @@
                     let d = Math.sqrt(dd);
                     vx = dx / d;
                     vy = dy / d;
-                    force = Math.min(dd * 20000, 2.0); // Força mais potente para efeito visível
+                    force = Math.min(dd * 20000, 2.0);
                 }
                 this.last = { x: point.x, y: point.y };
                 this.trail.push({ x: point.x, y: point.y, age: 0, force, vx, vy });
@@ -539,6 +382,8 @@
                 this.mesh = null;
                 const w = window.innerWidth || 1;
                 const h = window.innerHeight || 1;
+                
+                // Uniforms fixos para o Esquema 1
                 this.uniforms = {
                     uTime: { value: 0 },
                     uResolution: { value: new THREE.Vector2(w, h) },
@@ -548,16 +393,16 @@
                     uColor4: { value: new THREE.Vector3(0.039, 0.055, 0.153) }, 
                     uColor5: { value: new THREE.Vector3(0.945, 0.353, 0.133) }, 
                     uColor6: { value: new THREE.Vector3(0.039, 0.055, 0.153) }, 
-                    uSpeed: { value: 1.2 }, 
+                    uSpeed: { value: 1.5 }, 
                     uIntensity: { value: 1.8 },
                     uTouchTexture: { value: null },
                     uGrainIntensity: { value: 0.08 },
                     uZoom: { value: 1.0 }, 
                     uDarkNavy: { value: new THREE.Vector3(0.039, 0.055, 0.153) }, 
-                    uGradientSize: { value: 1.0 }, 
-                    uGradientCount: { value: 6.0 }, 
-                    uColor1Weight: { value: 1.0 }, 
-                    uColor2Weight: { value: 1.0 } 
+                    uGradientSize: { value: 0.45 }, 
+                    uGradientCount: { value: 12.0 }, 
+                    uColor1Weight: { value: 0.5 }, 
+                    uColor2Weight: { value: 1.8 } 
                 };
             }
 
@@ -599,7 +444,6 @@
                         
                         #define PI 3.14159265359
                         
-                        // Função de ruído para o efeito film grain
                         float grain(vec2 uv, float time) {
                             vec2 grainUv = uv * uResolution * 0.5;
                             float grainValue = fract(sin(dot(grainUv + time, vec2(12.9898, 78.233))) * 43758.5453);
@@ -689,7 +533,6 @@
                         void main() {
                             vec2 uv = vUv;
                             
-                            // Efeito distorção na água com base no toque
                             vec4 touchTex = texture2D(uTouchTexture, uv);
                             float vx = -(touchTex.r * 2.0 - 1.0);
                             float vy = -(touchTex.g * 2.0 - 1.0);
@@ -764,7 +607,7 @@
                 this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
                 this.renderer.setAnimationLoop(null);
                 document.body.appendChild(this.renderer.domElement);
-                this.renderer.domElement.id = "webGLApp"; // CSS garante z-index: -1
+                this.renderer.domElement.id = "webGLApp"; 
 
                 this.camera = new THREE.PerspectiveCamera(45, w / h, 0.1, 10000);
                 this.camera.position.z = 50;
@@ -776,58 +619,11 @@
                 this.gradientBackground = new GradientBackground(this);
                 this.gradientBackground.uniforms.uTouchTexture.value = this.touchTexture.texture;
 
-                this.colorSchemes = {
-                    1: { color1: new THREE.Vector3(0.945, 0.353, 0.133), color2: new THREE.Vector3(0.039, 0.055, 0.153) },
-                    2: { color1: new THREE.Vector3(1.0, 0.424, 0.314), color2: new THREE.Vector3(0.251, 0.878, 0.816) },
-                    3: { color1: new THREE.Vector3(0.945, 0.353, 0.133), color2: new THREE.Vector3(0.039, 0.055, 0.153), color3: new THREE.Vector3(0.251, 0.878, 0.816) },
-                    4: { color1: new THREE.Vector3(0.949, 0.4, 0.2), color2: new THREE.Vector3(0.176, 0.42, 0.427), color3: new THREE.Vector3(0.82, 0.686, 0.612) },
-                    5: { color1: new THREE.Vector3(0.945, 0.353, 0.133), color2: new THREE.Vector3(0.0, 0.259, 0.22), color3: new THREE.Vector3(0.945, 0.353, 0.133), color4: new THREE.Vector3(0.0, 0.0, 0.0), color5: new THREE.Vector3(0.945, 0.353, 0.133), color6: new THREE.Vector3(0.0, 0.0, 0.0) }
-                };
-                this.currentScheme = 1;
                 this.init();
-            }
-
-            setColorScheme(scheme) {
-                if (!this.colorSchemes[scheme]) return;
-                this.currentScheme = scheme;
-                const colors = this.colorSchemes[scheme];
-                const uniforms = this.gradientBackground.uniforms;
-
-                if (scheme === 3) {
-                    uniforms.uColor1.value.copy(colors.color1); uniforms.uColor2.value.copy(colors.color2); uniforms.uColor3.value.copy(colors.color3); uniforms.uColor4.value.copy(colors.color1); uniforms.uColor5.value.copy(colors.color2); uniforms.uColor6.value.copy(colors.color3);
-                } else if (scheme === 4) {
-                    uniforms.uColor1.value.copy(colors.color1); uniforms.uColor2.value.copy(colors.color2); uniforms.uColor3.value.copy(colors.color3); uniforms.uColor4.value.copy(colors.color1); uniforms.uColor5.value.copy(colors.color2); uniforms.uColor6.value.copy(colors.color3);
-                } else if (scheme === 5) {
-                    uniforms.uColor1.value.copy(colors.color1); uniforms.uColor2.value.copy(colors.color2); uniforms.uColor3.value.copy(colors.color3); uniforms.uColor4.value.copy(colors.color4); uniforms.uColor5.value.copy(colors.color5); uniforms.uColor6.value.copy(colors.color6);
-                } else {
-                    uniforms.uColor1.value.copy(colors.color1); uniforms.uColor2.value.copy(colors.color2); uniforms.uColor3.value.copy(colors.color1); uniforms.uColor4.value.copy(colors.color2); uniforms.uColor5.value.copy(colors.color1); uniforms.uColor6.value.copy(colors.color2);
-                }
-
-                if (scheme === 1 || scheme === 6 || scheme === 7 || scheme === 8 || scheme === 5) {
-                    this.scene.background = new THREE.Color(0x0a0e27);
-                    uniforms.uDarkNavy.value.set(0.039, 0.055, 0.153);
-                    uniforms.uGradientSize.value = 0.45;
-                    uniforms.uGradientCount.value = 12.0;
-                    uniforms.uSpeed.value = 1.5;
-                    uniforms.uColor1Weight.value = 0.5;
-                    uniforms.uColor2Weight.value = 1.8;
-                } else if (scheme === 4) {
-                    this.scene.background = new THREE.Color(0xffffff);
-                    uniforms.uDarkNavy.value.set(0, 0, 0);
-                } else {
-                    this.scene.background = new THREE.Color(0x0a0e27);
-                    uniforms.uDarkNavy.value.set(0.039, 0.055, 0.153);
-                    uniforms.uGradientSize.value = 1.0;
-                    uniforms.uGradientCount.value = 6.0;
-                    uniforms.uSpeed.value = 1.2;
-                    uniforms.uColor1Weight.value = 1.0;
-                    uniforms.uColor2Weight.value = 1.0;
-                }
             }
 
             init() {
                 this.gradientBackground.init();
-                this.setColorScheme(1);
                 this.render();
                 this.tick();
 
@@ -860,9 +656,9 @@
             getViewSize() {
                 const fovInRadians = (this.camera.fov * Math.PI) / 180;
                 let height = Math.abs(this.camera.position.z * Math.tan(fovInRadians / 2) * 2);
-                if (isNaN(height) || height === 0) height = 100; // Fallback caso NaN
+                if (isNaN(height) || height === 0) height = 100; 
                 let width = height * (this.camera.aspect || 1);
-                if (isNaN(width) || width === 0) width = 100; // Fallback caso NaN
+                if (isNaN(width) || width === 0) width = 100; 
                 return { width, height };
             }
 
@@ -901,158 +697,19 @@
         }
 
         // ==========================================
-        // PARTE 2: UI DO FLUIDO (SELETORES DE CORES)
+        // TILT EFFECT DO CARTÃO
         // ==========================================
 
-        const colorButtons = document.querySelectorAll(".color-btn");
-        colorButtons.forEach((btn) => {
-            btn.addEventListener("click", () => {
-                const scheme = parseInt(btn.dataset.scheme);
-                app.setColorScheme(scheme);
-                colorButtons.forEach((b) => b.classList.remove("active"));
-                btn.classList.add("active");
-                updateColorPickersFromScheme();
-            });
+        VanillaTilt.init(document.querySelector(".profile-card"), { 
+            max: 12, 
+            speed: 800, 
+            glare: true, 
+            "max-glare": 0.15, 
+            scale: 1.03, 
+            perspective: 1000, 
+            gyroscope: true, 
+            easing: "cubic-bezier(.03,.98,.52,.99)" 
         });
-
-        const colorAdjusterPanel = document.getElementById("colorAdjusterPanel");
-        const toggleAdjusterBtn = document.getElementById("toggleAdjusterBtn");
-        const closeAdjusterBtn = document.getElementById("closeAdjusterBtn");
-
-        toggleAdjusterBtn.addEventListener("click", () => {
-            colorAdjusterPanel.classList.toggle("open");
-            if (colorAdjusterPanel.classList.contains("open")) {
-                updateColorPickersFromScheme();
-                toggleAdjusterBtn.style.display = "none";
-            } else {
-                toggleAdjusterBtn.style.display = "block";
-            }
-        });
-
-        closeAdjusterBtn.addEventListener("click", () => {
-            colorAdjusterPanel.classList.remove("open");
-            toggleAdjusterBtn.style.display = "block";
-        });
-
-        function rgbToHex(r, g, b) {
-            const toHex = (n) => { const hex = Math.round(n * 255).toString(16); return hex.length === 1 ? "0" + hex : hex; };
-            return "#" + toHex(r) + toHex(g) + toHex(b);
-        }
-
-        function hexToRgb(hex) {
-            const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-            return result ? { r: parseInt(result[1], 16) / 255, g: parseInt(result[2], 16) / 255, b: parseInt(result[3], 16) / 255 } : null;
-        }
-
-        function updateColorPickersFromScheme() {
-            const uniforms = app.gradientBackground.uniforms;
-            const colors = [
-                uniforms.uColor1.value, uniforms.uColor2.value, uniforms.uColor3.value,
-                uniforms.uColor4.value, uniforms.uColor5.value, uniforms.uColor6.value
-            ];
-            colors.forEach((color, index) => {
-                const picker = document.getElementById(`colorPicker${index + 1}`);
-                const display = document.getElementById(`colorValue${index + 1}`);
-                if (picker && display) {
-                    const hex = rgbToHex(color.x, color.y, color.z);
-                    picker.value = hex; display.value = hex.toUpperCase();
-                }
-            });
-        }
-
-        for (let i = 1; i <= 6; i++) {
-            const picker = document.getElementById(`colorPicker${i}`);
-            const display = document.getElementById(`colorValue${i}`);
-            if (picker && display) {
-                picker.addEventListener("input", (e) => {
-                    const hex = e.target.value; const rgb = hexToRgb(hex);
-                    if (rgb) {
-                        const colorUniform = app.gradientBackground.uniforms[`uColor${i}`];
-                        if (colorUniform) { colorUniform.value.set(rgb.r, rgb.g, rgb.b); display.value = hex.toUpperCase(); }
-                    }
-                });
-            }
-        }
-
-        document.querySelectorAll(".copy-btn").forEach((btn) => {
-            btn.addEventListener("click", (e) => {
-                const colorIndex = e.target.dataset.copy;
-                const display = document.getElementById(`colorValue${colorIndex}`);
-                const text = display.value;
-                navigator.clipboard.writeText(text).then(() => {
-                    e.target.textContent = "Copiado!";
-                    e.target.classList.add("copied");
-                    setTimeout(() => { e.target.textContent = "Copiar"; e.target.classList.remove("copied"); }, 2000);
-                });
-            });
-        });
-
-        const exportAllBtn = document.getElementById("exportAllBtn");
-        exportAllBtn.addEventListener("click", () => {
-            const colors = [];
-            for (let i = 1; i <= 6; i++) {
-                const display = document.getElementById(`colorValue${i}`);
-                if (display) colors.push(display.value);
-            }
-            const exportText = `Esquema de Cores:\n${colors.map((c, i) => `Cor ${i + 1}: ${c}`).join("\n")}\n\nMatriz Hex: [${colors.map((c) => `"${c}"`).join(", ")}]`;
-            navigator.clipboard.writeText(exportText).then(() => {
-                exportAllBtn.textContent = "Copiado!";
-                exportAllBtn.style.background = "rgba(76, 175, 80, 0.3)";
-                exportAllBtn.style.borderColor = "rgba(76, 175, 80, 0.5)";
-                setTimeout(() => {
-                    exportAllBtn.textContent = "Exportar Todas as Cores";
-                    exportAllBtn.style.background = ""; exportAllBtn.style.borderColor = "";
-                }, 2000);
-            });
-        });
-
-        // ==========================================
-        // PARTE 3: CURSOR E EFEITOS DOM
-        // ==========================================
-
-        const cursor = document.getElementById("customCursor");
-        let uiMouseX = 0, uiMouseY = 0, cursorX = 0, cursorY = 0;
-        document.addEventListener("mousemove", (e) => { uiMouseX = e.clientX; uiMouseY = e.clientY; });
-
-        let isCursorAnimating = false;
-        function animateCursor() {
-            if (!isCursorAnimating) return;
-            cursorX = uiMouseX; cursorY = uiMouseY;
-            cursor.style.left = cursorX + "px"; cursor.style.top = cursorY + "px";
-            requestAnimationFrame(animateCursor);
-        }
-
-        document.addEventListener("mousemove", () => {
-            if (!isCursorAnimating) { isCursorAnimating = true; animateCursor(); }
-        }, { once: false });
-
-        const footerLink = document.querySelector(".footer a");
-        if(footerLink) {
-            footerLink.addEventListener("mouseenter", () => { cursor.style.width = "50px"; cursor.style.height = "50px"; cursor.style.borderWidth = "3px"; });
-            footerLink.addEventListener("mouseleave", () => { cursor.style.width = "40px"; cursor.style.height = "40px"; cursor.style.borderWidth = "2px"; });
-        }
-
-        colorButtons.forEach((btn) => {
-            btn.addEventListener("mouseenter", () => { cursor.style.width = "50px"; cursor.style.height = "50px"; cursor.style.borderWidth = "3px"; });
-            btn.addEventListener("mouseleave", () => { cursor.style.width = "40px"; cursor.style.height = "40px"; cursor.style.borderWidth = "2px"; });
-        });
-
-        toggleAdjusterBtn.addEventListener("mouseenter", () => { cursor.style.width = "50px"; cursor.style.height = "50px"; cursor.style.borderWidth = "3px"; });
-        toggleAdjusterBtn.addEventListener("mouseleave", () => { cursor.style.width = "40px"; cursor.style.height = "40px"; cursor.style.borderWidth = "2px"; });
-
-        let lastMouseMoveTime = 0, pulseFrame = null;
-        function checkPulse() {
-            if (Date.now() - lastMouseMoveTime > 100) { cursor.style.borderWidth = "2px"; pulseFrame = null; } 
-            else { pulseFrame = requestAnimationFrame(checkPulse); }
-        }
-        document.addEventListener("mousemove", () => {
-            lastMouseMoveTime = Date.now(); cursor.style.borderWidth = "2.5px";
-            if (!pulseFrame) { pulseFrame = requestAnimationFrame(checkPulse); }
-        });
-
-        // ==========================================
-        // PARTE 4: MOTOR DE TEMPESTADE E CARTÃO (CANVAS 2D)
-        // ==========================================
 
     </script>
 </body>
