@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KZNYBS | QUANTUM NEXUS</title>
+    <title>KZNYBS | CINEMATIC NOIR</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Google Fonts -->
@@ -13,18 +13,19 @@
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
-        /* --- HIGH-END QUANTUM SETTINGS --- */
+        /* --- HIGH-END CINEMATIC SETTINGS --- */
         :root {
-            --void-deep: #00020a; /* Abismo absoluto */
-            --cyan-core: #00f0ff;
-            --purple-nebula: #7000ff;
-            --blue-plasma: #0044ff;
+            --void-black: #000414; /* Azul oceano profundo */
+            --glass-base: rgba(10, 30, 60, 0.4);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --glass-glow: rgba(0, 150, 255, 0.05);
+            --thunder-glow: rgba(100, 200, 255, 0.8); /* Brilho cyan elétrico */
         }
 
         body {
             font-family: 'Montserrat', sans-serif;
             color: #ffffff;
-            background-color: var(--void-deep);
+            background-color: var(--void-black);
             overflow: hidden; 
             margin: 0;
             display: flex;
@@ -33,23 +34,23 @@
             min-height: 100vh;
             min-height: 100dvh; 
             cursor: crosshair;
-            perspective: 1200px;
+            perspective: 1000px;
         }
 
         /* --- CANVAS ENGINE --- */
-        #quantum-canvas {
+        #storm-canvas {
             position: fixed;
             top: 0; left: 0;
             width: 100%; height: 100%;
             z-index: 0;
-            filter: contrast(1.2) saturate(1.5);
+            filter: contrast(1.1);
         }
 
         /* --- IMMERSIVE OVERLAYS --- */
         .vignette {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: radial-gradient(circle at 50% 50%, transparent 10%, rgba(0,2,10,0.6) 70%, #000105 100%);
+            background: radial-gradient(circle at 50% 50%, transparent 20%, rgba(0,0,0,0.8) 90%, #000 100%);
             pointer-events: none;
             z-index: 2;
         }
@@ -57,14 +58,32 @@
         .film-grain {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
-            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
-            opacity: 0.04;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+            opacity: 0.05;
             z-index: 50;
             pointer-events: none;
-            mix-blend-mode: overlay;
         }
 
-        /* --- PHYSICS & SHOCKWAVE FX --- */
+        .scanlines {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: repeating-linear-gradient(
+                to bottom,
+                transparent 0%,
+                rgba(255, 255, 255, 0.02) 0.5%,
+                transparent 1%
+            );
+            z-index: 49;
+            pointer-events: none;
+            animation: scanline-shift 10s linear infinite;
+        }
+
+        @keyframes scanline-shift {
+            0% { background-position: 0 0; }
+            100% { background-position: 0 100vh; }
+        }
+
+        /* --- PHYSICS & SHAKE FX --- */
         .main-content {
             display: flex;
             flex-direction: column;
@@ -73,24 +92,26 @@
             width: 100%;
             z-index: 10;
             padding: 1rem;
-            transition: transform 0.1s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
+            transition: transform 0.05s ease-out; 
             transform-style: preserve-3d;
         }
 
-        .shockwave-active .main-content {
-            animation: quantum-pulse 0.8s cubic-bezier(0.1, 1, 0.2, 1) forwards;
+        .thunder-active .main-content {
+            animation: cinematic-shake 0.6s cubic-bezier(0.25, 1, 0.5, 1) forwards;
         }
 
-        @keyframes quantum-pulse {
-            0% { transform: scale(1) translateZ(0); filter: blur(0) brightness(1); }
-            10% { transform: scale(1.08) translateZ(50px); filter: blur(2px) brightness(2); }
-            40% { transform: scale(0.95) translateZ(-20px); filter: blur(0) brightness(0.8); }
-            100% { transform: scale(1) translateZ(0); filter: blur(0) brightness(1); }
+        @keyframes cinematic-shake {
+            0% { transform: translate3d(0, 0, 0) scale(1); filter: blur(0); }
+            10% { transform: translate3d(-8px, 4px, 0) scale(1.02); filter: blur(1px); }
+            20% { transform: translate3d(6px, -4px, 0) scale(0.98); filter: blur(0); }
+            30% { transform: translate3d(-4px, 2px, 0) scale(1.01); }
+            40% { transform: translate3d(2px, -2px, 0) scale(0.99); }
+            100% { transform: translate3d(0, 0, 0) scale(1); filter: blur(0); }
         }
 
-        /* --- TYPOGRAPHY (HOLOGRAPHIC GLITCH) --- */
+        /* --- TYPOGRAPHY (NEXT-GEN GLITCH) --- */
         .name-container { 
-            margin-bottom: 3.5rem; 
+            margin-bottom: 3rem; 
             perspective: 800px;
         }
 
@@ -106,32 +127,25 @@
 
         .glitch-text {
             position: relative;
-            font-size: clamp(4rem, 15vw, 9rem);
+            font-size: clamp(4rem, 15vw, 8.5rem);
             font-weight: 900;
-            letter-spacing: 0.08em;
+            letter-spacing: 0.05em;
             color: transparent;
-            -webkit-text-stroke: 1px rgba(255,255,255,0.1);
-            background: linear-gradient(180deg, #ffffff 0%, #b3d4ff 100%);
+            -webkit-text-stroke: 1px rgba(255,255,255,0.4);
+            background: linear-gradient(180deg, #fff 0%, #777 100%);
             -webkit-background-clip: text;
             background-clip: text;
-            filter: drop-shadow(0 0 20px rgba(0, 240, 255, 0.4));
-            transition: all 0.3s ease;
+            filter: drop-shadow(0 10px 20px rgba(0,0,0,0.8));
+            transition: all 0.2s ease;
         }
 
-        .glitch-text:hover {
+        .thunder-active .glitch-text {
             color: #fff;
             -webkit-text-stroke: 0;
             text-shadow: 
-                -3px 0 var(--cyan-core),
-                3px 0 var(--purple-nebula),
-                0 0 40px var(--cyan-core);
-            animation: hologram-flicker 0.1s infinite;
-        }
-
-        @keyframes hologram-flicker {
-            0% { opacity: 1; transform: skewX(0deg); }
-            50% { opacity: 0.8; transform: skewX(-2deg); }
-            100% { opacity: 1; transform: skewX(2deg); }
+                -4px 0 rgba(0, 255, 255, 0.8),
+                4px 0 rgba(0, 100, 255, 0.8),
+                0 0 30px var(--thunder-glow);
         }
 
         .glitch-text::before, .glitch-text::after {
@@ -140,120 +154,117 @@
             top: 0; left: 0; width: 100%; height: 100%;
             background: transparent;
             opacity: 0;
-            pointer-events: none;
+            transition: opacity 0.1s;
         }
 
-        .shockwave-active .glitch-text::before {
+        .thunder-active .glitch-text::before {
             opacity: 1;
-            left: 4px;
-            color: var(--cyan-core);
-            text-shadow: -2px 0 var(--cyan-core);
+            left: 3px;
+            text-shadow: -2px 0 rgba(0, 255, 255, 0.9);
             clip: rect(44px, 9999px, 56px, 0);
-            animation: hardcore-glitch 0.4s steps(2) infinite alternate-reverse;
-            z-index: 2;
+            animation: hardcore-glitch 0.3s steps(2) infinite alternate-reverse;
         }
 
-        .shockwave-active .glitch-text::after {
+        .thunder-active .glitch-text::after {
             opacity: 1;
-            left: -4px;
-            color: var(--purple-nebula);
-            text-shadow: 2px 0 var(--purple-nebula);
+            left: -3px;
+            text-shadow: 2px 0 rgba(0, 100, 255, 0.9);
             clip: rect(44px, 9999px, 56px, 0);
-            animation: hardcore-glitch 0.3s steps(3) infinite alternate;
-            z-index: -1;
+            animation: hardcore-glitch 0.2s steps(3) infinite alternate;
         }
 
         @keyframes hardcore-glitch {
-            0% { clip-path: inset(10% 0 80% 0); transform: translateX(-4px); }
-            20% { clip-path: inset(80% 0 5% 0); transform: translateX(4px); }
-            40% { clip-path: inset(30% 0 40% 0); transform: translateX(-2px); }
-            60% { clip-path: inset(60% 0 10% 0); transform: translateX(6px); }
-            80% { clip-path: inset(5% 0 70% 0); transform: translateX(-6px); }
-            100% { clip-path: inset(40% 0 30% 0); transform: translateX(2px); }
+            0% { clip-path: inset(10% 0 80% 0); transform: translateX(-2px); }
+            20% { clip-path: inset(80% 0 5% 0); transform: translateX(2px); }
+            40% { clip-path: inset(30% 0 40% 0); transform: translateX(-1px); }
+            60% { clip-path: inset(60% 0 10% 0); transform: translateX(3px); }
+            80% { clip-path: inset(5% 0 70% 0); transform: translateX(-3px); }
+            100% { clip-path: inset(40% 0 30% 0); transform: translateX(1px); }
         }
 
-        /* --- BEYOND ULTRA-PREMIUM GLASS CARD --- */
+        /* --- ULTRA-PREMIUM GLASS CARD --- */
         .profile-card {
-            background: linear-gradient(135deg, rgba(5, 15, 30, 0.4) 0%, rgba(2, 5, 10, 0.6) 100%);
-            backdrop-filter: blur(40px) saturate(180%);
-            -webkit-backdrop-filter: blur(40px) saturate(180%);
+            background: linear-gradient(135deg, rgba(20, 50, 100, 0.4) 0%, rgba(5, 10, 20, 0.7) 100%);
+            backdrop-filter: blur(35px) saturate(150%);
+            -webkit-backdrop-filter: blur(35px) saturate(150%);
             
+            /* Bordas perfeitamente redondas e suaves (Qualidade Extrema) */
             border-radius: 40px; 
-            border: 1px solid rgba(0, 240, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.05);
             
             box-shadow: 
-                inset 0 1px 1px rgba(255, 255, 255, 0.3), /* Highlight extremo no topo */
-                inset 0 -2px 5px rgba(0, 0, 0, 0.8), /* Sombra volumétrica interna */
-                0 40px 100px rgba(0, 0, 0, 0.99), /* Sombra projetada */
-                0 0 0 1px rgba(255, 255, 255, 0.05), /* Halo */
-                0 0 60px rgba(0, 240, 255, 0.05); /* Glow radiante do card */
+                inset 0 1px 2px rgba(255, 255, 255, 0.2), /* Reflexo de luz na borda superior */
+                inset 0 -1px 2px rgba(0, 0, 0, 0.8), /* Sombra profunda na base interna */
+                0 40px 80px rgba(0, 0, 0, 0.95), /* Sombra projetada massiva em 3D */
+                0 0 0 1px rgba(255, 255, 255, 0.02); /* Halo microscópico ao redor */
             
             transform-style: preserve-3d;
             position: relative;
             overflow: hidden;
-            transition: all 0.6s cubic-bezier(0.165, 0.84, 0.44, 1);
+            transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
         }
 
-        /* Efeito de Lente Prismática (Sweep) */
+        /* Reflexo de Vidro (Sweep) */
         .profile-card::before {
             content: "";
             position: absolute;
-            top: -100%; left: -100%;
-            width: 300%; height: 300%;
+            top: -50%; left: -50%;
+            width: 200%; height: 200%;
             background: linear-gradient(
-                115deg,
-                transparent 0%,
-                rgba(0, 240, 255, 0.03) 45%,
-                rgba(255, 255, 255, 0.2) 50%,
-                rgba(112, 0, 255, 0.03) 55%,
-                transparent 100%
+                to bottom right,
+                rgba(255,255,255,0) 0%,
+                rgba(255,255,255,0.03) 40%,
+                rgba(255,255,255,0.15) 50%,
+                rgba(255,255,255,0) 60%,
+                rgba(255,255,255,0) 100%
             );
-            transform: translateY(-100%);
-            transition: transform 0.8s cubic-bezier(0.19, 1, 0.22, 1);
+            transform: rotate(30deg) translateY(-100%);
+            transition: transform 0.6s ease-out;
             pointer-events: none;
             z-index: 1;
         }
 
         .profile-card:hover::before {
-            transform: translateY(100%);
+            transform: rotate(30deg) translateY(100%);
         }
 
-        /* Iluminação Interna Reativa */
+        /* Iluminação Interna Volumétrica */
         .profile-card::after {
             content: "";
             position: absolute;
             top: 0; left: 0;
             width: 100%; height: 100%;
-            background: radial-gradient(circle at var(--mouse-x, 50%) var(--mouse-y, -20%), rgba(0, 240, 255, 0.15) 0%, transparent 60%);
+            background: radial-gradient(circle at 50% 0%, rgba(255,255,255,0.1) 0%, transparent 60%);
             pointer-events: none;
-            z-index: 0;
-            transition: background 0.2s;
+            z-index: 1;
         }
 
-        .shockwave-active .profile-card {
-            border-color: rgba(0, 240, 255, 0.6);
+        /* Reação do Cartão ao Trovão */
+        .thunder-active .profile-card {
+            background: linear-gradient(135deg, rgba(40, 80, 150, 0.6) 0%, rgba(10, 20, 40, 0.9) 100%);
+            border-color: rgba(100, 200, 255, 0.5);
             box-shadow: 
-                inset 0 2px 10px rgba(0, 240, 255, 0.8), 
-                0 40px 100px rgba(0, 0, 0, 1),
-                0 0 100px rgba(0, 240, 255, 0.4); 
-            background: linear-gradient(135deg, rgba(10, 30, 60, 0.6) 0%, rgba(5, 10, 20, 0.8) 100%);
+                inset 0 2px 5px rgba(255, 255, 255, 0.7), 
+                inset 0 -1px 2px rgba(0, 0, 0, 0.8),
+                0 40px 80px rgba(0, 0, 0, 1),
+                0 0 80px rgba(0, 150, 255, 0.3); /* Brilho azul elétrico ao redor do cartão */
         }
 
-        /* --- ICONS (HOLOGRAPHIC) --- */
+        /* --- ICONS (NEO-MORPHIC) --- */
         .icon-container { 
             display: flex; 
-            gap: 2.5rem; 
+            gap: 2rem; 
             justify-content: center; 
             align-items: center; 
             z-index: 2;
             position: relative;
         }
-        @media (min-width: 768px) { .icon-container { gap: 4rem; } }
+        @media (min-width: 768px) { .icon-container { gap: 3.5rem; } }
 
         .icon-link {
             position: relative;
-            color: rgba(255, 255, 255, 0.3);
-            transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+            color: rgba(255, 255, 255, 0.4);
+            transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             display: flex;
             justify-content: center;
             align-items: center;
@@ -261,67 +272,63 @@
         
         .icon-link:hover { 
             color: #fff; 
-            transform: translateY(-12px) scale(1.25); 
-            text-shadow: 
-                0 0 10px var(--cyan-core),
-                0 0 30px var(--blue-plasma);
+            transform: translateY(-10px) scale(1.2); 
+            text-shadow: 0 0 25px rgba(255, 255, 255, 0.9); 
         }
         
-        /* Singularidade sob o ícone */
+        /* Ponto de mira (Target) sob o ícone no hover */
         .icon-link::after {
             content: ''; 
             position: absolute; 
-            bottom: -20px; 
-            width: 6px; 
-            height: 6px;
+            bottom: -15px; 
+            width: 4px; 
+            height: 4px;
             border-radius: 50%;
-            background: var(--cyan-core); 
+            background: #fff; 
             opacity: 0;
             transform: scale(0); 
-            transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-            box-shadow: 
-                0 0 10px 2px var(--cyan-core),
-                0 0 20px 5px var(--blue-plasma);
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            box-shadow: 0 0 10px 2px rgba(255, 255, 255, 0.8);
         }
         .icon-link:hover::after { 
             opacity: 1; 
             transform: scale(1);
         }
 
-        /* --- HUD DATA OVERLAYS --- */
+        /* --- HUD ELEMENTS --- */
         .hud-text {
             position: absolute;
             font-family: 'Courier New', Courier, monospace;
             font-weight: 700;
-            letter-spacing: 0.5em;
-            font-size: 0.6rem;
-            color: rgba(0, 240, 255, 0.3);
+            letter-spacing: 0.4em;
+            font-size: 0.65rem;
+            color: rgba(255, 255, 255, 0.2);
             pointer-events: none;
-            transition: all 0.3s;
+            transition: color 0.2s;
             z-index: 2;
         }
 
-        .shockwave-active .hud-text {
-            color: var(--cyan-core);
-            text-shadow: 0 0 10px var(--cyan-core);
-            letter-spacing: 0.8em;
+        .thunder-active .hud-text {
+            color: rgba(255, 255, 255, 0.8);
+            text-shadow: 0 0 8px #fff;
         }
 
-        .hud-bottom-right { bottom: 2rem; right: 2.5rem; }
-        .hud-top-left { top: 2rem; left: 2.5rem; opacity: 0.6; }
+        .hud-bottom-right { bottom: 1.5rem; right: 2rem; }
+        .hud-top-left { top: 1.5rem; left: 2rem; opacity: 0.5; }
 
     </style>
 </head>
 <body class="antialiased">
 
-    <!-- Motor de Fluido Quântico -->
-    <canvas id="quantum-canvas"></canvas>
+    <!-- Fundo de Tempestade Avançado (Canvas) -->
+    <canvas id="storm-canvas"></canvas>
     
-    <!-- Overlays -->
+    <!-- Overlays Cinemáticos -->
     <div class="vignette"></div>
     <div class="film-grain"></div>
+    <div class="scanlines"></div>
 
-    <!-- Interface -->
+    <!-- Interface Principal -->
     <div class="main-content" id="main-content">
         <div class="name-container">
             <div class="glitch-wrapper">
@@ -329,33 +336,33 @@
             </div>
         </div>
 
-        <div class="w-full max-w-sm md:max-w-3xl p-8 md:p-16 profile-card" id="card"
-             data-tilt data-tilt-max="12" data-tilt-speed="800" data-tilt-glare="true" data-tilt-max-glare="0.2">
+        <div class="w-full max-w-sm md:max-w-2xl p-8 md:p-14 profile-card" 
+             data-tilt data-tilt-max="8" data-tilt-speed="600" data-tilt-glare="true" data-tilt-max-glare="0.15">
             
-            <div class="hud-text hud-top-left transform-gpu" style="transform: translateZ(20px);">
-                QNX // 99.9%
+            <div class="hud-text hud-top-left transform-gpu" style="transform: translateZ(10px);">
+                SEC // 01
             </div>
 
-            <div class="icon-container transform-gpu" style="transform: translateZ(50px);">
+            <div class="icon-container transform-gpu" style="transform: translateZ(40px);">
                 <a href="https://github.com/kznybs" target="_blank" class="icon-link" aria-label="GitHub">
-                    <i class="fab fa-github text-5xl md:text-6xl"></i>
+                    <i class="fab fa-github text-4xl md:text-6xl"></i>
                 </a>
 
                 <a href="https://steamcommunity.com/id/kznybs/" target="_blank" class="icon-link" aria-label="Steam">
-                    <i class="fab fa-steam text-5xl md:text-6xl"></i>
+                    <i class="fab fa-steam text-4xl md:text-6xl"></i>
                 </a>
 
                 <a href="https://www.instagram.com/kznybs/" target="_blank" class="icon-link" aria-label="Instagram">
-                    <i class="fab fa-instagram text-5xl md:text-6xl"></i>
+                    <i class="fab fa-instagram text-4xl md:text-6xl"></i>
                 </a>
                 
                 <a href="https://www.linkedin.com/in/kznybs/" target="_blank" class="icon-link" aria-label="LinkedIn">
-                    <i class="fab fa-linkedin text-5xl md:text-6xl"></i>
+                    <i class="fab fa-linkedin text-4xl md:text-6xl"></i>
                 </a>
             </div>
 
-            <div class="hud-text hud-bottom-right transform-gpu" style="transform: translateZ(30px);">
-                QUANTUM_FIELD // ENGAGED
+            <div class="hud-text hud-bottom-right transform-gpu" style="transform: translateZ(20px);">
+                NEXUS_LINK // ACTIVE
             </div>
         </div>
     </div>
@@ -364,191 +371,274 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/vanilla-tilt/1.7.2/vanilla-tilt.min.js"></script>
     
     <script>
-        // --- NEXT-GEN QUANTUM FLOW FIELD ENGINE ---
-        // Cria um campo de plasma/energia super premium com milhares de partículas que reagem à matemática e ao mouse
-        const canvas = document.getElementById('quantum-canvas');
-        const ctx = canvas.getContext('2d', { alpha: false });
+        // --- NEXT-GEN STORM ENGINE (CANVAS) ---
+        const canvas = document.getElementById('storm-canvas');
+        const ctx = canvas.getContext('2d', { alpha: false }); // Otimização de performance
         const body = document.body;
-        const card = document.getElementById('card');
 
         let width, height;
-        let particles = [];
-        let mouseX = 0, mouseY = 0;
-        let targetMouseX = 0, targetMouseY = 0;
-        let time = 0;
-        let isShockwave = false;
-        let shockwaveRadius = 0;
+        let rain = [];
+        let splashes = [];
+        let lightning = [];
+        let flashOpacity = 0;
 
-        // Configurações Extrema Qualidade
-        const PARTICLE_COUNT = window.innerWidth > 768 ? 1200 : 600;
+        // Mouse Parallax & Spotlight Tracking
+        let mouseX = 0, mouseY = 0;
+        let spotX = 0, spotY = 0;
+
+        // Configurações Físicas
+        const RAIN_COUNT = window.innerWidth > 768 ? 600 : 300; // Responsivo
+        const BASE_ANGLE = 0.15;
+        let currentAngle = BASE_ANGLE;
 
         function resize() {
             width = canvas.width = window.innerWidth;
             height = canvas.height = window.innerHeight;
-            if (mouseX === 0) {
-                mouseX = targetMouseX = width / 2;
-                mouseY = targetMouseY = height / 2;
+            if (spotX === 0) {
+                spotX = width / 2;
+                spotY = height / 2;
+                mouseX = width / 2;
+                mouseY = height / 2;
             }
         }
         window.addEventListener('resize', resize);
         resize();
 
-        // Rastreamento Suave do Mouse para Iluminação do Cartão e Gravidade do Canvas
         window.addEventListener('mousemove', (e) => {
-            targetMouseX = e.clientX;
-            targetMouseY = e.clientY;
-
-            // Calcula posição do mouse relativa ao cartão para iluminação interna
-            const rect = card.getBoundingClientRect();
-            const x = e.clientX - rect.left;
-            const y = e.clientY - rect.top;
-            card.style.setProperty('--mouse-x', `${x}px`);
-            card.style.setProperty('--mouse-y', `${y}px`);
+            mouseX = e.clientX;
+            mouseY = e.clientY;
+            // O ângulo da chuva muda levemente com o mouse (Parallax 3D fake)
+            currentAngle = BASE_ANGLE + ((mouseX / width) - 0.5) * 0.2;
         });
 
-        // Evento de Supernova (Clique)
-        window.addEventListener('click', () => {
-            isShockwave = true;
-            shockwaveRadius = 0;
-            body.classList.add('shockwave-active');
-            
-            // Dá um pulso massivo de energia nas partículas
-            particles.forEach(p => {
-                const dx = p.x - mouseX;
-                const dy = p.y - mouseY;
-                const dist = Math.sqrt(dx * dx + dy * dy);
-                const force = Math.max(0, 1000 - dist) / 20; // Força explosiva
-                p.vx += (dx / dist) * force;
-                p.vy += (dy / dist) * force;
-            });
+        // Clique para invocar trovão
+        window.addEventListener('click', createLightning);
 
-            setTimeout(() => {
-                body.classList.remove('shockwave-active');
-            }, 800);
-        });
+        // --- CLASSES DE PARTÍCULAS ---
 
-        // Classe de Partícula de Energia Quântica
-        class QuantumParticle {
+        class Drop {
             constructor() {
-                this.x = Math.random() * width;
-                this.y = Math.random() * height;
-                this.vx = 0;
-                this.vy = 0;
-                this.baseSpeed = Math.random() * 0.5 + 0.1;
-                this.size = Math.random() * 1.5 + 0.5;
-                // Cores variando de ciano para roxo profundo
-                this.hue = Math.random() > 0.5 ? 180 + Math.random() * 30 : 250 + Math.random() * 40;
+                this.reset(true);
+            }
+
+            reset(randomY = false) {
+                // Espalha a chuva além das bordas para compensar o ângulo
+                this.x = (Math.random() * (width + 400)) - 200;
+                this.y = randomY ? Math.random() * height : -Math.random() * 100 - 10;
+                
+                // Z define profundidade: afeta tamanho, velocidade e opacidade
+                this.z = Math.random() * 0.7 + 0.3; 
+                this.len = (Math.random() * 30 + 15) * this.z;
+                this.speed = (Math.random() * 15 + 25) * this.z;
             }
 
             update() {
-                // Matemática do Campo de Fluxo (Simplex Noise simulado com Trigonometria complexa)
-                // Isso cria o efeito "Aurora" ou fluido magnético
-                let angle = Math.sin(this.x * 0.002 + time) * Math.cos(this.y * 0.002 + time) * Math.PI * 4;
-                
-                // Força Magnética do Cursor
-                let dx = mouseX - this.x;
-                let dy = mouseY - this.y;
-                let dist = Math.sqrt(dx * dx + dy * dy);
-                
-                if (dist < 400) {
-                    // Puxa suavemente para o mouse criando um vórtice
-                    let gravityAngle = Math.atan2(dy, dx);
-                    // Adiciona rotação
-                    angle = gravityAngle + (dist * 0.005);
+                this.x += currentAngle * this.speed;
+                this.y += this.speed;
+
+                if (this.y > height) {
+                    // Criar splash quando atinge o chão (apenas as mais próximas)
+                    if (this.z > 0.6 && Math.random() > 0.5) {
+                        createSplash(this.x, height);
+                    }
+                    this.reset();
                 }
-
-                // Aplica forças
-                this.vx += Math.cos(angle) * this.baseSpeed;
-                this.vy += Math.sin(angle) * this.baseSpeed;
-                
-                // Fricção para manter a suavidade como um fluido
-                this.vx *= 0.92;
-                this.vy *= 0.92;
-
-                this.x += this.vx;
-                this.y += this.vy;
-
-                // Loop contínuo pelas bordas
-                if (this.x < 0) this.x = width;
-                if (this.x > width) this.x = 0;
-                if (this.y < 0) this.y = height;
-                if (this.y > height) this.y = 0;
             }
 
             draw() {
-                // Velocidade afeta o brilho
-                let speed = Math.sqrt(this.vx * this.vx + this.vy * this.vy);
-                let alpha = Math.min(speed * 0.3, 0.8) + 0.1;
+                ctx.beginPath();
+                // Gradiente linear cinemático na gota de chuva (Motion Blur Realista)
+                const grad = ctx.createLinearGradient(this.x, this.y, this.x + currentAngle * this.len, this.y + this.len);
+                grad.addColorStop(0, `rgba(150, 200, 255, 0)`);
+                grad.addColorStop(1, `rgba(150, 200, 255, ${0.4 * this.z})`);
+                
+                ctx.strokeStyle = grad;
+                ctx.lineWidth = 1.5 * this.z;
+                ctx.moveTo(this.x, this.y);
+                ctx.lineTo(this.x + currentAngle * this.len, this.y + this.len);
+                ctx.stroke();
+            }
+        }
 
-                ctx.fillStyle = `hsla(${this.hue}, 100%, 60%, ${alpha})`;
+        class Splash {
+            constructor(x, y) {
+                this.x = x;
+                this.y = y;
+                this.vx = (Math.random() - 0.5) * 4;
+                this.vy = -Math.random() * 3 - 2;
+                this.life = 1;
+                this.decay = Math.random() * 0.05 + 0.05;
+                this.size = Math.random() * 2 + 1;
+            }
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+                this.vy += 0.2; // Gravidade
+                this.life -= this.decay;
+            }
+            draw() {
+                ctx.fillStyle = `rgba(200, 200, 200, ${this.life * 0.5})`;
                 ctx.fillRect(this.x, this.y, this.size, this.size);
             }
         }
 
-        for (let i = 0; i < PARTICLE_COUNT; i++) {
-            particles.push(new QuantumParticle());
+        function createSplash(x, y) {
+            let count = Math.floor(Math.random() * 3) + 1;
+            for (let i = 0; i < count; i++) {
+                splashes.push(new Splash(x, y));
+            }
         }
 
-        // Loop de Renderização
-        function loop() {
-            // Suaviza a posição do mouse
-            mouseX += (targetMouseX - mouseX) * 0.1;
-            mouseY += (targetMouseY - mouseY) * 0.1;
-            time += 0.001;
+        for (let i = 0; i < RAIN_COUNT; i++) {
+            rain.push(new Drop());
+        }
 
-            // Rastro de luz (Light Painting) - Alpha muito baixo cria os fios de energia
-            ctx.globalCompositeOperation = 'source-over';
-            ctx.fillStyle = 'rgba(0, 2, 10, 0.08)'; 
-            ctx.fillRect(0, 0, width, height);
+        // --- SISTEMA DE RAIOS (GERAÇÃO PROCEDURAL AVANÇADA) ---
 
-            // Desenhar Glow Central (Núcleo Quântico)
-            ctx.globalCompositeOperation = 'screen';
-            let coreSize = 300 + Math.sin(time * 50) * 20; // Respiração
-            const coreGradient = ctx.createRadialGradient(mouseX, mouseY, 0, mouseX, mouseY, coreSize);
-            coreGradient.addColorStop(0, "rgba(0, 240, 255, 0.15)");
-            coreGradient.addColorStop(0.5, "rgba(112, 0, 255, 0.05)");
-            coreGradient.addColorStop(1, "transparent");
-            ctx.fillStyle = coreGradient;
-            ctx.fillRect(0, 0, width, height);
+        function createLightning() {
+            const startX = Math.random() * width;
+            const segments = [];
+            
+            // Função recursiva para criar ramificações
+            function generateBranch(x, y, targetY, isMain) {
+                let currentX = x;
+                let currentY = y;
+                const branchSegments = [];
 
-            // Shockwave Expansão
-            if (isShockwave) {
-                shockwaveRadius += 30;
-                ctx.beginPath();
-                ctx.arc(mouseX, mouseY, shockwaveRadius, 0, Math.PI * 2);
-                ctx.strokeStyle = `rgba(0, 240, 255, ${Math.max(0, 1 - shockwaveRadius/1000)})`;
-                ctx.lineWidth = 10;
-                ctx.stroke();
-                
-                if (shockwaveRadius > 1500) {
-                    isShockwave = false;
+                while (currentY < targetY) {
+                    const stepY = Math.random() * 40 + 10;
+                    const stepX = (Math.random() - 0.5) * 80;
+                    const nextX = currentX + stepX;
+                    const nextY = currentY + stepY;
+                    
+                    branchSegments.push({x1: currentX, y1: currentY, x2: nextX, y2: nextY, isMain: isMain});
+                    
+                    // Chance de criar um galho secundário
+                    if (isMain && Math.random() > 0.8) {
+                        segments.push(...generateBranch(nextX, nextY, targetY - (Math.random() * 200), false));
+                    }
+
+                    currentX = nextX;
+                    currentY = nextY;
                 }
+                return branchSegments;
             }
 
-            // Atualizar e Desenhar Partículas
-            ctx.globalCompositeOperation = 'screen';
-            particles.forEach(p => {
-                p.update();
-                p.draw();
+            segments.push(...generateBranch(startX, 0, height, true));
+            
+            lightning.push({
+                segments: segments,
+                life: 12, // Duração
+                opacity: 1
             });
+
+            // Efeitos Globais
+            flashOpacity = 0.6; 
+            body.classList.add('thunder-active');
+            
+            // Limpa a classe após a animação CSS (600ms)
+            clearTimeout(window.thunderTimeout);
+            window.thunderTimeout = setTimeout(() => {
+                body.classList.remove('thunder-active');
+            }, 600);
+        }
+
+        // --- LOOP PRINCIPAL ---
+
+        function loop() {
+            // Suavização do movimento do mouse (Lerp) para o Spotlight
+            spotX += (mouseX - spotX) * 0.05;
+            spotY += (mouseY - spotY) * 0.05;
+
+            // Fundo Dinâmico (Azul Vivo e Profundo)
+            const gradient = ctx.createRadialGradient(spotX, spotY, 0, spotX, spotY, Math.max(width, height) * 0.9);
+            gradient.addColorStop(0, "#005c97"); // Centro iluminado (azul vibrante)
+            gradient.addColorStop(1, "#000814"); // Bordas oceano profundo
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, width, height);
+
+            // Desenhar Chuva
+            ctx.lineCap = 'round';
+            rain.forEach(drop => {
+                drop.update();
+                drop.draw();
+            });
+
+            // Desenhar Splashes
+            for (let i = splashes.length - 1; i >= 0; i--) {
+                let s = splashes[i];
+                s.update();
+                s.draw();
+                if (s.life <= 0) splashes.splice(i, 1);
+            }
+
+            // Invocar Raio Aleatório (Baixa probabilidade, alta tensão)
+            if (Math.random() < 0.004) { 
+                createLightning();
+            }
+
+            // Desenhar Raios (Com Bloom/Glow intenso)
+            if (lightning.length > 0) {
+                ctx.save();
+                ctx.globalCompositeOperation = 'screen'; // Faz a luz "estourar"
+                
+                for (let i = lightning.length - 1; i >= 0; i--) {
+                    const bolt = lightning[i];
+                    
+                    // Flickering caótico
+                    ctx.globalAlpha = Math.random() > 0.2 ? bolt.opacity : 0; 
+                    
+                    // Configuração do Glow
+                    ctx.shadowBlur = 30;
+                    ctx.shadowColor = "rgba(0, 195, 255, 1)"; // Glow cyan elétrico
+                    ctx.strokeStyle = "#ffffff";
+                    
+                    ctx.beginPath();
+                    bolt.segments.forEach(seg => {
+                        ctx.lineWidth = seg.isMain ? 3 : 1; // Galho principal mais grosso
+                        ctx.moveTo(seg.x1, seg.y1);
+                        ctx.lineTo(seg.x2, seg.y2);
+                    });
+                    ctx.stroke();
+
+                    // Núcleo branco puro (re-desenhar sem sombra para ficar nítido)
+                    ctx.shadowBlur = 0;
+                    ctx.lineWidth = 1;
+                    ctx.stroke();
+
+                    bolt.life--;
+                    if (bolt.life <= 0) {
+                        lightning.splice(i, 1);
+                    }
+                }
+                ctx.restore();
+            }
+
+            // Desenhar Flash Global (Ilumina a tela inteira)
+            if (flashOpacity > 0) {
+                ctx.fillStyle = `rgba(180, 230, 255, ${flashOpacity})`; // Branco levemente azulado
+                ctx.fillRect(0, 0, width, height);
+                flashOpacity *= 0.8; // Decaimento exponencial
+            }
 
             requestAnimationFrame(loop);
         }
 
-        // Iniciar
+        // Iniciar Loop
         requestAnimationFrame(loop);
 
-        // Vanilla Tilt Setup
+        // --- INIT VANILLA TILT ---
         VanillaTilt.init(document.querySelector(".profile-card"), {
-            max: 10,
-            speed: 1000, 
+            max: 12,
+            speed: 800, 
             glare: true,
-            "max-glare": 0.2,
-            scale: 1.04,
-            perspective: 1200,
+            "max-glare": 0.15,
+            scale: 1.03,
+            perspective: 1000,
             gyroscope: true,
-            easing: "cubic-bezier(.03,.98,.52,.99)"
+            easing: "cubic-bezier(.03,.98,.52,.99)" // Movimento hiper suave
         });
     </script>
+
 </body>
 </html>
