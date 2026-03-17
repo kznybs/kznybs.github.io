@@ -1,0 +1,1056 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lançamentos TI - Barralcool</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- PapaParse para ler e exportar CSV -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+    <!-- SheetJS (XLSX) para ler e exportar Excel -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <!-- Ícones Lucide -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <!-- Configuração de Cores Identidade Visual (Verde) -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        barralcool: {
+                            light: '#4ade80',
+                            DEFAULT: '#16a34a',
+                            dark: '#064e3b',
+                            accent: '#facc15'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .bg-pattern {
+            background-color: #f3f4f6;
+            background-image: radial-gradient(#d1d5db 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+        .drag-over { border-color: #16a34a !important; background-color: #f0fdf4 !important; }
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        
+        /* Estilos para inputs de edição */
+        .edit-input {
+            width: 100%;
+            padding: 4px 8px;
+            border: 1px solid #d1d5db;
+            border-radius: 4px;
+            font-size: 0.875rem;
+            transition: all 0.2s;
+            background-color: #f9fafb;
+        }
+        .edit-input:focus {
+            outline: none;
+            border-color: #16a34a;
+            box-shadow: 0 0 0 2px rgba(22, 163, 74, 0.2);
+            background-color: white;
+        }
+        .edit-input-currency {
+            text-align: right;
+            font-weight: 600;
+        }
+        
+        /* Oculta setas do input number */
+        input[type=number]::-webkit-inner-spin-button, 
+        input[type=number]::-webkit-outer-spin-button { 
+            -webkit-appearance: none; 
+            margin: 0; 
+        }
+        input[type=number] {
+            -moz-appearance: textfield;
+        }
+        
+        .row-updated {
+            animation: highlightRow 2s ease-out;
+        }
+        
+        @keyframes highlightRow {
+            0% { background-color: #fef08a; } /* Amarelo claro */
+            100% { background-color: transparent; }
+        }
+    </style>
+</head>
+<body class="bg-pattern h-screen text-gray-800 flex flex-col overflow-hidden">
+
+    <!-- Cabeçalho Barralcool -->
+    <header class="bg-white shadow-md shrink-0 z-20 relative">
+        <div class="max-w-[1600px] mx-auto px-4 py-4 flex flex-col sm:flex-row justify-between items-center gap-4 sm:gap-0">
+            <div class="flex items-center gap-4 w-full sm:w-auto justify-center sm:justify-start">
+                <!-- Logo Barralcool -->
+                <img src="https://barralcool.com.br/site/assets/svg/logo.svg" alt="Logo Barralcool" class="h-10 sm:h-14 w-auto">
+                
+                <div class="border-l-2 border-gray-200 pl-4">
+                    <h1 class="text-lg sm:text-2xl font-bold tracking-tight text-barralcool-dark leading-tight">Departamento de Tecnologia</h1>
+                    <span class="text-[10px] sm:text-xs text-barralcool uppercase tracking-wider font-bold">Lançamentos Mensais</span>
+                </div>
+            </div>
+            
+            <div class="flex flex-wrap items-center justify-center gap-3 w-full sm:w-auto" id="headerActions" style="display: none;">
+                <button onclick="downloadExcel()" class="text-sm text-white bg-barralcool hover:bg-barralcool-dark font-medium flex items-center gap-1.5 transition-colors px-4 py-2 rounded-lg shadow-sm">
+                    <i data-lucide="download" class="w-4 h-4"></i> Exportar Dados
+                </button>
+                <button onclick="clearDataConfirm()" class="text-sm text-red-600 hover:text-red-800 font-medium flex items-center gap-1.5 transition-colors bg-white border border-red-200 hover:bg-red-50 px-3 py-2 rounded-lg shadow-sm">
+                    <i data-lucide="trash-2" class="w-4 h-4"></i> Limpar Sessão
+                </button>
+            </div>
+        </div>
+        <!-- Faixa Verde Inferior -->
+        <div class="bg-barralcool-dark h-2 w-full"></div>
+    </header>
+
+    <main class="flex-1 max-w-[1600px] mx-auto px-2 sm:px-4 py-4 sm:py-6 w-full flex flex-col gap-4 overflow-hidden relative">
+
+        <!-- Área Inicial / Upload -->
+        <div id="initialState" class="flex flex-col items-center justify-center h-full w-full max-w-2xl mx-auto">
+            
+            <div class="text-center mb-8">
+                <div class="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4 text-barralcool">
+                    <i data-lucide="calculator" class="w-10 h-10"></i>
+                </div>
+                <h2 class="text-2xl font-bold text-gray-800 mb-2">Painel de Lançamentos</h2>
+                <p class="text-gray-600">
+                    Importe suas planilhas para visualizar, editar os valores realizados nas provisões e manter seu controle atualizado. 
+                    <br><span class="text-xs font-semibold text-barralcool mt-2 block">Os dados são salvos automaticamente no seu navegador.</span>
+                </p>
+            </div>
+
+            <section id="dropZone" class="w-full border-2 border-dashed border-gray-300 rounded-xl p-10 text-center transition-all duration-300 bg-white hover:border-barralcool hover:bg-green-50 cursor-pointer shadow-sm relative overflow-hidden" onclick="document.getElementById('fileInput').click()">
+                <input type="file" id="fileInput" accept=".csv, .xls, .xlsx" multiple class="hidden" onchange="handleFiles(this.files)">
+                
+                <i data-lucide="upload-cloud" class="w-12 h-12 text-gray-400 mx-auto mb-4 group-hover:text-barralcool transition-colors"></i>
+                <h3 class="text-lg font-bold text-gray-800">Clique ou arraste suas planilhas</h3>
+                <p class="text-sm text-gray-500 mt-2">Suporta .csv, .xls, .xlsx</p>
+                
+                <div id="fileStatus" class="absolute inset-0 bg-white/90 backdrop-blur-sm flex flex-col items-center justify-center hidden">
+                    <i data-lucide="loader-2" class="w-8 h-8 animate-spin text-barralcool mb-2"></i>
+                    <span class="text-sm font-bold text-barralcool" id="fileStatusText">Processando dados...</span>
+                </div>
+            </section>
+            
+            <div id="loadSavedDataContainer" class="mt-6 hidden">
+                <button onclick="loadFromLocalStorage()" class="text-barralcool-dark font-medium underline flex items-center gap-1 hover:text-barralcool transition-colors">
+                    <i data-lucide="history" class="w-4 h-4"></i> Continuar sessão anterior (<span id="savedRecordsCount">0</span> registros salvos)
+                </button>
+            </div>
+        </div>
+
+        <!-- Painel Principal (Oculto inicialmente) -->
+        <div id="dashboardState" class="hidden flex-col h-full gap-4">
+            
+            <!-- Cards de Resumo Rápido -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 shrink-0">
+                <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-4 border-l-4 border-l-yellow-400">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <p class="text-xs font-bold text-gray-500 uppercase tracking-wider">Total Provisionado</p>
+                            <h4 class="text-xl font-bold text-gray-800 mt-1" id="kpiProvisao">R$ 0,00</h4>
+                        </div>
+                        <div class="p-2 bg-yellow-50 rounded-lg"><i data-lucide="target" class="w-5 h-5 text-yellow-600"></i></div>
+                    </div>
+                </div>
+                <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-4 border-l-4 border-l-barralcool">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <p class="text-xs font-bold text-gray-500 uppercase tracking-wider">Total Realizado (Preenchido)</p>
+                            <h4 class="text-xl font-bold text-gray-800 mt-1" id="kpiRealizado">R$ 0,00</h4>
+                        </div>
+                        <div class="p-2 bg-green-50 rounded-lg"><i data-lucide="check-circle-2" class="w-5 h-5 text-barralcool"></i></div>
+                    </div>
+                </div>
+                <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-4 border-l-4 border-l-blue-500">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <p class="text-xs font-bold text-gray-500 uppercase tracking-wider">Diferença (Saldo)</p>
+                            <h4 class="text-xl font-bold text-gray-800 mt-1" id="kpiDiferenca">R$ 0,00</h4>
+                        </div>
+                        <div class="p-2 bg-blue-50 rounded-lg"><i data-lucide="calculator" class="w-5 h-5 text-blue-500"></i></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Controles e Filtros -->
+            <section class="bg-white p-4 rounded-xl shadow-sm border border-gray-200 flex flex-wrap items-start justify-between gap-4 shrink-0">
+                
+                <div class="flex flex-wrap items-center gap-4 w-full xl:w-auto">
+                    <div class="w-full sm:w-32">
+                        <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1 flex items-center gap-1">
+                            <i data-lucide="calendar-filter" class="w-3 h-3"></i> Mês Ref.
+                        </label>
+                        <select id="filterMes" onchange="applyFilters()" class="w-full border border-gray-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-barralcool outline-none bg-gray-50 font-medium text-gray-700">
+                            <option value="Todos">Todos</option>
+                        </select>
+                    </div>
+
+                    <div class="w-full sm:w-28">
+                        <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1 flex items-center gap-1">
+                            <i data-lucide="calendar" class="w-3 h-3"></i> Ano
+                        </label>
+                        <select id="filterAno" onchange="applyFilters()" class="w-full border border-gray-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-barralcool outline-none bg-gray-50 font-medium text-gray-700">
+                            <option value="Todos">Todos</option>
+                        </select>
+                    </div>
+                    
+                    <div class="w-full sm:w-36">
+                        <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1 flex items-center gap-1">
+                            <i data-lucide="filter" class="w-3 h-3"></i> Tipo
+                        </label>
+                        <select id="filterTipo" onchange="applyFilters()" class="w-full border border-gray-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-barralcool outline-none bg-gray-50 font-medium text-gray-700">
+                            <option value="Todos">Todos</option>
+                            <option value="Provisão">Apenas Provisão</option>
+                            <option value="Realizado">Apenas Realizado</option>
+                        </select>
+                    </div>
+
+                    <div class="w-full sm:w-56">
+                        <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1 flex items-center gap-1">
+                            <i data-lucide="building" class="w-3 h-3"></i> Centro de Custo
+                        </label>
+                        <select id="filterCentroCusto" onchange="applyFilters()" class="w-full border border-gray-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-barralcool outline-none bg-gray-50 font-medium text-gray-700">
+                            <option value="Todos">Todos</option>
+                        </select>
+                    </div>
+
+                    <div class="w-full sm:w-56">
+                        <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1 flex items-center gap-1">
+                            <i data-lucide="tag" class="w-3 h-3"></i> Conta Analítica
+                        </label>
+                        <select id="filterConta" onchange="applyFilters()" class="w-full border border-gray-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-barralcool outline-none bg-gray-50 font-medium text-gray-700">
+                            <option value="Todos">Todas</option>
+                        </select>
+                    </div>
+
+                    <div class="w-full sm:w-32">
+                        <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1 flex items-center gap-1">
+                            <i data-lucide="help-circle" class="w-3 h-3"></i> Orçado?
+                        </label>
+                        <select id="filterOrcado" onchange="applyFilters()" class="w-full border border-gray-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-barralcool outline-none bg-gray-50 font-medium text-gray-700">
+                            <option value="Todos">Todos</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="flex flex-col items-start xl:items-end gap-1 w-full xl:w-auto mt-2 xl:mt-0">
+                     <span class="text-xs font-medium text-gray-500 flex items-center gap-1">
+                         <i data-lucide="info" class="w-3 h-3"></i>
+                         Clique nos valores para editá-los
+                     </span>
+                </div>
+            </section>
+
+            <!-- Tabela Editável -->
+            <div class="flex-1 bg-white rounded-xl shadow-sm border border-gray-200 flex flex-col min-h-0 relative">
+                
+                <div class="p-3 border-b border-gray-200 flex justify-between items-center bg-gray-50 shrink-0 rounded-t-xl">
+                    <h3 class="text-sm font-bold text-gray-800 flex items-center gap-2">
+                        <i data-lucide="list-tree" class="w-4 h-4 text-barralcool"></i> Detalhamento por Centro de Custo e Conta
+                    </h3>
+                    <div class="flex items-center gap-2">
+                        <span id="saveStatus" class="text-xs font-medium text-green-600 hidden flex items-center gap-1">
+                            <i data-lucide="check" class="w-3 h-3"></i> Salvo
+                        </span>
+                        <span class="text-xs font-bold bg-gray-200 text-gray-700 px-3 py-1 rounded-full border border-gray-300" id="registroCount">0 linhas</span>
+                    </div>
+                </div>
+                
+                <div class="flex-1 overflow-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-100 sticky top-0 z-10 shadow-sm">
+                            <tr>
+                                <th class="px-4 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider w-20">Mês</th>
+                                <th class="px-4 py-3 text-center text-xs font-bold text-gray-600 uppercase tracking-wider w-20">Ano</th>
+                                <th class="px-4 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Centro de Custo</th>
+                                <th class="px-4 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Conta Analítica</th>
+                                <th class="px-4 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Fornecedor / Histórico</th>
+                                <th class="px-4 py-3 text-center text-xs font-bold text-gray-600 uppercase tracking-wider w-20">Orçado?</th>
+                                <th class="px-4 py-3 text-center text-xs font-bold text-gray-600 uppercase tracking-wider w-28">Status</th>
+                                <th class="px-4 py-3 text-right text-xs font-bold text-gray-600 uppercase tracking-wider w-28">Orçado (R$)</th>
+                                <th class="px-4 py-3 text-right text-xs font-bold text-barralcool-dark uppercase tracking-wider w-36 border-l-2 border-green-200 bg-green-50">Realizado (R$)</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-100 text-sm" id="tableBody">
+                            <!-- Linhas inseridas via JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+
+    </main>
+
+    <!-- Barra de Análise Inferior (Dinâmica por Centro de Custo) -->
+    <div id="bottomAnalysisBar" class="fixed bottom-0 left-0 w-full bg-white border-t border-gray-300 shadow-[0_-10px_25px_-5px_rgba(0,0,0,0.15)] transform translate-y-full transition-transform duration-300 z-40 flex flex-col max-h-[40vh]">
+        <div class="bg-gray-50 px-4 sm:px-6 py-3 border-b border-gray-200 flex flex-wrap items-center justify-between gap-4 shrink-0">
+            <div class="flex items-center gap-3">
+                <div class="bg-barralcool/10 p-2.5 rounded-lg"><i data-lucide="building-2" class="w-5 h-5 text-barralcool-dark"></i></div>
+                <div>
+                    <h4 class="text-sm font-bold text-gray-800" id="bottomCcName">Centro de Custo</h4>
+                    <p class="text-[10px] text-gray-500 uppercase tracking-wider font-bold">Análise do Centro de Custo</p>
+                </div>
+            </div>
+            <div class="flex flex-wrap items-center gap-4 sm:gap-8">
+                <div class="text-right">
+                    <p class="text-[10px] text-gray-500 uppercase font-bold flex items-center justify-end gap-1"><i data-lucide="target" class="w-3 h-3 text-yellow-600"></i> Provisão</p>
+                    <p class="text-sm font-bold text-gray-800" id="bottomCcProv">R$ 0,00</p>
+                </div>
+                <div class="text-right">
+                    <p class="text-[10px] text-gray-500 uppercase font-bold flex items-center justify-end gap-1"><i data-lucide="check-circle-2" class="w-3 h-3 text-barralcool"></i> Realizado</p>
+                    <p class="text-sm font-bold text-gray-800" id="bottomCcReal">R$ 0,00</p>
+                </div>
+                <div class="text-right pl-4 sm:pl-8 border-l border-gray-300">
+                    <p class="text-[10px] text-gray-500 uppercase font-bold flex items-center justify-end gap-1"><i data-lucide="calculator" class="w-3 h-3 text-blue-500"></i> Saldo</p>
+                    <p class="text-lg font-black" id="bottomCcSaldo">R$ 0,00</p>
+                </div>
+                <button onclick="closeBottomBar()" class="ml-2 p-1 text-gray-400 hover:text-gray-700 bg-gray-200/50 hover:bg-gray-200 rounded-md transition-colors">
+                    <i data-lucide="chevron-down" class="w-5 h-5"></i>
+                </button>
+            </div>
+        </div>
+        
+        <div class="p-4 overflow-x-auto flex gap-4 items-stretch bg-gray-100/50 scroll-smooth" id="bottomContasContainer">
+            <!-- Cards de contas gerados via JS -->
+        </div>
+    </div>
+
+    <!-- Modal Confirmação Limpeza -->
+    <div id="confirmModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center hidden opacity-0 transition-opacity duration-200">
+        <div class="bg-white rounded-xl shadow-xl max-w-md w-full mx-4 transform scale-95 transition-transform duration-200" id="confirmModalContent">
+            <div class="p-6">
+                <div class="w-12 h-12 rounded-full bg-red-100 text-red-600 flex items-center justify-center mb-4">
+                    <i data-lucide="alert-triangle" class="w-6 h-6"></i>
+                </div>
+                <h3 class="text-lg font-bold text-gray-900 mb-2">Limpar todos os dados?</h3>
+                <p class="text-sm text-gray-500 mb-6">
+                    Isso irá apagar todos os lançamentos carregados e as edições feitas até o momento. Esta ação não pode ser desfeita.
+                </p>
+                <div class="flex justify-end gap-3">
+                    <button onclick="closeConfirmModal()" class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors">
+                        Cancelar
+                    </button>
+                    <button onclick="executeClearData()" class="px-4 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-lg transition-colors">
+                        Sim, limpar tudo
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        lucide.createIcons();
+
+        let globalData = [];
+        let filteredData = [];
+        const STORAGE_KEY = 'barralcool_lancamentos_ti';
+
+        const monthOrder = {
+            'janeiro': 1, 'fevereiro': 2, 'março': 3, 'abril': 4, 'maio': 5, 'junho': 6,
+            'julho': 7, 'agosto': 8, 'setembro': 9, 'outubro': 10, 'novembro': 11, 'dezembro': 12
+        };
+
+        window.onload = () => {
+            checkSavedData();
+        };
+
+        function checkSavedData() {
+            try {
+                const savedStr = localStorage.getItem(STORAGE_KEY);
+                if (savedStr) {
+                    const parsed = JSON.parse(savedStr);
+                    if (parsed && parsed.length > 0) {
+                        document.getElementById('loadSavedDataContainer').classList.remove('hidden');
+                        document.getElementById('savedRecordsCount').innerText = parsed.length;
+                    }
+                }
+            } catch (e) {
+                console.error("Erro ao ler LocalStorage", e);
+            }
+        }
+
+        function loadFromLocalStorage() {
+            try {
+                const savedStr = localStorage.getItem(STORAGE_KEY);
+                if (savedStr) {
+                    globalData = JSON.parse(savedStr);
+                    transitionToDashboard();
+                }
+            } catch (e) {
+                alert("Erro ao carregar dados salvos.");
+            }
+        }
+
+        function saveToLocalStorage() {
+            try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(globalData));
+                showSaveStatus();
+            } catch (e) {
+                console.error("Erro ao salvar no LocalStorage", e);
+            }
+        }
+
+        let saveTimeout;
+        function showSaveStatus() {
+            const el = document.getElementById('saveStatus');
+            el.classList.remove('hidden');
+            clearTimeout(saveTimeout);
+            saveTimeout = setTimeout(() => {
+                el.classList.add('hidden');
+            }, 2000);
+        }
+
+        const dropZone = document.getElementById('dropZone');
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            dropZone.addEventListener(eventName, preventDefaults, false);
+            document.body.addEventListener(eventName, preventDefaults, false);
+        });
+
+        function preventDefaults(e) { e.preventDefault(); e.stopPropagation(); }
+
+        ['dragenter', 'dragover'].forEach(eventName => dropZone.classList.add('drag-over'));
+        ['dragleave', 'drop'].forEach(eventName => dropZone.classList.remove('drag-over'));
+
+        dropZone.addEventListener('drop', (e) => handleFiles(e.dataTransfer.files));
+
+        function handleFiles(files) {
+            if (!files.length) return;
+            
+            document.getElementById('fileStatus').classList.remove('hidden');
+            
+            let promises = [];
+
+            for (let i = 0; i < files.length; i++) {
+                let file = files[i];
+                let fileName = file.name.toLowerCase();
+
+                if (fileName.endsWith(".csv")) {
+                    promises.push(new Promise((resolve, reject) => {
+                        Papa.parse(file, {
+                            header: true,
+                            skipEmptyLines: 'greedy',
+                            encoding: "ISO-8859-1", 
+                            complete: function(results) { resolve(processRawData(results.data)); },
+                            error: function(err) { reject(err); }
+                        });
+                    }));
+                } 
+                else if (fileName.endsWith(".xlsx") || fileName.endsWith(".xls")) {
+                    promises.push(new Promise((resolve, reject) => {
+                        let reader = new FileReader();
+                        reader.onload = function(e) {
+                            try {
+                                let data = new Uint8Array(e.target.result);
+                                let workbook = XLSX.read(data, {type: 'array'});
+                                let allSheetsData = [];
+
+                                workbook.SheetNames.forEach(function(sheetName) {
+                                    let sheet = workbook.Sheets[sheetName];
+                                    let json = XLSX.utils.sheet_to_json(sheet, {defval: ''});
+                                    allSheetsData = allSheetsData.concat(json);
+                                });
+
+                                resolve(processRawData(allSheetsData));
+                            } catch (err) { reject(err); }
+                        };
+                        reader.onerror = function(err) { reject(err); };
+                        reader.readAsArrayBuffer(file);
+                    }));
+                }
+            }
+
+            Promise.all(promises).then(results => {
+                let allData = results.flat();
+                
+                if (allData.length === 0) {
+                    document.getElementById('fileStatus').classList.add('hidden');
+                    alert("Não foi possível extrair dados válidos. Verifique o formato do arquivo.");
+                    return;
+                }
+
+                globalData = [...globalData, ...allData];
+                saveToLocalStorage();
+                transitionToDashboard();
+
+            }).catch(err => {
+                document.getElementById('fileStatus').classList.add('hidden');
+                alert("Erro ao processar arquivo: " + err);
+            });
+        }
+
+        function processRawData(dataArray) {
+            let processed = [];
+            
+            const normalizeKey = (str) => {
+                if (!str) return '';
+                return str.toString().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z]/g, "");
+            };
+
+            dataArray.forEach((row, index) => {
+                const getVal = (possibleKeys, excludeKeys = []) => {
+                    let normKeysInRow = Object.keys(row).map(k => ({ original: k, norm: normalizeKey(k) }));
+                    
+                    for (let pk of possibleKeys) {
+                        let match = normKeysInRow.find(k => {
+                            if (excludeKeys.some(ex => k.norm.includes(ex))) return false;
+                            return k.norm.includes(pk);
+                        });
+                        if (match && row[match.original] !== undefined && row[match.original] !== null && String(row[match.original]).trim() !== '') {
+                            return String(row[match.original]).trim();
+                        }
+                    }
+                    return null;
+                };
+
+                let diretoria = getVal(['diretoria', 'gerencia']) || 'T.I.';
+                let centroCusto = getVal(['centro', 'custo']) || '-';
+                
+                let conta = getVal(['conta', 'analitica']) || getVal(['descrica'], ['centro', 'fornecedor', 'historico']) || '-';
+                let fornecedor = getVal(['fornecedor', 'historico']) || '-';
+                
+                let mes = getVal(['mes', 'date']) || 'N/A';
+                mes = mes.toLowerCase().trim();
+                let ano = getVal(['ano']) || new Date().getFullYear().toString();
+                
+                let valorStr = getVal(['varia', 'valor', 'r$']) || '0';
+                valorStr = valorStr.replace(/[R$\s]/gi, '');
+                
+                if (valorStr.includes(',') && valorStr.includes('.')) {
+                    let lastComma = valorStr.lastIndexOf(',');
+                    let lastDot = valorStr.lastIndexOf('.');
+                    if (lastComma > lastDot) valorStr = valorStr.replace(/\./g, '').replace(',', '.');
+                    else valorStr = valorStr.replace(/,/g, '');
+                } else if (valorStr.includes(',')) {
+                    valorStr = valorStr.replace(',', '.');
+                }
+                
+                let valor = parseFloat(valorStr) || 0;
+                let valorAbsoluto = Math.abs(valor);
+
+                // Definição do Tipo
+                let tipo = 'Realizado';
+                let orcamentoRaw = getVal(['simnao', 'orcamento']) || '';
+                let forncNorm = normalizeKey(fornecedor);
+
+                if (forncNorm.includes('provisa') || forncNorm.includes('orcado') || normalizeKey(orcamentoRaw) === 'or' || normalizeKey(orcamentoRaw) === 'orcado') {
+                    tipo = 'Provisão';
+                }
+
+                diretoria = diretoria.replace(/diretoria /gi, '');
+
+                // Lógica de Identificação SIM/NÃO/OR (Orçado Flag)
+                let orcamentoNorm = normalizeKey(orcamentoRaw);
+                let orcadoFlag = '-';
+                if (orcamentoNorm === 'or' || orcamentoNorm === 'orcado' || tipo === 'Provisão') {
+                    orcadoFlag = 'OR';
+                } else if (orcamentoNorm === 'sim') {
+                    orcadoFlag = 'SIM';
+                } else if (orcamentoNorm === 'nao') {
+                    orcadoFlag = 'NÃO';
+                } else if (orcamentoRaw) {
+                    orcadoFlag = orcamentoRaw.toUpperCase();
+                }
+
+                if (valor !== 0 || fornecedor !== '-' || conta !== '-') { 
+                    let idUnico = 'row_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+                    
+                    processed.push({ 
+                        id: idUnico,
+                        diretoria, 
+                        centroCusto, 
+                        conta,          
+                        fornecedor, 
+                        mes, 
+                        ano, 
+                        tipoOriginal: tipo,
+                        orcadoFlag: orcadoFlag, // Salva o indicador extraído da coluna SIM/NÃO
+                        valorOrcado: tipo === 'Provisão' ? valor : 0, 
+                        valorRealizado: tipo === 'Realizado' ? valorAbsoluto : 0,
+                        editado: false,
+                        finalizado: false
+                    });
+                }
+            });
+            return processed;
+        }
+
+        function transitionToDashboard() {
+            document.getElementById('initialState').classList.add('hidden');
+            document.getElementById('fileStatus').classList.add('hidden');
+            document.getElementById('headerActions').style.display = 'flex';
+            
+            const dashboard = document.getElementById('dashboardState');
+            dashboard.classList.remove('hidden');
+            dashboard.classList.add('flex');
+
+            populateFilters();
+            applyFilters();
+        }
+
+        function populateFilters() {
+            let meses = [...new Set(globalData.map(d => d.mes))].filter(m => m !== 'n/a' && m !== '');
+            meses.sort((a, b) => (monthOrder[a] || 99) - (monthOrder[b] || 99));
+            
+            let anos = [...new Set(globalData.map(d => d.ano))].filter(a => a !== 'n/a' && a !== '').sort((a, b) => b - a);
+            let centros = [...new Set(globalData.map(d => d.centroCusto))].filter(c => c !== '-').sort();
+            let contas = [...new Set(globalData.map(d => d.conta))].filter(c => c !== '-').sort();
+            let orcados = [...new Set(globalData.map(d => d.orcadoFlag))].filter(c => c !== '-' && c !== '').sort();
+
+            const mesSelect = document.getElementById('filterMes');
+            const anoSelect = document.getElementById('filterAno');
+            const centroSelect = document.getElementById('filterCentroCusto');
+            const contaSelect = document.getElementById('filterConta');
+            const orcadoSelect = document.getElementById('filterOrcado');
+            
+            const currentMes = mesSelect.value;
+            const currentAno = anoSelect.value;
+            const currentCentro = centroSelect.value;
+            const currentConta = contaSelect.value;
+            const currentOrcado = orcadoSelect.value;
+            
+            mesSelect.innerHTML = '<option value="Todos">Todos</option>';
+            meses.forEach(m => {
+                let opt = document.createElement('option');
+                opt.value = m;
+                opt.textContent = m.charAt(0).toUpperCase() + m.slice(1);
+                mesSelect.appendChild(opt);
+            });
+
+            anoSelect.innerHTML = '<option value="Todos">Todos</option>';
+            anos.forEach(a => {
+                let opt = document.createElement('option');
+                opt.value = a;
+                opt.textContent = a;
+                anoSelect.appendChild(opt);
+            });
+
+            centroSelect.innerHTML = '<option value="Todos">Todos</option>';
+            centros.forEach(c => {
+                let opt = document.createElement('option');
+                opt.value = c;
+                opt.textContent = c;
+                centroSelect.appendChild(opt);
+            });
+
+            contaSelect.innerHTML = '<option value="Todos">Todas</option>';
+            contas.forEach(c => {
+                let opt = document.createElement('option');
+                opt.value = c;
+                opt.textContent = c;
+                contaSelect.appendChild(opt);
+            });
+
+            orcadoSelect.innerHTML = '<option value="Todos">Todos</option>';
+            orcados.forEach(o => {
+                let opt = document.createElement('option');
+                opt.value = o;
+                opt.textContent = o;
+                orcadoSelect.appendChild(opt);
+            });
+            
+            if ([...mesSelect.options].some(o => o.value === currentMes)) mesSelect.value = currentMes;
+            if ([...anoSelect.options].some(o => o.value === currentAno)) anoSelect.value = currentAno;
+            if ([...centroSelect.options].some(o => o.value === currentCentro)) centroSelect.value = currentCentro;
+            if ([...contaSelect.options].some(o => o.value === currentConta)) contaSelect.value = currentConta;
+            if ([...orcadoSelect.options].some(o => o.value === currentOrcado)) orcadoSelect.value = currentOrcado;
+        }
+
+        function applyFilters() {
+            const fMes = document.getElementById('filterMes').value;
+            const fAno = document.getElementById('filterAno').value;
+            const fTipo = document.getElementById('filterTipo').value;
+            const fCentro = document.getElementById('filterCentroCusto').value;
+            const fConta = document.getElementById('filterConta').value;
+            const fOrcado = document.getElementById('filterOrcado').value;
+            
+            filteredData = globalData.filter(d => {
+                let passMes = (fMes === 'Todos' || d.mes === fMes);
+                let passAno = (fAno === 'Todos' || d.ano === fAno);
+                let passCentro = (fCentro === 'Todos' || d.centroCusto === fCentro);
+                let passConta = (fConta === 'Todos' || d.conta === fConta);
+                let passOrcado = (fOrcado === 'Todos' || d.orcadoFlag === fOrcado);
+                let passTipo = true;
+                
+                if (fTipo === 'Provisão') passTipo = (d.tipoOriginal === 'Provisão');
+                if (fTipo === 'Realizado') passTipo = (d.tipoOriginal === 'Realizado' || d.valorRealizado > 0);
+
+                return passMes && passAno && passTipo && passCentro && passConta && passOrcado;
+            });
+
+            filteredData.sort((a, b) => {
+                if (a.centroCusto !== b.centroCusto) return a.centroCusto.localeCompare(b.centroCusto);
+                
+                let contaA = a.conta || '';
+                let contaB = b.conta || '';
+                if (contaA !== contaB) return contaA.localeCompare(contaB);
+                
+                if (a.tipoOriginal === 'Provisão' && b.tipoOriginal !== 'Provisão') return -1;
+                if (a.tipoOriginal !== 'Provisão' && b.tipoOriginal === 'Provisão') return 1;
+                return 0;
+            });
+
+            updateDashboard();
+            updateBottomBar(fMes, fAno, fCentro);
+        }
+
+        const formatBRL = (val) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(val);
+        const formatNumberInput = (val) => parseFloat(val).toFixed(2);
+
+        function updateDashboard() {
+            const tbody = document.getElementById('tableBody');
+            tbody.innerHTML = '';
+            
+            document.getElementById('registroCount').innerText = `${filteredData.length} linhas`;
+
+            let sumProvisao = 0;
+            let sumRealizado = 0;
+
+            let groupTotals = {};
+            filteredData.forEach(d => {
+                let key = d.centroCusto + '|' + d.conta;
+                if (!groupTotals[key]) groupTotals[key] = { orcado: 0, realizado: 0 };
+                groupTotals[key].orcado += Math.abs(d.valorOrcado);
+                groupTotals[key].realizado += (d.valorRealizado || 0);
+            });
+
+            filteredData.forEach(d => {
+                let orcadoAbsoluto = Math.abs(d.valorOrcado);
+                sumProvisao += orcadoAbsoluto;
+                sumRealizado += d.valorRealizado;
+
+                let group = groupTotals[d.centroCusto + '|' + d.conta];
+                let diffGroup = group.orcado - group.realizado;
+                
+                let flagHtml = '';
+                if (group.orcado > 0) {
+                    if (diffGroup === 0 && group.realizado > 0) {
+                        flagHtml = `<div class="mt-1 text-[9px] font-bold text-blue-700 bg-blue-100 border border-blue-200 px-1.5 py-0.5 rounded-md inline-flex items-center gap-1 shadow-sm" title="O realizado fechou exatamente com a provisão"><i data-lucide="check-check" class="w-2.5 h-2.5"></i> Exato</div>`;
+                    } else if (diffGroup < 0) {
+                        flagHtml = `<div class="mt-1 text-[9px] font-bold text-red-700 bg-red-100 border border-red-200 px-1.5 py-0.5 rounded-md inline-flex items-center gap-1 shadow-sm" title="Passou do orçamento em ${formatBRL(Math.abs(diffGroup))}"><i data-lucide="alert-circle" class="w-2.5 h-2.5"></i> Passou</div>`;
+                    } else if (group.realizado > 0 && diffGroup > 0) {
+                        flagHtml = `<div class="mt-1 text-[9px] font-bold text-green-700 bg-green-100 border border-green-200 px-1.5 py-0.5 rounded-md inline-flex items-center gap-1 shadow-sm" title="Sobrou ${formatBRL(diffGroup)} da provisão"><i data-lucide="arrow-down-right" class="w-2.5 h-2.5"></i> Sobrou</div>`;
+                    }
+                } else if (group.realizado > 0 && group.orcado === 0) {
+                    flagHtml = `<div class="mt-1 text-[9px] font-bold text-orange-700 bg-orange-100 border border-orange-200 px-1.5 py-0.5 rounded-md inline-flex items-center gap-1 shadow-sm" title="Custo lançado sem provisão prévia"><i data-lucide="alert-triangle" class="w-2.5 h-2.5"></i> Não Orçado</div>`;
+                }
+
+                let tr = document.createElement('tr');
+                tr.id = `tr_${d.id}`;
+                tr.className = "hover:bg-gray-50 transition-colors border-b border-gray-100 group";
+                
+                let isProvisao = d.tipoOriginal === 'Provisão';
+                
+                // Formatação Badge Orçado (SIM/NÃO/OR)
+                let orcadoBadge = '';
+                if (d.orcadoFlag === 'OR') {
+                    orcadoBadge = `<span class="px-2 py-0.5 text-[10px] font-bold rounded bg-purple-100 text-purple-700 border border-purple-200" title="Linha de Provisão/Orçamento">OR</span>`;
+                } else if (d.orcadoFlag === 'SIM') {
+                    orcadoBadge = `<span class="px-2 py-0.5 text-[10px] font-bold rounded bg-emerald-100 text-emerald-700 border border-emerald-200" title="Previsto no Orçamento">SIM</span>`;
+                } else if (d.orcadoFlag === 'NÃO' || d.orcadoFlag === 'NAO') {
+                    orcadoBadge = `<span class="px-2 py-0.5 text-[10px] font-bold rounded bg-rose-100 text-rose-700 border border-rose-200" title="Não Previsto no Orçamento">NÃO</span>`;
+                } else {
+                    orcadoBadge = `<span class="px-2 py-0.5 text-[10px] font-bold rounded bg-gray-100 text-gray-600 border border-gray-200">${d.orcadoFlag}</span>`;
+                }
+
+                let statusHtml = '';
+                if (isProvisao) {
+                    if (d.finalizado) {
+                        statusHtml = `<button onclick="toggleFinalizado('${d.id}')" title="Clique para reverter" class="px-2 py-1 text-[10px] font-bold uppercase rounded text-green-700 bg-green-100 border border-green-200 hover:bg-green-200 transition-colors cursor-pointer w-full text-center flex items-center justify-center gap-1"><i data-lucide="check-circle" class="w-3 h-3"></i> Finalizado</button>`;
+                    } else {
+                        statusHtml = `<button onclick="toggleFinalizado('${d.id}')" title="Clique para finalizar manualmente" class="px-2 py-1 text-[10px] font-bold uppercase rounded text-blue-700 bg-blue-100 border border-blue-200 hover:bg-blue-200 transition-colors cursor-pointer w-full text-center flex items-center justify-center gap-1"><i data-lucide="shield-check" class="w-3 h-3"></i> Provisionado</button>`;
+                    }
+                } else {
+                    statusHtml = `<span class="px-2 py-1 text-[10px] font-bold uppercase rounded text-gray-600 bg-gray-200 border border-gray-300 block w-full text-center">Avulso</span>`;
+                }
+
+                let editCell = `
+                    <div class="relative flex items-center justify-end">
+                        <span class="absolute left-2 text-gray-400 text-xs">R$</span>
+                        <input type="number" step="0.01" min="0" 
+                            class="edit-input edit-input-currency ${d.valorRealizado > 0 ? 'text-barralcool-dark' : 'text-gray-400'}" 
+                            value="${d.valorRealizado > 0 ? formatNumberInput(d.valorRealizado) : ''}" 
+                            placeholder="0.00"
+                            onchange="updateValue('${d.id}', this.value)"
+                            onfocus="this.select()">
+                    </div>
+                `;
+
+                tr.innerHTML = `
+                    <td class="px-4 py-2 whitespace-nowrap text-gray-500 text-[11px] capitalize">${d.mes}</td>
+                    <td class="px-4 py-2 whitespace-nowrap text-gray-600 text-[11px] font-medium text-center">${d.ano}</td>
+                    <td class="px-4 py-2 whitespace-nowrap font-medium text-gray-800 text-[11px] truncate max-w-[150px]" title="${d.centroCusto}">${d.centroCusto}</td>
+                    <td class="px-4 py-2 text-gray-700 text-[11px] font-medium max-w-[200px]" title="${d.conta || '-'}">
+                        <div class="truncate leading-tight">${d.conta || '-'}</div>
+                        ${flagHtml}
+                    </td>
+                    <td class="px-4 py-2 text-gray-500 text-[11px] truncate max-w-[200px]" title="${d.fornecedor}">${d.fornecedor}</td>
+                    <td class="px-4 py-2 whitespace-nowrap text-center">${orcadoBadge}</td>
+                    <td class="px-4 py-2 whitespace-nowrap text-center">${statusHtml}</td>
+                    <td class="px-4 py-2 whitespace-nowrap text-right font-medium ${orcadoAbsoluto > 0 ? 'text-gray-800' : 'text-gray-300'}">${orcadoAbsoluto > 0 ? formatBRL(orcadoAbsoluto) : '-'}</td>
+                    <td class="px-2 py-1.5 whitespace-nowrap border-l-2 border-green-100 bg-green-50/30 group-hover:bg-green-50/80 transition-colors">
+                        ${editCell}
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            document.getElementById('kpiProvisao').innerText = formatBRL(sumProvisao);
+            document.getElementById('kpiRealizado').innerText = formatBRL(sumRealizado);
+            
+            let diferenca = sumProvisao - sumRealizado;
+            let diffEl = document.getElementById('kpiDiferenca');
+            diffEl.innerText = formatBRL(diferenca);
+            
+            if (diferenca < 0) {
+                diffEl.className = "text-xl font-bold mt-1 text-red-600";
+            } else if (diferenca > 0) {
+                diffEl.className = "text-xl font-bold mt-1 text-blue-600";
+            } else {
+                diffEl.className = "text-xl font-bold mt-1 text-gray-800";
+            }
+
+            lucide.createIcons();
+        }
+
+        function updateBottomBar(selectedMes, selectedAno, selectedCentro) {
+            const bar = document.getElementById('bottomAnalysisBar');
+            const main = document.querySelector('main');
+            
+            if (selectedCentro === 'Todos') {
+                bar.classList.add('translate-y-full');
+                main.style.paddingBottom = '1.5rem'; 
+                return;
+            }
+
+            let ccData = globalData.filter(d => {
+                let passMes = (selectedMes === 'Todos' || d.mes === selectedMes);
+                let passAno = (selectedAno === 'Todos' || d.ano === selectedAno);
+                let passCentro = (d.centroCusto === selectedCentro);
+                return passMes && passAno && passCentro;
+            });
+
+            if (ccData.length === 0) {
+                bar.classList.add('translate-y-full');
+                main.style.paddingBottom = '1.5rem';
+                return;
+            }
+
+            let ccProv = 0;
+            let ccReal = 0;
+            let contasAgrupadas = {};
+
+            ccData.forEach(d => {
+                let orcadoAbsoluto = Math.abs(d.valorOrcado);
+                let realizado = d.valorRealizado || 0;
+                
+                ccProv += orcadoAbsoluto;
+                ccReal += realizado;
+
+                if (!contasAgrupadas[d.conta]) {
+                    contasAgrupadas[d.conta] = { orcado: 0, realizado: 0 };
+                }
+                contasAgrupadas[d.conta].orcado += orcadoAbsoluto;
+                contasAgrupadas[d.conta].realizado += realizado;
+            });
+
+            document.getElementById('bottomCcName').innerText = selectedCentro;
+            document.getElementById('bottomCcProv').innerText = formatBRL(ccProv);
+            document.getElementById('bottomCcReal').innerText = formatBRL(ccReal);
+            
+            let saldo = ccProv - ccReal;
+            let saldoEl = document.getElementById('bottomCcSaldo');
+            saldoEl.innerText = formatBRL(saldo);
+            saldoEl.className = `text-lg font-black ${saldo < 0 ? 'text-red-600' : (saldo > 0 ? 'text-blue-600' : 'text-gray-800')}`;
+
+            const container = document.getElementById('bottomContasContainer');
+            container.innerHTML = '';
+
+            Object.keys(contasAgrupadas).sort().forEach(contaNome => {
+                let c = contasAgrupadas[contaNome];
+                let diff = c.orcado - c.realizado;
+                
+                let statusColor = 'bg-white border-gray-200';
+                let statusIcon = '';
+                let statusText = '';
+                let textClass = 'text-gray-800';
+
+                if (c.orcado > 0) {
+                    if (diff === 0 && c.realizado > 0) {
+                        statusColor = 'bg-blue-50 border-blue-200 shadow-blue-100'; textClass = 'text-blue-700';
+                        statusIcon = '<i data-lucide="check-check" class="w-3.5 h-3.5"></i>'; statusText = 'Exato';
+                    } else if (diff < 0) {
+                        statusColor = 'bg-red-50 border-red-200 shadow-red-100'; textClass = 'text-red-700';
+                        statusIcon = '<i data-lucide="alert-circle" class="w-3.5 h-3.5"></i>'; statusText = `Passou ${formatBRL(Math.abs(diff))}`;
+                    } else if (c.realizado > 0 && diff > 0) {
+                        statusColor = 'bg-green-50 border-green-200 shadow-green-100'; textClass = 'text-green-700';
+                        statusIcon = '<i data-lucide="arrow-down-right" class="w-3.5 h-3.5"></i>'; statusText = `Sobrou ${formatBRL(diff)}`;
+                    } else {
+                        statusColor = 'bg-yellow-50 border-yellow-200 shadow-yellow-100'; textClass = 'text-yellow-700';
+                        statusIcon = '<i data-lucide="clock" class="w-3.5 h-3.5"></i>'; statusText = 'Aguardando Lanç.';
+                    }
+                } else if (c.realizado > 0 && c.orcado === 0) {
+                    statusColor = 'bg-orange-50 border-orange-200 shadow-orange-100'; textClass = 'text-orange-700';
+                    statusIcon = '<i data-lucide="alert-triangle" class="w-3.5 h-3.5"></i>'; statusText = 'Não Orçado';
+                }
+
+                let card = document.createElement('div');
+                card.className = `shrink-0 w-[260px] p-3 rounded-xl border ${statusColor} shadow-sm flex flex-col justify-between transition-colors`;
+                card.innerHTML = `
+                    <div class="mb-3 border-b border-gray-200/60 pb-2">
+                        <h5 class="text-[11px] font-bold text-gray-800 line-clamp-2 leading-tight" title="${contaNome}">${contaNome}</h5>
+                    </div>
+                    <div class="grid grid-cols-2 gap-2 text-[11px] mb-3 bg-white/60 p-2 rounded-lg border border-white/60 shadow-inner">
+                        <div>
+                            <span class="text-gray-400 block uppercase text-[9px] font-bold mb-0.5">Provisão</span>
+                            <span class="font-bold text-gray-800">${formatBRL(c.orcado)}</span>
+                        </div>
+                        <div>
+                            <span class="text-gray-400 block uppercase text-[9px] font-bold mb-0.5">Realizado</span>
+                            <span class="font-bold text-gray-800">${formatBRL(c.realizado)}</span>
+                        </div>
+                    </div>
+                    <div class="mt-auto pt-2 border-t border-black/5 text-[11px] font-bold ${textClass} flex items-center gap-1.5">
+                        ${statusIcon} ${statusText}
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+
+            lucide.createIcons();
+            bar.classList.remove('translate-y-full');
+            
+            setTimeout(() => {
+                main.style.paddingBottom = (bar.offsetHeight + 24) + 'px';
+            }, 300);
+        }
+
+        function closeBottomBar() {
+            document.getElementById('bottomAnalysisBar').classList.add('translate-y-full');
+            document.querySelector('main').style.paddingBottom = '1.5rem';
+        }
+
+        window.toggleFinalizado = function(id) {
+            let index = globalData.findIndex(d => d.id === id);
+            if (index !== -1) {
+                globalData[index].finalizado = !globalData[index].finalizado;
+                globalData[index].editado = true;
+                saveToLocalStorage();
+                applyFilters(); 
+            }
+        };
+
+        window.updateValue = function(id, newValueStr) {
+            let val = parseFloat(newValueStr) || 0;
+            
+            let index = globalData.findIndex(d => d.id === id);
+            if (index !== -1) {
+                globalData[index].valorRealizado = val;
+                globalData[index].editado = true;
+                
+                if (val > 0) {
+                    globalData[index].finalizado = true;
+                } else if (val === 0) {
+                    globalData[index].finalizado = false;
+                }
+
+                saveToLocalStorage();
+                applyFilters(); 
+                
+                let tr = document.getElementById(`tr_${id}`);
+                if(tr) {
+                    tr.classList.remove('row-updated');
+                    void tr.offsetWidth; 
+                    tr.classList.add('row-updated');
+                }
+            }
+        };
+
+        function clearDataConfirm() {
+            const modal = document.getElementById('confirmModal');
+            const content = document.getElementById('confirmModalContent');
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                modal.classList.remove('opacity-0');
+                content.classList.remove('scale-95');
+                content.classList.add('scale-100');
+            }, 10);
+        }
+
+        function closeConfirmModal() {
+            const modal = document.getElementById('confirmModal');
+            const content = document.getElementById('confirmModalContent');
+            modal.classList.add('opacity-0');
+            content.classList.remove('scale-100');
+            content.classList.add('scale-95');
+            setTimeout(() => {
+                modal.classList.add('hidden');
+            }, 200);
+        }
+
+        window.executeClearData = function() {
+            globalData = [];
+            filteredData = [];
+            localStorage.removeItem(STORAGE_KEY);
+            
+            closeConfirmModal();
+            
+            document.getElementById('dashboardState').classList.add('hidden');
+            document.getElementById('dashboardState').classList.remove('flex');
+            
+            document.getElementById('headerActions').style.display = 'none';
+            document.getElementById('loadSavedDataContainer').classList.add('hidden');
+            
+            document.getElementById('initialState').classList.remove('hidden');
+            document.getElementById('fileInput').value = "";
+        };
+
+        window.downloadExcel = function() {
+            if (globalData.length === 0) {
+                alert("Não há dados para exportar.");
+                return;
+            }
+
+            let exportData = globalData.map(d => {
+                let statusExport = d.tipoOriginal === 'Provisão' ? (d.finalizado ? 'Finalizado' : 'Provisionado') : 'Avulso';
+
+                return {
+                    'Mês': d.mes,
+                    'Ano': d.ano,
+                    'Diretoria': d.diretoria,
+                    'Centro de Custo': d.centroCusto,
+                    'Conta Analítica': d.conta || '',
+                    'Fornecedor / Descrição': d.fornecedor,
+                    'Classificação Original': d.tipoOriginal,
+                    'Orçado? (SIM/NÃO/OR)': d.orcadoFlag,
+                    'Status': statusExport,
+                    'Valor Orçado (Provisão)': d.valorOrcado !== 0 ? d.valorOrcado : '', 
+                    'Valor Realizado (Preenchido)': d.valorRealizado > 0 ? d.valorRealizado : '',
+                    'Diferença': (Math.abs(d.valorOrcado) - d.valorRealizado),
+                    'Foi Editado?': d.editado ? 'Sim' : 'Não'
+                };
+            });
+
+            const wb = XLSX.utils.book_new();
+            const ws = XLSX.utils.json_to_sheet(exportData);
+            XLSX.utils.book_append_sheet(wb, ws, "Lançamentos Atualizados");
+            
+            let date = new Date();
+            let fileName = `Lancamentos_TI_Atualizado_${date.getFullYear()}${String(date.getMonth()+1).padStart(2,'0')}${String(date.getDate()).padStart(2,'0')}.xlsx`;
+            
+            XLSX.writeFile(wb, fileName);
+        };
+    </script>
+</body>
+</html>
