@@ -2,14 +2,14 @@
 <html lang="pt-PT">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KZ | Kira Theme</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>KZ</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Audiowide&family=Montserrat:wght@300;400;700;900&family=Syne:wght@500;600;700&family=Inter:wght@500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Audiowide&family=Montserrat:wght@300;400;700;900&family=Syne:wght@500;600;700&display=swap" rel="stylesheet">
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
@@ -18,6 +18,7 @@
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
         }
 
         /* --- DEATH NOTE THEME SETTINGS --- */
@@ -38,7 +39,8 @@
             justify-content: center;
             align-items: center;
             min-height: 100vh;
-            min-height: 100dvh; 
+            /* Fix para altura real no mobile */
+            height: 100dvh; 
             perspective: 1000px;
         }
 
@@ -57,7 +59,7 @@
         .vignette {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: radial-gradient(circle at 50% 50%, transparent 10%, rgba(0,0,0,0.85) 80%, #000 100%);
+            background: radial-gradient(circle at 50% 50%, transparent 5%, rgba(0,0,0,0.85) 75%, #000 100%);
             pointer-events: none;
             z-index: 2;
         }
@@ -91,13 +93,14 @@
             100% { background-position: 0 100vh; }
         }
 
-        /* --- PHYSICS & SHAKE FX --- */
+        /* --- PHYSICS & LAYOUT --- */
         .main-content {
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             width: 100%;
+            height: 100%;
             z-index: 10;
             padding: 1rem;
             transform-style: preserve-3d;
@@ -105,8 +108,13 @@
 
         /* --- TYPOGRAPHY (KIRA GLITCH) --- */
         .name-container { 
-            margin-bottom: 3rem; 
+            margin-bottom: 2rem; 
             perspective: 800px;
+            width: 100%;
+            text-align: center;
+        }
+        @media (min-width: 768px) {
+            .name-container { margin-bottom: 3rem; }
         }
 
         h1 { font-family: 'Audiowide', cursive; }
@@ -119,9 +127,10 @@
 
         .glitch-text {
             position: relative;
-            font-size: clamp(4rem, 15vw, 8.5rem);
+            /* Ajuste fino para mobile e desktop */
+            font-size: clamp(3.2rem, 12vw, 8.5rem);
             font-weight: 900;
-            letter-spacing: 0.05em;
+            letter-spacing: 0.02em;
             color: var(--kira-white); 
             -webkit-text-stroke: 1px rgba(255,255,255,0.2); 
             text-shadow: 0 5px 15px rgba(0,0,0,0.8);
@@ -131,25 +140,61 @@
         .highlight-z {
             color: var(--kira-red) !important;
             -webkit-text-stroke: 1px var(--kira-dark-red) !important;
-            text-shadow: 0 0 20px var(--kira-red), 0 0 40px var(--kira-dark-red) !important;
+            text-shadow: 0 0 15px var(--kira-red), 0 0 30px var(--kira-dark-red) !important;
             display: inline-block; 
+        }
+        @media (min-width: 768px) {
+            .highlight-z {
+                text-shadow: 0 0 20px var(--kira-red), 0 0 40px var(--kira-dark-red) !important;
+            }
         }
 
         /* --- ULTRA-PREMIUM DEATH NOTE CARD (DARK/NOIR) --- */
         .profile-card {
-            background: linear-gradient(135deg, rgba(20, 20, 20, 0.8) 0%, rgba(5, 5, 5, 0.95) 100%); 
+            background: linear-gradient(135deg, rgba(20, 20, 20, 0.85) 0%, rgba(5, 5, 5, 0.98) 100%); 
             backdrop-filter: blur(25px) saturate(120%);
             -webkit-backdrop-filter: blur(25px) saturate(120%);
-            border-radius: 40px; 
-            border: 1px solid rgba(255, 255, 255, 0.1); 
+            
+            /* Bordas adaptáveis para mobile */
+            border-radius: 24px;
+            clip-path: polygon(
+                15px 0, 100% 0, 
+                100% calc(100% - 15px), calc(100% - 15px) 100%, 
+                0 100%, 0 15px
+            );
+            
+            border: 1px solid rgba(255, 255, 255, 0.08); 
             box-shadow: 
-                inset 0 0 15px rgba(255, 255, 255, 0.03), 
-                0 20px 50px rgba(0, 0, 0, 0.95), 
+                inset 0 0 15px rgba(255, 255, 255, 0.02), 
+                0 20px 40px rgba(0, 0, 0, 0.9), 
                 0 0 0 1px rgba(255, 255, 255, 0.02); 
             transform-style: preserve-3d;
             position: relative;
             overflow: hidden;
-            transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+            transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+            
+            /* Largura fluida perfeita para mobile */
+            width: 92%;
+            max-width: 380px;
+            padding: 2rem 1.5rem;
+        }
+
+        @media (min-width: 768px) {
+            .profile-card {
+                border-radius: 40px;
+                clip-path: polygon(
+                    30px 0, 100% 0, 
+                    100% calc(100% - 30px), calc(100% - 30px) 100%, 
+                    0 100%, 0 30px
+                );
+                width: 100%;
+                max-width: 42rem; /* 672px */
+                padding: 3.5rem;
+                box-shadow: 
+                    inset 0 0 15px rgba(255, 255, 255, 0.03), 
+                    0 20px 50px rgba(0, 0, 0, 0.95), 
+                    0 0 0 1px rgba(255, 255, 255, 0.02);
+            }
         }
 
         /* Reflexo Metálico/Vidro (Sweep) */
@@ -161,18 +206,20 @@
             background: linear-gradient(
                 to bottom right,
                 rgba(255,255,255,0) 0%,
-                rgba(255,255,255,0.02) 40%,
-                rgba(255,255,255,0.1) 50%, 
+                rgba(255,255,255,0.01) 40%,
+                rgba(255,255,255,0.08) 50%, 
                 rgba(255,255,255,0) 60%,
                 rgba(255,255,255,0) 100%
             );
             transform: rotate(30deg) translateY(-100%);
-            transition: transform 0.6s ease-out;
+            transition: transform 0.8s ease-out;
             pointer-events: none;
             z-index: 1;
         }
 
-        .profile-card:hover::before { transform: rotate(30deg) translateY(100%); }
+        .profile-card:hover::before, .profile-card:active::before { 
+            transform: rotate(30deg) translateY(100%); 
+        }
 
         /* Iluminação Interna Cinza/Branca */
         .profile-card::after {
@@ -187,39 +234,87 @@
 
         /* --- ICONS --- */
         .icon-container { 
-            display: flex; gap: 2rem; justify-content: center; align-items: center; z-index: 2; position: relative;
+            display: flex; 
+            gap: 1.25rem; /* Gap menor no mobile */
+            justify-content: center; 
+            align-items: center; 
+            z-index: 2; 
+            position: relative;
+            flex-wrap: wrap; /* Evita quebrar o layout em telas minúsculas */
         }
-        @media (min-width: 768px) { .icon-container { gap: 3.5rem; } }
+        @media (min-width: 380px) {
+            .icon-container { gap: 1.75rem; }
+        }
+        @media (min-width: 768px) { 
+            .icon-container { gap: 3.5rem; flex-wrap: nowrap; } 
+        }
 
         .icon-link {
             position: relative;
             color: rgba(255, 255, 255, 0.4); 
-            transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            display: flex; justify-content: center; align-items: center;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            display: flex; 
+            justify-content: center; 
+            align-items: center;
+            padding: 0.5rem; /* Aumenta área de toque no mobile */
         }
         
-        .icon-link:hover { 
+        .icon-link i {
+            font-size: 2.25rem; /* Tamanho base mobile */
+            transition: inherit;
+        }
+        @media (min-width: 380px) {
+            .icon-link i { font-size: 2.5rem; }
+        }
+        @media (min-width: 768px) {
+            .icon-link i { font-size: 3.75rem; }
+            .icon-link { padding: 0; }
+        }
+        
+        .icon-link:hover, .icon-link:active { 
             color: var(--kira-white); 
-            transform: translateY(-10px) scale(1.2); 
+            transform: translateY(-8px) scale(1.15); 
             text-shadow: 0 0 20px rgba(255,255,255,0.8); 
         }
         
         .icon-link::after {
-            content: ''; position: absolute; bottom: -15px; width: 4px; height: 4px; border-radius: 50%;
+            content: ''; position: absolute; bottom: -5px; width: 4px; height: 4px; border-radius: 50%;
             background: var(--kira-white); opacity: 0; transform: scale(0); transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
             box-shadow: 0 0 10px 2px rgba(255,255,255,0.5);
         }
-        .icon-link:hover::after { opacity: 1; transform: scale(1); }
+        @media (min-width: 768px) {
+            .icon-link::after { bottom: -15px; }
+        }
+        .icon-link:hover::after, .icon-link:active::after { 
+            opacity: 1; transform: scale(1); 
+        }
 
         /* --- HUD ELEMENTS --- */
         .hud-text {
-            position: absolute; font-family: 'Courier New', Courier, monospace; font-weight: 700;
-            letter-spacing: 0.4em; font-size: 0.65rem; color: rgba(255, 255, 255, 0.3); pointer-events: none;
+            position: absolute; 
+            font-family: 'Courier New', Courier, monospace; 
+            font-weight: 700;
+            letter-spacing: 0.2em; 
+            font-size: 0.55rem; 
+            color: rgba(255, 255, 255, 0.3); 
+            pointer-events: none;
             z-index: 2;
         }
+        @media (min-width: 768px) {
+            .hud-text {
+                letter-spacing: 0.4em; 
+                font-size: 0.65rem;
+            }
+        }
 
-        .hud-bottom-right { bottom: 1.5rem; right: 2rem; }
-        .hud-top-left { top: 1.5rem; left: 2rem; opacity: 0.5; }
+        /* Ajustes de posicionamento mobile para não encostar nas bordas */
+        .hud-bottom-right { bottom: 1rem; right: 1.25rem; }
+        .hud-top-left { top: 1rem; left: 1.25rem; opacity: 0.5; }
+        
+        @media (min-width: 768px) {
+            .hud-bottom-right { bottom: 1.5rem; right: 2rem; }
+            .hud-top-left { top: 1.5rem; left: 2rem; }
+        }
 
     </style>
 </head>
@@ -242,28 +337,28 @@
             </div>
         </div>
 
-        <div class="w-full max-w-sm md:max-w-2xl p-8 md:p-14 profile-card" 
-             data-tilt data-tilt-max="8" data-tilt-speed="600" data-tilt-glare="true" data-tilt-max-glare="0.15">
+        <div class="profile-card" 
+             data-tilt data-tilt-max="10" data-tilt-speed="400" data-tilt-glare="true" data-tilt-max-glare="0.1" data-tilt-gyroscope="true">
             
             <div class="hud-text hud-top-left transform-gpu" style="transform: translateZ(10px);">
-               
+                
             </div>
 
-            <div class="icon-container transform-gpu" style="transform: translateZ(40px);">
+            <div class="icon-container transform-gpu" style="transform: translateZ(30px);">
                 <a href="https://github.com/kznybs" target="_blank" class="icon-link" aria-label="GitHub">
-                    <i class="fab fa-github text-4xl md:text-6xl"></i>
+                    <i class="fab fa-github"></i>
                 </a>
 
                 <a href="https://steamcommunity.com/id/kznybs/" target="_blank" class="icon-link" aria-label="Steam">
-                    <i class="fab fa-steam text-4xl md:text-6xl"></i>
+                    <i class="fab fa-steam"></i>
                 </a>
 
                 <a href="https://www.instagram.com/kznybs/" target="_blank" class="icon-link" aria-label="Instagram">
-                    <i class="fab fa-instagram text-4xl md:text-6xl"></i>
+                    <i class="fab fa-instagram"></i>
                 </a>
                 
                 <a href="https://www.linkedin.com/in/kznybs/" target="_blank" class="icon-link" aria-label="LinkedIn">
-                    <i class="fab fa-linkedin text-4xl md:text-6xl"></i>
+                    <i class="fab fa-linkedin"></i>
                 </a>
             </div>
 
@@ -278,7 +373,7 @@
     
     <script>
         // ==========================================
-        // MOTOR DE FUNDO: Sopa de Letras (Noir/Manga)
+        // MOTOR DE FUNDO: Sopa de Letras Tech
         // ==========================================
         const canvas = document.getElementById('typo-canvas');
         const ctx = canvas.getContext('2d', { alpha: false });
@@ -288,7 +383,7 @@
         let mouseX = 0, mouseY = 0;
         let targetMouseX = 0, targetMouseY = 0;
 
-        // Dicionário Tech/Computação para a sopa de letras
+        // Dicionário Tech/Computação
         const phrases = [
             "SYSTEM", "DATA", "ALGORITHM", "NEURAL NETWORK", "PROTOCOL", "BINARY", "CODE",
             "OVERRIDE", "ROOT", "MATRIX", "CIPHER", "SYNTAX", "TERMINAL", "KERNEL", "EXECUTE",
@@ -308,59 +403,91 @@
         // Criar a densa sopa de letras menores
         function createWords() {
             wordsArray = [];
-            const count = window.innerWidth > 768 ? 400 : 200; // Mais letras pois são menores
+            // Otimização de performance para mobile: Menos elementos em telas pequenas
+            const isMobile = window.innerWidth < 768;
+            const count = isMobile ? 120 : 350; 
             
             for (let i = 0; i < count; i++) {
-                // Tamanhos menores para dar efeito de fundo denso
-                const size = Math.random() * 25 + 8;
-                // Cores em tons de cinza/branco com baixa opacidade para compor o preto e branco
-                const alpha = Math.random() * 0.3 + 0.05;
+                // Tamanhos responsivos
+                const baseSize = isMobile ? 6 : 8;
+                const sizeMult = isMobile ? 15 : 25;
+                const size = Math.random() * sizeMult + baseSize;
+                
+                // Cores em tons de cinza/branco com baixa opacidade
+                const alpha = Math.random() * (isMobile ? 0.25 : 0.3) + 0.05;
                 const color = `rgba(255, 255, 255, ${alpha})`;
                 
                 wordsArray.push({
                     text: phrases[Math.floor(Math.random() * phrases.length)],
-                    x: (Math.random() * 1.5 - 0.25) * width, 
+                    x: (Math.random() * 2 - 0.5) * width, // Espalhar amplamente
                     y: (Math.random() * 1.5 - 0.25) * height,
                     z: Math.random() * 2 + 0.5, // Parallax depth
                     size: size,
                     color: color,
-                    vertical: Math.random() > 0.85, // Algumas palavras na vertical
+                    vertical: Math.random() > 0.85, 
                     weight: Math.random() > 0.5 ? 900 : 700 
                 });
             }
         }
 
-        window.addEventListener('resize', initCanvas);
+        // Otimização: Debounce no resize
+        let resizeTimer;
+        window.addEventListener('resize', () => {
+            clearTimeout(resizeTimer);
+            resizeTimer = setTimeout(initCanvas, 200);
+        });
         
+        // Interação de Mouse & Touch para o Parallax
         window.addEventListener('mousemove', (e) => {
             targetMouseX = e.clientX;
             targetMouseY = e.clientY;
         });
 
+        // Suporte suave ao giroscópio (mobile) para o Parallax do Canvas
+        window.addEventListener('deviceorientation', (e) => {
+            if(!e.gamma || !e.beta) return;
+            // Gamma (esquerda/direita) -90 a 90
+            // Beta (frente/trás) -180 a 180
+            const x = (e.gamma / 45) * (width / 2) + (width / 2);
+            const y = (e.beta / 45) * (height / 2) + (height / 2);
+            
+            targetMouseX = Math.max(0, Math.min(width, x));
+            targetMouseY = Math.max(0, Math.min(height, y));
+        }, true);
+
         function loop() {
-            // Suavizar movimento do mouse para o parallax
+            // Suavizar movimento do mouse/giroscópio
             mouseX += (targetMouseX - mouseX) * 0.05;
             mouseY += (targetMouseY - mouseY) * 0.05;
 
-            // Fundo Preto Profundo (sem o vermelho central)
+            // Fundo Preto Profundo (sem degradê avermelhado)
             const bgGrad = ctx.createRadialGradient(mouseX, mouseY, 0, width/2, height/2, width);
-            bgGrad.addColorStop(0, "#111111"); 
+            bgGrad.addColorStop(0, "#0c0c0c"); 
             bgGrad.addColorStop(1, "#000000");
             ctx.fillStyle = bgGrad;
             ctx.fillRect(0, 0, width, height);
 
-            // 1. Desenhar Sopa de Letras (Parallax Baseado no Mouse)
-            const offsetX = (mouseX - width / 2) * 0.05;
-            const offsetY = (mouseY - height / 2) * 0.05;
+            // 1. Desenhar Sopa de Letras (Parallax Baseado no Mouse/Touch)
+            const offsetX = (mouseX - width / 2) * 0.06;
+            const offsetY = (mouseY - height / 2) * 0.06;
 
             wordsArray.forEach(w => {
+                // Movimento contínuo para a esquerda
+                w.x -= 0.4 * w.z; 
+
+                // Lógica de Wrap-around (quando sair da tela)
+                if (w.x < -width * 0.3) {
+                    w.x = width * 1.3;
+                    w.y = (Math.random() * 1.5 - 0.25) * height; 
+                }
+
                 ctx.save();
                 ctx.fillStyle = w.color;
                 ctx.font = `${w.weight} ${w.size}px 'Arial Black', Impact, sans-serif`;
                 ctx.textBaseline = 'middle';
                 ctx.textAlign = 'center';
 
-                // Aplica o Parallax
+                // Aplica o Parallax com o Mouse + a Posição X em movimento
                 const px = w.x - (offsetX * w.z);
                 const py = w.y - (offsetY * w.z);
 
@@ -379,16 +506,20 @@
         loop();
 
         // ==========================================
-        // TILT EFFECT DO CARTÃO
+        // TILT EFFECT DO CARTÃO (Otimizado p/ Mobile)
         // ==========================================
         VanillaTilt.init(document.querySelector(".profile-card"), { 
-            max: 12, 
-            speed: 800, 
+            max: window.innerWidth < 768 ? 8 : 12, // Menos tilt em mobile para não bugar
+            speed: 600, 
             glare: true, 
-            "max-glare": 0.15,
-            scale: 1.03, 
+            "max-glare": 0.1,
+            scale: window.innerWidth < 768 ? 1.02 : 1.03, 
             perspective: 1000, 
             gyroscope: true, 
+            gyroscopeMinAngleX: -45, 
+            gyroscopeMaxAngleX:  45, 
+            gyroscopeMinAngleY: -45, 
+            gyroscopeMaxAngleY:  45, 
             easing: "cubic-bezier(.03,.98,.52,.99)" 
         });
 
