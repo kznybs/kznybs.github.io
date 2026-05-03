@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KZ | Kira Theme</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Audiowide&family=Montserrat:wght@300;400;700;900&family=Syne:wght@500;600;700&family=Inter:wght@500&display=swap" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        /* --- ESTILOS GERAIS UNIFICADOS --- */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* --- DEATH NOTE THEME SETTINGS --- */
+        :root {
+            --kira-red: #ff0000;
+            --kira-dark-red: #8b0000;
+            --kira-black: #050505;
+            --kira-white: #f0f0f0;
+        }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            color: var(--kira-white);
+            background-color: var(--kira-black);
+            overflow: hidden; 
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            min-height: 100dvh; 
+            perspective: 1000px;
+        }
+
+        /* --- TYPOGRAPHY CANVAS BACKGROUND --- */
+        #typo-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -2;
+            background-color: #000000;
+        }
+
+        /* --- IMMERSIVE OVERLAYS --- */
+        .vignette {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(circle at 50% 50%, transparent 10%, rgba(0,0,0,0.85) 80%, #000 100%);
+            pointer-events: none;
+            z-index: 2;
+        }
+
+        .film-grain {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+            opacity: 0.12; 
+            z-index: 50;
+            pointer-events: none;
+            mix-blend-mode: overlay;
+        }
+
+        .scanlines {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: repeating-linear-gradient(
+                to bottom,
+                transparent 0%,
+                rgba(255, 255, 255, 0.02) 0.5%, 
+                transparent 1%
+            );
+            z-index: 49;
+            pointer-events: none;
+            animation: scanline-shift 10s linear infinite;
+        }
+
+        @keyframes scanline-shift {
+            0% { background-position: 0 0; }
+            100% { background-position: 0 100vh; }
+        }
+
+        /* --- PHYSICS & SHAKE FX --- */
+        .main-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            z-index: 10;
+            padding: 1rem;
+            transform-style: preserve-3d;
+        }
+
+        /* --- TYPOGRAPHY (KIRA GLITCH) --- */
+        .name-container { 
+            margin-bottom: 3rem; 
+            perspective: 800px;
+        }
+
+        h1 { font-family: 'Audiowide', cursive; }
+        
+        .glitch-wrapper { 
+            position: relative; 
+            display: inline-block; 
+            white-space: nowrap; 
+        }
+
+        .glitch-text {
+            position: relative;
+            font-size: clamp(4rem, 15vw, 8.5rem);
+            font-weight: 900;
+            letter-spacing: 0.05em;
+            color: var(--kira-white); 
+            -webkit-text-stroke: 1px rgba(255,255,255,0.2); 
+            text-shadow: 0 5px 15px rgba(0,0,0,0.8);
+        }
+        
+        /* Destaque para o 'Z' Vermelho */
+        .highlight-z {
+            color: var(--kira-red) !important;
+            -webkit-text-stroke: 1px var(--kira-dark-red) !important;
+            text-shadow: 0 0 20px var(--kira-red), 0 0 40px var(--kira-dark-red) !important;
+            display: inline-block; 
+        }
+
+        /* --- ULTRA-PREMIUM DEATH NOTE CARD (DARK/NOIR) --- */
+        .profile-card {
+            background: linear-gradient(135deg, rgba(20, 20, 20, 0.8) 0%, rgba(5, 5, 5, 0.95) 100%); 
+            backdrop-filter: blur(25px) saturate(120%);
+            -webkit-backdrop-filter: blur(25px) saturate(120%);
+            border-radius: 40px; 
+            border: 1px solid rgba(255, 255, 255, 0.1); 
+            box-shadow: 
+                inset 0 0 15px rgba(255, 255, 255, 0.03), 
+                0 20px 50px rgba(0, 0, 0, 0.95), 
+                0 0 0 1px rgba(255, 255, 255, 0.02); 
+            transform-style: preserve-3d;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+        }
+
+        /* Reflexo Metálico/Vidro (Sweep) */
+        .profile-card::before {
+            content: "";
+            position: absolute;
+            top: -50%; left: -50%;
+            width: 200%; height: 200%;
+            background: linear-gradient(
+                to bottom right,
+                rgba(255,255,255,0) 0%,
+                rgba(255,255,255,0.02) 40%,
+                rgba(255,255,255,0.1) 50%, 
+                rgba(255,255,255,0) 60%,
+                rgba(255,255,255,0) 100%
+            );
+            transform: rotate(30deg) translateY(-100%);
+            transition: transform 0.6s ease-out;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .profile-card:hover::before { transform: rotate(30deg) translateY(100%); }
+
+        /* Iluminação Interna Cinza/Branca */
+        .profile-card::after {
+            content: "";
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: radial-gradient(circle at 50% 0%, rgba(255,255,255,0.05) 0%, transparent 60%); 
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        /* --- ICONS --- */
+        .icon-container { 
+            display: flex; gap: 2rem; justify-content: center; align-items: center; z-index: 2; position: relative;
+        }
+        @media (min-width: 768px) { .icon-container { gap: 3.5rem; } }
+
+        .icon-link {
+            position: relative;
+            color: rgba(255, 255, 255, 0.4); 
+            transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            display: flex; justify-content: center; align-items: center;
+        }
+        
+        .icon-link:hover { 
+            color: var(--kira-white); 
+            transform: translateY(-10px) scale(1.2); 
+            text-shadow: 0 0 20px rgba(255,255,255,0.8); 
+        }
+        
+        .icon-link::after {
+            content: ''; position: absolute; bottom: -15px; width: 4px; height: 4px; border-radius: 50%;
+            background: var(--kira-white); opacity: 0; transform: scale(0); transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            box-shadow: 0 0 10px 2px rgba(255,255,255,0.5);
+        }
+        .icon-link:hover::after { opacity: 1; transform: scale(1); }
+
+        /* --- HUD ELEMENTS --- */
+        .hud-text {
+            position: absolute; font-family: 'Courier New', Courier, monospace; font-weight: 700;
+            letter-spacing: 0.4em; font-size: 0.65rem; color: rgba(255, 255, 255, 0.3); pointer-events: none;
+            z-index: 2;
+        }
+
+        .hud-bottom-right { bottom: 1.5rem; right: 2rem; }
+        .hud-top-left { top: 1.5rem; left: 2rem; opacity: 0.5; }
+
+    </style>
+</head>
+<body class="antialiased">
+    
+    <!-- Sopa de Letras (Typographic Canvas Background) -->
+    <canvas id="typo-canvas"></canvas>
+
+    <!-- Overlays Cinemáticos -->
+    <div class="vignette"></div>
+    <div class="film-grain"></div>
+    <div class="scanlines"></div>
+
+    <!-- Interface Principal (Cartão) -->
+    <div class="main-content" id="main-content">
+        <div class="name-container">
+            <div class="glitch-wrapper">
+                <!-- Z destacado em vermelho -->
+                <h1 class="glitch-text" data-text="KZNYBS">K<span class="highlight-z">Z</span>NYBS</h1>
+            </div>
+        </div>
+
+        <div class="w-full max-w-sm md:max-w-2xl p-8 md:p-14 profile-card" 
+             data-tilt data-tilt-max="8" data-tilt-speed="600" data-tilt-glare="true" data-tilt-max-glare="0.15">
+            
+            <div class="hud-text hud-top-left transform-gpu" style="transform: translateZ(10px);">
+               
+            </div>
+
+            <div class="icon-container transform-gpu" style="transform: translateZ(40px);">
+                <a href="https://github.com/kznybs" target="_blank" class="icon-link" aria-label="GitHub">
+                    <i class="fab fa-github text-4xl md:text-6xl"></i>
+                </a>
+
+                <a href="https://steamcommunity.com/id/kznybs/" target="_blank" class="icon-link" aria-label="Steam">
+                    <i class="fab fa-steam text-4xl md:text-6xl"></i>
+                </a>
+
+                <a href="https://www.instagram.com/kznybs/" target="_blank" class="icon-link" aria-label="Instagram">
+                    <i class="fab fa-instagram text-4xl md:text-6xl"></i>
+                </a>
+                
+                <a href="https://www.linkedin.com/in/kznybs/" target="_blank" class="icon-link" aria-label="LinkedIn">
+                    <i class="fab fa-linkedin text-4xl md:text-6xl"></i>
+                </a>
+            </div>
+
+            <div class="hud-text hud-bottom-right transform-gpu" style="transform: translateZ(20px);">
+              
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vanilla-tilt/1.7.2/vanilla-tilt.min.js"></script>
+    
+    <script>
+        // ==========================================
+        // MOTOR DE FUNDO: Sopa de Letras (Noir/Manga)
+        // ==========================================
+        const canvas = document.getElementById('typo-canvas');
+        const ctx = canvas.getContext('2d', { alpha: false });
+        
+        let width, height;
+        let wordsArray = [];
+        let mouseX = 0, mouseY = 0;
+        let targetMouseX = 0, targetMouseY = 0;
+
+        // Dicionário Tech/Computação para a sopa de letras
+        const phrases = [
+            "SYSTEM", "DATA", "ALGORITHM", "NEURAL NETWORK", "PROTOCOL", "BINARY", "CODE",
+            "OVERRIDE", "ROOT", "MATRIX", "CIPHER", "SYNTAX", "TERMINAL", "KERNEL", "EXECUTE",
+            "NULL", "UNDEFINED", "CYBER", "ENCRYPT", "DECRYPT", "MAINFRAME", "NODE",
+            "QUANTUM", "CACHE", "BUFFER", "BYTE", "01010100", "11001011", "SYS.ADMIN", "HACK",
+            "FIREWALL", "PROXY", "LATENCY", "BANDWIDTH", "SERVER", "CLIENT", "A.I."
+        ];
+
+        function initCanvas() {
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight;
+            mouseX = targetMouseX = width / 2;
+            mouseY = targetMouseY = height / 2;
+            createWords();
+        }
+
+        // Criar a densa sopa de letras menores
+        function createWords() {
+            wordsArray = [];
+            const count = window.innerWidth > 768 ? 400 : 200; // Mais letras pois são menores
+            
+            for (let i = 0; i < count; i++) {
+                // Tamanhos menores para dar efeito de fundo denso
+                const size = Math.random() * 25 + 8;
+                // Cores em tons de cinza/branco com baixa opacidade para compor o preto e branco
+                const alpha = Math.random() * 0.3 + 0.05;
+                const color = `rgba(255, 255, 255, ${alpha})`;
+                
+                wordsArray.push({
+                    text: phrases[Math.floor(Math.random() * phrases.length)],
+                    x: (Math.random() * 1.5 - 0.25) * width, 
+                    y: (Math.random() * 1.5 - 0.25) * height,
+                    z: Math.random() * 2 + 0.5, // Parallax depth
+                    size: size,
+                    color: color,
+                    vertical: Math.random() > 0.85, // Algumas palavras na vertical
+                    weight: Math.random() > 0.5 ? 900 : 700 
+                });
+            }
+        }
+
+        window.addEventListener('resize', initCanvas);
+        
+        window.addEventListener('mousemove', (e) => {
+            targetMouseX = e.clientX;
+            targetMouseY = e.clientY;
+        });
+
+        function loop() {
+            // Suavizar movimento do mouse para o parallax
+            mouseX += (targetMouseX - mouseX) * 0.05;
+            mouseY += (targetMouseY - mouseY) * 0.05;
+
+            // Fundo Preto Profundo (sem o vermelho central)
+            const bgGrad = ctx.createRadialGradient(mouseX, mouseY, 0, width/2, height/2, width);
+            bgGrad.addColorStop(0, "#111111"); 
+            bgGrad.addColorStop(1, "#000000");
+            ctx.fillStyle = bgGrad;
+            ctx.fillRect(0, 0, width, height);
+
+            // 1. Desenhar Sopa de Letras (Parallax Baseado no Mouse)
+            const offsetX = (mouseX - width / 2) * 0.05;
+            const offsetY = (mouseY - height / 2) * 0.05;
+
+            wordsArray.forEach(w => {
+                ctx.save();
+                ctx.fillStyle = w.color;
+                ctx.font = `${w.weight} ${w.size}px 'Arial Black', Impact, sans-serif`;
+                ctx.textBaseline = 'middle';
+                ctx.textAlign = 'center';
+
+                // Aplica o Parallax
+                const px = w.x - (offsetX * w.z);
+                const py = w.y - (offsetY * w.z);
+
+                ctx.translate(px, py);
+                if (w.vertical) ctx.rotate(-Math.PI / 2);
+
+                ctx.fillText(w.text, 0, 0);
+                ctx.restore();
+            });
+
+            requestAnimationFrame(loop);
+        }
+
+        // Iniciar
+        initCanvas();
+        loop();
+
+        // ==========================================
+        // TILT EFFECT DO CARTÃO
+        // ==========================================
+        VanillaTilt.init(document.querySelector(".profile-card"), { 
+            max: 12, 
+            speed: 800, 
+            glare: true, 
+            "max-glare": 0.15,
+            scale: 1.03, 
+            perspective: 1000, 
+            gyroscope: true, 
+            easing: "cubic-bezier(.03,.98,.52,.99)" 
+        });
+
+    </script>
+</body>
+</html>
