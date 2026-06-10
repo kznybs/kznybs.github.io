@@ -1,264 +1,562 @@
-
 <!DOCTYPE html>
-<html lang="pt-PT">
+<html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Apresentação: Código de Hamming</title>
-    <style>
-        :root {
-            --bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
-            --glass-bg: rgba(255, 255, 255, 0.05);
-            --glass-border: rgba(255, 255, 255, 0.1);
-            --accent-color: #38bdf8;
-            --text-main: #f8fafc;
-            --text-muted: #94a3b8;
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-
-        body {
-            background: var(--bg-gradient);
-            color: var(--text-main);
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            overflow: hidden;
-            padding: 20px;
-        }
-
-        .container {
-            width: 100%;
-            max-width: 900px;
-            background: var(--glass-bg);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border: 1px solid var(--glass-border);
-            border-radius: 16px;
-            padding: 40px;
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
-            display: flex;
-            flex-direction: column;
-            gap: 30px;
-            position: relative;
-        }
-
-        .header {
-            border-bottom: 1px solid var(--glass-border);
-            padding-bottom: 15px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .header h1 {
-            font-size: 1.5rem;
-            color: var(--accent-color);
-            font-weight: 600;
-        }
-
-        .step-indicator {
-            font-size: 0.9rem;
-            color: var(--text-muted);
-            background: rgba(255, 255, 255, 0.08);
-            padding: 4px 12px;
-            border-radius: 20px;
-        }
-
-        .slide-content {
-            min-height: 250px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-        }
-
-        .step {
-            display: none;
-            animation: fadeIn 0.5s ease forwards;
-        }
-
-        .step.active {
-            display: block;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .step h2 {
-            font-size: 1.8rem;
-            margin-bottom: 15px;
-        }
-
-        .step p {
-            color: var(--text-muted);
-            line-height: 1.6;
-            font-size: 1.1rem;
-            margin-bottom: 20px;
-        }
-
-        .highlight-box {
-            background: rgba(56, 189, 248, 0.06);
-            border-left: 4px solid var(--accent-color);
-            padding: 15px;
-            border-radius: 0 8px 8px 0;
-            font-size: 1rem;
-            color: #e2e8f0;
-        }
-
-        .matrix-mock {
-            font-family: monospace;
-            background: rgba(0, 0, 0, 0.2);
-            padding: 15px;
-            border-radius: 8px;
-            border: 1px solid var(--glass-border);
-            margin-top: 15px;
-            color: #34d399;
-            line-height: 1.4;
-        }
-
-        .controls {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-top: 10px;
-        }
-
-        button {
-            background: rgba(255, 255, 255, 0.08);
-            color: var(--text-main);
-            border: 1px solid var(--glass-border);
-            padding: 12px 24px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 500;
-            transition: all 0.3s ease;
-        }
-
-        button:hover:not(:disabled) {
-            background: var(--accent-color);
-            color: #0f172a;
-            box-shadow: 0 0 15px rgba(56, 189, 248, 0.4);
-        }
-
-        button:disabled {
-            opacity: 0.3;
-            cursor: not-allowed;
-        }
-
-        button.btn-next {
-            background: rgba(56, 189, 248, 0.2);
-            border-color: rgba(56, 189, 248, 0.4);
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Leitor de Orçamentos PDF v2.0</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.4.168/pdf.min.js"></script>
+<style>
+* { box-sizing: border-box; }
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  margin: 20px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  min-height: 100vh;
+}
+.container {
+  max-width: 1400px;
+  margin: 0 auto;
+}
+h1 {
+  color: white;
+  text-align: center;
+  margin-bottom: 30px;
+  text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+}
+.card {
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 20px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+}
+.card h3 {
+  margin-top: 0;
+  color: #333;
+  border-bottom: 3px solid #667eea;
+  padding-bottom: 10px;
+}
+.grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+.grid-3 {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 20px;
+}
+@media (max-width: 1024px) {
+  .grid-2 { grid-template-columns: 1fr; }
+  .grid-3 { grid-template-columns: 1fr; }
+}
+textarea {
+  width: 100%;
+  padding: 12px;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  font-family: 'Courier New', monospace;
+  font-size: 13px;
+  resize: vertical;
+  transition: border-color 0.3s;
+}
+textarea:focus {
+  outline: none;
+  border-color: #667eea;
+}
+input[type="file"] {
+  padding: 10px;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  cursor: pointer;
+  width: 100%;
+}
+button {
+  padding: 12px 24px;
+  background: #667eea;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  transition: all 0.3s;
+  margin-right: 10px;
+  margin-bottom: 10px;
+}
+button:hover {
+  background: #764ba2;
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+}
+button:active {
+  transform: translateY(0);
+}
+.diagnostico {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+.status {
+  padding: 12px;
+  border-radius: 6px;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.status.ok {
+  background: #e8f5e9;
+  color: #2e7d32;
+  border-left: 4px solid #4caf50;
+}
+.status.warn {
+  background: #fff3e0;
+  color: #e65100;
+  border-left: 4px solid #ff9800;
+}
+.status.err {
+  background: #ffebee;
+  color: #c62828;
+  border-left: 4px solid #f44336;
+}
+.meta-info {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-bottom: 15px;
+}
+.meta-field {
+  padding: 10px;
+  background: #f5f5f5;
+  border-radius: 6px;
+  border-left: 4px solid #667eea;
+}
+.meta-field label {
+  display: block;
+  font-size: 12px;
+  color: #999;
+  font-weight: 600;
+  margin-bottom: 5px;
+}
+.meta-field .value {
+  font-size: 16px;
+  color: #333;
+  font-weight: 500;
+  word-break: break-all;
+}
+#resultado {
+  height: 300px;
+  font-size: 12px;
+}
+#textoExtraido {
+  height: 400px;
+  font-size: 11px;
+}
+.button-group {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+details {
+  margin-top: 20px;
+}
+details > summary {
+  cursor: pointer;
+  padding: 10px;
+  background: #f5f5f5;
+  border-radius: 6px;
+  user-select: none;
+  font-weight: 600;
+  color: #667eea;
+}
+details > summary:hover {
+  background: #ebebeb;
+}
+.loading {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  border: 3px solid #f3f3f3;
+  border-top: 3px solid #667eea;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+.error-message {
+  padding: 15px;
+  background: #ffebee;
+  color: #c62828;
+  border-radius: 8px;
+  margin: 10px 0;
+  border-left: 4px solid #f44336;
+}
+.success-message {
+  padding: 15px;
+  background: #e8f5e9;
+  color: #2e7d32;
+  border-radius: 8px;
+  margin: 10px 0;
+  border-left: 4px solid #4caf50;
+}
+.table-preview {
+  overflow-x: auto;
+  margin-top: 10px;
+}
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+table th {
+  background: #667eea;
+  color: white;
+  padding: 10px;
+  text-align: left;
+  font-weight: 600;
+}
+table td {
+  padding: 8px 10px;
+  border-bottom: 1px solid #e0e0e0;
+}
+table tr:hover {
+  background: #f5f5f5;
+}
+</style>
 </head>
 <body>
 
-    <div class="container">
-        <div class="header">
-            <h1>Código de Hamming (7,4)</h1>
-            <div class="step-indicator" id="progress">Passo 1 de 4</div>
-        </div>
+<div class="container">
+  <h1>📊 Leitor de Orçamentos PDF v2.0</h1>
 
-        <div class="slide-content">
-            <!-- PASSO 1 -->
-            <div class="step active" id="step-1">
-                <h2>O Motor de Codificação: Matriz Geradora (G)</h2>
-                <p>A Matriz Geradora <i>G</i> possui 7 linhas e 4 colunas. Ela é o coração do sistema, responsável por transformar dados simples num bloco protegido.</p>
-                <div class="highlight-box">
-                    As posições de potência base 2 (linhas 1, 2 e 4) atuam como guardiães, calculando a paridade inteligente para proteger a informação.
-                </div>
-                <div class="matrix-mock">
-                    G = [<br>
-                    &nbsp;&nbsp;[1, 1, 0, 1], -> p1 (cobre bits 1, 2, 4)<br>
-                    &nbsp;&nbsp;[1, 0, 1, 1], -> p2 (cobre bits 1, 3, 4)<br>
-                    &nbsp;&nbsp;[1, 0, 0, 0],<br>
-                    &nbsp;&nbsp;[0, 1, 1, 1], -> p3 (cobre bits 2, 3, 4)<br>
-                    &nbsp;&nbsp;[0, 1, 0, 0],<br>
-                    &nbsp;&nbsp;[0, 0, 1, 0],<br>
-                    &nbsp;&nbsp;[0, 0, 0, 1]<br>
-                    ]
-                </div>
-            </div>
+  <div class="card">
+    <h3>📁 Selecionar PDF</h3>
+    <input type="file" id="pdfFile" accept=".pdf">
+    <div id="loadingStatus" style="margin-top: 10px; display: none;">
+      <span class="loading"></span> Processando PDF...
+    </div>
+  </div>
 
-            <!-- PASSO 2 -->
-            <div class="step" id="step-2">
-                <h2>Passo 1: A Mensagem Original</h2>
-                <p>O processo prático começa com a receção do vetor de dados puro que precisa de ser transmitido sem erros.</p>
-                <div class="highlight-box">
-                    Neste exemplo prático, o vetor original recebido é: <strong>d = [1, 0, 1, 1]</strong>.
-                </div>
-            </div>
-
-            <!-- PASSO 3 -->
-            <div class="step" id="step-3">
-                <h2>Passo 2: A Multiplicação (Aritmética Módulo 2)</h2>
-                <p>O vetor de dados é multiplicado pela matriz <i>G</i> utilizando a lógica matemática computacional pura.</p>
-                <div class="highlight-box">
-                    Operação: <strong>x = G · d (mod 2)</strong>.
-                </div>
-                <p style="margin-top: 15px; font-size: 0.95rem;">Nota: A aritmética módulo 2 utiliza a lógica <strong>XOR</strong>, onde somas binárias idênticas resultam em zero (ex: 1 + 1 = 0).</p>
-            </div>
-
-            <!-- PASSO 4 -->
-            <div class="step" id="step-4">
-                <h2>Passo 3: A Blindagem (Resultado Final)</h2>
-                <p>O resultado da operação gera o bloco final blindado, intercalando perfeitamente a informação original e as paridades calculadas.</p>
-                <div class="highlight-box" style="background: rgba(52, 211, 153, 0.1); border-left-color: #34d399;">
-                    Bloco gerado: <strong>0110011</strong>
-                </div>
-                <p style="margin-top: 15px; font-size: 0.95rem;">Esse bloco de 7 bits agora está protegido. Se qualquer bit for corrompido no caminho, o recetor saberá exatamente como corrigir.</p>
-            </div>
-        </div>
-
-        <div class="controls">
-            <button id="prevBtn" onclick="changeStep(-1)" disabled>Anterior</button>
-            <button id="nextBtn" class="btn-next" onclick="changeStep(1)">Avançar</button>
-        </div>
+  <div class="grid-2">
+    <div class="card">
+      <h3>🔍 Diagnóstico</h3>
+      <div class="diagnostico" id="diagnostico">
+        <div class="status warn">Aguardando PDF...</div>
+      </div>
     </div>
 
-    <script>
-        let currentStep = 1;
-        const totalSteps = 4;
+    <div class="card">
+      <h3>⚙️ Configuração de Materiais</h3>
+      <p style="margin-top: 0; color: #999; font-size: 13px;">Edite as regras para identificar materiais (chave=valor):</p>
+      <textarea id="materiais" rows="15">FOTOLUMINESCENTE=ADESIVO FOTOLUMINESCENTE
+REFLETIVO GRAU ENGENHARIA=ADESIVOS REFLETIVOS GRAU ENGENHARIA
+REFLETIVO GRAU COMERCIAL=ADESIVOS REFLETIVOS GRAU COMERCIAL
+PERFURADO=ADESIVO PERFURADO
+AVERY=ADESIVOS AVERY USO EXTERNO
+ACM=PLACA EM ACM
+PVC=PLACAS EM PVC
+ACRÍLICO=ACRÍLICO
+ADESIVO=ADESIVOS COMUM
+BANNER=BANNER
+FAIXA=BANNER
+LONA=LONA</textarea>
+    </div>
+  </div>
 
-        function changeStep(direction) {
-            // Remove active do passo atual
-            document.getElementById(`step-${currentStep}`).classList.remove('active');
-            
-            // Atualiza o contador
-            currentStep += direction;
-            
-            // Adiciona active no novo passo
-            document.getElementById(`step-${currentStep}`).classList.add('active');
-            
-            // Atualiza os botões e progresso
-            document.getElementById('prevBtn').disabled = currentStep === 1;
-            
-            if (currentStep === totalSteps) {
-                document.getElementById('nextBtn').innerText = 'Reiniciar';
-            } else {
-                document.getElementById('nextBtn').innerText = 'Avançar';
-            }
+  <div class="card">
+    <h3>📋 Metadados Extraídos</h3>
+    <div class="meta-info">
+      <div class="meta-field">
+        <label>Data do Orçamento</label>
+        <div class="value" id="metaData">-</div>
+      </div>
+      <div class="meta-field">
+        <label>Número do Orçamento</label>
+        <div class="value" id="metaOrc">-</div>
+      </div>
+      <div class="meta-field">
+        <label>Cliente/Solicitante</label>
+        <div class="value" id="metaSol">-</div>
+      </div>
+      <div class="meta-field">
+        <label>Referência</label>
+        <div class="value" id="metaRef">-</div>
+      </div>
+    </div>
+  </div>
 
-            if (currentStep > totalSteps) {
-                // Reinicia a apresentação
-                document.getElementById(`step-${totalSteps}`).classList.remove('active');
-                currentStep = 1;
-                document.getElementById(`step-${currentStep}`).classList.add('active');
-                document.getElementById('prevBtn').disabled = true;
-                document.getElementById('nextBtn').innerText = 'Avançar';
-            }
+  <div class="card">
+    <h3>📊 Resultado para Excel</h3>
+    <p style="margin: 0 0 10px 0; color: #999; font-size: 13px;">
+      Colunas: DATA | C.C | SOLICITANTE | DESCRIÇÃO | QTDE | MATERIAL | LARGURA | ALTURA | SOL | ORÇ | PREÇO
+    </p>
+    <textarea id="resultado" placeholder="Os dados aparecerão aqui..."></textarea>
+    <div class="button-group" style="margin-top: 15px;">
+      <button onclick="copiarResultado()">📋 Copiar para Clipboard</button>
+      <button onclick="baixarCSV()">📥 Baixar como CSV</button>
+    </div>
+  </div>
 
-            document.getElementById('progress').innerText = `Passo ${currentStep} de ${totalSteps}`;
-        }
-    </script>
+  <div class="card">
+    <h3>👁️ Preview da Tabela</h3>
+    <div id="previewTable" style="font-size: 12px;">
+      <p style="color: #999;">A visualização aparecerá após processar o PDF</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <details>
+      <summary>🔎 Mostrar Texto Extraído do PDF (DEBUG)</summary>
+      <textarea id="textoExtraido" placeholder="Texto bruto extraído aparecerá aqui..."></textarea>
+    </details>
+  </div>
+</div>
+
+<script>
+function copiarResultado(){
+  const txt = document.getElementById('resultado');
+  if(!txt.value) {
+    alert('Nenhum resultado para copiar. Processe um PDF primeiro.');
+    return;
+  }
+  txt.select();
+  document.execCommand('copy');
+  alert('✓ Resultado copiado para clipboard!');
+}
+
+function baixarCSV(){
+  const txt = document.getElementById('resultado');
+  if(!txt.value) {
+    alert('Nenhum resultado para baixar. Processe um PDF primeiro.');
+    return;
+  }
+  
+  const headers = 'DATA\tC.C\tSOLICITANTE\tDESCRIÇÃO\tQTDE\tMATERIAL\tLARGURA\tALTURA\tSOL\tORÇ\tPREÇO\n';
+  const csv = headers + txt.value;
+  
+  const blob = new Blob([csv], { type: 'text/plain;charset=utf-8;' });
+  const link = document.createElement('a');
+  const url = URL.createObjectURL(blob);
+  link.setAttribute('href', url);
+  link.setAttribute('download', 'orcamentos.txt');
+  link.click();
+}
+
+function dataBR(texto){
+  const meses = {
+    'JANEIRO': '01', 'FEVEREIRO': '02', 'MARÇO': '03', 'MARCO': '03',
+    'ABRIL': '04', 'MAIO': '05', 'JUNHO': '06', 'JULHO': '07',
+    'AGOSTO': '08', 'SETEMBRO': '09', 'OUTUBRO': '10', 'NOVEMBRO': '11', 'DEZEMBRO': '12'
+  };
+  
+  // Tenta vários padrões de data
+  const patterns = [
+    /(\d{1,2})\s+DE\s+([A-ZÇÃÁÉÍÓÚ]+)\s+DE\s+(\d{4})/i,
+    /(\d{2})\/(\d{2})\/(\d{4})/,
+    /(\d{1,2})\s+([A-ZÇÃÁÉÍÓÚ]+)\s+(\d{4})/i
+  ];
+  
+  for(let pattern of patterns){
+    const m = texto.match(pattern);
+    if(!m) continue;
+    
+    if(isNaN(m[2])){
+      // Formato com mês em texto
+      const mes = meses[m[2].toUpperCase()] || '';
+      if(mes) return m[1].padStart(2,'0') + '/' + mes + '/' + m[3];
+    } else {
+      // Formato com mês numérico
+      return m[1].padStart(2,'0') + '/' + m[2].padStart(2,'0') + '/' + m[3];
+    }
+  }
+  return '';
+}
+
+function materialDaDescricao(desc, regras){
+  const u = desc.toUpperCase();
+  for(const r of regras){
+    const [k, v] = r.split('=');
+    if(k && v && u.includes(k.trim().toUpperCase())) {
+      return v.trim();
+    }
+  }
+  return 'MATERIAL NÃO IDENTIFICADO';
+}
+
+function parseQuantidade(texto){
+  const m = texto.match(/^\s*(\d+)\s/);
+  return m ? m[1] : '1';
+}
+
+function extrairDimensoes(texto){
+  // Busca por padrão: número X número MTS ou CM
+  const patterns = [
+    /(\d+[,\.]\d+)\s*[xX]\s*(\d+[,\.]\d+)\s*(MTS|M|CM)/i,
+    /(\d+)\s*[xX]\s*(\d+)\s*(MTS|M|CM)/i
+  ];
+  
+  for(let pattern of patterns){
+    const m = texto.match(pattern);
+    if(m){
+      let largura = parseFloat(m[1].replace(',', '.'));
+      let altura = parseFloat(m[2].replace(',', '.'));
+      const unidade = m[3].toUpperCase();
+      
+      // Se for em metros e menor que 10, converte para cm
+      if((unidade === 'M' || unidade === 'MTS') && largura <= 10){
+        largura = Math.round(largura * 100);
+        altura = Math.round(altura * 100);
+      }
+      
+      return { largura: largura.toString(), altura: altura.toString() };
+    }
+  }
+  
+  return { largura: '0', altura: '0' };
+}
+
+function extrairPreco(texto){
+  const m = texto.match(/R\$\s*([\d\.,]+)/);
+  return m ? m[1] : '0';
+}
+
+function extrairDescricao(texto){
+  const upper = texto.toUpperCase();
+  if(upper.includes('FAIXA')) return 'FAIXA';
+  if(upper.includes('BANNER')) return 'BANNER';
+  if(upper.includes('ADESIVO')) return 'ADESIVO';
+  if(upper.includes('PLACA')) return 'PLACA';
+  return 'CONFECÇÃO';
+}
+
+document.getElementById('pdfFile').addEventListener('change', async e => {
+  const file = e.target.files[0];
+  if(!file) return;
+
+  document.getElementById('loadingStatus').style.display = 'block';
+
+  try {
+    const buffer = await file.arrayBuffer();
+    const pdf = await pdfjsLib.getDocument({data: buffer}).promise;
+
+    let texto = '';
+    for(let i = 1; i <= pdf.numPages; i++){
+      const page = await pdf.getPage(i);
+      const content = await page.getTextContent();
+      texto += content.items.map(x => x.str).join(' ') + '\n';
+    }
+
+    document.getElementById('textoExtraido').value = texto;
+
+    const diag = [];
+    const regras = document.getElementById('materiais').value.split('\n').filter(Boolean);
+
+    // Extração de metadados
+    const orcMatch = texto.match(/ORÇAMENTO\s*N[ºO°]?\s*0*([0-9]+)/i);
+    const orc = orcMatch ? orcMatch[1] : '';
+
+    const solicitanteMatch = texto.match(/SOLICITAD[OA]\s+POR[:\s]+([^\n]+)/i);
+    const solicitante = solicitanteMatch ? solicitanteMatch[1].trim().split('\n')[0] : '';
+
+    const clienteMatch = texto.match(/CLIENTE\s*[:\-]?\s*([^\n]+)/i);
+    const cliente = clienteMatch ? clienteMatch[1].trim() : '';
+
+    const data = dataBR(texto);
+
+    let ref = '';
+    const refMatch = texto.match(/REF\.?\s*[:\-]?\s*([A-ZÀ-Ú\s\-\d]+?)(?=SOL|SOLICITAD|$)/i);
+    if(refMatch){
+      ref = refMatch[1].replace(/[-–]/g, ' ').trim();
+    }
+
+    // Atualizar metadados na interface
+    document.getElementById('metaData').textContent = data || '-';
+    document.getElementById('metaOrc').textContent = orc || '-';
+    document.getElementById('metaSol').textContent = solicitante || cliente || '-';
+    document.getElementById('metaRef').textContent = ref || '-';
+
+    // Diagnostico
+    if(data) diag.push('<div class="status ok">✓ Data encontrada</div>');
+    else diag.push('<div class="status warn">⚠ Data não encontrada</div>');
+    
+    if(solicitante || cliente) diag.push('<div class="status ok">✓ Solicitante encontrado</div>');
+    else diag.push('<div class="status warn">⚠ Solicitante não encontrado</div>');
+    
+    if(orc) diag.push('<div class="status ok">✓ Orçamento encontrado</div>');
+    else diag.push('<div class="status warn">⚠ Orçamento não encontrado</div>');
+    
+    if(ref) diag.push('<div class="status ok">✓ Referência encontrada</div>');
+    else diag.push('<div class="status warn">⚠ Referência não encontrada</div>');
+
+    // Extração de itens - Melhorado
+    const linhas = [];
+    
+    // Regex melhorado para capturar itens
+    const regexLinhas = /(\d+)\s+CONFEC[^\n]*?([A-ZÀ-Ú\s]+?)\s+MEDINDO\s+(\d+[,\.]\d+)\s*[xX]\s*(\d+[,\.]\d+)\s*([A-Z]+).*?R\$\s*([\d\.,]+)/gi;
+    
+    let match;
+    while((match = regexLinhas.exec(texto)) !== null){
+      const qtde = match[1];
+      const descBruta = match[2].toUpperCase().trim();
+      const largura = parseFloat(match[3].replace(',', '.'));
+      const altura = parseFloat(match[4].replace(',', '.'));
+      const unidade = match[5].toUpperCase();
+      const preco = match[6];
+
+      // Converter dimensões para CM se estiver em metros
+      let larguraFinal = largura;
+      let alturaFinal = altura;
+      
+      if((unidade === 'M' || unidade === 'MTS') && largura <= 10){
+        larguraFinal = Math.round(largura * 100);
+        alturaFinal = Math.round(altura * 100);
+      }
+
+      const descricao = extrairDescricao(descBruta) + (ref ? ' ' + ref : '');
+      const material = materialDaDescricao(descBruta, regras);
+
+      linhas.push(
+        `${data}\t\t${solicitante || cliente}\t${descricao}\t${qtde}\t${material}\t${larguraFinal}\t${alturaFinal}\t\t${orc}\t${preco}`
+      );
+    }
+
+    if(linhas.length === 0){
+      diag.push('<div class="status err">✗ Nenhum item identificado</div>');
+    } else {
+      diag.push(`<div class="status ok">✓ ${linhas.length} item(ns) identificado(s)</div>`);
+    }
+
+    document.getElementById('diagnostico').innerHTML = diag.join('');
+    document.getElementById('resultado').value = linhas.join('\n');
+
+    // Gerar preview da tabela
+    if(linhas.length > 0){
+      let tableHTML = '<div class="table-preview"><table><thead><tr><th>DATA</th><th>C.C</th><th>SOLICITANTE</th><th>DESCRIÇÃO</th><th>QTDE</th><th>MATERIAL</th><th>LARGURA</th><th>ALTURA</th><th>SOL</th><th>ORÇ</th><th>PREÇO</th></tr></thead><tbody>';
+      
+      linhas.forEach(linha => {
+        const cols = linha.split('\t');
+        tableHTML += '<tr>';
+        cols.forEach(col => {
+          tableHTML += `<td>${col}</td>`;
+        });
+        tableHTML += '</tr>';
+      });
+      
+      tableHTML += '</tbody></table></div>';
+      document.getElementById('previewTable').innerHTML = tableHTML;
+    }
+
+  } catch(err){
+    document.getElementById('diagnostico').innerHTML = `<div class="status err">✗ Erro ao processar PDF: ${err.message}</div>`;
+    console.error(err);
+  } finally {
+    document.getElementById('loadingStatus').style.display = 'none';
+  }
+});
+</script>
+
 </body>
 </html>
