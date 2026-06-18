@@ -1,0 +1,279 @@
+
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Leitor de Orçamentos PDF</title>
+    <!-- PDF.js para leitura do PDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <!-- SheetJS para exportação direta para Excel -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        window.onload = function() {
+            if (typeof pdfjsLib !== 'undefined') {
+                pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+            }
+        };
+    </script>
+</head>
+<body class="bg-gray-100 font-sans text-gray-800 min-h-screen p-4 md:p-8">
+
+    <div class="max-w-6xl mx-auto space-y-6">
+        
+        <!-- Cabeçalho -->
+        <header class="bg-white shadow-md rounded-xl p-6 flex flex-col md:flex-row justify-between items-center gap-4 border-l-4 border-blue-600">
+            <div>
+                <h1 class="text-2xl font-bold text-gray-900">Leitor de Orçamentos</h1>
+                <p class="text-sm text-gray-500">Ferramenta simplificada para extração de dados para Excel</p>
+            </div>
+            <div class="relative">
+                <input type="file" id="pdfFile" accept=".pdf" class="hidden">
+                <label for="pdfFile" class="cursor-pointer bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg shadow-lg transition-all flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                    </svg>
+                    Carregar PDF do Orçamento
+                </label>
+            </div>
+        </header>
+
+        <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+            
+            <!-- Coluna Lateral -->
+            <div class="space-y-6 lg:col-span-1">
+                <div class="bg-white p-5 rounded-xl shadow-md">
+                    <h3 class="text-md font-bold text-gray-700 border-b pb-2 mb-3">Status da Leitura</h3>
+                    <div id="diagnostico" class="text-sm space-y-2 text-gray-600">
+                        Aguardando ficheiro...
+                    </div>
+                </div>
+
+                <div class="bg-white p-5 rounded-xl shadow-md">
+                    <h3 class="text-md font-bold text-gray-700 border-b pb-2 mb-3">Regras de Material</h3>
+                    <textarea id="materiais" rows="10" class="w-full text-xs border border-gray-300 rounded p-2 bg-gray-50">FOTOLUMINESCENTE=ADESIVO FOTOLUMINECENTE
+REFLETIVO GRAU ENGENHARIA=ADESIVOS REFLETIVOS GRAU ENGENHARIA
+REFLETIVO GRAU COMERCIAL=ADESIVOS REFLETIVOS GRAU COMERCIAL
+PERFURADO=ADESIVO PERFURADO
+AVERY=ADESIVOS AVERY USO EXTERNO
+ACM=PLACA EM ACM
+PVC=PLACAS EM PVC
+ACRÍLICO=ACRÍLICO
+ADESIVO=ADESIVOS COMUM
+BANNER=BANNER
+LONA=BANNER</textarea>
+                </div>
+            </div>
+
+            <!-- Coluna Principal (Tabela) -->
+            <div class="bg-white rounded-xl shadow-md lg:col-span-3 flex flex-col overflow-hidden">
+                <div class="p-4 border-b bg-gray-50 flex justify-between items-center">
+                    <h3 class="text-lg font-bold text-gray-800">Dados Encontrados</h3>
+                    <button onclick="baixarExcel()" id="btnExcel" class="bg-green-600 hover:bg-green-700 text-white px-5 py-2 rounded-lg shadow font-bold transition-colors flex items-center gap-2 opacity-50 cursor-not-allowed" disabled>
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd" />
+                        </svg>
+                        Descarregar Excel (.xlsx)
+                    </button>
+                </div>
+                
+                <div class="overflow-x-auto p-0 flex-1">
+                    <table class="w-full text-left text-sm text-gray-600 border-collapse">
+                        <thead class="text-xs text-gray-700 uppercase bg-gray-200">
+                            <tr>
+                                <th class="px-3 py-3 border-b">Data</th>
+                                <th class="px-3 py-3 border-b">Solicitante</th>
+                                <th class="px-3 py-3 border-b">Orç.</th>
+                                <th class="px-3 py-3 border-b text-center">Qtd</th>
+                                <th class="px-3 py-3 border-b">Descrição</th>
+                                <th class="px-3 py-3 border-b">Material</th>
+                                <th class="px-3 py-3 border-b text-right">Larg.</th>
+                                <th class="px-3 py-3 border-b text-right">Alt.</th>
+                                <th class="px-3 py-3 border-b text-right">Preço</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabelaCorpo">
+                            <tr>
+                                <td colspan="9" class="text-center py-12 text-gray-400">Nenhum dado para mostrar. Carregue um PDF.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        // Variável global para armazenar os dados puros para o Excel
+        let dadosParaExcel = [];
+
+        function baixarExcel() {
+            if (dadosParaExcel.length === 0) return;
+            
+            // Cria a folha de cálculo
+            const ws = XLSX.utils.json_to_sheet(dadosParaExcel);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Dados");
+            
+            // Força o download do ficheiro .xlsx
+            XLSX.writeFile(wb, "Extracao_Orcamento.xlsx");
+        }
+
+        function extrairMaterial(desc, regras) {
+            const descUpperCase = desc.toUpperCase();
+            for (const r of regras) {
+                const partes = r.split('=');
+                if (partes.length !== 2) continue;
+                const [chave, valor] = partes;
+                if (chave.trim() && descUpperCase.includes(chave.trim().toUpperCase())) {
+                    return valor.trim();
+                }
+            }
+            return 'MATERIAL NÃO IDENTIFICADO';
+        }
+
+        document.getElementById('pdfFile').addEventListener('change', async (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const btnExcel = document.getElementById('btnExcel');
+            btnExcel.disabled = true;
+            btnExcel.classList.add('opacity-50', 'cursor-not-allowed');
+            
+            document.getElementById('diagnostico').innerHTML = '<span class="text-blue-600 font-bold animate-pulse">A ler PDF...</span>';
+            document.getElementById('tabelaCorpo').innerHTML = '<tr><td colspan="9" class="text-center py-12 text-blue-500 font-bold">A processar dados...</td></tr>';
+            
+            try {
+                const buffer = await file.arrayBuffer();
+                const pdf = await pdfjsLib.getDocument({ data: buffer }).promise;
+
+                let textoCompleto = '';
+                for (let i = 1; i <= pdf.numPages; i++) {
+                    const page = await pdf.getPage(i);
+                    const content = await page.getTextContent();
+                    textoCompleto += content.items.map(x => x.str).join(' ') + '\n';
+                }
+
+                // Normalização rigorosa: Remove quebras de linha e excesso de espaços
+                const textoNormalizado = textoCompleto.replace(/[\n\r]+/g, ' ').replace(/\s{2,}/g, ' ');
+
+                // 1. Orçamento
+                const matchOrc = textoNormalizado.match(/ORÇAMENTO\s*(?:N[º°O]?|№|NUMERO)?\s*([\d\/-]+)/i);
+                const orcamento = matchOrc ? matchOrc[1].trim() : '';
+
+                // 2. Solicitante
+                const matchSol = textoNormalizado.match(/SOLICITADO POR:\s*([A-ZÀ-Ú0-9\s]+?)\s*(?:QUANT|DESCRIÇÃO|R\$|ORÇAMENTO|$)/i);
+                const solicitante = matchSol ? matchSol[1].trim() : '';
+
+                // 3. Data
+                const meses = {
+                    JANEIRO: '01', FEVEREIRO: '02', MARÇO: '03', MARCO: '03',
+                    ABRIL: '04', MAIO: '05', JUNHO: '06', JULHO: '07',
+                    AGOSTO: '08', SETEMBRO: '09', OUTUBRO: '10', NOVEMBRO: '11', DEZEMBRO: '12'
+                };
+                const matchData = textoNormalizado.match(/(\d{1,2})\s+DE\s+([A-ZÇÃ]+)\s+DE\s+(\d{4})/i);
+                let dataDoc = '';
+                if (matchData) {
+                    const mesStr = matchData[2].toUpperCase();
+                    dataDoc = matchData[1].padStart(2, '0') + '/' + (meses[mesStr] || '') + '/' + matchData[3];
+                }
+
+                // Regras
+                const regrasRaw = document.getElementById('materiais').value.split('\n');
+                const regras = regrasRaw.filter(r => r.includes('='));
+
+                // Extração dos Itens da Tabela (Expressão Regular super focada na estrutura do PDF)
+                // Procura: (Quantidade) ... (Descrição até a palavra MEDINDO) ... (Largura X Altura) ... (Preço Unitário) ... (Preço Total opcional)
+                const regexItens = /\b(\d{1,5})\s+(.+?MEDINDO\s+(\d+[,\.]\d+)\s*[xX]\s*(\d+[,\.]\d+).*?)\s+(?:R\$|R\s*\$)\s*([\d\.,]+)(?:\s+(?:R\$|R\s*\$)\s*([\d\.,]+))?/gi;
+                
+                let matchItem;
+                let contagem = 0;
+                dadosParaExcel = []; // Limpa dados anteriores
+                const linhasTabela = [];
+
+                while ((matchItem = regexItens.exec(textoNormalizado)) !== null) {
+                    contagem++;
+                    
+                    const qtde = parseInt(matchItem[1], 10);
+                    const textoTotalDoItem = matchItem[2];
+                    const descBruta = textoTotalDoItem.toUpperCase();
+
+                    let tipoCurto = 'PLACA';
+                    if (descBruta.includes('FAIXA')) tipoCurto = 'FAIXA';
+                    else if (descBruta.includes('BANNER')) tipoCurto = 'BANNER';
+                    else if (descBruta.includes('ADESIVO')) tipoCurto = 'ADESIVO';
+
+                    const material = extrairMaterial(textoTotalDoItem, regras);
+
+                    let largura = parseFloat(matchItem[3].replace(',', '.'));
+                    let altura = parseFloat(matchItem[4].replace(',', '.'));
+
+                    if (largura <= 10) largura = Math.round(largura * 100);
+                    if (altura <= 10) altura = Math.round(altura * 100);
+
+                    // Se houver dois preços (Unitário e Total), pegamos o Total (grupo 6). Senão o único preço (grupo 5).
+                    const precoFinal = matchItem[6] ? matchItem[6] : matchItem[5];
+
+                    // Guardar para o Excel
+                    dadosParaExcel.push({
+                        "DATA": dataDoc,
+                        "SOLICITANTE": solicitante,
+                        "DESCRIÇÃO": tipoCurto,
+                        "QTD": qtde,
+                        "MATERIAL": material,
+                        "LARGURA": largura,
+                        "ALTURA": altura,
+                        "REF": "",
+                        "ORÇAMENTO": orcamento,
+                        "PREÇO": precoFinal
+                    });
+
+                    // Construir HTML da Tabela
+                    linhasTabela.push(`
+                        <tr class="bg-white border-b hover:bg-blue-50">
+                            <td class="px-3 py-2 whitespace-nowrap">${dataDoc}</td>
+                            <td class="px-3 py-2 font-medium text-gray-900">${solicitante}</td>
+                            <td class="px-3 py-2 text-gray-500">${orcamento}</td>
+                            <td class="px-3 py-2 text-center font-bold bg-gray-50">${qtde}</td>
+                            <td class="px-3 py-2 text-blue-600">${tipoCurto}</td>
+                            <td class="px-3 py-2">
+                                <span class="bg-blue-100 text-blue-800 text-xs font-semibold px-2 py-1 rounded">${material}</span>
+                            </td>
+                            <td class="px-3 py-2 text-right">${largura}</td>
+                            <td class="px-3 py-2 text-right">${altura}</td>
+                            <td class="px-3 py-2 text-right font-mono font-bold text-green-700">R$ ${precoFinal}</td>
+                        </tr>
+                    `);
+                }
+
+                const diagnostico = [];
+                diagnostico.push(`<div class="text-green-600">✓ Orçamento: <strong>${orcamento || 'Não enc.'}</strong></div>`);
+                diagnostico.push(`<div class="text-green-600">✓ Cliente: <strong>${solicitante || 'Não enc.'}</strong></div>`);
+                
+                if (contagem === 0) {
+                    diagnostico.push(`<div class="text-red-600 font-bold mt-2">✖ Nenhum item detectado.</div>`);
+                    document.getElementById('tabelaCorpo').innerHTML = '<tr><td colspan="9" class="text-center py-12 text-red-500 font-bold">Nenhum item da tabela foi reconhecido.</td></tr>';
+                } else {
+                    diagnostico.push(`<div class="text-blue-600 font-bold mt-2">✓ ${contagem} iten(s) extraído(s) com sucesso!</div>`);
+                    document.getElementById('tabelaCorpo').innerHTML = linhasTabela.join('');
+                    
+                    // Ativar botão do Excel
+                    btnExcel.disabled = false;
+                    btnExcel.classList.remove('opacity-50', 'cursor-not-allowed');
+                }
+
+                document.getElementById('diagnostico').innerHTML = diagnostico.join('');
+
+            } catch (error) {
+                console.error(error);
+                document.getElementById('diagnostico').innerHTML = `<div class="text-red-600 font-bold">Erro: ${error.message}</div>`;
+                document.getElementById('tabelaCorpo').innerHTML = '<tr><td colspan="9" class="text-center py-12 text-red-500 font-bold">Falha ao processar o ficheiro PDF.</td></tr>';
+            }
+        });
+    </script>
+</body>
+</html>
+
