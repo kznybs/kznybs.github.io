@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sentinela Digital - Monitoramento IoT Barra do Bugres</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""/>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #0f172a; color: #f8fafc; overflow-x: hidden; }
+        
+        /* === ESTILOS DO SIMULADOR (TOP) === */
+        .glow-safe { box-shadow: 0 0 30px rgba(34, 197, 94, 0.2); border-color: #22c55e; }
+        .glow-warning { box-shadow: 0 0 40px rgba(249, 115, 22, 0.4); border-color: #f97316; }
+        .glow-danger { box-shadow: 0 0 50px rgba(239, 68, 68, 0.6); border-color: #ef4444; animation: pulse-danger 1s infinite alternate; }
+        
+        @keyframes pulse-danger {
+            0% { box-shadow: 0 0 30px rgba(239, 68, 68, 0.5); }
+            100% { box-shadow: 0 0 60px rgba(239, 68, 68, 0.9); }
+        }
+
+        .smartphone {
+            border: 12px solid #334155; border-radius: 36px; background: #1e293b;
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.5), 0 20px 40px rgba(0,0,0,0.4);
+            position: relative; overflow: hidden;
+        }
+        .notch {
+            position: absolute; top: 0; left: 50%; transform: translateX(-50%);
+            width: 120px; height: 25px; background: #334155;
+            border-bottom-left-radius: 16px; border-bottom-right-radius: 16px; z-index: 10;
+        }
+
+        input[type=range] { -webkit-appearance: none; width: 100%; background: transparent; }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none; height: 24px; width: 24px;
+            border-radius: 50%; background: #fff; cursor: pointer;
+            margin-top: -8px; box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+        }
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%; height: 8px; cursor: pointer; background: #334155; border-radius: 4px;
+        }
+        
+        .connector-line {
+            position: absolute; top: 50%; height: 4px;
+            background: linear-gradient(90deg, #475569 50%, transparent 50%);
+            background-size: 10px 100%; width: 50px; z-index: -1;
+        }
+        .anim-dash { animation: dash 1s linear infinite; }
+        @keyframes dash { to { background-position: -20px 0; } }
+        .transition-colors { transition: background-color 0.4s ease, border-color 0.4s ease, color 0.4s ease; }
+
+        /* === ESTILOS DO MAPA (BOTTOM) === */
+        #map-container { height: 75vh; width: 100%; border-radius: 1rem; overflow: hidden; position: relative; border: 1px solid #334155;}
+        #map { height: 100%; width: 100%; z-index: 1; }
+        
+        .glass-panel-dark {
+            background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1); z-index: 1000;
+        }
+
+        /* Animações Mapa */
+        @keyframes pulse-fire {
+            0% { transform: scale(0.9); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.8); }
+            70% { transform: scale(1.2); box-shadow: 0 0 0 20px rgba(239, 68, 68, 0); }
+            100% { transform: scale(0.9); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+        }
+        .fire-marker {
+            background-color: #ef4444; border: 2px solid #fca5a5;
+            border-radius: 50%; animation: pulse-fire 1.5s infinite;
+        }
+
+        @keyframes drift-smoke {
+            0% { opacity: 0.3; transform: scale(1) translateX(0); }
+            50% { opacity: 0.5; transform: scale(1.05) translateX(-20px); }
+            100% { opacity: 0.3; transform: scale(1) translateX(0); }
+        }
+        .smoke-plume { animation: drift-smoke 6s infinite alternate ease-in-out; transform-origin: center; }
+
+        .custom-icon-wrapper {
+            display: flex; align-items: center; justify-content: center;
+            width: 36px; height: 36px; border-radius: 50%; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.6);
+        }
+        .bg-hospital { background-color: #3b82f6; border: 2px solid #93c5fd; } 
+        .bg-road { background-color: #f59e0b; border: 2px solid #fcd34d; } 
+
+        .step-item { transition: all 0.2s ease; cursor: pointer; border-left: 2px solid transparent;}
+        .step-item:hover { background-color: rgba(255, 255, 255, 0.05); border-left-color: #38bdf8; padding-left: 0.75rem;}
+        
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        
+        /* Dark Theme Leaflet Popups */
+        .leaflet-popup-content-wrapper { background: #1e293b; color: #f8fafc; border: 1px solid #334155; }
+        .leaflet-popup-tip { background: #1e293b; border: 1px solid #334155; border-top: none; border-left: none; }
+    </style>
+</head>
+<body class="flex flex-col p-4 md:p-8 relative">
+
+    <header class="text-center mb-10 mt-4">
+        <h1 class="text-3xl md:text-5xl font-bold text-white mb-4 tracking-tight">Sentinela Digital IoT</h1>
+        <p class="text-slate-400 max-w-3xl mx-auto text-lg">Mova os controles deslizantes abaixo para simular o início de uma queimada e observe a rede reagindo em tempo real, alertando a população e mapeando o perigo em Barra do Bugres.</p>
+    </header>
+
+    <main class="max-w-7xl w-full mx-auto flex flex-col gap-16">
+        
+        <!-- === PARTE 1: SIMULADOR DOS SENSORES E CELULAR === -->
+        <section class="flex flex-col md:flex-row items-center justify-between gap-8 md:gap-4 relative z-10 w-full">
+
+            <!-- 1. CAUSA -->
+            <div class="w-full md:w-1/3 bg-slate-800/80 p-6 rounded-2xl border border-slate-700 shadow-xl backdrop-blur-sm z-10 relative">
+                <div class="flex items-center gap-3 mb-6">
+                    <div class="w-10 h-10 rounded-full bg-slate-700 flex items-center justify-center text-xl shadow-inner">🔥</div>
+                    <h2 class="text-xl font-bold text-white">1. O Ambiente (Causa)</h2>
+                </div>
+                
+                <div class="space-y-8">
+                    <div>
+                        <div class="flex justify-between items-end mb-2">
+                            <label class="text-sm font-semibold text-slate-300">Nuvem Tóxica (PM2.5)</label>
+                            <span id="pm-value" class="text-xl font-bold text-sky-400">12 µg/m³</span>
+                        </div>
+                        <input type="range" id="slider-pm" min="0" max="300" value="12" class="w-full">
+                    </div>
+
+                    <div>
+                        <div class="flex justify-between items-end mb-2">
+                            <label class="text-sm font-semibold text-slate-300">Calor / Anomalia Térmica</label>
+                            <span id="temp-value" class="text-xl font-bold text-amber-400">28°C</span>
+                        </div>
+                        <input type="range" id="slider-temp" min="20" max="60" value="28" class="w-full">
+                    </div>
+                </div>
+                <div class="hidden md:block connector-line -right-[50px] anim-dash"></div>
+            </div>
+
+            <!-- 2. O NÓ -->
+            <div class="w-full md:w-1/3 flex flex-col items-center justify-center relative z-20">
+                <div class="absolute -top-6 text-center w-full z-30">
+                    <span class="bg-indigo-600 text-white text-[10px] font-bold px-4 py-1.5 rounded-full uppercase tracking-widest shadow-lg border border-indigo-400">Processamento Borda (Edge)</span>
+                </div>
+                
+                <div id="iot-node" class="w-full bg-slate-900 border-2 rounded-3xl p-6 glow-safe transition-colors flex flex-col items-center shadow-2xl relative overflow-hidden">
+                    
+                    <h3 class="text-lg font-bold text-white mb-1">Nó BB-01 (Mastro Sul)</h3>
+                    <p class="text-xs text-slate-400 mb-5 font-mono">ESP32 + MQTT + LoRa</p>
+
+                    <div class="w-28 h-28 rounded-full flex items-center justify-center border-4 mb-4 transition-colors relative bg-slate-800 shadow-inner" id="status-circle" style="border-color: #22c55e;">
+                        <span id="aqi-value" class="text-4xl font-black text-white">25</span>
+                        <div class="absolute -bottom-3 bg-slate-950 text-[10px] px-3 py-1 rounded-full border border-slate-600 text-slate-300 font-bold tracking-wider shadow-md">ÍNDICE AQI</div>
+                    </div>
+
+                    <div id="status-text" class="text-green-400 font-bold text-xl mt-2 mb-2 uppercase tracking-wide">Tudo Limpo</div>
+                    <p id="status-desc" class="text-sm text-slate-300 text-center leading-relaxed h-10">Parâmetros normais.</p>
+                    
+                </div>
+                <div class="hidden md:block connector-line -right-[50px] anim-dash"></div>
+            </div>
+
+            <!-- 3. EFEITO (CELULAR) -->
+            <div class="w-full md:w-1/3 flex justify-center z-10">
+                <div class="smartphone w-[260px] h-[520px] flex flex-col">
+                    <div class="notch"></div>
+                    
+                    <div class="flex-1 bg-slate-950 p-4 flex flex-col pt-12 relative">
+                        <div class="text-center mb-6">
+                            <p class="text-slate-200 font-bold text-lg">App Cidadão</p>
+                            <p class="text-slate-500 text-xs">Defesa Civil MT</p>
+                        </div>
+
+                        <div id="phone-bg-alert" class="absolute inset-0 bg-red-900/30 opacity-0 transition-opacity duration-500 pointer-events-none"></div>
+
+                        <div id="phone-status-normal" class="bg-slate-800/80 rounded-xl p-4 border border-slate-700 transition-opacity duration-300 relative z-10">
+                            <div class="flex items-center gap-3 mb-2">
+                                <div class="w-3 h-3 rounded-full bg-green-500 shadow-[0_0_10px_#22c55e]"></div>
+                                <h4 class="text-white font-semibold text-sm">Tempo Seguro</h4>
+                            </div>
+                            <p class="text-slate-400 text-xs">Nenhum foco de incêndio detectado em Barra do Bugres.</p>
+                        </div>
+
+                        <div id="push-notification" class="absolute top-16 left-3 right-3 bg-slate-50 rounded-2xl p-4 shadow-2xl transform -translate-y-[200%] opacity-0 pointer-events-none transition-all duration-500 ease-out z-20">
+                            <div class="flex items-start gap-3">
+                                <div class="bg-red-100 p-2 rounded-full flex-shrink-0 animate-pulse">
+                                    <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                                </div>
+                                <div>
+                                    <h4 class="text-red-700 font-bold text-sm mb-1 uppercase">Perigo: Queimada!</h4>
+                                    <p class="text-slate-700 text-xs leading-tight font-medium">Nuvem tóxica detectada pelo Nó BB-01. Feche janelas e evite a rua. Brigada a caminho!</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="h-1.5 w-1/3 bg-slate-600 rounded-full mx-auto mb-3 relative z-20"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- === PARTE 2: MAPA EFEITO DOMINÓ === -->
+        <section class="w-full flex flex-col items-center">
+            <div class="flex items-center gap-4 mb-6">
+                <svg class="w-8 h-8 text-sky-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"></path></svg>
+                <h2 class="text-2xl md:text-3xl font-bold text-white text-center">Impacto Macro: O Efeito Dominó no Território</h2>
+            </div>
+            
+            <div id="map-container" class="shadow-[0_0_50px_rgba(0,0,0,0.5)]">
+                <div id="map"></div>
+
+                <!-- Painel de Informações sobreposto ao mapa -->
+                <div class="absolute top-4 left-4 glass-panel-dark p-5 rounded-xl max-w-[300px] flex flex-col gap-4">
+                    <div class="border-b border-slate-700 pb-3">
+                        <h3 class="text-lg font-bold text-white tracking-tight flex items-center gap-2">
+                            <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse" id="panel-status-dot"></span>
+                            Monitoramento Live
+                        </h3>
+                        <p class="text-xs text-slate-400 font-mono mt-1">CCOM: Barra do Bugres</p>
+                    </div>
+
+                    <div class="space-y-3">
+                        <div class="step-item p-2 -ml-2 rounded" onclick="map.flyTo([-15.0600, -57.1400], 14)">
+                            <h4 class="font-bold text-sm text-red-400 flex items-center gap-2">
+                                <div class="w-3 h-3 rounded-full bg-red-500 border border-red-300"></div> 1. Causa Raiz
+                            </h4>
+                            <p class="text-[11px] text-slate-400 mt-1">Focos de calor em áreas rurais/canaviais (Nordeste).</p>
+                        </div>
+                        <div class="step-item p-2 -ml-2 rounded" onclick="map.flyTo([-15.0720, -57.1820], 13)">
+                            <h4 class="font-bold text-sm text-slate-300 flex items-center gap-2">
+                                <div class="w-3 h-3 rounded-full bg-slate-500"></div> 2. O Vetor
+                            </h4>
+                            <p class="text-[11px] text-slate-400 mt-1">Vento desloca fumaça (PM2.5) para o núcleo urbano.</p>
+                        </div>
+                        <div class="step-item p-2 -ml-2 rounded" onclick="map.flyTo([-15.0745, -57.1815], 15)">
+                            <h4 class="font-bold text-sm text-blue-400 flex items-center gap-2">
+                                <div class="w-3 h-3 rounded-full bg-blue-500"></div> 3. Saúde Pública
+                            </h4>
+                            <p class="text-[11px] text-slate-400 mt-1">Hospital Regional recebe alerta de triagem respiratória.</p>
+                        </div>
+                        <div class="step-item p-2 -ml-2 rounded" onclick="map.flyTo([-15.0950, -57.1700], 14)">
+                            <h4 class="font-bold text-sm text-amber-400 flex items-center gap-2">
+                                <div class="w-3 h-3 rounded-full bg-amber-500"></div> 4. Segurança Viária
+                            </h4>
+                            <p class="text-[11px] text-slate-400 mt-1">Alerta nas rodovias MT-246 e MT-343 por baixa visibilidade.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+    
+    <script>
+        // ==========================================
+        // CONFIGURAÇÃO DO MAPA (LEAFLET)
+        // ==========================================
+        const centroBDB = [-15.0715, -57.1808]; // Barra do Bugres
+        const map = L.map('map', { zoomControl: false }).setView(centroBDB, 13);
+        L.control.zoom({ position: 'topright' }).addTo(map);
+
+        // Tema Escuro do Mapa (Dark Matter)
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+            maxZoom: 19,
+            attribution: '&copy; OpenStreetMap contributors &copy; CARTO'
+        }).addTo(map);
+
+        // Grupos de Camadas para facilitar apagar/desenhar dinamicamente
+        let layerFocos = L.featureGroup().addTo(map);
+        let layerFumaca = L.featureGroup().addTo(map);
+        let layerSaude = L.featureGroup().addTo(map);
+        let layerRodovias = L.featureGroup().addTo(map);
+
+        // Ícones SVG customizados
+        const fireIcon = L.divIcon({
+            className: 'custom-div-icon',
+            html: '<div class="fire-marker w-5 h-5 shadow-[0_0_15px_red]"></div>',
+            iconSize: [20, 20], iconAnchor: [10, 10]
+        });
+
+        const hospitalIcon = L.divIcon({
+            className: 'custom-div-icon',
+            html: `<div class="custom-icon-wrapper bg-hospital text-white"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg></div>`,
+            iconSize: [36, 36], iconAnchor: [18, 18]
+        });
+
+        const roadIcon = L.divIcon({
+            className: 'custom-div-icon',
+            html: `<div class="custom-icon-wrapper bg-road text-white"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg></div>`,
+            iconSize: [36, 36], iconAnchor: [18, 18]
+        });
+
+        // ==========================================
+        // LÓGICA DO SIMULADOR E INTEGRAÇÃO COM O MAPA
+        // ==========================================
+        const sliderPM = document.getElementById('slider-pm');
+        const sliderTemp = document.getElementById('slider-temp');
+        const pushNotif = document.getElementById('push-notification');
+        const panelStatusDot = document.getElementById('panel-status-dot');
+        
+        let currentAlertState = 'INIT'; 
+
+        function processSensors() {
+            const pm = parseInt(sliderPM.value);
+            const temp = parseInt(sliderTemp.value);
+            
+            document.getElementById('pm-value').textContent = `${pm} µg/m³`;
+            document.getElementById('pm-value').className = `text-xl font-bold ${pm > 150 ? 'text-red-400' : pm > 50 ? 'text-amber-400' : 'text-sky-400'}`;
+            
+            document.getElementById('temp-value').textContent = `${temp}°C`;
+            document.getElementById('temp-value').className = `text-xl font-bold ${temp > 40 ? 'text-red-400' : temp > 32 ? 'text-amber-400' : 'text-sky-400'}`;
+
+            // Cálculo AQI
+            let aqi = Math.floor((pm * 0.8) + (temp > 35 ? (temp - 35) * 5 : 0));
+            if (aqi < 10) aqi = 10 + Math.floor(Math.random() * 5); 
+            document.getElementById('aqi-value').textContent = aqi;
+
+            // Motor de Decisão Edge
+            if (aqi >= 150) {
+                setDangerState();
+            } else if (aqi >= 60) {
+                setWarningState();
+            } else {
+                setSafeState();
+            }
+        }
+
+        // --- ESTADO: SEGURO ---
+        function setSafeState() {
+            if(currentAlertState === 'SAFE') return;
+            currentAlertState = 'SAFE';
+
+            // UI Simulador
+            document.getElementById('iot-node').className = 'w-full bg-slate-900 border-2 rounded-3xl p-6 glow-safe transition-colors flex flex-col items-center shadow-2xl relative overflow-hidden';
+            document.getElementById('status-circle').style.borderColor = '#22c55e';
+            document.getElementById('status-text').textContent = 'Tudo Limpo';
+            document.getElementById('status-text').className = 'text-green-400 font-bold text-xl mt-2 mb-2 uppercase tracking-wide transition-colors';
+            document.getElementById('status-desc').textContent = 'Parâmetros atmosféricos normais. Nenhum risco detectado.';
+            pushNotif.classList.remove('-translate-y-48'); 
+            pushNotif.classList.add('-translate-y-[200%]', 'opacity-0', 'pointer-events-none');
+            document.getElementById('phone-bg-alert').classList.add('opacity-0');
+            
+            panelStatusDot.className = "w-2 h-2 rounded-full bg-green-500 animate-pulse";
+
+            // UI Mapa: Limpar tudo
+            layerFocos.clearLayers();
+            layerFumaca.clearLayers();
+            layerSaude.clearLayers();
+            layerRodovias.clearLayers();
+            map.flyTo(centroBDB, 13, {duration: 1.5});
+        }
+
+        // --- ESTADO: ATENÇÃO (Início do Fogo) ---
+        function setWarningState() {
+            if(currentAlertState === 'WARNING') return;
+            currentAlertState = 'WARNING';
+
+            // UI Simulador
+            document.getElementById('iot-node').className = 'w-full bg-slate-900 border-2 rounded-3xl p-6 glow-warning transition-colors flex flex-col items-center shadow-2xl relative overflow-hidden';
+            document.getElementById('status-circle').style.borderColor = '#f97316';
+            document.getElementById('status-text').textContent = 'Atenção Térmica';
+            document.getElementById('status-text').className = 'text-orange-400 font-bold text-xl mt-2 mb-2 uppercase tracking-wide transition-colors';
+            document.getElementById('status-desc').textContent = 'Anomalia detectada. Observando elevação de PM2.5.';
+            pushNotif.classList.remove('-translate-y-48'); 
+            pushNotif.classList.add('-translate-y-[200%]', 'opacity-0', 'pointer-events-none');
+            document.getElementById('phone-bg-alert').classList.add('opacity-0');
+
+            panelStatusDot.className = "w-2 h-2 rounded-full bg-orange-500 animate-pulse";
+
+            // UI Mapa: Mostrar Foco inicial
+            layerFocos.clearLayers();
+            layerFumaca.clearLayers();
+            layerSaude.clearLayers();
+            layerRodovias.clearLayers();
+
+            const coordFoco = [-15.0600, -57.1400]; // Foco nas bordas
+            L.marker(coordFoco, {icon: fireIcon}).addTo(layerFocos)
+             .bindPopup('<div class="p-1"><b class="text-orange-500">Alerta Edge</b><br><span class="text-xs text-slate-300">Calor atípico detectado no canavial.</span></div>').openPopup();
+            
+            // Fumaça muito pequena
+            L.circle(coordFoco, { radius: 1000, fillColor: "#475569", color: "transparent", fillOpacity: 0.4, className: 'smoke-plume'}).addTo(layerFumaca);
+            
+            map.flyTo(coordFoco, 14, {duration: 1.5});
+        }
+
+        // --- ESTADO: PERIGO (Efeito Dominó) ---
+        function setDangerState() {
+            if(currentAlertState === 'DANGER') return;
+            currentAlertState = 'DANGER';
+
+            // UI Simulador
+            document.getElementById('iot-node').className = 'w-full bg-slate-900 border-2 rounded-3xl p-6 glow-danger transition-colors flex flex-col items-center shadow-2xl relative overflow-hidden';
+            document.getElementById('status-circle').style.borderColor = '#ef4444';
+            document.getElementById('status-text').textContent = 'PERIGO (Fumaça)';
+            document.getElementById('status-text').className = 'text-red-500 font-bold text-xl mt-2 mb-2 uppercase tracking-wide transition-colors';
+            document.getElementById('status-desc').textContent = 'Limites rompidos! Transmitindo alertas para Defesa Civil.';
+            
+            setTimeout(() => {
+                pushNotif.classList.remove('-translate-y-[200%]', 'opacity-0', 'pointer-events-none', '-translate-y-48');
+                document.getElementById('phone-bg-alert').classList.remove('opacity-0');
+            }, 600); 
+
+            panelStatusDot.className = "w-2 h-2 rounded-full bg-red-500 animate-pulse";
+
+            // UI Mapa: O Apocalipse (Efeito Dominó)
+            layerFocos.clearLayers();
+            layerFumaca.clearLayers();
+            
+            // 1. Múltiplos Focos
+            const locaisFocos = [ [-15.0450, -57.1550], [-15.0850, -57.2150], [-15.0600, -57.1400] ];
+            locaisFocos.forEach(coord => {
+                L.marker(coord, {icon: fireIcon}).addTo(layerFocos);
+            });
+
+            // 2. Fumaça gigante sobre a cidade
+            L.circle([-15.0650, -57.1750], { radius: 3500, fillColor: "#334155", color: "transparent", fillOpacity: 0.5, className: 'smoke-plume'}).addTo(layerFumaca);
+            L.circle([-15.0720, -57.1820], { radius: 1500, fillColor: "#ef4444", color: "transparent", fillOpacity: 0.3, className: 'smoke-plume'}).addTo(layerFumaca); // Núcleo tóxico
+
+            // 3. Hospital afetado
+            const hospitalMarker = L.marker([-15.0745, -57.1815], {icon: hospitalIcon}).addTo(layerSaude)
+                .bindPopup('<div class="p-1"><b class="text-blue-400">Hospital Regional</b><br><span class="text-xs text-slate-300">Sobrecarga de asma/bronquite.</span></div>');
+            
+            // 4. Rodovias Perigosas
+            L.marker([-15.0950, -57.1700], {icon: roadIcon}).addTo(layerRodovias)
+                .bindPopup('<div class="p-1"><b class="text-amber-400">MT-246</b><br><span class="text-xs text-slate-300">Visibilidade zero.</span></div>');
+            L.marker([-15.0500, -57.1900], {icon: roadIcon}).addTo(layerRodovias);
+
+            // Voa para ver a cidade toda coberta
+            map.flyTo([-15.0700, -57.1750], 13, {duration: 2});
+            
+            // Abre o popup do hospital após o zoom
+            setTimeout(() => { hospitalMarker.openPopup(); }, 2000);
+            
+            // Scroll automático (opcional, suave) para mostrar o mapa
+            document.getElementById('map-container').scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+
+        // Listeners
+        sliderPM.addEventListener('input', processSensors);
+        sliderTemp.addEventListener('input', processSensors);
+
+        // Init
+        processSensors();
+
+    </script>
+</body>
+</html>
