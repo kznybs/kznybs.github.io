@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mapa do Efeito Dominó - Barra do Bugres</title>
+    <!-- Tailwind CSS para estilização rápida -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Leaflet CSS para o mapa interativo -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+    <style>
+        #map { height: 100vh; width: 100%; z-index: 1; }
+        .info-panel { z-index: 1000; }
+        
+        /* Ícones customizados usando HTML/CSS */
+        .custom-div-icon {
+            background: transparent;
+            border: none;
+        }
+        .icon-saude {
+            background-color: #ef4444;
+            color: white;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            border: 2px solid white;
+            box-shadow: 0 0 10px rgba(0,0,0,0.5);
+        }
+        .icon-transito {
+            background-color: #f59e0b;
+            color: white;
+            border-radius: 5px;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            border: 2px solid white;
+            box-shadow: 0 0 10px rgba(0,0,0,0.5);
+        }
+    </style>
+</head>
+<body class="relative m-0 p-0 overflow-hidden font-sans">
+
+    <!-- Container do Mapa -->
+    <div id="map"></div>
+
+    <!-- Painel de Informações (Sobreposição) -->
+    <div class="info-panel absolute top-4 left-4 bg-white/95 backdrop-blur-sm p-6 rounded-lg shadow-xl border border-gray-200 max-w-sm">
+        <div class="flex items-center gap-3 mb-4">
+            <h1 class="text-xl font-bold text-gray-800">O Efeito Dominó</h1>
+            <span class="bg-red-100 text-red-800 text-xs font-semibold px-2.5 py-0.5 rounded">Barra do Bugres - MT</span>
+        </div>
+        
+        <p class="text-sm text-gray-600 mb-5">Simulação espacial da crise sazonal descrita no projeto de monitoramento IoT.</p>
+
+        <div class="space-y-4">
+            <!-- Causa Raiz -->
+            <div class="flex items-start gap-3">
+                <div class="mt-1 w-4 h-4 rounded-full bg-orange-600 border border-orange-800 flex-shrink-0"></div>
+                <div>
+                    <h3 class="font-bold text-sm text-gray-800">1. Causa Raiz (Focos)</h3>
+                    <p class="text-xs text-gray-600">Queimadas em terrenos baldios e áreas periurbanas (agrícolas/cana).</p>
+                </div>
+            </div>
+
+            <!-- O Vetor -->
+            <div class="flex items-start gap-3">
+                <div class="mt-1 w-4 h-4 rounded-full bg-gray-500 opacity-50 flex-shrink-0"></div>
+                <div>
+                    <h3 class="font-bold text-sm text-gray-800">2. O Vetor (PM 2.5)</h3>
+                    <p class="text-xs text-gray-600">Fumaça tóxica sendo empurrada pelos ventos em direção ao centro urbano.</p>
+                </div>
+            </div>
+
+            <!-- Saúde Pública -->
+            <div class="flex items-start gap-3">
+                <div class="mt-1 w-4 h-4 rounded-full bg-red-500 border border-red-700 flex-shrink-0 flex items-center justify-center text-[8px] text-white font-bold">+</div>
+                <div>
+                    <h3 class="font-bold text-sm text-gray-800">3. Saúde Pública</h3>
+                    <p class="text-xs text-gray-600">Sobrecarga no hospital municipal por doenças respiratórias crônicas e agudas.</p>
+                </div>
+            </div>
+
+            <!-- Segurança Viária -->
+            <div class="flex items-start gap-3">
+                <div class="mt-1 w-4 h-4 rounded bg-yellow-500 border border-yellow-700 flex-shrink-0 flex items-center justify-center text-[8px] text-white font-bold">!</div>
+                <div>
+                    <h3 class="font-bold text-sm text-gray-800">4. Segurança Viária</h3>
+                    <p class="text-xs text-gray-600">Baixa visibilidade nas rodovias MT-246 e MT-343, aumentando risco de acidentes.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    
+    <script>
+        // Coordenadas centrais de Barra do Bugres - MT
+        const barraDoBugres = [-15.0764, -57.1812];
+
+        // Inicializa o mapa
+        const map = L.map('map').setView(barraDoBugres, 13);
+
+        // Adiciona a camada de mapa base (OpenStreetMap)
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '© OpenStreetMap contributors | Projeto IoT - Gabriel O.'
+        }).addTo(map);
+
+        // 1. CAUSA RAIZ: Focos de Queimada Periurbanos
+        const focos = [
+            [-15.0650, -57.1650], // Nordeste
+            [-15.0900, -57.1700], // Sudeste
+            [-15.0850, -57.2000]  // Sudoeste
+        ];
+
+        focos.forEach(coord => {
+            L.circleMarker(coord, {
+                radius: 8,
+                fillColor: "#ea580c", // Laranja/Vermelho
+                color: "#9a3412",
+                weight: 1,
+                opacity: 1,
+                fillOpacity: 0.8
+            }).addTo(map).bindPopup('<b>Foco de Queimada Ativo</b><br>Monitoramento ausente ou tardio.');
+        });
+
+        // 2. O VETOR: Zonas de Dispersão de PM 2.5 (Fumaça)
+        // Círculos maiores sobrepostos cobrindo a cidade
+        L.circle([-15.0750, -57.1800], {
+            radius: 1800,
+            fillColor: "#71717a", // Cinza fumaça
+            color: "transparent",
+            fillOpacity: 0.4
+        }).addTo(map).bindPopup('<b>Pluma de Poluição (PM 2.5)</b><br>Concentração perigosa de material particulado.');
+
+        L.circle([-15.0800, -57.1750], {
+            radius: 2200,
+            fillColor: "#52525b", 
+            color: "transparent",
+            fillOpacity: 0.3
+        }).addTo(map);
+
+        // 3. SAÚDE PÚBLICA: Hospital (Centro da Cidade)
+        const hospitalIcon = L.divIcon({
+            className: 'custom-div-icon',
+            html: '<div class="icon-saude">+</div>',
+            iconSize: [30, 30],
+            iconAnchor: [15, 15]
+        });
+
+        L.marker([-15.0780, -57.1850], {icon: hospitalIcon}).addTo(map)
+            .bindPopup('<b style="color:red">Impacto na Saúde</b><br>Aumento no fluxo do pronto-socorro infantil e geriátrico por inalação de fumaça.')
+            .openPopup();
+
+        // 4. SEGURANÇA VIÁRIA: Rodovias (MT-343 e acessos)
+        const transitoIcon = L.divIcon({
+            className: 'custom-div-icon',
+            html: '<div class="icon-transito">!</div>',
+            iconSize: [30, 30],
+            iconAnchor: [15, 15]
+        });
+
+        L.marker([-15.0850, -57.1650], {icon: transitoIcon}).addTo(map)
+            .bindPopup('<b style="color:#d97706">Risco Viário</b><br>Cortina de fumaça na rodovia. Visibilidade reduzida a menos de 50 metros.');
+            
+        L.marker([-15.0920, -57.1850], {icon: transitoIcon}).addTo(map)
+            .bindPopup('<b style="color:#d97706">Risco Viário</b><br>Cortina de fumaça na rodovia.');
+
+    </script>
+</body>
+</html>
