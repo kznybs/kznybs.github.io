@@ -307,7 +307,7 @@
     <div class="main-content" id="main-content">
         <div class="name-container">
             <div class="glitch-wrapper">
-                <h1 class="glitch-text" data-text="KZNYBS">K<span style="color: #0096ff; -webkit-text-fill-color: #0096ff;">Z</span>NYBS</h1>
+                <h1 class="glitch-text" data-text="KZNYBS">KZNYBS</h1>
             </div>
         </div>
 
@@ -315,7 +315,7 @@
              data-tilt data-tilt-max="8" data-tilt-speed="600" data-tilt-glare="true" data-tilt-max-glare="0.15">
             
             <div class="hud-text hud-top-left transform-gpu" style="transform: translateZ(10px);">
-                SYSTEM.ONLINE
+                
             </div>
 
             <div class="icon-container transform-gpu" style="transform: translateZ(40px);">
@@ -337,7 +337,7 @@
             </div>
 
             <div class="hud-text hud-bottom-right transform-gpu" style="transform: translateZ(20px);">
-                V. 2.0.4
+           
             </div>
         </div>
     </div>
@@ -386,6 +386,19 @@
 
         // Retorna à animação CSS nativa se o mouse sair da tela
         document.body.addEventListener("mouseleave", (e) => {
+            Array.from(circleElements).forEach((element) => {
+                element.removeAttribute("style");
+            });
+        });
+
+        // Retorna à animação quando o toque termina (mobile) ou botão do mouse é solto (desktop)
+        document.body.addEventListener("touchend", (e) => {
+            Array.from(circleElements).forEach((element) => {
+                element.removeAttribute("style");
+            });
+        });
+
+        document.body.addEventListener("mouseup", (e) => {
             Array.from(circleElements).forEach((element) => {
                 element.removeAttribute("style");
             });
