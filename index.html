@@ -8,6 +8,15 @@
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     
+    <!-- Importmap para o Three.js do Fundo Fractal -->
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://unpkg.com/three@0.160.0/build/three.module.js"
+            }
+        }
+    </script>
+    
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -24,21 +33,8 @@
             box-sizing: border-box;
         }
 
-        /* Definição de propriedades para a animação do fundo */
-        @property --amplitude {
-            syntax: "<length>";
-            initial-value: 0;
-            inherits: false;
-        }
-
-        @property --scale {
-            syntax: "<number>";
-            initial-value: 1;
-            inherits: false;
-        }
-
         :root {
-            --void-black: #0d0f1e; /* Adaptado para combinar com o novo fundo */
+            --void-black: #0b1016; /* Ajustado para o tema do fractal */
             --glass-base: rgba(10, 30, 60, 0.4);
             --glass-border: rgba(255, 255, 255, 0.08);
             --glass-glow: rgba(0, 150, 255, 0.05);
@@ -60,63 +56,23 @@
             min-height: 100vh;
             min-height: 100dvh; 
             perspective: 1000px;
-            cursor: crosshair; /* Mudado sutilmente para facilitar a interação com os círculos */
+            cursor: crosshair;
         }
 
         /* Oculta cursores em elementos interativos caso queira manter o aspecto limpo */
         a, button, input {
-            cursor: pointer !important; /* Retornado para pointer para usabilidade */
+            cursor: pointer !important;
         }
 
-        /* --- NEW CIRCLE PATTERN BACKGROUND --- */
-        .background-wrapper {
-            position: fixed;
-            top: 0;
-            left: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100%;
-            width: 100%;
-            z-index: -1;
-            overflow: hidden;
-        }
-
-        .circle {
-            position: absolute;
-            height: 100px;
-            width: 100px;
-            border-radius: 9999999px;
-            background: radial-gradient(
-                circle at 50% 0%,
-                oklch(0.1186 0.0248 260.66),
-                oklch(0.3133 0.1419 260.73),
-                oklch(0.6061 0.2122 260.66)
-            );
-            --angle: 90deg;
-            --amplitude: 175px;
-            --scale: 1.5;
-            --offset: 30deg;
-            transform: translate(
-                calc(cos(var(--angle)) * var(--amplitude)),
-                calc(sin(var(--angle)) * var(--amplitude) * -1)
-            )
-            scale(var(--scale)) rotate(calc(-1 * var(--angle) + 17deg));
-            mix-blend-mode: lighten;
-            animation: expand 4.01s cubic-bezier(0.8, 0, 0.2, 1) infinite alternate;
-        }
-
-        .circle:nth-child(1) { --angle: calc(0deg + var(--offset)); }
-        .circle:nth-child(2) { --angle: calc(60deg + var(--offset)); }
-        .circle:nth-child(3) { --angle: calc(120deg + var(--offset)); }
-        .circle:nth-child(4) { --angle: calc(180deg + var(--offset)); }
-        .circle:nth-child(5) { --angle: calc(240deg + var(--offset)); }
-        .circle:nth-child(6) { --angle: calc(300deg + var(--offset)); }
-
-        @keyframes expand {
-            0% { --amplitude: 150px; --scale: 1; }
-            50% { --amplitude: 100px; --scale: 3; }
-            100% { --amplitude: 150px; --scale: 3; }
+        /* --- FRACTAL WEBGL BACKGROUND --- */
+        .webgl { 
+            display: block; 
+            position: fixed; 
+            inset: 0; 
+            z-index: -1; 
+            width: 100%; 
+            height: 100%; 
+            pointer-events: none; /* Deixa os eventos de mouse passarem para o Tilt */
         }
 
         /* --- IMMERSIVE OVERLAYS --- */
@@ -288,15 +244,8 @@
 </head>
 <body class="antialiased">
     
-    <!-- Novo Fundo de Círculos Animados -->
-    <div class="background-wrapper">
-        <div class="circle"></div>
-        <div class="circle"></div>
-        <div class="circle"></div>
-        <div class="circle"></div>
-        <div class="circle"></div>
-        <div class="circle"></div>
-    </div>
+    <!-- Fundo WebGL Fractal -->
+    <canvas class="webgl"></canvas>
 
     <!-- Overlays Cinemáticos -->
     <div class="vignette"></div>
@@ -315,7 +264,7 @@
              data-tilt data-tilt-max="8" data-tilt-speed="600" data-tilt-glare="true" data-tilt-max-glare="0.15">
             
             <div class="hud-text hud-top-left transform-gpu" style="transform: translateZ(10px);">
-                
+               
             </div>
 
             <div class="icon-container transform-gpu" style="transform: translateZ(40px);">
@@ -336,8 +285,6 @@
                 </a>
             </div>
 
-            <div class="hud-text hud-bottom-right transform-gpu" style="transform: translateZ(20px);">
-           
             </div>
         </div>
     </div>
@@ -349,61 +296,6 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/vanilla-tilt/1.7.2/vanilla-tilt.min.js"></script>
     
     <script>
-        /* ==========================================
-           LÓGICA DO NOVO FUNDO DE CÍRCULOS
-           ========================================== */
-        const circleElements = document.querySelectorAll(".circle");
-
-        // Animação reagindo ao movimento do mouse
-        document.body.addEventListener("mousemove", (e) => {
-            const percentX = e.clientX / window.innerWidth;
-            const percentY = e.clientY / window.innerHeight;
-            const amplitude = 0 + 500 * percentX + "px";
-            const scale = 0 + 10 * percentY;
-            
-            Array.from(circleElements).forEach((element) => {
-                element.setAttribute(
-                    "style",
-                    `animation: none; --amplitude: ${amplitude}; --scale: ${scale};`
-                );
-            });
-        });
-
-        // Animação reagindo ao toque em telas móveis
-        document.body.addEventListener("touchmove", (e) => {
-            const percentX = e.touches[0].clientX / window.innerWidth;
-            const percentY = e.touches[0].clientY / window.innerHeight;
-            const amplitude = 0 + 500 * percentX + "px";
-            const scale = 0 + 10 * percentY;
-            
-            Array.from(circleElements).forEach((element) => {
-                element.setAttribute(
-                    "style",
-                    `animation: none; --amplitude: ${amplitude}; --scale: ${scale};`
-                );
-            });
-        });
-
-        // Retorna à animação CSS nativa se o mouse sair da tela
-        document.body.addEventListener("mouseleave", (e) => {
-            Array.from(circleElements).forEach((element) => {
-                element.removeAttribute("style");
-            });
-        });
-
-        // Retorna à animação quando o toque termina (mobile) ou botão do mouse é solto (desktop)
-        document.body.addEventListener("touchend", (e) => {
-            Array.from(circleElements).forEach((element) => {
-                element.removeAttribute("style");
-            });
-        });
-
-        document.body.addEventListener("mouseup", (e) => {
-            Array.from(circleElements).forEach((element) => {
-                element.removeAttribute("style");
-            });
-        });
-
         /* ==========================================
            TILT EFFECT DO CARTÃO
            ========================================== */
@@ -417,6 +309,230 @@
             gyroscope: true, 
             easing: "cubic-bezier(.03,.98,.52,.99)" 
         });
+    </script>
+
+    <!-- Script do Fundo Fractal (Module) -->
+    <script type="module">
+        import * as THREE from "three";
+
+        const canvas = document.querySelector("canvas.webgl");
+
+        const sizes = {
+            width: window.innerWidth,
+            height: window.innerHeight,
+            dpr: Math.min(window.devicePixelRatio, 1.25),
+        };
+
+        const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+        const renderer = new THREE.WebGLRenderer({ canvas, antialias: false });
+        renderer.setPixelRatio(sizes.dpr);
+        renderer.setSize(sizes.width, sizes.height);
+
+        const scene = new THREE.Scene();
+        const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
+
+        const uniforms = {
+            uTime: { value: 0 },
+            uResolution: {
+                value: new THREE.Vector2(sizes.width * sizes.dpr, sizes.height * sizes.dpr),
+            },
+            uMouse: { value: new THREE.Vector2(0, 0) },
+        };
+
+        const vertexShader = `
+            void main() {
+              gl_Position = vec4(position.xy, 0.0, 1.0);
+            }
+        `;
+
+        const fragmentShader = `
+            uniform float uTime;
+            uniform vec2 uResolution;
+            uniform vec2 uMouse;
+
+            #define MAX_STEPS 64
+            #define MAX_DIST 28.0
+            #define SECTORS 6.0
+            #define Z_PERIOD 4.0
+
+            mat2 rot(float a) {
+              float c = cos(a), s = sin(a);
+              return mat2(c, -s, s, c);
+            }
+
+            float hash3(vec3 p) {
+              p = fract(p * 0.3183099 + 0.1);
+              p *= 17.0;
+              return fract(p.x * p.y * p.z * (p.x + p.y + p.z));
+            }
+
+            float vnoise(vec3 x) {
+              vec3 i = floor(x);
+              vec3 f = fract(x);
+              f = f * f * (3.0 - 2.0 * f);
+              return mix(
+                mix(mix(hash3(i + vec3(0.0, 0.0, 0.0)), hash3(i + vec3(1.0, 0.0, 0.0)), f.x),
+                    mix(hash3(i + vec3(0.0, 1.0, 0.0)), hash3(i + vec3(1.0, 1.0, 0.0)), f.x), f.y),
+                mix(mix(hash3(i + vec3(0.0, 0.0, 1.0)), hash3(i + vec3(1.0, 0.0, 1.0)), f.x),
+                    mix(hash3(i + vec3(0.0, 1.0, 1.0)), hash3(i + vec3(1.0, 1.0, 1.0)), f.x), f.y),
+                f.z
+              );
+            }
+
+            float smin(float a, float b, float k) {
+              float h = clamp(0.5 + 0.5 * (b - a) / k, 0.0, 1.0);
+              return mix(b, a, h) - k * h * (1.0 - h);
+            }
+
+            float smax(float a, float b, float k) {
+              return -smin(-a, -b, k);
+            }
+
+            float map(vec3 p, out float orbit, float rt) {
+              float axialR = length(p.xy);
+              float zEvo = p.z * 0.11;
+
+              float ang = 6.2831853 / SECTORS;
+              float a = atan(p.y, p.x + 1e-4);
+              a = abs(mod(a, ang) - ang * 0.5);
+              p.xy = vec2(cos(a), sin(a)) * length(p.xy);
+
+              p.z = mod(p.z, Z_PERIOD) - Z_PERIOD * 0.5;
+              p.x -= 2.0;
+
+              float lod = clamp((20.0 - rt) / 14.0, 0.0, 1.0);
+
+              if (lod > 0.01) {
+                vec3 wp = p * 1.6 + vec3(0.0, 0.0, uTime * 0.15);
+                float w1 = vnoise(wp) - 0.5;
+                float w2 = vnoise(wp + 11.3) - 0.5;
+                p.xy += vec2(w1, w2) * (0.085 * lod);
+                float w3 = vnoise(p * 0.6 + vec3(0.0, 0.0, uTime * 0.08)) - 0.5;
+                p.xy += w3 * (0.06 * lod);
+              }
+
+              float kz = 3.0 * 6.2831853 / Z_PERIOD;
+              p.x += sin(p.z * kz - uTime * 1.0) * 0.04;
+
+              vec3 texP = p;
+              float scale = 1.0;
+              orbit = 1e9;
+              float dCoarse = 1e9;
+              float dMid = 1e9;
+              float dFine = 1e9;
+              float dVein = 1e9;
+              float dUltra = 1e9;
+              mat2 rYZ = rot(0.42 + 0.22 * sin(zEvo));
+              mat2 rXZ = rot(-0.23 + 0.22 * cos(zEvo * 1.1));
+              vec3 ifsOff = vec3(2.1 + 0.22 * sin(zEvo * 0.7), 1.35, 0.95 + 0.18 * cos(zEvo));
+              for (int i = 0; i < 9; i++) {
+                p = abs(p);
+                if (p.x < p.y) p.xy = p.yx;
+                if (p.x < p.z) p.xz = p.zx;
+                p.yz *= rYZ;
+                p.xz *= rXZ;
+                p = p * 2.0 - ifsOff;
+                scale *= 2.0;
+                orbit = min(orbit, length(p));
+                if (i == 2) dCoarse = (length(p.xy) - (0.34 + 0.10 * sin(zEvo * 0.8))) / scale;
+                if (i == 4) dMid = (length(p.xy) - (0.22 + 0.07 * sin(zEvo * 1.3 + 1.0))) / scale;
+                if (i == 6) dFine = (length(p.xy) - (0.12 + 0.04 * sin(zEvo * 2.1))) / scale;
+                if (i == 7) dVein = (length(p.xy) - (0.10 + 0.03 * sin(zEvo * 2.4))) / scale;
+                if (i == 8) dUltra = (length(p.xy) - (0.09 + 0.03 * sin(zEvo * 2.7))) / scale;
+              }
+              float d = smin(dCoarse, dMid, 0.20);
+              d = smin(d, dFine, 0.11);
+              d = smin(d, dVein, 0.08);
+              d = smin(d, dUltra, 0.06);
+
+              if (lod > 0.01) d -= (vnoise(texP * 7.0 + vec3(0.0, 0.0, uTime * 0.1)) - 0.5) * (0.008 * lod);
+
+              d = smax(d, 0.5 - axialR, 0.3);
+              return d;
+            }
+
+            void main() {
+              vec2 uv = (gl_FragCoord.xy * 2.0 - uResolution) / uResolution.y;
+
+              float glide = uTime * 0.42 + 0.15 * sin(uTime * 0.20);
+              vec3 ro = vec3(0.0, 0.0, glide);
+              vec3 rd = normalize(vec3(uv + uMouse * 0.35, 1.5));
+              rd.xy *= rot(uTime * 0.012);
+
+              float t = 0.0;
+              float steps = 0.0;
+              float orbit = 0.0;
+              float o;
+              for (int i = 0; i < MAX_STEPS; i++) {
+                vec3 pos = ro + rd * t;
+                float d = map(pos, o, t);
+                orbit = o;
+                if (d < 0.0012 * (1.0 + t) || t > MAX_DIST) { break; }
+                t += d * 0.78;
+                steps += 1.0;
+              }
+
+              float ao = 1.0 - steps / float(MAX_STEPS);
+
+              vec3 frost = vec3(0.88, 0.93, 0.965);
+              vec3 ink   = vec3(0.20, 0.26, 0.34);
+
+              float breath = 0.85 + 0.15 * sin(uTime * 0.63);
+
+              vec3 col = mix(ink, frost, pow(ao, 2.2));
+              col += vec3(0.35, 0.55, 0.75) * exp(-orbit * 1.5) * 0.25 * breath;
+              col += frost * 0.18 * exp(-orbit * 7.0);
+
+              float fog = 1.0 - exp(-t * 0.075);
+              col = mix(col, frost, fog * 0.5);
+
+              vec2 axisUV = uv + uMouse * 0.35;
+              float shaft = exp(-abs(axisUV.x) * 9.0) * exp(-abs(axisUV.y) * 0.9);
+              float axis = length(axisUV);
+              col += frost * 0.16 * exp(-axis * 4.0) * breath;
+              col += frost * 0.85 * shaft * (0.3 + 0.7 * fog) * breath;
+
+              col = max(col, ink * 0.55);
+
+              float core = exp(-axis * 9.0);
+              col = mix(col, frost, core);
+
+              col = clamp(col, vec3(0.0), vec3(0.92, 0.955, 0.985));
+              gl_FragColor = vec4(col, 1.0);
+            }
+        `;
+
+        const material = new THREE.ShaderMaterial({ uniforms, vertexShader, fragmentShader });
+        scene.add(new THREE.Mesh(new THREE.PlaneGeometry(2, 2), material));
+
+        const mouseTarget = new THREE.Vector2(0, 0);
+        window.addEventListener("pointermove", (e) => {
+            mouseTarget.x = (e.clientX / sizes.width) * 2 - 1;
+            mouseTarget.y = -((e.clientY / sizes.height) * 2 - 1);
+        });
+
+        window.addEventListener("resize", () => {
+            sizes.width = window.innerWidth;
+            sizes.height = window.innerHeight;
+            sizes.dpr = Math.min(window.devicePixelRatio, 1.25);
+            renderer.setPixelRatio(sizes.dpr);
+            renderer.setSize(sizes.width, sizes.height);
+            uniforms.uResolution.value.set(sizes.width * sizes.dpr, sizes.height * sizes.dpr);
+        });
+
+        const clock = new THREE.Clock();
+        function tick() {
+            uniforms.uTime.value = reducedMotion ? 12.0 : clock.getElapsedTime();
+            uniforms.uMouse.value.lerp(mouseTarget, 0.05);
+            renderer.render(scene, camera);
+            requestAnimationFrame(tick);
+        }
+        
+        // Inicia a animação assim que a janela carrega
+        window.onload = () => {
+            tick();
+        };
 
     </script>
 </body>
