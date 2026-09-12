@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Forms TI</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; max-width: 400px; margin: auto; }
+        label { display: block; margin-top: 15px; font-weight: bold; }
+        input, textarea { width: 100%; padding: 8px; margin-top: 5px; box-sizing: border-box; }
+        button { margin-top: 20px; padding: 10px 15px; background: #0078D4; color: white; border: none; cursor: pointer; width: 100%; font-size: 16px; }
+        button:hover { background: #005A9E; }
+    </style>
+</head>
+<body>
+
+    <h2>Abertura de Solicitação - TI</h2>
+    <form id="meuFormulario">
+        <label for="nome">Nome do Solicitante:</label>
+        <input type="text" id="nome" placeholder="Digite seu nome" required>
+
+        <label for="tipo">Tipo de Solicitação:</label>
+        <input type="text" id="tipo" placeholder="Ex: Formatação, Criação de Usuário" required>
+
+        <label for="descricao">Descrição do Pedido:</label>
+        <textarea id="descricao" rows="4" placeholder="Detalhe a solicitação..." required></textarea>
+
+        <button type="button" onclick="enviarWebhook()">Enviar Formulário</button>
+    </form>
+
+    <script>
+        function enviarWebhook() {
+            // URL gerada pelo gatilho do Power Automate
+            const url = "https://default43225152890e4109b9020aa71529d6.5a.environment.api.powerplatform.com:443/powerautomate/automations/direct/cu/20/workflows/332b453a4eb44db6847206916edf5465/triggers/manual/paths/invoke?api-version=1";
+
+            // 1. Captura os valores digitados no HTML
+            const nome = document.getElementById("nome").value;
+            const tipo = document.getElementById("tipo").value;
+            const descricao = document.getElementById("descricao").value;
+
+            // 2. Validação simples para não enviar vazio
+            if(!nome || !tipo || !descricao) {
+                alert("Por favor, preencha todos os campos antes de enviar.");
+                return;
+            }
+
+            // 3. Monta a estrutura JSON com os dados do form
+            const payload = {
+                nome_solicitante: nome,
+                tipo_solicitacao: tipo,
+                descricao_pedido: descricao
+            };
+
+            // 4. Dispara a requisição HTTP POST
+            fetch(url, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(payload)
+            })
+            .then(resposta => {
+                if (resposta.ok) {
+                    alert("✅ Solicitação enviada com sucesso para a TI!");
+                    document.getElementById("meuFormulario").reset(); // Limpa os campos
+                } else {
+                    alert("❌ Falha ao enviar. Erro HTTP: " + resposta.status);
+                }
+            })
+            .catch(erro => console.error("Erro na requisição:", erro));
+        }
+    </script>
+
+</body>
+</html>
