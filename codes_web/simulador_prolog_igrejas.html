@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Simulador Prolog - Igrejas</title>
+<style>
+*{box-sizing:border-box}
+body{
+  margin:0;background:#0b1118;color:#e8eef5;
+  font-family:Inter,Segoe UI,Arial,sans-serif;
+  min-height:100vh;display:flex;align-items:center;justify-content:center;
+}
+.app{width:min(1100px,94vw);padding:24px 0}
+.header{margin-bottom:18px}
+.header h1{margin:0;font-size:28px}
+.header p{margin:6px 0 0;color:#91a0b2}
+.terminal{
+  background:#0f1720;border:1px solid #263445;border-radius:14px;
+  overflow:hidden;box-shadow:0 18px 50px #0008;
+}
+.bar{
+  background:#182332;padding:11px 16px;display:flex;align-items:center;
+  gap:8px;border-bottom:1px solid #2a394b;
+}
+.dot{width:11px;height:11px;border-radius:50%;background:#718096}
+.title{margin-left:8px;color:#aebbd0;font-size:13px}
+.screen{padding:22px;min-height:470px}
+.line{font-family:"Cascadia Code","Consolas",monospace;font-size:16px;line-height:1.65;white-space:pre-wrap}
+.prompt{color:#7dd3fc}
+.result{color:#e2e8f0}
+.success{color:#7ee787}
+.muted{color:#718096}
+.error{color:#ff7b72}
+.controls{
+  display:grid;grid-template-columns:1fr auto;gap:10px;
+  padding:14px;border-top:1px solid #263445;background:#111b27;
+}
+input{
+  width:100%;background:#081018;border:1px solid #34465b;color:#f8fafc;
+  border-radius:8px;padding:12px;font:15px "Cascadia Code",Consolas,monospace;outline:none;
+}
+input:focus{border-color:#60a5fa}
+button{
+  border:0;border-radius:8px;padding:0 18px;background:#2563eb;color:white;
+  font-weight:700;cursor:pointer;
+}
+button:hover{background:#1d4ed8}
+.examples{
+  display:flex;flex-wrap:wrap;gap:8px;margin-top:12px
+}
+.examples button{
+  padding:8px 11px;background:#1b2939;color:#bcd0e6;font-size:12px;font-weight:500
+}
+.examples button:hover{background:#263a51}
+.info{
+  margin-top:15px;background:#111b27;border:1px solid #263445;
+  border-radius:10px;padding:13px;color:#94a3b8;font-size:13px
+}
+kbd{color:#dbeafe;background:#1e293b;padding:2px 5px;border-radius:4px}
+@media(max-width:650px){
+ .controls{grid-template-columns:1fr}
+ button{height:42px}
+ .screen{min-height:520px}
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <h1>Simulador de Consultas Prolog</h1>
+    <p>Base de conhecimento: Igrejas</p>
+  </div>
+
+  <div class="terminal">
+    <div class="bar">
+      <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+      <span class="title">Prolog Console — igrejas.pl</span>
+    </div>
+
+    <div class="screen" id="screen"></div>
+
+    <div class="controls">
+      <input id="query" autocomplete="off"
+        placeholder="Digite uma consulta, ex.: tombada(Igreja).">
+      <button onclick="runQuery()">Executar</button>
+    </div>
+  </div>
+
+  <div class="examples">
+    <button onclick="setQuery(\"seculo_construcao('Capela do Cemitério', Seculo).\")">Questão A</button>
+    <button onclick="setQuery('tombada(Igreja).')">Questão B</button>
+    <button onclick="setQuery('aberta(Igreja).')">Questão C</button>
+    <button onclick="setQuery('tombada_e_aberta(Igreja).')">Questão D</button>
+    <button onclick="setQuery('tombada_nao_aberta(Igreja).')">Questão E</button>
+    <button onclick="clearScreen()">Limpar</button>
+  </div>
+
+  <div class="info">
+    <strong>Apresentação:</strong> clique nas questões acima para demonstrar as consultas.
+    Também é possível digitar uma das consultas no terminal e pressionar <kbd>Enter</kbd>.
+  </div>
+</div>
+
+<script>
+const data = {
+  seculo_construcao: {
+    "Igreja Matriz":"XIX",
+    "Capela São Benedito":"XIX",
+    "Igreja N. Sra. do Carmo":"XX",
+    "Capela do Cemitério":"XVIII",
+    "Igreja São Luiz":"XX"
+  },
+  tombada: ["Igreja Matriz","Capela São Benedito","Capela do Cemitério"],
+  aberta: ["Igreja Matriz","Igreja N. Sra. do Carmo","Igreja São Luiz"]
+};
+
+const screen = document.getElementById("screen");
+const input = document.getElementById("query");
+
+function addLine(text, cls="line"){
+  const div=document.createElement("div");
+  div.className=cls+" line";
+  div.textContent=text;
+  screen.appendChild(div);
+}
+
+function setQuery(q){
+  input.value=q;
+  runQuery();
+}
+
+function clearScreen(){
+  screen.innerHTML="";
+  addLine("% Simulador Prolog carregado.", "muted");
+  addLine("% Base: igrejas.pl", "muted");
+  addLine("");
+  addLine("?- ", "prompt");
+}
+
+function queryA(){
+  addLine("?- seculo_construcao('Capela do Cemitério', Seculo).", "prompt");
+  addLine("Seculo = 'XVIII'.", "result");
+  addLine("true.", "success");
+}
+
+function queryList(nome, values){
+  addLine("?- "+nome+"(Igreja).", "prompt");
+  values.forEach((v,i)=>{
+    addLine("Igreja = '"+v+"'"+(i<values.length-1 ? " ;" : "."), "result");
+  });
+  addLine("true.", "success");
+}
+
+function runQuery(){
+  const q=input.value.trim();
+  if(!q) return;
+
+  if(q === "seculo_construcao('Capela do Cemitério', Seculo)."){
+    queryA();
+  } else if(q === "tombada(Igreja)."){
+    queryList("tombada", data.tombada);
+  } else if(q === "aberta(Igreja)."){
+    queryList("aberta", data.aberta);
+  } else if(q === "tombada_e_aberta(Igreja)."){
+    const r=data.tombada.filter(x=>data.aberta.includes(x));
+    addLine("?- tombada_e_aberta(Igreja).", "prompt");
+    r.forEach((v,i)=>addLine("Igreja = '"+v+"'"+(i<r.length-1?" ;":"."), "result"));
+    addLine("true.", "success");
+  } else if(q === "tombada_nao_aberta(Igreja)."){
+    const r=data.tombada.filter(x=>!data.aberta.includes(x));
+    addLine("?- tombada_nao_aberta(Igreja).", "prompt");
+    r.forEach((v,i)=>addLine("Igreja = '"+v+"'"+(i<r.length-1?" ;":"."), "result"));
+    addLine("true.", "success");
+  } else {
+    addLine("?- "+q, "prompt");
+    addLine("ERROR: consulta não cadastrada neste simulador.", "error");
+    addLine("Use uma das 5 consultas da atividade.", "muted");
+  }
+  screen.scrollTop=screen.scrollHeight;
+  input.value="";
+}
+
+input.addEventListener("keydown", e=>{
+  if(e.key==="Enter") runQuery();
+});
+
+clearScreen();
+</script>
+</body>
+</html>
