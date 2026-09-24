@@ -1,0 +1,877 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checklist TI - Formatação Barralcool</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Phosphor Icons -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'] },
+                    colors: {
+                        // Paleta Corporativa IT / Barralcool (Tons de Azul Tecnológico e Verde)
+                        brand: {
+                            50: '#f0fdfa',
+                            100: '#ccfbf1',
+                            200: '#99f6e4',
+                            300: '#5eead4',
+                            400: '#2dd4bf',
+                            500: '#14b8a6', // Teal principal
+                            600: '#0d9488',
+                            700: '#0f766e',
+                            800: '#115e59',
+                            900: '#134e4a',
+                        },
+                        corporate: {
+                            800: '#1e293b', // Slate 800
+                            900: '#0f172a', // Slate 900
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+            overflow: hidden; /* Prevent body scroll, handled by internal containers */
+        }
+        .dark body { background-color: #0f172a; }
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        .dark ::-webkit-scrollbar-thumb { background: #475569; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+        /* Animations */
+        .fade-in { animation: fadeIn 0.3s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        
+        .toast-enter { animation: toastEnter 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        .toast-leave { animation: toastLeave 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        @keyframes toastEnter { from { opacity: 0; transform: translateY(100%) scale(0.9); } to { opacity: 1; transform: translateY(0) scale(1); } }
+        @keyframes toastLeave { from { opacity: 1; transform: translateY(0) scale(1); } to { opacity: 0; transform: translateY(100%) scale(0.9); } }
+
+        /* Smooth UI Transitions */
+        .transition-theme { transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease; }
+    </style>
+</head>
+
+<body class="text-slate-800 dark:text-slate-200 transition-theme h-screen flex flex-col md:flex-row">
+
+    <!-- Sidebar (Desktop) / Drawer (Mobile) -->
+    <aside id="sidebar" class="fixed md:static inset-y-0 left-0 z-40 w-72 bg-corporate-900 text-slate-300 transform -translate-x-full md:translate-x-0 transition-transform duration-300 ease-in-out flex flex-col shadow-2xl md:shadow-none">
+        
+        <!-- Branding -->
+        <div class="h-20 flex items-center px-6 border-b border-white/10 bg-corporate-900/50 backdrop-blur-sm shrink-0">
+            <div class="w-10 h-10 rounded-xl bg-brand-500 flex items-center justify-center text-white mr-3 shadow-lg shadow-brand-500/20">
+                <i class="ph ph-desktop-tower text-2xl"></i>
+            </div>
+            <div>
+                <h1 class="text-lg font-bold text-white leading-tight">Barralcool TI</h1>
+                <p class="text-xs text-brand-300 font-medium">Gestão de Setups</p>
+            </div>
+            <!-- Mobile Close Btn -->
+            <button id="close-sidebar-btn" class="md:hidden ml-auto text-slate-400 hover:text-white p-2">
+                <i class="ph ph-x text-xl"></i>
+            </button>
+        </div>
+
+        <!-- Dynamic Sidebar Content Area -->
+        <div id="sidebar-content" class="flex-1 flex flex-col overflow-hidden">
+            <!-- Rendered by JS based on View -->
+        </div>
+
+    </aside>
+
+    <!-- Main Content -->
+    <main class="flex-1 flex flex-col h-full bg-slate-50 dark:bg-slate-900 transition-theme relative w-full overflow-hidden">
+        
+        <!-- Topbar -->
+        <header class="h-20 bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between px-4 sm:px-8 shrink-0 transition-theme z-10">
+            <div class="flex items-center gap-4">
+                <button id="open-sidebar-btn" class="md:hidden p-2 -ml-2 text-slate-500 hover:text-brand-600 dark:text-slate-400 dark:hover:text-brand-400 rounded-lg">
+                    <i class="ph ph-list text-2xl"></i>
+                </button>
+                
+                <!-- Back Button (Hidden in Dashboard) -->
+                <button id="back-to-dashboard-btn" class="hidden items-center gap-2 text-slate-500 hover:text-brand-600 dark:text-slate-400 dark:hover:text-brand-400 transition-colors font-medium">
+                    <i class="ph ph-arrow-left text-xl"></i>
+                    <span class="hidden sm:inline">Voltar</span>
+                </button>
+
+                <div class="flex flex-col">
+                    <h2 id="topbar-title" class="text-xl font-bold text-slate-800 dark:text-white truncate max-w-[200px] sm:max-w-md">Dashboard de Máquinas</h2>
+                    <p id="topbar-subtitle" class="text-xs text-slate-500 dark:text-slate-400 hidden">Checklist em andamento</p>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-3">
+                <!-- Search -->
+                <div class="relative hidden sm:block">
+                    <i class="ph ph-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                    <input type="text" id="search-input" placeholder="Pesquisar..." 
+                        class="pl-10 pr-4 py-2 w-64 bg-slate-100 dark:bg-slate-900 border-transparent focus:border-brand-500 focus:bg-white dark:focus:bg-slate-800 rounded-xl text-sm outline-none transition-all dark:text-slate-200 placeholder-slate-400">
+                </div>
+                
+                <!-- Theme Toggle -->
+                <button id="theme-toggle" class="w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-700 flex items-center justify-center text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors">
+                    <i id="theme-icon" class="ph ph-moon text-lg"></i>
+                </button>
+            </div>
+        </header>
+
+        <!-- Content Area: DASHBOARD VIEW -->
+        <div id="dashboard-view" class="flex-1 overflow-y-auto p-4 sm:p-8 relative block fade-in">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
+                <div>
+                    <h3 class="text-lg font-semibold text-slate-800 dark:text-slate-200">Máquinas em Setup</h3>
+                    <p class="text-sm text-slate-500 dark:text-slate-400">Gerencie e acompanhe a formatação dos equipamentos.</p>
+                </div>
+                <button onclick="app.openNewMachineModal()" class="w-full sm:w-auto bg-brand-600 hover:bg-brand-700 text-white font-medium rounded-xl text-sm px-6 py-3 flex items-center justify-center gap-2 transition-colors shadow-lg shadow-brand-500/30">
+                    <i class="ph ph-plus-circle text-lg"></i>
+                    Nova Máquina
+                </button>
+            </div>
+
+            <!-- Grid de Máquinas -->
+            <div id="machines-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 pb-20">
+                <!-- Injected by JS -->
+            </div>
+
+            <!-- Empty Dashboard State -->
+            <div id="dashboard-empty-state" class="hidden flex flex-col items-center justify-center py-20 text-center fade-in">
+                <div class="w-24 h-24 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center mb-6 text-brand-500/50">
+                    <i class="ph ph-desktop-tower text-5xl"></i>
+                </div>
+                <h3 class="text-xl font-bold text-slate-700 dark:text-slate-200 mb-2">Nenhuma máquina na fila</h3>
+                <p class="text-slate-500 dark:text-slate-400 max-w-sm text-sm mb-6">Clique no botão "Nova Máquina" para iniciar um novo processo de formatação.</p>
+                <button onclick="app.openNewMachineModal()" class="text-brand-600 dark:text-brand-400 font-medium hover:underline">Criar primeiro setup</button>
+            </div>
+        </div>
+
+        <!-- Content Area: MACHINE DETAIL VIEW (Checklist) -->
+        <div id="machine-detail-view" class="flex-1 overflow-y-auto p-4 sm:p-8 relative hidden fade-in">
+            <!-- Add Custom Task Form -->
+            <form id="add-task-form" class="mb-8 bg-white dark:bg-slate-800 p-2 sm:p-2 pl-4 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 flex flex-col sm:flex-row gap-3 transition-theme">
+                <input type="text" id="new-task-input" required placeholder="Adicionar verificação extra..." 
+                    class="flex-1 bg-transparent border-none text-slate-800 dark:text-slate-100 text-sm focus:ring-0 outline-none placeholder-slate-400 py-2 sm:py-0">
+                
+                <div class="flex gap-2 sm:shrink-0">
+                    <select id="new-task-priority" class="bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 text-sm rounded-xl focus:ring-2 focus:ring-brand-500 outline-none px-3 py-2 cursor-pointer transition-theme">
+                        <option value="high">Crítica</option>
+                        <option value="medium" selected>Normal</option>
+                        <option value="low">Baixa</option>
+                    </select>
+                    
+                    <button type="submit" class="bg-brand-600 hover:bg-brand-700 text-white font-medium rounded-xl text-sm px-5 py-2 flex items-center gap-2 transition-colors shadow-sm">
+                        <i class="ph ph-plus font-bold"></i>
+                        <span class="hidden sm:inline">Adicionar</span>
+                    </button>
+                </div>
+            </form>
+
+            <!-- Tasks List -->
+            <div class="max-w-4xl mx-auto pb-20">
+                <div id="tasks-container" class="space-y-3">
+                    <!-- Tasks injected by JS -->
+                </div>
+
+                <!-- Empty State Tasks -->
+                <div id="empty-state" class="hidden flex flex-col items-center justify-center py-20 text-center fade-in">
+                    <div class="w-20 h-20 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center mb-6 text-slate-400 dark:text-slate-500">
+                        <i class="ph ph-check-circle text-4xl"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-slate-700 dark:text-slate-200 mb-2">Tudo pronto por aqui!</h3>
+                    <p class="text-slate-500 dark:text-slate-400 max-w-sm text-sm">Todas as tarefas desta etapa foram concluídas ou nenhuma foi encontrada.</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Modal Nova Máquina -->
+    <div id="new-machine-modal" class="fixed inset-0 z-50 flex items-center justify-center hidden">
+        <!-- Backdrop -->
+        <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onclick="app.closeNewMachineModal()"></div>
+        
+        <!-- Modal Content -->
+        <div class="relative bg-white dark:bg-slate-800 w-full max-w-md rounded-2xl shadow-2xl p-6 transform scale-95 opacity-0 transition-all duration-300" id="modal-content">
+            <div class="flex items-center justify-between mb-6">
+                <h3 class="text-xl font-bold text-slate-800 dark:text-white flex items-center gap-2">
+                    <i class="ph ph-laptop text-brand-500"></i> Cadastrar Máquina
+                </h3>
+                <button onclick="app.closeNewMachineModal()" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
+                    <i class="ph ph-x text-xl"></i>
+                </button>
+            </div>
+
+            <form id="create-machine-form" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Hostname (Nome na Rede) *</label>
+                    <input type="text" id="machine-hostname" required placeholder="Ex: BRL-TI-05" 
+                        class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-100 rounded-xl px-4 py-2.5 outline-none focus:ring-2 focus:ring-brand-500 transition-all">
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Usuário / Setor *</label>
+                    <input type="text" id="machine-user" required placeholder="Ex: João Silva - Contabilidade" 
+                        class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-100 rounded-xl px-4 py-2.5 outline-none focus:ring-2 focus:ring-brand-500 transition-all">
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Patrimônio</label>
+                        <input type="text" id="machine-patrimony" placeholder="Ex: 01245" 
+                            class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-100 rounded-xl px-4 py-2.5 outline-none focus:ring-2 focus:ring-brand-500 transition-all">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Técnico</label>
+                        <input type="text" id="machine-tech" required placeholder="Seu nome" 
+                            class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-100 rounded-xl px-4 py-2.5 outline-none focus:ring-2 focus:ring-brand-500 transition-all">
+                    </div>
+                </div>
+
+                <div class="pt-4 flex gap-3">
+                    <button type="button" onclick="app.closeNewMachineModal()" class="flex-1 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 font-medium py-2.5 rounded-xl transition-colors">Cancelar</button>
+                    <button type="submit" class="flex-1 bg-brand-600 hover:bg-brand-700 text-white font-medium py-2.5 rounded-xl transition-colors shadow-lg shadow-brand-500/30">Iniciar Setup</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Overlay for Mobile Sidebar -->
+    <div id="mobile-overlay" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-30 hidden md:hidden"></div>
+
+    <!-- Toast Container -->
+    <div id="toast-container" class="fixed bottom-6 right-6 z-50 flex flex-col gap-3 pointer-events-none"></div>
+
+    <script>
+        /**
+         * ==========================================
+         * CORE ARCHITECTURE: Multi-Session Checklist
+         * ==========================================
+         */
+
+        const STAGES_TEMPLATE = [
+            { id: 'stg_1', title: '1. Triagem e Backup', icon: 'ph-hard-drives' },
+            { id: 'stg_2', title: '2. SO e Drivers', icon: 'ph-windows-logo' },
+            { id: 'stg_3', title: '3. ERP e Corporativo', icon: 'ph-buildings' },
+            { id: 'stg_4', title: '4. Rede e Domínio', icon: 'ph-globe-hemisphere-west' },
+            { id: 'stg_5', title: '5. Validação e Entrega', icon: 'ph-shield-check' }
+        ];
+
+        const TASKS_TEMPLATE = [
+            { id: 't1', stageId: 'stg_1', title: 'Realizar backup dos arquivos do usuário (Documentos, Desktop)', completed: false, priority: 'high' },
+            { id: 't2', stageId: 'stg_1', title: 'Fazer backup do arquivo PST (Outlook)', completed: false, priority: 'high' },
+            { id: 't3', stageId: 'stg_1', title: 'Anotar nome da máquina atual e IP fixo (se houver)', completed: false, priority: 'medium' },
+            
+            { id: 't4', stageId: 'stg_2', title: 'Formatar disco C: (NTFS) e instalar Windows 10/11 Pro', completed: false, priority: 'high' },
+            { id: 't5', stageId: 'stg_2', title: 'Instalar ferramenta da fabricante (Dell Command / Lenovo Vantage)', completed: false, priority: 'medium' },
+            { id: 't6', stageId: 'stg_2', title: 'Atualizar todos os drivers e BIOS', completed: false, priority: 'high' },
+
+            { id: 't7', stageId: 'stg_3', title: 'Instalar Pacote Office 365 e ativar', completed: false, priority: 'high' },
+            { id: 't8', stageId: 'stg_3', title: 'Instalar TOTVS Protheus (Configurar SmartClient e atalhos)', completed: false, priority: 'high' },
+            { id: 't9', stageId: 'stg_3', title: 'Instalar Kaspersky Endpoint Security', completed: false, priority: 'high' },
+
+            { id: 't10', stageId: 'stg_4', title: 'Inserir máquina no Domínio (barralcool.local)', completed: false, priority: 'high' },
+            { id: 't11', stageId: 'stg_4', title: 'Mapear unidades de rede departamentais (Z:, W:, etc)', completed: false, priority: 'medium' },
+            { id: 't12', stageId: 'stg_4', title: 'Instalar impressoras padrão do setor', completed: false, priority: 'medium' },
+
+            { id: 't13', stageId: 'stg_5', title: 'Restaurar backup do usuário', completed: false, priority: 'high' },
+            { id: 't14', stageId: 'stg_5', title: 'Validar acesso à internet e ERP com usuário logado', completed: false, priority: 'high' },
+        ];
+
+        class Store {
+            constructor() {
+                this.state = {
+                    view: 'dashboard', // 'dashboard' or 'machine_detail'
+                    machines: [],
+                    activeMachineId: null,
+                    activeStageId: 'all', 
+                    searchQuery: '',
+                    theme: 'light'
+                };
+                this.listeners = [];
+                this.init();
+            }
+
+            init() {
+                const savedTheme = localStorage.getItem('barralcool_ti_theme');
+                if (savedTheme) this.state.theme = savedTheme;
+                else if (window.matchMedia('(prefers-color-scheme: dark)').matches) this.state.theme = 'dark';
+
+                const savedMachines = localStorage.getItem('barralcool_ti_machines');
+                if (savedMachines) {
+                    this.state.machines = JSON.parse(savedMachines);
+                }
+            }
+
+            subscribe(listener) {
+                this.listeners.push(listener);
+                listener(this.state);
+            }
+
+            notify() {
+                this.listeners.forEach(listener => listener(this.state));
+            }
+
+            persist() {
+                localStorage.setItem('barralcool_ti_machines', JSON.stringify(this.state.machines));
+                localStorage.setItem('barralcool_ti_theme', this.state.theme);
+            }
+
+            // Actions
+            toggleTheme() {
+                this.state.theme = this.state.theme === 'light' ? 'dark' : 'light';
+                this.persist();
+                this.notify();
+            }
+
+            setSearchQuery(query) {
+                this.state.searchQuery = query.toLowerCase();
+                this.notify();
+            }
+
+            createMachine(info) {
+                const newMachine = {
+                    id: 'mac_' + Date.now().toString(36),
+                    info: info,
+                    createdAt: new Date().toISOString(),
+                    tasks: JSON.parse(JSON.stringify(TASKS_TEMPLATE)) // Deep clone template
+                };
+                this.state.machines.push(newMachine);
+                this.persist();
+                this.notify();
+                return newMachine.id;
+            }
+
+            deleteMachine(machineId) {
+                this.state.machines = this.state.machines.filter(m => m.id !== machineId);
+                if (this.state.activeMachineId === machineId) {
+                    this.state.view = 'dashboard';
+                    this.state.activeMachineId = null;
+                }
+                this.persist();
+                this.notify();
+            }
+
+            openMachine(machineId) {
+                this.state.view = 'machine_detail';
+                this.state.activeMachineId = machineId;
+                this.state.activeStageId = 'all'; // Default open all stages
+                this.state.searchQuery = ''; // clear search when navigating
+                this.notify();
+            }
+
+            goToDashboard() {
+                this.state.view = 'dashboard';
+                this.state.activeMachineId = null;
+                this.state.searchQuery = '';
+                this.notify();
+            }
+
+            setActiveStage(stageId) {
+                this.state.activeStageId = stageId;
+                this.notify();
+            }
+
+            toggleTask(taskId) {
+                if (!this.state.activeMachineId) return;
+                const machine = this.state.machines.find(m => m.id === this.state.activeMachineId);
+                if (machine) {
+                    const task = machine.tasks.find(t => t.id === taskId);
+                    if (task) {
+                        task.completed = !task.completed;
+                        this.persist();
+                        this.notify();
+                    }
+                }
+            }
+
+            deleteTask(taskId) {
+                if (!this.state.activeMachineId) return;
+                const machine = this.state.machines.find(m => m.id === this.state.activeMachineId);
+                if (machine) {
+                    machine.tasks = machine.tasks.filter(t => t.id !== taskId);
+                    this.persist();
+                    this.notify();
+                }
+            }
+
+            addTask(title, priority) {
+                if (!this.state.activeMachineId) return;
+                const machine = this.state.machines.find(m => m.id === this.state.activeMachineId);
+                if (machine) {
+                    const stageId = this.state.activeStageId === 'all' ? STAGES_TEMPLATE[0].id : this.state.activeStageId;
+                    machine.tasks.push({
+                        id: 't_' + Date.now().toString(36),
+                        stageId: stageId,
+                        title: title.trim(),
+                        completed: false,
+                        priority: priority
+                    });
+                    this.persist();
+                    this.notify();
+                }
+            }
+
+            // Selectors
+            getMachineProgress(machine) {
+                if (!machine || !machine.tasks) return { total: 0, completed: 0, percentage: 0 };
+                const total = machine.tasks.length;
+                const completed = machine.tasks.filter(t => t.completed).length;
+                const percentage = total === 0 ? 0 : Math.round((completed / total) * 100);
+                return { total, completed, percentage };
+            }
+        }
+
+        class UIRenderer {
+            constructor(store) {
+                this.store = store;
+                this.DOM = {
+                    html: document.documentElement,
+                    themeToggle: document.getElementById('theme-toggle'),
+                    themeIcon: document.getElementById('theme-icon'),
+                    sidebarContent: document.getElementById('sidebar-content'),
+                    topbarTitle: document.getElementById('topbar-title'),
+                    topbarSubtitle: document.getElementById('topbar-subtitle'),
+                    searchInput: document.getElementById('search-input'),
+                    dashboardView: document.getElementById('dashboard-view'),
+                    machineDetailView: document.getElementById('machine-detail-view'),
+                    machinesGrid: document.getElementById('machines-grid'),
+                    dashboardEmptyState: document.getElementById('dashboard-empty-state'),
+                    tasksContainer: document.getElementById('tasks-container'),
+                    tasksEmptyState: document.getElementById('empty-state'),
+                    backBtn: document.getElementById('back-to-dashboard-btn'),
+                    sidebar: document.getElementById('sidebar'),
+                    mobileOverlay: document.getElementById('mobile-overlay'),
+                    toastContainer: document.getElementById('toast-container')
+                };
+
+                this.priorityConfig = {
+                    high: { label: 'Crítica', class: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400 border border-red-200 dark:border-red-800', icon: 'ph-warning-circle' },
+                    medium: { label: 'Normal', class: 'bg-slate-100 text-slate-700 dark:bg-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-600', icon: 'ph-minus' },
+                    low: { label: 'Baixa', class: 'bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 border border-blue-100 dark:border-blue-800', icon: 'ph-arrow-down' }
+                };
+            }
+
+            render(state) {
+                this.renderTheme(state.theme);
+                this.DOM.searchInput.value = state.searchQuery; // Keep input synced
+
+                if (state.view === 'dashboard') {
+                    this.renderDashboard(state);
+                } else {
+                    this.renderMachineDetail(state);
+                }
+            }
+
+            renderTheme(theme) {
+                if (theme === 'dark') {
+                    this.DOM.html.classList.add('dark');
+                    this.DOM.themeIcon.classList.replace('ph-moon', 'ph-sun');
+                } else {
+                    this.DOM.html.classList.remove('dark');
+                    this.DOM.themeIcon.classList.replace('ph-sun', 'ph-moon');
+                }
+            }
+
+            renderDashboard(state) {
+                // UI Toggles
+                this.DOM.dashboardView.classList.remove('hidden');
+                this.DOM.machineDetailView.classList.add('hidden');
+                this.DOM.backBtn.classList.add('hidden');
+                this.DOM.openSidebarBtn = document.getElementById('open-sidebar-btn');
+                this.DOM.openSidebarBtn.classList.remove('hidden');
+                
+                this.DOM.topbarTitle.textContent = 'Dashboard de Máquinas';
+                this.DOM.topbarSubtitle.classList.add('hidden');
+
+                // Sidebar setup for Dashboard
+                this.renderSidebarDashboard(state);
+
+                // Filter & Render Grid
+                const filtered = state.machines.filter(m => 
+                    m.info.hostname.toLowerCase().includes(state.searchQuery) ||
+                    m.info.user.toLowerCase().includes(state.searchQuery)
+                );
+
+                this.DOM.machinesGrid.innerHTML = '';
+
+                if (filtered.length === 0) {
+                    if(state.machines.length === 0) {
+                        this.DOM.dashboardEmptyState.classList.remove('hidden');
+                        this.DOM.machinesGrid.classList.add('hidden');
+                    } else {
+                        this.DOM.dashboardEmptyState.classList.add('hidden');
+                        this.DOM.machinesGrid.classList.remove('hidden');
+                        this.DOM.machinesGrid.innerHTML = '<p class="col-span-full text-center text-slate-500 py-10">Nenhuma máquina encontrada para esta pesquisa.</p>';
+                    }
+                } else {
+                    this.DOM.dashboardEmptyState.classList.add('hidden');
+                    this.DOM.machinesGrid.classList.remove('hidden');
+
+                    filtered.forEach(machine => {
+                        const prog = this.store.getMachineProgress(machine);
+                        const isDone = prog.percentage === 100;
+
+                        const card = document.createElement('div');
+                        card.className = `bg-white dark:bg-slate-800 rounded-2xl p-5 shadow-sm border transition-all hover:shadow-md flex flex-col group
+                                        ${isDone ? 'border-brand-500/30 dark:border-brand-500/20' : 'border-slate-200 dark:border-slate-700 hover:border-brand-300 dark:hover:border-brand-600'}`;
+                        
+                        card.innerHTML = `
+                            <div class="flex justify-between items-start mb-4">
+                                <div class="w-12 h-12 rounded-xl flex items-center justify-center ${isDone ? 'bg-brand-500 text-white' : 'bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-300'}">
+                                    <i class="ph ph-desktop-tower text-2xl"></i>
+                                </div>
+                                <div class="flex gap-1">
+                                    <button onclick="app.deleteMachine('${machine.id}')" class="text-slate-300 dark:text-slate-600 hover:text-red-500 p-2 rounded-lg transition-colors" title="Excluir">
+                                        <i class="ph ph-trash text-lg"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <h4 class="font-bold text-lg text-slate-800 dark:text-white truncate mb-1">${this.escapeHTML(machine.info.hostname)}</h4>
+                            <p class="text-sm text-slate-500 dark:text-slate-400 truncate mb-4"><i class="ph ph-user mr-1"></i>${this.escapeHTML(machine.info.user)}</p>
+                            
+                            <div class="mt-auto">
+                                <div class="flex justify-between text-xs mb-1.5 font-medium">
+                                    <span class="text-slate-500 dark:text-slate-400">Progresso</span>
+                                    <span class="${isDone ? 'text-brand-500' : 'text-slate-700 dark:text-slate-300'}">${prog.percentage}%</span>
+                                </div>
+                                <div class="w-full bg-slate-100 dark:bg-slate-700 rounded-full h-1.5 mb-5 overflow-hidden">
+                                    <div class="bg-brand-500 h-full transition-all duration-500" style="width: ${prog.percentage}%"></div>
+                                </div>
+                                
+                                <button onclick="app.openMachine('${machine.id}')" class="w-full py-2.5 rounded-xl text-sm font-medium transition-colors border outline-none
+                                    ${isDone ? 'bg-brand-50 dark:bg-brand-500/10 text-brand-600 dark:text-brand-400 border-brand-200 dark:border-brand-500/30 hover:bg-brand-100 dark:hover:bg-brand-500/20' 
+                                            : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-200 hover:border-brand-500 group-hover:border-brand-500 hover:text-brand-600 dark:hover:text-brand-400'}">
+                                    ${isDone ? 'Verificar Setup' : 'Continuar Setup'}
+                                </button>
+                            </div>
+                        `;
+                        this.DOM.machinesGrid.appendChild(card);
+                    });
+                }
+            }
+
+            renderSidebarDashboard(state) {
+                const total = state.machines.length;
+                const completed = state.machines.filter(m => this.store.getMachineProgress(m).percentage === 100).length;
+                const inProgress = total - completed;
+
+                this.DOM.sidebarContent.innerHTML = `
+                    <div class="p-6">
+                        <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-4">Resumo Global</p>
+                        <div class="space-y-4">
+                            <div class="bg-corporate-800/50 rounded-xl p-4 border border-white/5">
+                                <div class="text-slate-400 text-sm mb-1">Total de Máquinas</div>
+                                <div class="text-2xl font-bold text-white">${total}</div>
+                            </div>
+                            <div class="flex gap-4">
+                                <div class="flex-1 bg-brand-500/10 rounded-xl p-4 border border-brand-500/20">
+                                    <div class="text-brand-400 text-sm mb-1">Concluídas</div>
+                                    <div class="text-xl font-bold text-brand-300">${completed}</div>
+                                </div>
+                                <div class="flex-1 bg-slate-800/50 rounded-xl p-4 border border-white/5">
+                                    <div class="text-slate-400 text-sm mb-1">Na Fila</div>
+                                    <div class="text-xl font-bold text-white">${inProgress}</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            renderMachineDetail(state) {
+                const machine = state.machines.find(m => m.id === state.activeMachineId);
+                if (!machine) return this.store.goToDashboard(); // Fallback
+
+                // UI Toggles
+                this.DOM.dashboardView.classList.add('hidden');
+                this.DOM.machineDetailView.classList.remove('hidden');
+                this.DOM.backBtn.classList.remove('hidden');
+                this.DOM.openSidebarBtn.classList.add('hidden');
+
+                this.DOM.topbarTitle.textContent = machine.info.hostname;
+                this.DOM.topbarSubtitle.textContent = machine.info.user;
+                this.DOM.topbarSubtitle.classList.remove('hidden');
+
+                // Render Sidebar with Stages
+                this.renderSidebarStages(machine, state.activeStageId);
+
+                // Render Tasks
+                const tasksToRender = machine.tasks.filter(task => {
+                    const matchesStage = state.activeStageId === 'all' || task.stageId === state.activeStageId;
+                    const matchesSearch = task.title.toLowerCase().includes(state.searchQuery);
+                    return matchesStage && matchesSearch;
+                });
+
+                this.DOM.tasksContainer.innerHTML = '';
+
+                if (tasksToRender.length === 0) {
+                    this.DOM.tasksContainer.classList.add('hidden');
+                    this.DOM.tasksEmptyState.classList.remove('hidden');
+                } else {
+                    this.DOM.tasksContainer.classList.remove('hidden');
+                    this.DOM.tasksEmptyState.classList.add('hidden');
+
+                    tasksToRender.forEach(task => {
+                        const stageObj = STAGES_TEMPLATE.find(s => s.id === task.stageId);
+                        const stageName = stageObj ? stageObj.title : '';
+                        const prio = this.priorityConfig[task.priority];
+
+                        const div = document.createElement('div');
+                        div.className = `fade-in group bg-white dark:bg-slate-800 p-4 rounded-2xl border transition-all flex items-start gap-4 shadow-sm
+                            ${task.completed 
+                                ? 'border-slate-100 dark:border-slate-700/50 opacity-60 bg-slate-50 dark:bg-slate-800/50' 
+                                : 'border-slate-200 dark:border-slate-700 hover:border-brand-300 dark:hover:border-brand-600'}`;
+                        
+                        div.innerHTML = `
+                            <button onclick="app.toggleTask('${task.id}')" 
+                                class="shrink-0 mt-0.5 w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2 dark:focus:ring-offset-slate-900
+                                ${task.completed ? 'bg-brand-500 border-brand-500 text-white' : 'border-slate-300 dark:border-slate-500 text-transparent hover:border-brand-500 dark:hover:border-brand-400'}">
+                                <i class="ph ph-check text-sm font-bold"></i>
+                            </button>
+                            
+                            <div class="flex-1 min-w-0">
+                                <p class="text-[15px] font-medium leading-snug mb-2 ${task.completed ? 'text-slate-400 dark:text-slate-500 line-through' : 'text-slate-700 dark:text-slate-200'}">
+                                    ${this.escapeHTML(task.title)}
+                                </p>
+                                <div class="flex flex-wrap items-center gap-2">
+                                    ${state.activeStageId === 'all' ? `
+                                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-semibold uppercase tracking-wider bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400">
+                                            <i class="ph ph-folder"></i> ${this.escapeHTML(stageName)}
+                                        </span>
+                                    ` : ''}
+                                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-semibold uppercase tracking-wider ${prio.class}">
+                                        <i class="ph ${prio.icon}"></i> ${prio.label}
+                                    </span>
+                                </div>
+                            </div>
+
+                            <button onclick="app.deleteTask('${task.id}')" class="shrink-0 text-slate-300 dark:text-slate-600 hover:text-red-500 dark:hover:text-red-400 p-1.5 rounded-lg transition-colors outline-none focus:ring-2 focus:ring-red-500">
+                                <i class="ph ph-trash text-lg"></i>
+                            </button>
+                        `;
+                        this.DOM.tasksContainer.appendChild(div);
+                    });
+                }
+            }
+
+            renderSidebarStages(machine, activeStageId) {
+                const prog = this.store.getMachineProgress(machine);
+                
+                let html = `
+                    <div class="p-6 border-b border-white/10 shrink-0">
+                        <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Progresso do Setup</p>
+                        <div class="flex justify-between items-end mb-2">
+                            <span class="text-3xl font-bold text-white">${prog.percentage}%</span>
+                            <span class="text-sm font-medium text-slate-400">${prog.completed}/${prog.total}</span>
+                        </div>
+                        <div class="w-full bg-slate-800 rounded-full h-2">
+                            <div class="bg-brand-500 h-2 rounded-full transition-all duration-700 ease-out" style="width: ${prog.percentage}%"></div>
+                        </div>
+                    </div>
+                    
+                    <nav class="flex-1 overflow-y-auto py-4 px-3 space-y-1">
+                        <button class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all font-medium text-sm text-left
+                            ${activeStageId === 'all' ? 'bg-brand-500/10 text-brand-400 border border-brand-500/20' : 'text-slate-400 hover:bg-slate-800 hover:text-slate-200 border border-transparent'}"
+                            onclick="app.setActiveStage('all')">
+                            <i class="ph ph-squares-four text-lg"></i>
+                            Visão Geral
+                        </button>
+                `;
+
+                STAGES_TEMPLATE.forEach(stage => {
+                    const isActive = activeStageId === stage.id;
+                    const stageTasks = machine.tasks.filter(t => t.stageId === stage.id);
+                    const completedTasks = stageTasks.filter(t => t.completed).length;
+                    const totalTasks = stageTasks.length;
+                    const isFullyCompleted = totalTasks > 0 && completedTasks === totalTasks;
+
+                    html += `
+                        <button class="w-full flex items-center justify-between px-3 py-2.5 rounded-xl transition-all text-sm text-left group
+                            ${isActive ? 'bg-brand-500/10 text-brand-400 border border-brand-500/20' : 'text-slate-400 hover:bg-slate-800 hover:text-slate-200 border border-transparent'}"
+                            onclick="app.setActiveStage('${stage.id}')">
+                            <div class="flex items-center gap-3 truncate">
+                                <i class="ph ${stage.icon} text-lg ${isFullyCompleted ? 'text-green-500' : ''}"></i>
+                                <span class="font-medium truncate ${isFullyCompleted && !isActive ? 'line-through opacity-70' : ''}">${this.escapeHTML(stage.title)}</span>
+                            </div>
+                            ${totalTasks > 0 ? `
+                                <span class="text-[10px] font-bold px-2 py-0.5 rounded-full ${isActive ? 'bg-brand-500/20 text-brand-300' : 'bg-slate-800 text-slate-500 group-hover:bg-slate-700'}">
+                                    ${completedTasks}/${totalTasks}
+                                </span>
+                            ` : ''}
+                        </button>
+                    `;
+                });
+
+                html += `</nav>`;
+                this.DOM.sidebarContent.innerHTML = html;
+            }
+
+            showToast(message, type = 'success') {
+                const toast = document.createElement('div');
+                const styles = {
+                    success: 'bg-emerald-500 text-white shadow-emerald-500/20',
+                    error: 'bg-red-500 text-white shadow-red-500/20',
+                    info: 'bg-slate-800 text-white shadow-slate-900/20 dark:bg-slate-700'
+                };
+                const icons = { success: 'ph-check-circle', error: 'ph-warning-circle', info: 'ph-info' };
+
+                toast.className = `toast-enter pointer-events-auto flex items-center gap-3 px-4 py-3 rounded-xl shadow-lg text-sm font-medium ${styles[type]}`;
+                toast.innerHTML = `<i class="ph ${icons[type]} text-xl"></i><span>${this.escapeHTML(message)}</span>`;
+
+                this.DOM.toastContainer.appendChild(toast);
+                setTimeout(() => {
+                    toast.classList.replace('toast-enter', 'toast-leave');
+                    toast.addEventListener('animationend', () => toast.remove());
+                }, 3000);
+            }
+
+            escapeHTML(str) {
+                const div = document.createElement('div');
+                div.textContent = str;
+                return div.innerHTML;
+            }
+
+            toggleMobileMenu(forceClose = false) {
+                const isOpen = !this.DOM.sidebar.classList.contains('-translate-x-full');
+                if (isOpen || forceClose) {
+                    this.DOM.sidebar.classList.add('-translate-x-full');
+                    this.DOM.mobileOverlay.classList.add('hidden');
+                } else {
+                    this.DOM.sidebar.classList.remove('-translate-x-full');
+                    this.DOM.mobileOverlay.classList.remove('hidden');
+                }
+            }
+        }
+
+        class AppController {
+            constructor() {
+                this.store = new Store();
+                this.ui = new UIRenderer(this.store);
+                this.store.subscribe((state) => this.ui.render(state));
+                this.setupEventListeners();
+                
+                // Greeting
+                if(this.store.state.machines.length === 0) {
+                    this.ui.showToast('Bem-vindo. Crie uma máquina para começar.', 'info');
+                }
+            }
+
+            setupEventListeners() {
+                this.ui.DOM.themeToggle.addEventListener('click', () => this.store.toggleTheme());
+
+                // Search Debounce
+                let searchTimeout;
+                this.ui.DOM.searchInput.addEventListener('input', (e) => {
+                    clearTimeout(searchTimeout);
+                    searchTimeout = setTimeout(() => this.store.setSearchQuery(e.target.value), 300);
+                });
+
+                // Add Task in Detail View
+                document.getElementById('add-task-form').addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    const input = document.getElementById('new-task-input');
+                    const prio = document.getElementById('new-task-priority').value;
+                    if (input.value.trim()) {
+                        this.store.addTask(input.value, prio);
+                        input.value = '';
+                        this.ui.showToast('Verificação adicionada ao checklist.');
+                    }
+                });
+
+                // New Machine Form
+                document.getElementById('create-machine-form').addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    const formData = {
+                        hostname: document.getElementById('machine-hostname').value,
+                        user: document.getElementById('machine-user').value,
+                        patrimony: document.getElementById('machine-patrimony').value,
+                        technician: document.getElementById('machine-tech').value,
+                    };
+                    const newId = this.store.createMachine(formData);
+                    this.closeNewMachineModal();
+                    this.store.openMachine(newId); // auto open created machine
+                    this.ui.showToast('Setup iniciado com sucesso!', 'success');
+                });
+
+                // Navigation
+                this.ui.DOM.backBtn.addEventListener('click', () => this.goToDashboard());
+
+                // Mobile
+                document.getElementById('open-sidebar-btn')?.addEventListener('click', () => this.ui.toggleMobileMenu());
+                document.getElementById('close-sidebar-btn')?.addEventListener('click', () => this.ui.toggleMobileMenu());
+                document.getElementById('mobile-overlay')?.addEventListener('click', () => this.ui.toggleMobileMenu());
+            }
+
+            // Expose globally
+            openNewMachineModal() {
+                const modal = document.getElementById('new-machine-modal');
+                const content = document.getElementById('modal-content');
+                document.getElementById('create-machine-form').reset();
+                
+                modal.classList.remove('hidden');
+                // Trigger animation
+                setTimeout(() => {
+                    content.classList.remove('scale-95', 'opacity-0');
+                    content.classList.add('scale-100', 'opacity-100');
+                }, 10);
+            }
+
+            closeNewMachineModal() {
+                const modal = document.getElementById('new-machine-modal');
+                const content = document.getElementById('modal-content');
+                
+                content.classList.remove('scale-100', 'opacity-100');
+                content.classList.add('scale-95', 'opacity-0');
+                
+                setTimeout(() => {
+                    modal.classList.add('hidden');
+                }, 300); // match transition duration
+            }
+
+            openMachine(id) { this.store.openMachine(id); }
+            goToDashboard() { 
+                this.store.goToDashboard();
+                if (window.innerWidth < 768) this.ui.toggleMobileMenu(true);
+            }
+            setActiveStage(id) {
+                this.store.setActiveStage(id);
+                if (window.innerWidth < 768) this.ui.toggleMobileMenu(true);
+            }
+            toggleTask(id) { this.store.toggleTask(id); }
+            deleteTask(id) { this.store.deleteTask(id); this.ui.showToast('Item removido.', 'info'); }
+            deleteMachine(id) {
+                // Using standard confirm only for destructive external actions if needed, 
+                // but let's make it direct to match previous requirement of no alerts. 
+                // (In a real app we'd use a custom modal, but here we execute immediately)
+                this.store.deleteMachine(id);
+                this.ui.showToast('Máquina removida do sistema.', 'info');
+            }
+        }
+
+        let app;
+        window.addEventListener('DOMContentLoaded', () => { app = new AppController(); });
+
+    </script>
+</body>
+</html>
