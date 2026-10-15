@@ -1,0 +1,3443 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Studio de Automação de Artes e Comunicados</title>
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Carlito:ital,wght@0,400;0,700;1,400;1,700&family=Inter:wght@400;500;600;700;800&family=Montserrat:wght@500;600;700;800&family=Open+Sans:wght@400;600;700&family=Ubuntu:wght@400;500;700&display=swap" rel="stylesheet">
+
+  <style>
+    body {
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      background-color: #090d16;
+      color: #f1f5f9;
+    }
+
+    /* Fundo quadriculado sutil no palco de edição da arte */
+    .stage-checkerboard {
+      background-color: #0f172a;
+      background-image:
+        linear-gradient(45deg, #1e293b 25%, transparent 25%),
+        linear-gradient(-45deg, #1e293b 25%, transparent 25%),
+        linear-gradient(45deg, transparent 75%, #1e293b 75%),
+        linear-gradient(-45deg, transparent 75%, #1e293b 75%);
+      background-size: 24px 24px;
+      background-position: 0 0, 0 12px, 12px -12px, -12px 0;
+    }
+
+    #art-canvas {
+      max-width: 100%;
+      max-height: calc(100vh - 210px);
+      width: auto;
+      height: auto;
+      display: block;
+      border-radius: 6px;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.65);
+      background-color: #ffffff;
+      touch-action: none;
+      user-select: none;
+    }
+
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #090d16;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #334155;
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #475569;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col selection:bg-emerald-500 selection:text-slate-950">
+
+  <header class="bg-slate-900/95 border-b border-slate-800 sticky top-0 z-40 backdrop-blur">
+    <div class="max-w-[1600px] mx-auto px-4 py-2.5 flex flex-wrap items-center justify-between gap-3">
+
+      <!-- Identidade do Sistema -->
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-700 flex items-center justify-center font-extrabold text-white shadow-lg shadow-emerald-900/40 shrink-0">
+          SA
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <h1 class="text-sm sm:text-base font-extrabold text-white tracking-tight">
+              Studio de Automação de Artes e Comunicados
+            </h1>
+            <span class="hidden sm:inline-block text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
+              v2.0 Completo
+            </span>
+          </div>
+          <p class="text-[11px] text-slate-400">
+            Cadastre o modelo uma única vez e gere novas artes preenchendo apenas o formulário
+          </p>
+        </div>
+      </div>
+
+      <!-- Navegação por Etapas (Início vs Upgrades) -->
+      <nav class="flex flex-wrap items-center gap-2">
+        <!-- Grupo INÍCIO -->
+        <div class="flex items-center bg-slate-950 border border-slate-800 rounded-xl p-1 gap-1">
+          <span class="text-[10px] font-extrabold uppercase tracking-wider text-emerald-400 px-2 py-1">
+            Início
+          </span>
+          <button
+            type="button"
+            data-stage="stage-1"
+            class="stage-nav-btn px-3 py-1.5 rounded-lg text-xs font-bold transition bg-emerald-500 text-slate-950 shadow"
+          >
+            Etapa 1: MVP Estúdio
+          </button>
+          <button
+            type="button"
+            data-stage="stage-2"
+            class="stage-nav-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition text-slate-300 hover:text-white hover:bg-slate-800/70 flex items-center gap-1.5"
+          >
+            <span>Etapa 2: Biblioteca</span>
+            <span id="badge-templates-count" class="px-1.5 py-0.2 rounded-full text-[10px] bg-slate-800 text-emerald-400 font-bold">3</span>
+          </button>
+        </div>
+
+        <!-- Grupo UPGRADES -->
+        <div class="flex items-center bg-slate-950 border border-slate-800 rounded-xl p-1 gap-1">
+          <span class="text-[10px] font-extrabold uppercase tracking-wider text-amber-400 px-2 py-1">
+            Upgrades
+          </span>
+          <button
+            type="button"
+            data-stage="stage-3"
+            class="stage-nav-btn px-2.5 py-1.5 rounded-lg text-xs font-semibold transition text-slate-300 hover:text-white hover:bg-slate-800/70 flex items-center gap-1"
+          >
+            <span>Etapa 3: Histórico</span>
+            <span id="badge-history-count" class="px-1.5 py-0.2 rounded-full text-[10px] bg-slate-800 text-amber-400 font-bold">0</span>
+          </button>
+          <button
+            type="button"
+            data-stage="stage-4"
+            class="stage-nav-btn px-2.5 py-1.5 rounded-lg text-xs font-semibold transition text-slate-300 hover:text-white hover:bg-slate-800/70 flex items-center gap-1"
+          >
+            <span>Etapa 4: Solicitações</span>
+            <span id="badge-requests-count" class="px-1.5 py-0.2 rounded-full text-[10px] bg-amber-500/20 text-amber-300 font-bold">3</span>
+          </button>
+          <button
+            type="button"
+            data-stage="stage-5"
+            class="stage-nav-btn px-2.5 py-1.5 rounded-lg text-xs font-semibold transition text-slate-300 hover:text-white hover:bg-slate-800/70"
+          >
+            Etapa 5: Automações
+          </button>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Input de Arquivo Oculto Global para Upload de Imagem de Fundo -->
+  <input id="global-bg-upload" type="file" accept="image/*" class="hidden" />
+  <!-- Input de Arquivo Oculto Global para Importar Modelo JSON -->
+  <input id="global-json-upload" type="file" accept=".json,application/json" class="hidden" />
+
+  <!-- Notificação Toast Flutuante (Sem usar alert) -->
+  <div
+    id="toast-container"
+    class="fixed bottom-5 right-5 z-50 hidden max-w-md bg-slate-900/95 border border-emerald-500/50 text-slate-100 px-4 py-3 rounded-2xl shadow-2xl flex items-center gap-3 backdrop-blur"
+  >
+    <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 shrink-0 animate-pulse"></span>
+    <p id="toast-message" class="text-xs sm:text-sm font-medium flex-1"></p>
+    <button
+      id="toast-close-btn"
+      type="button"
+      class="text-slate-400 hover:text-white text-xs font-bold px-2 py-1 rounded-lg hover:bg-slate-800"
+    >
+      ✕
+    </button>
+  </div>
+
+  <!-- ===================================================================== -->
+  <!-- ETAPA 1 — MVP: CRIAÇÃO, PREENCHIMENTO E EXPORTAÇÃO DE ARTES           -->
+  <!-- ===================================================================== -->
+  <main id="view-stage-1" class="stage-view flex-1 max-w-[1600px] w-full mx-auto px-4 py-4 grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
+
+    <!-- COLUNA ESQUERDA (5 COLUNAS): FORMULÁRIO DINÂMICO OU CONFIGURAÇÃO DO MODELO -->
+    <section class="lg:col-span-5 bg-slate-900 border border-slate-800 rounded-2xl shadow-xl flex flex-col lg:max-h-[calc(100vh-88px)] overflow-hidden">
+
+      <!-- Barra Superior do Painel Esquerdo: Seletor Rápido de Modelo + Alternador de Modo -->
+      <div class="p-3.5 bg-slate-950/90 border-b border-slate-800 space-y-3">
+        <div class="flex items-center justify-between gap-2">
+          <div class="flex items-center gap-2 min-w-0 flex-1">
+            <span class="text-[11px] font-bold uppercase tracking-wider text-slate-400 shrink-0">Modelo:</span>
+            <select
+              id="studio-template-select"
+              class="w-full bg-slate-900 border border-slate-700 rounded-xl px-2.5 py-1.5 text-xs sm:text-sm font-bold text-emerald-400 focus:outline-none focus:border-emerald-500 truncate cursor-pointer"
+            ></select>
+          </div>
+          <button
+            id="btn-quick-new-with-image"
+            type="button"
+            class="px-3 py-1.5 rounded-xl bg-emerald-600/20 hover:bg-emerald-600/35 border border-emerald-500/40 text-emerald-300 text-xs font-bold transition shrink-0 flex items-center gap-1.5"
+            title="Criar um novo modelo enviando uma imagem do seu computador"
+          >
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+            </svg>
+            <span>Novo c/ Imagem</span>
+          </button>
+        </div>
+
+        <!-- Abas Internas da Etapa 1: Preencher (Dia a Dia) vs Configurar Modelo -->
+        <div class="grid grid-cols-2 gap-1.5 bg-slate-900 p-1 rounded-xl border border-slate-800">
+          <button
+            id="tab-btn-fill"
+            type="button"
+            class="py-2 px-3 rounded-lg text-xs font-bold transition bg-emerald-500 text-slate-950 shadow flex items-center justify-center gap-1.5"
+          >
+            <span>1. Preencher Formulário</span>
+          </button>
+          <button
+            id="tab-btn-configure"
+            type="button"
+            class="py-2 px-3 rounded-lg text-xs font-bold transition text-slate-300 hover:text-white hover:bg-slate-800 flex items-center justify-center gap-1.5"
+          >
+            <span>2. Configurar Modelo e Fundo</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- ================================================================= -->
+      <!-- SUB-ABA 1: MODO PREENCHIMENTO (USO NO DIA A DIA)                  -->
+      <!-- ================================================================= -->
+      <div id="subpanel-fill" class="p-4 overflow-y-auto space-y-4 flex-1">
+
+        <!-- Card de Upload/Troca Rápida da Imagem de Fundo -->
+        <div class="bg-slate-950 border border-emerald-500/30 rounded-xl p-3 flex items-center justify-between gap-3">
+          <div class="flex items-center gap-3 min-w-0">
+            <img
+              id="fill-bg-preview-thumb"
+              src="https://placehold.co/80x100/0f172a/10b981?text=Arte"
+              alt="Miniatura"
+              class="w-11 h-14 object-cover rounded-lg border border-slate-700 bg-slate-900 shrink-0"
+            />
+            <div class="min-w-0">
+              <span class="text-[11px] font-extrabold uppercase tracking-wider text-emerald-400 block">
+                Imagem de Fundo da Arte
+              </span>
+              <p id="fill-bg-resolution-text" class="text-xs text-slate-300 truncate">
+                Carregando dimensões...
+              </p>
+              <p class="text-[10px] text-slate-400">
+                Você também pode arrastar uma imagem para a direita ou dar Ctrl+V
+              </p>
+            </div>
+          </div>
+          <button
+            id="btn-upload-bg-from-fill"
+            type="button"
+            class="px-3 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold shadow transition shrink-0"
+          >
+            Trocar Fundo
+          </button>
+        </div>
+
+        <!-- Cabeçalho do Formulário Dinâmico -->
+        <div class="flex items-center justify-between border-b border-slate-800 pb-2.5">
+          <div>
+            <h2 id="fill-model-title" class="text-sm font-bold text-white">Nome do Modelo</h2>
+            <p id="fill-model-category" class="text-xs text-slate-400">Categoria</p>
+          </div>
+          <button
+            id="btn-jump-to-add-field"
+            type="button"
+            class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-emerald-400 border border-slate-700 text-xs font-bold transition"
+          >
+            + Editar / Criar Campos
+          </button>
+        </div>
+
+        <!-- Lista de Inputs Gerados Automaticamente pelos Campos do Modelo -->
+        <div id="dynamic-form-container" class="space-y-3"></div>
+      </div>
+
+      <!-- ================================================================= -->
+      <!-- SUB-ABA 2: CONFIGURAR MODELO (UPLOAD DE FUNDO + PROPRIEDADES)     -->
+      <!-- ================================================================= -->
+      <div id="subpanel-configure" class="p-4 overflow-y-auto space-y-4 flex-1 hidden">
+
+        <!-- Bloco A: Dados do Modelo e Imagem de Fundo -->
+        <div class="bg-slate-950 border border-slate-800 rounded-xl p-3.5 space-y-3">
+          <div class="flex items-center justify-between">
+            <h3 class="text-xs font-extrabold uppercase tracking-wider text-emerald-400">
+              A. Imagem Base e Dados do Modelo
+            </h3>
+            <span id="config-dimensions-badge" class="text-[11px] font-mono text-slate-400 bg-slate-900 px-2 py-0.5 rounded border border-slate-800">
+              680 × 982 px
+            </span>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+            <div>
+              <label class="block text-[11px] font-semibold text-slate-400 mb-1">Nome do Modelo</label>
+              <input
+                id="config-model-name"
+                type="text"
+                class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white focus:outline-none focus:border-emerald-500"
+              />
+            </div>
+            <div>
+              <label class="block text-[11px] font-semibold text-slate-400 mb-1">Categoria (Etapa 2)</label>
+              <select
+                id="config-model-category"
+                class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white focus:outline-none focus:border-emerald-500"
+              >
+                <option value="Informativos diversos">Informativos diversos</option>
+                <option value="Comunicados internos">Comunicados internos</option>
+                <option value="Eventos">Eventos</option>
+                <option value="Avisos operacionais">Avisos operacionais</option>
+                <option value="Datas comemorativas">Datas comemorativas</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Upload de Imagem de Fundo -->
+          <div class="flex items-center gap-3 bg-slate-900 border border-slate-800 rounded-xl p-2.5">
+            <img
+              id="config-bg-preview-thumb"
+              src="https://placehold.co/80x100/0f172a/10b981?text=Fundo"
+              alt="Fundo"
+              class="w-12 h-16 object-cover rounded-lg border border-slate-700 bg-slate-950 shrink-0"
+            />
+            <div class="flex-1 space-y-1.5">
+              <button
+                id="btn-upload-bg-from-config"
+                type="button"
+                class="w-full py-2 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold shadow transition flex items-center justify-center gap-1.5"
+              >
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+                <span>Escolher Imagem de Fundo (PNG / JPG)</span>
+              </button>
+              <p class="text-[10px] text-slate-400 leading-tight">
+                A resolução da arte se ajusta automaticamente ao tamanho da imagem enviada.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Bloco B: Lista de Campos Mapeados na Arte -->
+        <div class="bg-slate-950 border border-slate-800 rounded-xl p-3.5 space-y-3">
+          <div class="flex items-center justify-between">
+            <h3 class="text-xs font-extrabold uppercase tracking-wider text-emerald-400">
+              B. Campos Posicionados na Arte
+            </h3>
+            <button
+              id="btn-add-new-field"
+              type="button"
+              class="px-3 py-1.5 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-xs font-extrabold shadow transition flex items-center gap-1"
+            >
+              <span>+ Adicionar Campo</span>
+            </button>
+          </div>
+
+          <p class="text-[11px] text-slate-400">
+            Clique em um campo abaixo (ou diretamente sobre a imagem à direita) para configurar fonte, cor, tamanho ou arrastá-lo com o mouse:
+          </p>
+
+          <div id="field-chips-list" class="flex flex-wrap gap-1.5 max-h-32 overflow-y-auto p-1"></div>
+        </div>
+
+        <!-- Bloco C: Inspetor de Propriedades do Campo Selecionado -->
+        <div id="field-inspector-box" class="bg-slate-950 border border-slate-800 rounded-xl p-3.5 space-y-3">
+          <div class="flex items-center justify-between border-b border-slate-800 pb-2">
+            <span class="text-xs font-extrabold uppercase tracking-wider text-amber-400">
+              C. Propriedades do Campo Selecionado
+            </span>
+            <div class="flex items-center gap-1.5">
+              <button
+                id="btn-duplicate-field"
+                type="button"
+                class="px-2 py-1 rounded bg-slate-800 hover:bg-slate-700 text-[11px] text-slate-200 font-semibold transition"
+              >
+                Duplicar
+              </button>
+              <button
+                id="btn-delete-field"
+                type="button"
+                class="px-2 py-1 rounded bg-rose-950/80 hover:bg-rose-900 text-[11px] text-rose-300 border border-rose-800/50 font-semibold transition"
+              >
+                Excluir
+              </button>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-12 gap-2.5">
+            <div class="sm:col-span-7">
+              <label class="block text-[11px] text-slate-400 mb-1">Nome da Pergunta no Formulário</label>
+              <input
+                id="insp-label"
+                type="text"
+                class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white focus:outline-none focus:border-emerald-500"
+              />
+            </div>
+            <div class="sm:col-span-5">
+              <label class="block text-[11px] text-slate-400 mb-1">Tipo de Entrada</label>
+              <select
+                id="insp-type"
+                class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white focus:outline-none focus:border-emerald-500"
+              >
+                <option value="text">Texto Curto (1 linha)</option>
+                <option value="textarea">Texto Longo (Múltiplas linhas)</option>
+              </select>
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-[11px] text-slate-400 mb-1">Valor Atual / Texto de Exemplo</label>
+            <textarea
+              id="insp-value"
+              rows="2"
+              class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white focus:outline-none focus:border-emerald-500"
+            ></textarea>
+          </div>
+
+          <!-- Fonte, Tamanho e Peso -->
+          <div class="grid grid-cols-3 gap-2">
+            <div>
+              <label class="block text-[11px] text-slate-400 mb-1">Fonte</label>
+              <select
+                id="insp-font-family"
+                class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2 py-1.5 text-xs text-white focus:outline-none focus:border-emerald-500"
+              >
+                <option value="Ubuntu">Ubuntu</option>
+                <option value="Montserrat">Montserrat</option>
+                <option value="Carlito">Carlito / Calibri</option>
+                <option value="Open Sans">Open Sans</option>
+                <option value="Inter">Inter</option>
+                <option value="Georgia">Georgia</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-[11px] text-slate-400 mb-1">Tamanho (px)</label>
+              <input
+                id="insp-font-size"
+                type="number"
+                min="8"
+                max="160"
+                class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white focus:outline-none focus:border-emerald-500"
+              />
+            </div>
+            <div>
+              <label class="block text-[11px] text-slate-400 mb-1">Peso</label>
+              <select
+                id="insp-font-weight"
+                class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2 py-1.5 text-xs text-white focus:outline-none focus:border-emerald-500"
+              >
+                <option value="400">Normal (400)</option>
+                <option value="500">Médio (500)</option>
+                <option value="600">Semibold (600)</option>
+                <option value="700">Negrito (700)</option>
+                <option value="800">ExtraBold (800)</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Cor do Texto, Alinhamento e Maiúsculas -->
+          <div class="grid grid-cols-1 sm:grid-cols-12 gap-2.5 items-end">
+            <div class="sm:col-span-5">
+              <label class="block text-[11px] text-slate-400 mb-1">Cor do Texto</label>
+              <div class="flex items-center gap-1.5 bg-slate-900 border border-slate-700 rounded-lg px-2 py-1">
+                <input id="insp-color-picker" type="color" class="w-6 h-6 rounded cursor-pointer bg-transparent border-0 shrink-0" />
+                <input id="insp-color-hex" type="text" class="w-full bg-transparent text-xs font-mono text-white focus:outline-none" />
+                <button
+                  id="btn-eyedropper-text"
+                  type="button"
+                  class="px-1.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-[10px] text-amber-300 font-bold shrink-0"
+                  title="Capturar cor clicando sobre a imagem à direita"
+                >
+                  Conta-gotas
+                </button>
+              </div>
+            </div>
+
+            <div class="sm:col-span-4">
+              <label class="block text-[11px] text-slate-400 mb-1">Alinhamento</label>
+              <div class="grid grid-cols-4 gap-1 bg-slate-900 p-1 rounded-lg border border-slate-700">
+                <button type="button" data-align="left" class="insp-align-btn py-1 rounded text-[10px] font-bold text-slate-300 hover:bg-slate-800">Esq</button>
+                <button type="button" data-align="center" class="insp-align-btn py-1 rounded text-[10px] font-bold text-slate-300 hover:bg-slate-800">Cen</button>
+                <button type="button" data-align="right" class="insp-align-btn py-1 rounded text-[10px] font-bold text-slate-300 hover:bg-slate-800">Dir</button>
+                <button type="button" data-align="justify" class="insp-align-btn py-1 rounded text-[10px] font-bold text-slate-300 hover:bg-slate-800">Just</button>
+              </div>
+            </div>
+
+            <div class="sm:col-span-3 pb-1">
+              <label class="inline-flex items-center gap-1.5 text-xs text-slate-300 cursor-pointer select-none">
+                <input id="insp-uppercase" type="checkbox" class="rounded bg-slate-900 border-slate-700 text-emerald-500" />
+                <span>MAIÚSCULAS</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Fundo Sólido Atrás do Texto (Para cobrir texto antigo de uma arte pronta) -->
+          <div class="bg-slate-900 border border-slate-800 rounded-xl p-2.5 space-y-2">
+            <label class="inline-flex items-center gap-2 text-xs font-semibold text-slate-200 cursor-pointer select-none">
+              <input id="insp-bg-enabled" type="checkbox" class="rounded bg-slate-950 border-slate-700 text-emerald-500" />
+              <span>Pintar tarja/fundo atrás do texto (Cobrir texto da imagem original)</span>
+            </label>
+
+            <div id="insp-bg-options" class="grid grid-cols-3 gap-2 pt-1 hidden">
+              <div>
+                <label class="block text-[10px] text-slate-400 mb-0.5">Cor do Fundo</label>
+                <div class="flex items-center gap-1">
+                  <input id="insp-bg-color" type="color" value="#f3be26" class="w-7 h-7 rounded cursor-pointer bg-slate-950 border border-slate-700 p-0.5 shrink-0" />
+                  <button
+                    id="btn-eyedropper-bg"
+                    type="button"
+                    class="w-full py-1 px-1.5 rounded bg-slate-800 hover:bg-slate-700 text-[10px] text-amber-300 font-bold truncate"
+                  >
+                    Pegar da Arte
+                  </button>
+                </div>
+              </div>
+              <div>
+                <label class="block text-[10px] text-slate-400 mb-0.5">Margem (px)</label>
+                <input id="insp-bg-padding" type="number" min="0" max="60" value="6" class="w-full bg-slate-950 border border-slate-700 rounded px-2 py-1 text-xs text-white" />
+              </div>
+              <div>
+                <label class="block text-[10px] text-slate-400 mb-0.5">Borda Arred.</label>
+                <input id="insp-bg-radius" type="number" min="0" max="60" value="6" class="w-full bg-slate-950 border border-slate-700 rounded px-2 py-1 text-xs text-white" />
+              </div>
+            </div>
+          </div>
+
+          <!-- Coordenadas Exatas X, Y, Largura e Espaçamento -->
+          <div class="grid grid-cols-4 gap-2">
+            <div>
+              <label class="block text-[10px] text-slate-400 mb-0.5">Posição X</label>
+              <input id="insp-x" type="number" class="w-full bg-slate-900 border border-slate-700 rounded px-2 py-1 text-xs text-white font-mono" />
+            </div>
+            <div>
+              <label class="block text-[10px] text-slate-400 mb-0.5">Posição Y</label>
+              <input id="insp-y" type="number" class="w-full bg-slate-900 border border-slate-700 rounded px-2 py-1 text-xs text-white font-mono" />
+            </div>
+            <div>
+              <label class="block text-[10px] text-slate-400 mb-0.5">Largura (px)</label>
+              <input id="insp-width" type="number" min="30" class="w-full bg-slate-900 border border-slate-700 rounded px-2 py-1 text-xs text-white font-mono" />
+            </div>
+            <div>
+              <label class="block text-[10px] text-slate-400 mb-0.5">Entrelinha</label>
+              <input id="insp-line-height" type="number" step="0.05" min="0.8" max="2.5" class="w-full bg-slate-900 border border-slate-700 rounded px-2 py-1 text-xs text-white font-mono" />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Barra de Ações Inferior Fixa: Exportar PNG, Exportar JPG e Salvar Modelo -->
+      <div class="p-3.5 bg-slate-950 border-t border-slate-800 space-y-2">
+        <div class="grid grid-cols-2 gap-2">
+          <button
+            id="btn-export-png"
+            type="button"
+            class="py-2.5 px-3 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-extrabold text-xs sm:text-sm shadow-lg shadow-emerald-500/20 transition flex items-center justify-center gap-1.5"
+          >
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.4" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+            </svg>
+            <span>Exportar PNG</span>
+          </button>
+          <button
+            id="btn-export-jpg"
+            type="button"
+            class="py-2.5 px-3 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-extrabold text-xs sm:text-sm shadow-lg shadow-amber-400/20 transition flex items-center justify-center gap-1.5"
+          >
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.4" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+            </svg>
+            <span>Exportar JPG</span>
+          </button>
+        </div>
+        <div class="flex items-center justify-between gap-2 pt-0.5">
+          <button
+            id="btn-save-template-json"
+            type="button"
+            class="flex-1 py-1.5 px-2.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-[11px] font-semibold border border-slate-700 transition"
+          >
+            Baixar Arquivo do Modelo (.JSON)
+          </button>
+          <button
+            id="btn-load-template-json"
+            type="button"
+            class="flex-1 py-1.5 px-2.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-[11px] font-semibold border border-slate-700 transition"
+          >
+            Importar Modelo (.JSON)
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- COLUNA DIREITA (7 COLUNAS): VISUALIZAÇÃO INTERATIVA E POSICIONAMENTO COM O MOUSE -->
+    <section class="lg:col-span-7 flex flex-col items-center">
+
+      <!-- Barra de Ferramentas Acima do Canvas -->
+      <div class="w-full bg-slate-900 border border-slate-800 rounded-t-2xl px-4 py-2.5 flex flex-wrap items-center justify-between gap-2 text-xs">
+        <div class="flex items-center gap-2">
+          <span id="canvas-status-dot" class="w-2.5 h-2.5 rounded-full bg-emerald-400"></span>
+          <span id="canvas-status-text" class="font-medium text-slate-300">
+            Arraste qualquer texto sobre a arte para posicioná-lo ou preencha o formulário à esquerda.
+          </span>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-2.5">
+          <button
+            id="btn-stage-upload-bg"
+            type="button"
+            class="px-2.5 py-1 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-500/40 text-emerald-300 text-xs font-bold transition flex items-center gap-1.5"
+          >
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            </svg>
+            <span>Subir Imagem de Fundo</span>
+          </button>
+
+          <label class="inline-flex items-center gap-1.5 text-xs text-slate-300 cursor-pointer select-none">
+            <input id="chk-show-guides" type="checkbox" checked class="rounded bg-slate-950 border-slate-700 text-emerald-500" />
+            <span>Demarcação dos campos</span>
+          </label>
+        </div>
+      </div>
+
+      <!-- Palco do Canvas -->
+      <div
+        id="canvas-drop-stage"
+        class="w-full stage-checkerboard border-x border-b border-slate-800 rounded-b-2xl p-4 sm:p-6 flex items-center justify-center min-h-[560px] relative overflow-auto"
+      >
+        <!-- Overlay de Drag & Drop de Imagem -->
+        <div
+          id="stage-drop-overlay"
+          class="hidden absolute inset-4 rounded-2xl bg-emerald-950/90 border-2 border-dashed border-emerald-400 z-20 flex flex-col items-center justify-center text-center p-6 pointer-events-none"
+        >
+          <p class="text-base font-extrabold text-white">
+            Solte sua imagem (PNG, JPG ou WebP) aqui para usar como Fundo da Arte
+          </p>
+          <p class="text-xs text-emerald-300 mt-1">
+            O tamanho do Canvas se ajustará automaticamente à sua imagem.
+          </p>
+        </div>
+
+        <canvas id="art-canvas" width="680" height="982"></canvas>
+      </div>
+    </section>
+  </main>
+
+  <!-- ===================================================================== -->
+  <!-- ETAPA 2 — BIBLIOTECA DE MODELOS (ORGANIZADA POR CATEGORIAS)           -->
+  <!-- ===================================================================== -->
+  <section id="view-stage-2" class="stage-view hidden flex-1 max-w-[1600px] w-full mx-auto px-4 py-6 space-y-6">
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 flex flex-wrap items-center justify-between gap-4">
+      <div>
+        <span class="text-xs font-extrabold uppercase tracking-wider text-emerald-400">
+          Início • Etapa 2
+        </span>
+        <h2 class="text-xl font-extrabold text-white mt-0.5">
+          Biblioteca de Modelos Padronizados
+        </h2>
+        <p class="text-xs sm:text-sm text-slate-400 mt-1">
+          Organize seus modelos por categoria, crie cópias para preservar o original ou cadastre novas artes enviando uma imagem base.
+        </p>
+      </div>
+
+      <div class="flex flex-wrap items-center gap-2.5">
+        <button
+          id="btn-lib-new-with-image"
+          type="button"
+          class="px-4 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-xs sm:text-sm font-extrabold shadow-lg shadow-emerald-500/20 transition flex items-center gap-2"
+        >
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.4" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+          </svg>
+          <span>+ Cadastrar Modelo com Imagem</span>
+        </button>
+        <button
+          id="btn-lib-import-json"
+          type="button"
+          class="px-3.5 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs sm:text-sm font-bold border border-slate-700 transition"
+        >
+          Importar Modelo (.JSON)
+        </button>
+      </div>
+    </div>
+
+    <!-- Filtro de Categorias -->
+    <div id="library-category-filters" class="flex flex-wrap items-center gap-2"></div>
+
+    <!-- Grade de Cards de Modelos -->
+    <div id="library-cards-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5"></div>
+  </section>
+
+  <!-- ===================================================================== -->
+  <!-- ETAPA 3 — HISTÓRICO E REGISTRO DOS DADOS GERADOS                      -->
+  <!-- ===================================================================== -->
+  <section id="view-stage-3" class="stage-view hidden flex-1 max-w-[1600px] w-full mx-auto px-4 py-6 space-y-6">
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 flex flex-wrap items-center justify-between gap-4">
+      <div>
+        <span class="text-xs font-extrabold uppercase tracking-wider text-amber-400">
+          Upgrades • Etapa 3
+        </span>
+        <h2 class="text-xl font-extrabold text-white mt-0.5">
+          Histórico e Registro de Comunicados Gerados
+        </h2>
+        <p class="text-xs sm:text-sm text-slate-400 mt-1">
+          Cada exportação registra automaticamente a data, o modelo utilizado e todos os dados preenchidos para auditoria no Excel ou Microsoft Lists.
+        </p>
+      </div>
+
+      <div class="flex flex-wrap items-center gap-2.5">
+        <button
+          id="btn-export-history-csv"
+          type="button"
+          class="px-4 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-xs sm:text-sm font-extrabold shadow-lg transition flex items-center gap-2"
+        >
+          <span>Exportar Histórico Completo (.CSV / Excel)</span>
+        </button>
+        <button
+          id="btn-clear-history"
+          type="button"
+          class="px-3.5 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold border border-slate-700 transition"
+        >
+          Limpar Histórico
+        </button>
+      </div>
+    </div>
+
+    <!-- Tabela de Histórico -->
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden">
+      <div class="overflow-x-auto">
+        <table class="w-full text-left border-collapse">
+          <thead>
+            <tr class="bg-slate-950 border-b border-slate-800 text-[11px] font-extrabold uppercase tracking-wider text-slate-400">
+              <th class="py-3.5 px-4">Data / Hora</th>
+              <th class="py-3.5 px-4">Modelo Utilizado</th>
+              <th class="py-3.5 px-4">Categoria</th>
+              <th class="py-3.5 px-4">Formato</th>
+              <th class="py-3.5 px-4">Dados Preenchidos no Comunicado</th>
+              <th class="py-3.5 px-4 text-right">Ações</th>
+            </tr>
+          </thead>
+          <tbody id="history-table-body" class="divide-y divide-slate-800 text-xs"></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================================================================== -->
+  <!-- ETAPA 4 — INTEGRAÇÃO COM SOLICITAÇÕES DE OUTROS SETORES               -->
+  <!-- ===================================================================== -->
+  <section id="view-stage-4" class="stage-view hidden flex-1 max-w-[1600px] w-full mx-auto px-4 py-6 grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+
+    <!-- Lista de Solicitações Recebidas (7 Colunas) -->
+    <div class="lg:col-span-7 space-y-4">
+      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5">
+        <span class="text-xs font-extrabold uppercase tracking-wider text-amber-400">
+          Upgrades • Etapa 4
+        </span>
+        <h2 class="text-xl font-extrabold text-white mt-0.5">
+          Fila de Solicitações dos Setores
+        </h2>
+        <p class="text-xs sm:text-sm text-slate-400 mt-1">
+          Outros setores enviam apenas as informações. Com 1 clique em <strong>"Carregar no Estúdio"</strong>, os dados preenchem o modelo automaticamente para você revisar e exportar.
+        </p>
+      </div>
+
+      <div id="requests-queue-list" class="space-y-3"></div>
+    </div>
+
+    <!-- Simulador de Formulário Externo para Outros Setores (5 Colunas) -->
+    <div class="lg:col-span-5 bg-slate-900 border border-slate-800 rounded-2xl p-5 space-y-4">
+      <div class="border-b border-slate-800 pb-3">
+        <span class="text-[11px] font-bold uppercase tracking-wider text-emerald-400">
+          Portal do Solicitante (Simulador Interno)
+        </span>
+        <h3 class="text-base font-bold text-white mt-0.5">
+          Registrar Nova Solicitação de Setor
+        </h3>
+        <p class="text-xs text-slate-400">
+          Simule como um colaborador de outro setor (RH, TI, Manutenção, Segurança) solicita um comunicado sem tocar no editor visual.
+        </p>
+      </div>
+
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1">Setor Solicitante</label>
+          <input
+            id="req-department"
+            type="text"
+            value="Segurança da Informação (TI)"
+            class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-500"
+          />
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1">Nome do Solicitante</label>
+          <input
+            id="req-requester"
+            type="text"
+            value="Carlos Eduardo"
+            class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-500"
+          />
+        </div>
+      </div>
+
+      <div>
+        <label class="block text-xs font-semibold text-slate-300 mb-1">Modelo de Comunicado Desejado</label>
+        <select
+          id="req-template-select"
+          class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs font-bold text-emerald-400 focus:outline-none focus:border-emerald-500"
+        ></select>
+      </div>
+
+      <div id="req-dynamic-fields" class="space-y-2.5 max-h-80 overflow-y-auto pr-1"></div>
+
+      <button
+        id="btn-submit-request"
+        type="button"
+        class="w-full py-2.5 px-4 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-extrabold text-xs sm:text-sm shadow-lg transition"
+      >
+        Enviar Solicitação para a Fila de Produção
+      </button>
+    </div>
+  </section>
+
+  <!-- ===================================================================== -->
+  <!-- ETAPA 5 — AUTOMAÇÕES ADICIONAIS (LISTS, SHAREPOINT E POWER AUTOMATE)  -->
+  <!-- ===================================================================== -->
+  <section id="view-stage-5" class="stage-view hidden flex-1 max-w-[1600px] w-full mx-auto px-4 py-6 grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+
+    <div class="lg:col-span-6 bg-slate-900 border border-slate-800 rounded-2xl p-5 space-y-4">
+      <div>
+        <span class="text-xs font-extrabold uppercase tracking-wider text-amber-400">
+          Upgrades • Etapa 5
+        </span>
+        <h2 class="text-xl font-extrabold text-white mt-0.5">
+          Conector Microsoft Lists, SharePoint & Power Automate
+        </h2>
+        <p class="text-xs sm:text-sm text-slate-400 mt-1">
+          Configure um Webhook HTTP do Power Automate para enviar automaticamente os dados e o status de cada comunicado gerado.
+        </p>
+      </div>
+
+      <div class="bg-slate-950 border border-slate-800 rounded-xl p-4 space-y-3">
+        <label class="inline-flex items-center gap-2 text-xs font-bold text-emerald-400 cursor-pointer">
+          <input id="auto-webhook-enabled" type="checkbox" class="rounded bg-slate-900 border-slate-700 text-emerald-500" />
+          <span>Disparar Webhook automaticamente ao exportar qualquer arte</span>
+        </label>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1">
+            URL do Gatilho HTTP (Power Automate / Logic Apps / API)
+          </label>
+          <input
+            id="auto-webhook-url"
+            type="url"
+            placeholder="https://prod-xx.brazilsouth.logic.azure.com:443/workflows/..."
+            class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white font-mono focus:outline-none focus:border-emerald-500"
+          />
+        </div>
+
+        <div class="flex flex-wrap items-center gap-2 pt-1">
+          <button
+            id="btn-test-webhook"
+            type="button"
+            class="px-4 py-2 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-extrabold text-xs transition"
+          >
+            Testar Disparo de Payload Agora
+          </button>
+          <span id="webhook-test-status" class="text-xs text-slate-400"></span>
+        </div>
+      </div>
+
+      <div class="bg-slate-950 border border-slate-800 rounded-xl p-4 space-y-2 text-xs text-slate-300">
+        <h4 class="font-bold text-white">Como conectar ao Microsoft Lists em 3 minutos:</h4>
+        <ol class="list-decimal list-inside space-y-1.5 text-slate-400">
+          <li>No <strong>Power Automate</strong>, crie um fluxo automatizado com o gatilho <em>"Quando uma solicitação HTTP é recebida"</em>.</li>
+          <li>Copie o <strong>Schema JSON</strong> gerado ao lado e cole no campo de esquema do gatilho.</li>
+          <li>Adicione a ação <strong>"Criar item (SharePoint / Microsoft Lists)"</strong> mapeando as colunas do comunicado.</li>
+        </ol>
+      </div>
+    </div>
+
+    <!-- Gerador de Schema JSON para Power Automate -->
+    <div class="lg:col-span-6 bg-slate-900 border border-slate-800 rounded-2xl p-5 space-y-4">
+      <div class="flex items-center justify-between">
+        <div>
+          <h3 class="text-base font-bold text-white">
+            Payload & Schema JSON do Modelo Ativo
+          </h3>
+          <p class="text-xs text-slate-400">
+            Pronto para colar no Power Automate ou integrar via REST API.
+          </p>
+        </div>
+        <button
+          id="btn-copy-schema"
+          type="button"
+          class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-emerald-400 text-xs font-bold border border-slate-700 transition"
+        >
+          Copiar JSON
+        </button>
+      </div>
+
+      <pre
+        id="automation-json-preview"
+        class="bg-slate-950 border border-slate-800 rounded-xl p-4 text-[11px] font-mono text-emerald-300 overflow-x-auto max-h-96"
+      ></pre>
+    </div>
+  </section>
+
+  <script>
+    // =========================================================================
+    // 1. GERADOR DE IMAGENS DE FUNDO NATIVAS PARA OS MODELOS INICIAIS
+    // =========================================================================
+    // Desenha um retângulo com cantos arredondados independentes
+    function roundedRectPath(ctx, x, y, w, h, radii) {
+      const r = typeof radii === 'number'
+        ? { tl: radii, tr: radii, br: radii, bl: radii }
+        : { tl: radii.tl || 0, tr: radii.tr || 0, br: radii.br || 0, bl: radii.bl || 0 };
+      ctx.beginPath();
+      ctx.moveTo(x + r.tl, y);
+      ctx.lineTo(x + w - r.tr, y);
+      ctx.quadraticCurveTo(x + w, y, x + w, y + r.tr);
+      ctx.lineTo(x + w, y + h - r.br);
+      ctx.quadraticCurveTo(x + w, y + h, x + w - r.br, y + h);
+      ctx.lineTo(x + r.bl, y + h);
+      ctx.quadraticCurveTo(x, y + h, x, y + h - r.bl);
+      ctx.lineTo(x, y + r.tl);
+      ctx.quadraticCurveTo(x, y, x + r.tl, y);
+      ctx.closePath();
+    }
+
+    // Gera a imagem base limpa do modelo "Fique por Dentro - Grupo Barralcool" (680x982)
+    function createBarralcoolBackgroundDataUrl() {
+      const c = document.createElement('canvas');
+      c.width = 680;
+      c.height = 982;
+      const ctx = c.getContext('2d');
+
+      // Fundo branco
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, 0, 680, 982);
+
+      // Moldura superior verde
+      ctx.fillStyle = '#338a4b';
+      ctx.fillRect(0, 0, 680, 25);
+      ctx.fillRect(0, 0, 27, 238);
+      ctx.fillRect(653, 0, 27, 238);
+
+      // Circuito decorativo no canto superior direito
+      ctx.save();
+      ctx.strokeStyle = '#e7ece9';
+      ctx.lineWidth = 1.6;
+      const traces = [
+        [[422, 30], [422, 85], [447, 110], [447, 164]],
+        [[440, 30], [440, 68], [470, 98], [470, 144]],
+        [[464, 30], [464, 54], [507, 97], [547, 97]],
+        [[492, 30], [492, 70], [537, 115], [537, 184]],
+        [[520, 30], [520, 60], [567, 107], [567, 204]],
+        [[544, 30], [544, 50], [597, 103], [597, 218]],
+        [[570, 30], [570, 65], [617, 112], [617, 194]]
+      ];
+      traces.forEach((pts) => {
+        ctx.beginPath();
+        ctx.moveTo(pts[0][0], pts[0][1]);
+        for (let i = 1; i < pts.length; i++) ctx.lineTo(pts[i][0], pts[i][1]);
+        ctx.stroke();
+        const last = pts[pts.length - 1];
+        ctx.beginPath();
+        ctx.arc(last[0], last[1], 3.2, 0, Math.PI * 2);
+        ctx.fillStyle = '#ffffff';
+        ctx.fill();
+        ctx.stroke();
+      });
+      ctx.restore();
+
+      // Selo listrado no canto superior direito
+      ctx.save();
+      roundedRectPath(ctx, 589, 16, 74, 74, { tl: 22, tr: 3, br: 18, bl: 3 });
+      ctx.fillStyle = '#235937';
+      ctx.fill();
+      ctx.clip();
+      ctx.strokeStyle = '#338a4b';
+      ctx.lineWidth = 2.8;
+      for (let offset = 2; offset <= 72; offset += 9) {
+        ctx.beginPath();
+        ctx.moveTo(589 + offset, 92);
+        ctx.lineTo(665, 16 + offset);
+        ctx.stroke();
+      }
+      ctx.restore();
+
+      // Barra amarela + Título fixo "Fique por Dentro"
+      ctx.fillStyle = '#f3be26';
+      ctx.fillRect(58, 39, 17, 49);
+      ctx.fillStyle = '#235937';
+      ctx.font = '700 45px "Ubuntu", "Montserrat", sans-serif';
+      ctx.textAlign = 'left';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('Fique por Dentro', 86, 63.5);
+
+      // Escudo com cadeado
+      ctx.save();
+      ctx.translate(53, 107);
+      ctx.beginPath();
+      ctx.arc(49, 53, 41, 0, Math.PI * 2);
+      ctx.strokeStyle = '#1e5936';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.arc(49, 53, 35, 0, Math.PI * 2);
+      ctx.fillStyle = '#ffffff';
+      ctx.fill();
+      ctx.lineWidth = 5.5;
+      ctx.strokeStyle = '#189444';
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.moveTo(49, 25);
+      ctx.bezierCurveTo(39, 25, 27, 29.5, 27, 29.5);
+      ctx.lineTo(27, 51.5);
+      ctx.bezierCurveTo(27, 67, 49, 77.5, 49, 77.5);
+      ctx.bezierCurveTo(49, 77.5, 71, 67, 71, 51.5);
+      ctx.lineTo(71, 29.5);
+      ctx.bezierCurveTo(71, 29.5, 59, 25, 49, 25);
+      ctx.closePath();
+      ctx.fillStyle = '#109643';
+      ctx.fill();
+
+      ctx.beginPath();
+      ctx.moveTo(42.5, 47);
+      ctx.lineTo(42.5, 40.5);
+      ctx.arc(49, 40.5, 6.5, Math.PI, 0, false);
+      ctx.lineTo(55.5, 47);
+      ctx.strokeStyle = '#53491a';
+      ctx.lineWidth = 3.2;
+      ctx.stroke();
+
+      roundedRectPath(ctx, 38.5, 46, 21, 17.5, 2.5);
+      ctx.fillStyle = '#f3be26';
+      ctx.fill();
+      ctx.restore();
+
+      // Barra verde do Período + Caixa Amarela de destaque
+      roundedRectPath(ctx, 171, 189, 311, 33, { tl: 0, tr: 0, br: 21, bl: 11 });
+      ctx.fillStyle = '#2b663e';
+      ctx.fill();
+      ctx.fillStyle = '#ffffff';
+      ctx.font = '700 14.5px "Carlito", sans-serif';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('Período:', 186, 209.5);
+
+      roundedRectPath(ctx, 171, 107, 338, 90, { tl: 20, tr: 20, br: 20, bl: 14 });
+      ctx.fillStyle = '#f3be26';
+      ctx.fill();
+      ctx.fillStyle = '#235937';
+      ctx.font = '700 23.5px "Ubuntu", sans-serif';
+      ctx.fillText('FORAM BLOQUEADAS', 191, 157);
+      ctx.font = '400 20px "Carlito", sans-serif';
+      ctx.fillText('em nossa rede.', 191, 181);
+
+      // Card principal arredondado
+      const cardX = 28, cardY = 342, cardW = 622, cardH = 540;
+      const cardRadii = { tl: 18, tr: 66, br: 26, bl: 16 };
+      roundedRectPath(ctx, cardX, cardY, cardW, cardH, cardRadii);
+      ctx.fillStyle = '#ffffff';
+      ctx.fill();
+
+      ctx.fillStyle = '#275f3b';
+      ctx.font = '700 23.5px "Ubuntu", sans-serif';
+      ctx.fillText('Saiba mais detalhes sobre os bloqueios:', 42, 373);
+
+      // 5 Caixas verdes de categorias + abas superiores
+      const fixedTabs = [
+        'Filtro de URL:',
+        'Phishing:',
+        'Sites Maliciosos:',
+        'URLs Spam:',
+        'Proxy Avoidance:'
+      ];
+      const startRowY = 404;
+      const rowGap = 67;
+
+      fixedTabs.forEach((titleText, idx) => {
+        const ry = startRowY + idx * rowGap;
+        roundedRectPath(ctx, 43, ry, 113, 50, { tl: 6, tr: 0, br: 3, bl: 6 });
+        ctx.fillStyle = '#378f4e';
+        ctx.fill();
+
+        ctx.fillStyle = '#ffffff';
+        ctx.font = '700 13px "Carlito", sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText('Bloqueios', 43 + 56.5, ry + 38.5);
+
+        ctx.textAlign = 'left';
+        ctx.font = '700 16px "Carlito", sans-serif';
+        const tabW = ctx.measureText(titleText).width + 26;
+        roundedRectPath(ctx, 156, ry, tabW, 26, { tl: 0, tr: 13, br: 0, bl: 0 });
+        ctx.fillStyle = '#29623d';
+        ctx.fill();
+        ctx.fillStyle = '#ffffff';
+        ctx.fillText(titleText, 170, ry + 13.5);
+      });
+
+      // Rodapé verde de Classificação de Risco dentro do Card
+      ctx.save();
+      roundedRectPath(ctx, cardX, cardY, cardW, cardH, cardRadii);
+      ctx.clip();
+      ctx.fillStyle = '#178241';
+      ctx.fillRect(cardX, 786, cardW, 98);
+      ctx.restore();
+
+      roundedRectPath(ctx, cardX, cardY, cardW, cardH, cardRadii);
+      ctx.strokeStyle = '#178241';
+      ctx.lineWidth = 2.5;
+      ctx.stroke();
+
+      roundedRectPath(ctx, cardX - 1.25, 755, 272, 31, { tl: 6, tr: 10, br: 0, bl: 0 });
+      ctx.fillStyle = '#f3be26';
+      ctx.fill();
+      ctx.fillStyle = '#235937';
+      ctx.font = '700 18px "Ubuntu", sans-serif';
+      ctx.fillText('CLASSIFICAÇÃO DE RISCO:', 38, 770.5);
+
+      // Rodapé Institucional Grupo Barralcool
+      ctx.save();
+      ctx.translate(36, 902);
+      ctx.fillStyle = '#3a6b48';
+      ctx.fillRect(6, 3, 3.8, 42);
+      ctx.fillRect(12.2, 3, 3.8, 42);
+      ctx.fillStyle = '#2c5939';
+      ctx.fillRect(18.4, 3, 4.2, 42);
+      ctx.beginPath();
+      ctx.moveTo(22.5, 23.5);
+      ctx.lineTo(27.5, 23.5);
+      ctx.bezierCurveTo(34.5, 23.5, 39, 27.2, 39, 34.2);
+      ctx.bezierCurveTo(39, 41.2, 34.5, 45, 27.5, 45);
+      ctx.lineTo(6, 45);
+      ctx.lineTo(6, 42.2);
+      ctx.lineTo(22.5, 42.2);
+      ctx.closePath();
+      ctx.fill();
+      ctx.fillStyle = '#3a6144';
+      ctx.font = 'italic 11.5px Georgia, serif';
+      ctx.fillText('Grupo', 45, 16);
+      ctx.fillStyle = '#2c5939';
+      ctx.font = 'bold 25.5px Georgia, serif';
+      ctx.fillText('arralcool', 41, 38);
+      ctx.fillStyle = '#438d57';
+      ctx.fillRect(2, 48.5, 171, 2.8);
+      ctx.fillStyle = '#667069';
+      ctx.font = 'italic 11.4px "Carlito", sans-serif';
+      ctx.fillText('Qualidade, esta é a nossa marca', 2, 60);
+      ctx.restore();
+
+      ctx.fillStyle = '#2c5e3d';
+      ctx.fillRect(258, 909, 65, 6.5);
+      ctx.fillStyle = '#378f4e';
+      ctx.fillRect(323, 909, 65, 6.5);
+      ctx.fillStyle = '#f3be26';
+      ctx.fillRect(388, 909, 64, 6.5);
+
+      ctx.fillStyle = '#2c5e3d';
+      ctx.font = '600 14px "Carlito", sans-serif';
+      ctx.fillText('@grupobarralcool', 325, 946);
+      ctx.fillText('www.grupobarralcool.com.br', 471, 946);
+
+      return c.toDataURL('image/png');
+    }
+
+    // Gera fundo para Comunicado de Manutenção / Aviso Operacional (800x1000)
+    function createMaintenanceBackgroundDataUrl() {
+      const c = document.createElement('canvas');
+      c.width = 800;
+      c.height = 1000;
+      const ctx = c.getContext('2d');
+
+      ctx.fillStyle = '#f8fafc';
+      ctx.fillRect(0, 0, 800, 1000);
+
+      // Cabeçalho escuro
+      ctx.fillStyle = '#0f172a';
+      ctx.fillRect(0, 0, 800, 210);
+
+      // Faixa de alerta amarela/laranja
+      ctx.fillStyle = '#f59e0b';
+      ctx.fillRect(0, 210, 800, 14);
+
+      // Badge superior
+      roundedRectPath(ctx, 50, 38, 220, 34, 8);
+      ctx.fillStyle = '#f59e0b';
+      ctx.fill();
+      ctx.fillStyle = '#0f172a';
+      ctx.font = '800 14px "Montserrat", sans-serif';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('COMUNICADO INTERNO', 68, 55);
+
+      // Card central
+      roundedRectPath(ctx, 50, 265, 700, 620, 20);
+      ctx.fillStyle = '#ffffff';
+      ctx.fill();
+      ctx.lineWidth = 2;
+      ctx.strokeStyle = '#e2e8f0';
+      ctx.stroke();
+
+      // Caixas de metadados (Data, Horário, Setor)
+      const boxesY = 295;
+      const labels = ['DATA PROGRAMADA', 'HORÁRIO PREVISTO', 'SETOR / ÁREA AFETADA'];
+      labels.forEach((lb, i) => {
+        const bx = 80 + i * 218;
+        roundedRectPath(ctx, bx, boxesY, 204, 92, 12);
+        ctx.fillStyle = '#f1f5f9';
+        ctx.fill();
+        ctx.fillStyle = '#64748b';
+        ctx.font = '700 11px "Inter", sans-serif';
+        ctx.fillText(lb, bx + 16, boxesY + 24);
+      });
+
+      // Divisória de detalhes
+      ctx.fillStyle = '#0f172a';
+      ctx.font = '800 16px "Montserrat", sans-serif';
+      ctx.fillText('DETALHES E ORIENTAÇÕES IMPORTANTES:', 80, 435);
+
+      roundedRectPath(ctx, 80, 458, 640, 290, 14);
+      ctx.fillStyle = '#f8fafc';
+      ctx.fill();
+      ctx.strokeStyle = '#cbd5e1';
+      ctx.stroke();
+
+      // Rodapé do Card
+      roundedRectPath(ctx, 80, 775, 640, 78, 12);
+      ctx.fillStyle = '#ecfdf5';
+      ctx.fill();
+      ctx.fillStyle = '#065f46';
+      ctx.font = '700 12px "Inter", sans-serif';
+      ctx.fillText('RESPONSÁVEL / CONTATO PARA DÚVIDAS:', 100, 800);
+
+      // Rodapé Institucional
+      ctx.fillStyle = '#64748b';
+      ctx.font = '600 13px "Inter", sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('Comunicação Interna Corporativa • Documento Gerado Automaticamente', 400, 945);
+
+      return c.toDataURL('image/png');
+    }
+
+    // Gera fundo para Convite de Evento / Treinamento (800x1000)
+    function createEventBackgroundDataUrl() {
+      const c = document.createElement('canvas');
+      c.width = 800;
+      c.height = 1000;
+      const ctx = c.getContext('2d');
+
+      const grad = ctx.createLinearGradient(0, 0, 800, 1000);
+      grad.addColorStop(0, '#064e3b');
+      grad.addColorStop(1, '#0f172a');
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, 800, 1000);
+
+      // Moldura interna elegante
+      roundedRectPath(ctx, 48, 48, 704, 904, 28);
+      ctx.fillStyle = 'rgba(255,255,255,0.04)';
+      ctx.fill();
+      ctx.lineWidth = 2;
+      ctx.strokeStyle = 'rgba(16, 185, 129, 0.35)';
+      ctx.stroke();
+
+      roundedRectPath(ctx, 90, 95, 210, 36, 999);
+      ctx.fillStyle = '#10b981';
+      ctx.fill();
+      ctx.fillStyle = '#022c22';
+      ctx.font = '800 13px "Montserrat", sans-serif';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('CONVITE & TREINAMENTO', 110, 113);
+
+      // Card branco central para informações do evento
+      roundedRectPath(ctx, 90, 330, 620, 520, 24);
+      ctx.fillStyle = '#ffffff';
+      ctx.fill();
+
+      ctx.fillStyle = '#047857';
+      ctx.font = '800 13px "Montserrat", sans-serif';
+      ctx.fillText('SOBRE O EVENTO:', 125, 375);
+
+      // Caixas de Data/Hora e Local
+      roundedRectPath(ctx, 125, 555, 265, 110, 14);
+      ctx.fillStyle = '#f0fdf4';
+      ctx.fill();
+      ctx.fillStyle = '#15803d';
+      ctx.font = '800 12px "Montserrat", sans-serif';
+      ctx.fillText('DATA E HORÁRIO', 145, 582);
+
+      roundedRectPath(ctx, 415, 555, 260, 110, 14);
+      ctx.fillStyle = '#f0fdf4';
+      ctx.fill();
+      ctx.fillStyle = '#15803d';
+      ctx.fillText('LOCAL / SALA', 435, 582);
+
+      roundedRectPath(ctx, 125, 690, 550, 115, 14);
+      ctx.fillStyle = '#f8fafc';
+      ctx.fill();
+      ctx.fillStyle = '#334155';
+      ctx.fillText('PALESTRANTE / INSTRUTOR E PÚBLICO-ALVO', 145, 718);
+
+      return c.toDataURL('image/png');
+    }
+
+    // =========================================================================
+    // 2. BIBLIOTECA INICIAL DE MODELOS E ESTADO DA APLICAÇÃO
+    // =========================================================================
+    function createInitialTemplates() {
+      return [
+        {
+          id: 'tpl-barralcool-fique-por-dentro',
+          name: 'Fique por Dentro — Segurança da Informação',
+          category: 'Informativos diversos',
+          width: 680,
+          height: 982,
+          backgroundDataUrl: createBarralcoolBackgroundDataUrl(),
+          fields: [
+            {
+              id: 'f-total',
+              label: 'Total de Ameaças (Destaque Amarelo)',
+              type: 'text',
+              value: '19. 310.850 AMEAÇAS',
+              x: 191,
+              y: 118,
+              width: 305,
+              fontFamily: 'Ubuntu',
+              fontSize: 24,
+              fontWeight: '700',
+              color: '#235937',
+              align: 'left',
+              lineHeight: 1.15,
+              uppercase: true,
+              bgEnabled: false,
+              bgColor: '#f3be26',
+              bgPadding: 4,
+              bgRadius: 4
+            },
+            {
+              id: 'f-periodo',
+              label: 'Período do Relatório',
+              type: 'text',
+              value: '01 a 30 de setembro de 2026',
+              x: 268,
+              y: 201,
+              width: 205,
+              fontFamily: 'Carlito',
+              fontSize: 15,
+              fontWeight: '700',
+              color: '#ffffff',
+              align: 'left',
+              lineHeight: 1.1,
+              uppercase: false,
+              bgEnabled: false,
+              bgColor: '#2b663e',
+              bgPadding: 4,
+              bgRadius: 4
+            },
+            {
+              id: 'f-intro',
+              label: 'Parágrafo Introdutório',
+              type: 'textarea',
+              value: 'À medida que garantimos maior proteção contra ameaças cibernéticas, reforçamos a importância de mantermos atenção redobrada ao navegar na internet. Evitem clicar em links ou anexos suspeitos.',
+              x: 40,
+              y: 248,
+              width: 600,
+              fontFamily: 'Carlito',
+              fontSize: 18,
+              fontWeight: '400',
+              color: '#232b25',
+              align: 'justify',
+              lineHeight: 1.35,
+              uppercase: false,
+              bgEnabled: false,
+              bgColor: '#ffffff',
+              bgPadding: 4,
+              bgRadius: 4
+            },
+            {
+              id: 'f-cat1-count',
+              label: '1. Filtro de URL (Quantidade)',
+              type: 'text',
+              value: '18.864.720',
+              x: 46,
+              y: 410,
+              width: 106,
+              fontFamily: 'Carlito',
+              fontSize: 20,
+              fontWeight: '700',
+              color: '#ffffff',
+              align: 'center',
+              lineHeight: 1.1,
+              uppercase: false,
+              bgEnabled: false,
+              bgColor: '#378f4e',
+              bgPadding: 2,
+              bgRadius: 2
+            },
+            {
+              id: 'f-cat1-desc',
+              label: '1. Filtro de URL (Descrição)',
+              type: 'text',
+              value: 'Impedindo acessos a sites não autorizados conforme regras definidas;',
+              x: 282,
+              y: 408,
+              width: 350,
+              fontFamily: 'Carlito',
+              fontSize: 16,
+              fontWeight: '400',
+              color: '#1b221d',
+              align: 'left',
+              lineHeight: 1.35,
+              uppercase: false,
+              bgEnabled: false,
+              bgColor: '#ffffff',
+              bgPadding: 2,
+              bgRadius: 2
+            },
+            {
+              id: 'f-cat2-count',
+              label: '2. Phishing (Quantidade)',
+              type: 'text',
+              value: '1.740',
+              x: 46,
+              y: 477,
+              width: 106,
+              fontFamily: 'Carlito',
+              fontSize: 20,
+              fontWeight: '700',
+              color: '#ffffff',
+              align: 'center',
+              lineHeight: 1.1,
+              uppercase: false,
+              bgEnabled: false,
+              bgColor: '#378f4e',
+              bgPadding: 2,
+              bgRadius: 2
+            },
+            {
+              id: 'f-cat2-desc',
+              label: '2. Phishing (Descrição)',
+              type: 'text',
+              value: 'Evitando o acesso a sites fraudulentos que tentam roubar informações pessoais;',
+              x: 256,
+              y: 475,
+              width: 375,
+              fontFamily: 'Carlito',
+              fontSize: 16,
+              fontWeight: '400',
+              color: '#1b221d',
+              align: 'left',
+              lineHeight: 1.35,
+              uppercase: false,
+              bgEnabled: false,
+              bgColor: '#ffffff',
+              bgPadding: 2,
+              bgRadius: 2
+            },
+            {
+              id: 'f-cat3-count',
+              label: '3. Sites Maliciosos (Quantidade)',
+              type: 'text',
+              value: '444.330',
+              x: 46,
+              y: 544,
+              width: 106,
+              fontFamily: 'Carlito',
+              fontSize: 20,
+              fontWeight: '700',
+              color: '#ffffff',
+              align: 'center',
+              lineHeight: 1.1,
+              uppercase: false,
+              bgEnabled: false,
+              bgColor: '#378f4e',
+              bgPadding: 2,
+              bgRadius: 2
+            },
+            {
+              id: 'f-cat3-desc',
+              label: '3. Sites Maliciosos (Descrição)',
+              type: 'text',
+              value: 'Protegendo contra páginas que distribuem malware, vírus e outros conteúdos perigosos;',
+              x: 304,
+              y: 542,
+              width: 328,
+              fontFamily: 'Carlito',
+              fontSize: 16,
+              fontWeight: '400',
+              color: '#1b221d',
+              align: 'left',
+              lineHeight: 1.35,
+              uppercase: false,
+              bgEnabled: false,
+              bgColor: '#ffffff',
+              bgPadding: 2,
+              bgRadius: 2
+            },
+            {
+              id: 'f-cat4-count',
+              label: '4. URLs Spam (Quantidade)',
+              type: 'text',
+              value: '60',
+              x: 46,
+              y: 611,
+              width: 106,
+              fontFamily: 'Carlito',
+              fontSize: 20,
+              fontWeight: '700',
+              color: '#ffffff',
+              align: 'center',
+              lineHeight: 1.1,
+              uppercase: false,
+              bgEnabled: false,
+              bgColor: '#378f4e',
+              bgPadding: 2,
+              bgRadius: 2
+            },
+            {
+              id: 'f-cat4-desc',
+              label: '4. URLs Spam (Descrição)',
+              type: 'text',
+              value: 'Bloqueia links usados em mensagens de spam que direcionam para conteúdo indesejado ou fraudulento.',
+              x: 274,
+              y: 609,
+              width: 358,
+              fontFamily: 'Carlito',
+              fontSize: 16,
+              fontWeight: '400',
+              color: '#1b221d',
+              align: 'left',
+              lineHeight: 1.35,
+              uppercase: false,
+              bgEnabled: false,
+              bgColor: '#ffffff',
+              bgPadding: 2,
+              bgRadius: 2
+            },
+            {
+              id: 'f-cat5-count',
+              label: '5. Proxy Avoidance (Quantidade)',
+              type: 'text',
+              value: '-',
+              x: 46,
+              y: 678,
+              width: 106,
+              fontFamily: 'Carlito',
+              fontSize: 20,
+              fontWeight: '700',
+              color: '#ffffff',
+              align: 'center',
+              lineHeight: 1.1,
+              uppercase: false,
+              bgEnabled: false,
+              bgColor: '#378f4e',
+              bgPadding: 2,
+              bgRadius: 2
+            },
+            {
+              id: 'f-cat5-desc',
+              label: '5. Proxy Avoidance (Descrição)',
+              type: 'text',
+              value: 'Impede o acesso a sites que distribuem malware, vírus, spyware ou outros conteúdos perigosos.',
+              x: 306,
+              y: 676,
+              width: 326,
+              fontFamily: 'Carlito',
+              fontSize: 16,
+              fontWeight: '400',
+              color: '#1b221d',
+              align: 'left',
+              lineHeight: 1.35,
+              uppercase: false,
+              bgEnabled: false,
+              bgColor: '#ffffff',
+              bgPadding: 2,
+              bgRadius: 2
+            },
+            {
+              id: 'f-risk',
+              label: 'Classificação de Risco (Rodapé Verde)',
+              type: 'text',
+              value: 'Severidade Alta: 100,00% dos bloqueios.',
+              x: 55,
+              y: 803,
+              width: 540,
+              fontFamily: 'Carlito',
+              fontSize: 19,
+              fontWeight: '700',
+              color: '#ffffff',
+              align: 'left',
+              lineHeight: 1.2,
+              uppercase: false,
+              bgEnabled: false,
+              bgColor: '#178241',
+              bgPadding: 4,
+              bgRadius: 4
+            }
+          ]
+        },
+        {
+          id: 'tpl-manutencao-programada',
+          name: 'Comunicado de Manutenção Programada',
+          category: 'Avisos operacionais',
+          width: 800,
+          height: 1000,
+          backgroundDataUrl: createMaintenanceBackgroundDataUrl(),
+          fields: [
+            {
+              id: 'm-titulo',
+              label: 'Título do Comunicado',
+              type: 'text',
+              value: 'MANUTENÇÃO PREVENTIVA NA REDE ELÉTRICA E SERVIDORES',
+              x: 50,
+              y: 92,
+              width: 700,
+              fontFamily: 'Montserrat',
+              fontSize: 28,
+              fontWeight: '800',
+              color: '#ffffff',
+              align: 'left',
+              lineHeight: 1.25,
+              uppercase: true,
+              bgEnabled: false,
+              bgColor: '#0f172a',
+              bgPadding: 6,
+              bgRadius: 6
+            },
+            {
+              id: 'm-data',
+              label: 'Data da Manutenção',
+              type: 'text',
+              value: '18/10/2026 (Domingo)',
+              x: 96,
+              y: 338,
+              width: 175,
+              fontFamily: 'Montserrat',
+              fontSize: 17,
+              fontWeight: '700',
+              color: '#0f172a',
+              align: 'left',
+              lineHeight: 1.2,
+              uppercase: false,
+              bgEnabled: false,
+              bgColor: '#f1f5f9',
+              bgPadding: 4,
+              bgRadius: 4
+            },
+            {
+              id: 'm-horario',
+              label: 'Horário Previsto',
+              type: 'text',
+              value: '08h00 às 12h30',
+              x: 314,
+              y: 338,
+              width: 175,
+              fontFamily: 'Montserrat',
+              fontSize: 17,
+              fontWeight: '700',
+              color: '#0f172a',
+              align: 'left',
+              lineHeight: 1.2,
+              uppercase: false,
+              bgEnabled: false,
+              bgColor: '#f1f5f9',
+              bgPadding: 4,
+              bgRadius: 4
+            },
+            {
+              id: 'm-setor',
+              label: 'Setor ou Sistema Afetado',
+              type: 'text',
+              value: 'ERP, E-mail e Wi-Fi Corporativo',
+              x: 532,
+              y: 338,
+              width: 175,
+              fontFamily: 'Montserrat',
+              fontSize: 15,
+              fontWeight: '700',
+              color: '#b45309',
+              align: 'left',
+              lineHeight: 1.2,
+              uppercase: false,
+              bgEnabled: false,
+              bgColor: '#f1f5f9',
+              bgPadding: 4,
+              bgRadius: 4
+            },
+            {
+              id: 'm-detalhes',
+              label: 'Texto de Orientações do Comunicado',
+              type: 'textarea',
+              value: 'Informamos a todos os colaboradores que realizaremos uma parada programada para atualização de segurança dos servidores principais.\n\nDurante este período, os sistemas internos e pastas de rede ficarão temporariamente indisponíveis. Recomendamos salvar todos os documentos antes do início da janela de manutenção.',
+              x: 102,
+              y: 482,
+              width: 595,
+              fontFamily: 'Open Sans',
+              fontSize: 18,
+              fontWeight: '400',
+              color: '#1e293b',
+              align: 'justify',
+              lineHeight: 1.45,
+              uppercase: false,
+              bgEnabled: false,
+              bgColor: '#f8fafc',
+              bgPadding: 4,
+              bgRadius: 4
+            },
+            {
+              id: 'm-responsavel',
+              label: 'Responsável / Ramal de Contato',
+              type: 'text',
+              value: 'Equipe de Infraestrutura de TI • Ramal 2045 / suporte@empresa.com.br',
+              x: 100,
+              y: 815,
+              width: 600,
+              fontFamily: 'Montserrat',
+              fontSize: 15,
+              fontWeight: '700',
+              color: '#064e3b',
+              align: 'left',
+              lineHeight: 1.2,
+              uppercase: false,
+              bgEnabled: false,
+              bgColor: '#ecfdf5',
+              bgPadding: 4,
+              bgRadius: 4
+            }
+          ]
+        },
+        {
+          id: 'tpl-convite-evento',
+          name: 'Convite de Evento e Treinamento Interno',
+          category: 'Eventos',
+          width: 800,
+          height: 1000,
+          backgroundDataUrl: createEventBackgroundDataUrl(),
+          fields: [
+            {
+              id: 'e-nome',
+              label: 'Nome do Evento / Treinamento',
+              type: 'textarea',
+              value: 'WORKSHOP DE BOAS PRÁTICAS EM SEGURANÇA OPERACIONAL E INOVAÇÃO',
+              x: 90,
+              y: 160,
+              width: 620,
+              fontFamily: 'Montserrat',
+              fontSize: 32,
+              fontWeight: '800',
+              color: '#ffffff',
+              align: 'left',
+              lineHeight: 1.25,
+              uppercase: true,
+              bgEnabled: false,
+              bgColor: '#064e3b',
+              bgPadding: 6,
+              bgRadius: 6
+            },
+            {
+              id: 'e-descricao',
+              label: 'Resumo do Evento',
+              type: 'textarea',
+              value: 'Convidamos todos os líderes e equipes operacionais para o encontro mensal de alinhamento estratégico, prevenção de incidentes e apresentação dos resultados do trimestre.',
+              x: 125,
+              y: 400,
+              width: 550,
+              fontFamily: 'Open Sans',
+              fontSize: 18,
+              fontWeight: '400',
+              color: '#334155',
+              align: 'left',
+              lineHeight: 1.45,
+              uppercase: false,
+              bgEnabled: false,
+              bgColor: '#ffffff',
+              bgPadding: 4,
+              bgRadius: 4
+            },
+            {
+              id: 'e-data-hora',
+              label: 'Data e Horário',
+              type: 'text',
+              value: '25 de Outubro • 14h00',
+              x: 145,
+              y: 608,
+              width: 225,
+              fontFamily: 'Montserrat',
+              fontSize: 18,
+              fontWeight: '700',
+              color: '#064e3b',
+              align: 'left',
+              lineHeight: 1.2,
+              uppercase: false,
+              bgEnabled: false,
+              bgColor: '#f0fdf4',
+              bgPadding: 4,
+              bgRadius: 4
+            },
+            {
+              id: 'e-local',
+              label: 'Local / Sala / Link',
+              type: 'text',
+              value: 'Auditório Principal - Bloco A',
+              x: 435,
+              y: 608,
+              width: 225,
+              fontFamily: 'Montserrat',
+              fontSize: 17,
+              fontWeight: '700',
+              color: '#064e3b',
+              align: 'left',
+              lineHeight: 1.2,
+              uppercase: false,
+              bgEnabled: false,
+              bgColor: '#f0fdf4',
+              bgPadding: 4,
+              bgRadius: 4
+            },
+            {
+              id: 'e-instrutor',
+              label: 'Instrutor e Público-Alvo',
+              type: 'text',
+              value: 'Condução: Eng. Marcos Rocha (SSMA) • Público: Coordenadores e Supervisores',
+              x: 145,
+              y: 745,
+              width: 510,
+              fontFamily: 'Open Sans',
+              fontSize: 15,
+              fontWeight: '700',
+              color: '#0f172a',
+              align: 'left',
+              lineHeight: 1.3,
+              uppercase: false,
+              bgEnabled: false,
+              bgColor: '#f8fafc',
+              bgPadding: 4,
+              bgRadius: 4
+            }
+          ]
+        }
+      ];
+    }
+
+    // Estado central da aplicação
+    const state = {
+      activeStage: 'stage-1', // 'stage-1' | 'stage-2' | 'stage-3' | 'stage-4' | 'stage-5'
+      studioTab: 'fill',      // 'fill' | 'configure'
+      templates: [],
+      activeTemplateId: '',
+      selectedFieldId: '',
+      showGuides: true,
+      libraryCategoryFilter: 'Todos',
+      bgImageCache: {},       // { [templateId]: HTMLImageElement }
+      eyedropperMode: null,   // 'text' | 'bg' | null
+      createNewTemplateOnUpload: false,
+      pointerAction: {
+        type: null,           // 'drag' | 'resize' | null
+        fieldId: null,
+        startX: 0,
+        startY: 0,
+        origX: 0,
+        origY: 0,
+        origWidth: 0
+      },
+      fieldHitBoxes: {},
+      historyRecords: [
+        {
+          id: 'hist-demo-1',
+          timestamp: '14/10/2026 09:15:00',
+          templateId: 'tpl-barralcool-fique-por-dentro',
+          templateName: 'Fique por Dentro — Segurança da Informação',
+          category: 'Informativos diversos',
+          format: 'PNG',
+          values: {
+            'Total de Ameaças (Destaque Amarelo)': '19. 310.850 AMEAÇAS',
+            'Período do Relatório': '01 a 30 de setembro de 2026',
+            '1. Filtro de URL (Quantidade)': '18.864.720',
+            '2. Phishing (Quantidade)': '1.740',
+            '3. Sites Maliciosos (Quantidade)': '444.330'
+          }
+        }
+      ],
+      sectorRequests: [
+        {
+          id: 'req-101',
+          createdAt: '14/10/2026 08:40',
+          department: 'Segurança da Informação (TI)',
+          requester: 'Rodrigo Almeida',
+          templateId: 'tpl-barralcool-fique-por-dentro',
+          templateName: 'Fique por Dentro — Segurança da Informação',
+          status: 'Pendente',
+          fieldValues: {
+            'f-total': '21. 450.900 AMEAÇAS',
+            'f-periodo': '01 a 31 de outubro de 2026',
+            'f-cat1-count': '20.910.000',
+            'f-cat2-count': '2.150',
+            'f-cat3-count': '538.630',
+            'f-cat4-count': '120',
+            'f-cat5-count': '-',
+            'f-risk': 'Severidade Alta: 100,00% dos bloqueios.'
+          }
+        },
+        {
+          id: 'req-102',
+          createdAt: '14/10/2026 10:05',
+          department: 'Manutenção Industrial',
+          requester: 'Eng. Fernanda Costa',
+          templateId: 'tpl-manutencao-programada',
+          templateName: 'Comunicado de Manutenção Programada',
+          status: 'Pendente',
+          fieldValues: {
+            'm-titulo': 'MANUTENÇÃO PROGRAMADA NO SISTEMA DE PESAGEM BALANÇA 02',
+            'm-data': '22/10/2026 (Quinta)',
+            'm-horario': '13h00 às 16h00',
+            'm-setor': 'Pátio e Recebimento Agrícola',
+            'm-detalhes': 'Informamos que a Balança Rodoviária 02 passará por aferição e calibração preventiva. Durante o período citado, todo o fluxo de veículos será direcionado para as Balanças 01 e 03.',
+            'm-responsavel': 'Coordenação de Manutenção • Ramal 3110'
+          }
+        },
+        {
+          id: 'req-103',
+          createdAt: '14/10/2026 11:20',
+          department: 'Recursos Humanos (DHO)',
+          requester: 'Juliana Mendes',
+          templateId: 'tpl-convite-evento',
+          templateName: 'Convite de Evento e Treinamento Interno',
+          status: 'Pendente',
+          fieldValues: {
+            'e-nome': 'INTEGRAÇÃO E TREINAMENTO DE LIDERANÇA POSITIVA 2026',
+            'e-descricao': 'Participe do nosso encontro especial voltado ao desenvolvimento de líderes, comunicação assertiva e gestão de equipes de alta performance.',
+            'e-data-hora': '30 de Outubro • 08h30',
+            'e-local': 'Sala de Treinamento RH - Sala 02',
+            'e-instrutor': 'Condução: Psicóloga Camila Vieira (DHO) • Público: Gestores e Líderes'
+          }
+        }
+      ]
+    };
+
+    // =========================================================================
+    // 3. FUNÇÕES UTILITÁRIAS E GERENCIAMENTO DE ESTADO
+    // =========================================================================
+    let toastTimer = null;
+    function showToast(message) {
+      const container = document.getElementById('toast-container');
+      const textEl = document.getElementById('toast-message');
+      if (!container || !textEl) return;
+      textEl.textContent = message;
+      container.classList.remove('hidden');
+      if (toastTimer) clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => {
+        container.classList.add('hidden');
+      }, 4200);
+    }
+
+    document.getElementById('toast-close-btn').addEventListener('click', () => {
+      document.getElementById('toast-container').classList.add('hidden');
+    });
+
+    function getActiveTemplate() {
+      return state.templates.find(t => t.id === state.activeTemplateId) || state.templates[0];
+    }
+
+    function getSelectedField() {
+      const tpl = getActiveTemplate();
+      if (!tpl || !tpl.fields.length) return null;
+      return tpl.fields.find(f => f.id === state.selectedFieldId) || tpl.fields[0];
+    }
+
+    function updateHeaderBadges() {
+      const tplBadge = document.getElementById('badge-templates-count');
+      const histBadge = document.getElementById('badge-history-count');
+      const reqBadge = document.getElementById('badge-requests-count');
+      if (tplBadge) tplBadge.textContent = String(state.templates.length);
+      if (histBadge) histBadge.textContent = String(state.historyRecords.length);
+      if (reqBadge) {
+        const pendingCount = state.sectorRequests.filter(r => r.status === 'Pendente').length;
+        reqBadge.textContent = String(pendingCount);
+      }
+    }
+
+    // Navegação entre as 5 Etapas (Início 1-2 e Upgrades 3-5)
+    function switchStage(stageKey) {
+      state.activeStage = stageKey;
+      document.querySelectorAll('.stage-view').forEach(sec => sec.classList.add('hidden'));
+      const targetView = document.getElementById(`view-${stageKey}`);
+      if (targetView) targetView.classList.remove('hidden');
+
+      document.querySelectorAll('.stage-nav-btn').forEach(btn => {
+        const isCurrent = btn.dataset.stage === stageKey;
+        if (isCurrent) {
+          btn.className = 'stage-nav-btn px-3 py-1.5 rounded-lg text-xs font-extrabold transition bg-emerald-500 text-slate-950 shadow flex items-center gap-1.5';
+        } else {
+          btn.className = 'stage-nav-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition text-slate-300 hover:text-white hover:bg-slate-800/70 flex items-center gap-1.5';
+        }
+      });
+
+      if (stageKey === 'stage-1') {
+        syncStudioUI();
+      } else if (stageKey === 'stage-2') {
+        renderLibraryStage();
+      } else if (stageKey === 'stage-3') {
+        renderHistoryStage();
+      } else if (stageKey === 'stage-4') {
+        renderRequestsStage();
+      } else if (stageKey === 'stage-5') {
+        renderAutomationStage();
+      }
+    }
+
+    document.querySelectorAll('.stage-nav-btn').forEach(btn => {
+      btn.addEventListener('click', () => switchStage(btn.dataset.stage));
+    });
+
+    // Alternância entre as sub-abas da Etapa 1 ("1. Preencher Formulário" vs "2. Configurar Modelo")
+    function switchStudioSubTab(tabName) {
+      state.studioTab = tabName;
+      const fillPanel = document.getElementById('subpanel-fill');
+      const configPanel = document.getElementById('subpanel-configure');
+      const btnFill = document.getElementById('tab-btn-fill');
+      const btnConfig = document.getElementById('tab-btn-configure');
+
+      if (tabName === 'fill') {
+        fillPanel.classList.remove('hidden');
+        configPanel.classList.add('hidden');
+        btnFill.className = 'py-2 px-3 rounded-lg text-xs font-bold transition bg-emerald-500 text-slate-950 shadow flex items-center justify-center gap-1.5';
+        btnConfig.className = 'py-2 px-3 rounded-lg text-xs font-bold transition text-slate-300 hover:text-white hover:bg-slate-800 flex items-center justify-center gap-1.5';
+      } else {
+        fillPanel.classList.add('hidden');
+        configPanel.classList.remove('hidden');
+        btnConfig.className = 'py-2 px-3 rounded-lg text-xs font-bold transition bg-amber-400 text-slate-950 shadow flex items-center justify-center gap-1.5';
+        btnFill.className = 'py-2 px-3 rounded-lg text-xs font-bold transition text-slate-300 hover:text-white hover:bg-slate-800 flex items-center justify-center gap-1.5';
+      }
+      renderStudioCanvas(false);
+    }
+
+    document.getElementById('tab-btn-fill').addEventListener('click', () => switchStudioSubTab('fill'));
+    document.getElementById('tab-btn-configure').addEventListener('click', () => switchStudioSubTab('configure'));
+    document.getElementById('btn-jump-to-add-field').addEventListener('click', () => switchStudioSubTab('configure'));
+
+    // =========================================================================
+    // 4. MOTOR DE RENDERIZAÇÃO DO CANVAS (IMAGEM DE FUNDO + CAMPOS DINÂMICOS)
+    // =========================================================================
+    function loadTemplateBackgroundAndRender(callback) {
+      const tpl = getActiveTemplate();
+      if (!tpl) return;
+
+      const canvas = document.getElementById('art-canvas');
+      if (canvas.width !== tpl.width || canvas.height !== tpl.height) {
+        canvas.width = tpl.width;
+        canvas.height = tpl.height;
+      }
+
+      // Atualiza miniaturas de preview do fundo
+      const thumbUrl = tpl.backgroundDataUrl || 'https://placehold.co/80x100/0f172a/10b981?text=Sem+Fundo';
+      document.getElementById('fill-bg-preview-thumb').src = thumbUrl;
+      document.getElementById('config-bg-preview-thumb').src = thumbUrl;
+      document.getElementById('fill-bg-resolution-text').textContent = `Resolução: ${tpl.width} × ${tpl.height} px`;
+      document.getElementById('config-dimensions-badge').textContent = `${tpl.width} × ${tpl.height} px`;
+
+      if (!tpl.backgroundDataUrl) {
+        renderStudioCanvas(false);
+        if (callback) callback();
+        return;
+      }
+
+      const cached = state.bgImageCache[tpl.id];
+      if (cached && cached.src === tpl.backgroundDataUrl && cached.complete) {
+        renderStudioCanvas(false);
+        if (callback) callback();
+        return;
+      }
+
+      const img = new Image();
+      img.onload = () => {
+        state.bgImageCache[tpl.id] = img;
+        renderStudioCanvas(false);
+        if (callback) callback();
+      };
+      img.src = tpl.backgroundDataUrl;
+    }
+
+    // Quebra um parágrafo em linhas que cabem em `maxWidth`
+    function wrapParagraphLines(ctx, text, maxWidth) {
+      const rawParagraphs = String(text ?? '').split('\n');
+      const allLines = [];
+
+      rawParagraphs.forEach((para) => {
+        const words = para.trim().split(/\s+/).filter(Boolean);
+        if (words.length === 0) {
+          allLines.push({ words: [''], isLastInParagraph: true });
+          return;
+        }
+        let currentLine = [words[0]];
+        for (let i = 1; i < words.length; i++) {
+          const testStr = currentLine.concat(words[i]).join(' ');
+          if (ctx.measureText(testStr).width <= maxWidth) {
+            currentLine.push(words[i]);
+          } else {
+            allLines.push({ words: currentLine, isLastInParagraph: false });
+            currentLine = [words[i]];
+          }
+        }
+        allLines.push({ words: currentLine, isLastInParagraph: true });
+      });
+
+      return allLines;
+    }
+
+    // Renderiza a arte completa no Canvas (cleanExport = true omite as caixas tracejadas de edição)
+    function renderStudioCanvas(cleanExport = false) {
+      const tpl = getActiveTemplate();
+      if (!tpl) return;
+      const canvas = document.getElementById('art-canvas');
+      const ctx = canvas.getContext('2d');
+
+      ctx.save();
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // 1. Fundo branco base + Imagem de Fundo do Modelo
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      const bgImg = state.bgImageCache[tpl.id];
+      if (bgImg && bgImg.complete) {
+        ctx.drawImage(bgImg, 0, 0, canvas.width, canvas.height);
+      }
+
+      if (!cleanExport) {
+        state.fieldHitBoxes = {};
+      }
+
+      // 2. Desenha cada Campo Dinâmico vinculado ao Formulário
+      tpl.fields.forEach((field) => {
+        const rawText = field.uppercase
+          ? String(field.value ?? '').toUpperCase()
+          : String(field.value ?? '');
+
+        const fontSize = Number(field.fontSize) || 18;
+        const fontWeight = field.fontWeight || '600';
+        const fontFamily = field.fontFamily || 'Inter';
+        const lineHeightPx = fontSize * (Number(field.lineHeight) || 1.25);
+        const boxWidth = Math.max(30, Number(field.width) || 240);
+
+        ctx.font = `${fontWeight} ${fontSize}px "${fontFamily}", sans-serif`;
+        ctx.textBaseline = 'top';
+
+        const lines = wrapParagraphLines(ctx, rawText, boxWidth);
+        const boxHeight = Math.max(lineHeightPx, lines.length * lineHeightPx);
+
+        // 2.1 Se o campo tiver fundo habilitado (para cobrir texto antigo da imagem original)
+        if (field.bgEnabled) {
+          const pad = Number(field.bgPadding) || 0;
+          const rad = Number(field.bgRadius) || 0;
+          roundedRectPath(
+            ctx,
+            field.x - pad,
+            field.y - pad,
+            boxWidth + pad * 2,
+            boxHeight + pad * 2,
+            rad
+          );
+          ctx.fillStyle = field.bgColor || '#ffffff';
+          ctx.fill();
+        }
+
+        // 2.2 Desenha as linhas de texto respeitando o alinhamento (left, center, right, justify)
+        ctx.fillStyle = field.color || '#000000';
+        lines.forEach((lineObj, lineIdx) => {
+          const ly = field.y + lineIdx * lineHeightPx;
+          const lineStr = lineObj.words.join(' ');
+
+          if (field.align === 'center') {
+            ctx.textAlign = 'center';
+            ctx.fillText(lineStr, field.x + boxWidth / 2, ly);
+          } else if (field.align === 'right') {
+            ctx.textAlign = 'right';
+            ctx.fillText(lineStr, field.x + boxWidth, ly);
+          } else if (field.align === 'justify' && !lineObj.isLastInParagraph && lineObj.words.length > 1) {
+            ctx.textAlign = 'left';
+            const totalWordsW = lineObj.words.reduce((acc, w) => acc + ctx.measureText(w).width, 0);
+            const spaceW = (boxWidth - totalWordsW) / (lineObj.words.length - 1);
+            let curX = field.x;
+            lineObj.words.forEach((w) => {
+              ctx.fillText(w, curX, ly);
+              curX += ctx.measureText(w).width + spaceW;
+            });
+          } else {
+            ctx.textAlign = 'left';
+            ctx.fillText(lineStr, field.x, ly);
+          }
+        });
+
+        // 2.3 Salva a área clicável do campo e desenha demarcação visual (se não for exportação final)
+        if (!cleanExport) {
+          state.fieldHitBoxes[field.id] = {
+            x: field.x,
+            y: field.y,
+            w: boxWidth,
+            h: boxHeight,
+            handleX: field.x + boxWidth,
+            handleY: field.y + boxHeight / 2
+          };
+
+          const isSelected = field.id === state.selectedFieldId;
+          if (state.showGuides || isSelected) {
+            ctx.save();
+            ctx.strokeStyle = isSelected ? '#f59e0b' : 'rgba(16, 185, 129, 0.65)';
+            ctx.lineWidth = isSelected ? 2 : 1.2;
+            ctx.setLineDash(isSelected ? [] : [5, 4]);
+            ctx.strokeRect(field.x - 4, field.y - 4, boxWidth + 8, boxHeight + 8);
+
+            if (isSelected) {
+              // Etiqueta superior com o nome do campo
+              ctx.font = '700 11px "Inter", sans-serif';
+              const tagText = field.label || 'Campo';
+              const tagW = ctx.measureText(tagText).width + 12;
+              const tagY = Math.max(0, field.y - 22);
+              ctx.fillStyle = '#f59e0b';
+              ctx.fillRect(field.x - 4, tagY, tagW, 18);
+              ctx.fillStyle = '#090d16';
+              ctx.textAlign = 'left';
+              ctx.textBaseline = 'middle';
+              ctx.fillText(tagText, field.x + 2, tagY + 9);
+
+              // Alça lateral direita para redimensionar a largura da caixa de texto
+              ctx.beginPath();
+              ctx.arc(field.x + boxWidth + 4, field.y + boxHeight / 2, 6.5, 0, Math.PI * 2);
+              ctx.fillStyle = '#f59e0b';
+              ctx.fill();
+              ctx.lineWidth = 2;
+              ctx.strokeStyle = '#090d16';
+              ctx.stroke();
+            }
+            ctx.restore();
+          }
+        }
+      });
+
+      ctx.restore();
+    }
+
+    // =========================================================================
+    // 5. SINCRONIZAÇÃO AUTOMÁTICA ENTRE FORMULÁRIO DINÂMICO E CONFIGURAÇÃO
+    // =========================================================================
+    function syncStudioUI() {
+      const tpl = getActiveTemplate();
+      if (!tpl) return;
+
+      if (!state.selectedFieldId || !tpl.fields.some(f => f.id === state.selectedFieldId)) {
+        state.selectedFieldId = tpl.fields[0]?.id || '';
+      }
+
+      // 1. Seletor de modelos no topo do painel esquerdo
+      const selectEl = document.getElementById('studio-template-select');
+      selectEl.innerHTML = '';
+      state.templates.forEach((item) => {
+        const opt = document.createElement('option');
+        opt.value = item.id;
+        opt.textContent = `${item.name} (${item.category})`;
+        if (item.id === tpl.id) opt.selected = true;
+        selectEl.appendChild(opt);
+      });
+
+      // 2. Cabeçalhos do Modo Preenchimento
+      document.getElementById('fill-model-title').textContent = tpl.name;
+      document.getElementById('fill-model-category').textContent = `${tpl.category} • ${tpl.fields.length} campos editáveis`;
+
+      // 3. Campos do Formulário Dinâmico (Sub-aba 1)
+      renderDynamicFormInputs();
+
+      // 4. Painel de Configuração (Sub-aba 2)
+      document.getElementById('config-model-name').value = tpl.name;
+      document.getElementById('config-model-category').value = tpl.category;
+      renderFieldChipsAndInspector();
+
+      // 5. Carrega a imagem de fundo e desenha o Canvas
+      loadTemplateBackgroundAndRender();
+      updateHeaderBadges();
+    }
+
+    function renderDynamicFormInputs() {
+      const tpl = getActiveTemplate();
+      const container = document.getElementById('dynamic-form-container');
+      container.innerHTML = '';
+
+      if (!tpl || tpl.fields.length === 0) {
+        container.innerHTML = `
+          <div class="bg-slate-950 border border-slate-800 rounded-xl p-4 text-center text-xs text-slate-400">
+            Nenhum campo adicionado neste modelo ainda. Clique em <strong>"2. Configurar Modelo e Fundo"</strong> acima e depois em <strong>"+ Adicionar Campo"</strong>.
+          </div>
+        `;
+        return;
+      }
+
+      tpl.fields.forEach((field, index) => {
+        const wrapper = document.createElement('div');
+        const isSelected = field.id === state.selectedFieldId;
+        wrapper.className = `p-3 rounded-xl border transition ${
+          isSelected
+            ? 'bg-slate-950 border-emerald-500/60 shadow-sm'
+            : 'bg-slate-950/60 border-slate-800/90 hover:border-slate-700'
+        }`;
+
+        const labelRow = document.createElement('div');
+        labelRow.className = 'flex items-center justify-between mb-1';
+        labelRow.innerHTML = `
+          <label class="text-xs font-bold text-slate-200">${index + 1}. ${field.label}</label>
+          <span class="text-[10px] font-mono text-slate-500">(${field.x}, ${field.y})</span>
+        `;
+        wrapper.appendChild(labelRow);
+
+        const inputEl = field.type === 'textarea'
+          ? document.createElement('textarea')
+          : document.createElement('input');
+
+        if (field.type === 'textarea') {
+          inputEl.rows = 3;
+        } else {
+          inputEl.type = 'text';
+        }
+
+        inputEl.value = field.value;
+        inputEl.className = 'w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs sm:text-sm text-white focus:outline-none focus:border-emerald-500';
+
+        inputEl.addEventListener('focus', () => {
+          state.selectedFieldId = field.id;
+          renderStudioCanvas(false);
+        });
+
+        inputEl.addEventListener('input', (e) => {
+          field.value = e.target.value;
+          const inspVal = document.getElementById('insp-value');
+          if (inspVal && state.selectedFieldId === field.id) {
+            inspVal.value = field.value;
+          }
+          renderStudioCanvas(false);
+        });
+
+        wrapper.appendChild(inputEl);
+        container.appendChild(wrapper);
+      });
+    }
+
+    function renderFieldChipsAndInspector() {
+      const tpl = getActiveTemplate();
+      const chipsContainer = document.getElementById('field-chips-list');
+      const inspectorBox = document.getElementById('field-inspector-box');
+      chipsContainer.innerHTML = '';
+
+      if (!tpl || tpl.fields.length === 0) {
+        inspectorBox.classList.add('hidden');
+        return;
+      }
+
+      inspectorBox.classList.remove('hidden');
+
+      tpl.fields.forEach((field, idx) => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        const isSel = field.id === state.selectedFieldId;
+        btn.className = isSel
+          ? 'px-2.5 py-1 rounded-lg text-xs font-extrabold bg-amber-400 text-slate-950 shadow transition'
+          : 'px-2.5 py-1 rounded-lg text-xs font-semibold bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-800 transition';
+        btn.textContent = `${idx + 1}. ${field.label}`;
+        btn.addEventListener('click', () => {
+          state.selectedFieldId = field.id;
+          renderFieldChipsAndInspector();
+          renderDynamicFormInputs();
+          renderStudioCanvas(false);
+        });
+        chipsContainer.appendChild(btn);
+      });
+
+      const sel = getSelectedField();
+      if (!sel) return;
+
+      document.getElementById('insp-label').value = sel.label || '';
+      document.getElementById('insp-type').value = sel.type || 'text';
+      document.getElementById('insp-value').value = sel.value || '';
+      document.getElementById('insp-font-family').value = sel.fontFamily || 'Ubuntu';
+      document.getElementById('insp-font-size').value = sel.fontSize || 18;
+      document.getElementById('insp-font-weight').value = sel.fontWeight || '700';
+      document.getElementById('insp-color-picker').value = sel.color || '#000000';
+      document.getElementById('insp-color-hex').value = sel.color || '#000000';
+      document.getElementById('insp-uppercase').checked = Boolean(sel.uppercase);
+      document.getElementById('insp-bg-enabled').checked = Boolean(sel.bgEnabled);
+      document.getElementById('insp-bg-options').classList.toggle('hidden', !sel.bgEnabled);
+      document.getElementById('insp-bg-color').value = sel.bgColor || '#f3be26';
+      document.getElementById('insp-bg-padding').value = sel.bgPadding ?? 6;
+      document.getElementById('insp-bg-radius').value = sel.bgRadius ?? 6;
+      document.getElementById('insp-x').value = Math.round(sel.x);
+      document.getElementById('insp-y').value = Math.round(sel.y);
+      document.getElementById('insp-width').value = Math.round(sel.width);
+      document.getElementById('insp-line-height').value = sel.lineHeight || 1.25;
+
+      document.querySelectorAll('.insp-align-btn').forEach((b) => {
+        const active = b.dataset.align === (sel.align || 'left');
+        b.className = active
+          ? 'insp-align-btn py-1 rounded text-[10px] font-extrabold bg-emerald-500 text-slate-950'
+          : 'insp-align-btn py-1 rounded text-[10px] font-bold text-slate-300 hover:bg-slate-800';
+      });
+    }
+
+    // =========================================================================
+    // 6. EVENTOS DE EDIÇÃO DE PROPRIEDADES, UPLOAD DE FUNDO E ARRASTE NO CANVAS
+    // =========================================================================
+    document.getElementById('studio-template-select').addEventListener('change', (e) => {
+      state.activeTemplateId = e.target.value;
+      const tpl = getActiveTemplate();
+      state.selectedFieldId = tpl?.fields[0]?.id || '';
+      syncStudioUI();
+    });
+
+    document.getElementById('config-model-name').addEventListener('input', (e) => {
+      const tpl = getActiveTemplate();
+      if (!tpl) return;
+      tpl.name = e.target.value;
+      document.getElementById('fill-model-title').textContent = tpl.name;
+    });
+
+    document.getElementById('config-model-category').addEventListener('change', (e) => {
+      const tpl = getActiveTemplate();
+      if (!tpl) return;
+      tpl.category = e.target.value;
+      syncStudioUI();
+    });
+
+    // Listeners do Inspetor de Campo
+    function bindInspectorEvents() {
+      const updateFieldProp = (updater, refreshChips = false) => {
+        const sel = getSelectedField();
+        if (!sel) return;
+        updater(sel);
+        if (refreshChips) renderFieldChipsAndInspector();
+        renderDynamicFormInputs();
+        renderStudioCanvas(false);
+      };
+
+      document.getElementById('insp-label').addEventListener('input', (e) => {
+        updateFieldProp(f => { f.label = e.target.value; }, true);
+      });
+      document.getElementById('insp-type').addEventListener('change', (e) => {
+        updateFieldProp(f => { f.type = e.target.value; });
+      });
+      document.getElementById('insp-value').addEventListener('input', (e) => {
+        updateFieldProp(f => { f.value = e.target.value; });
+      });
+      document.getElementById('insp-font-family').addEventListener('change', (e) => {
+        updateFieldProp(f => { f.fontFamily = e.target.value; });
+      });
+      document.getElementById('insp-font-size').addEventListener('input', (e) => {
+        updateFieldProp(f => { f.fontSize = Math.max(8, Number(e.target.value) || 16); });
+      });
+      document.getElementById('insp-font-weight').addEventListener('change', (e) => {
+        updateFieldProp(f => { f.fontWeight = e.target.value; });
+      });
+      document.getElementById('insp-color-picker').addEventListener('input', (e) => {
+        document.getElementById('insp-color-hex').value = e.target.value;
+        updateFieldProp(f => { f.color = e.target.value; });
+      });
+      document.getElementById('insp-color-hex').addEventListener('input', (e) => {
+        const val = e.target.value.trim();
+        if (/^#[0-9a-fA-F]{6}$/.test(val)) {
+          document.getElementById('insp-color-picker').value = val;
+          updateFieldProp(f => { f.color = val; });
+        }
+      });
+      document.getElementById('insp-uppercase').addEventListener('change', (e) => {
+        updateFieldProp(f => { f.uppercase = e.target.checked; });
+      });
+      document.getElementById('insp-bg-enabled').addEventListener('change', (e) => {
+        document.getElementById('insp-bg-options').classList.toggle('hidden', !e.target.checked);
+        updateFieldProp(f => { f.bgEnabled = e.target.checked; });
+      });
+      document.getElementById('insp-bg-color').addEventListener('input', (e) => {
+        updateFieldProp(f => { f.bgColor = e.target.value; });
+      });
+      document.getElementById('insp-bg-padding').addEventListener('input', (e) => {
+        updateFieldProp(f => { f.bgPadding = Number(e.target.value) || 0; });
+      });
+      document.getElementById('insp-bg-radius').addEventListener('input', (e) => {
+        updateFieldProp(f => { f.bgRadius = Number(e.target.value) || 0; });
+      });
+      document.getElementById('insp-x').addEventListener('input', (e) => {
+        updateFieldProp(f => { f.x = Number(e.target.value) || 0; });
+      });
+      document.getElementById('insp-y').addEventListener('input', (e) => {
+        updateFieldProp(f => { f.y = Number(e.target.value) || 0; });
+      });
+      document.getElementById('insp-width').addEventListener('input', (e) => {
+        updateFieldProp(f => { f.width = Math.max(30, Number(e.target.value) || 100); });
+      });
+      document.getElementById('insp-line-height').addEventListener('input', (e) => {
+        updateFieldProp(f => { f.lineHeight = Number(e.target.value) || 1.25; });
+      });
+
+      document.querySelectorAll('.insp-align-btn').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          updateFieldProp(f => { f.align = btn.dataset.align; }, true);
+        });
+      });
+    }
+    bindInspectorEvents();
+
+    // Adicionar, Duplicar e Excluir Campo
+    document.getElementById('btn-add-new-field').addEventListener('click', () => {
+      const tpl = getActiveTemplate();
+      if (!tpl) return;
+      const newIndex = tpl.fields.length + 1;
+      const newField = {
+        id: 'field-' + Date.now(),
+        label: `Novo Campo ${newIndex}`,
+        type: 'text',
+        value: `Texto Editável ${newIndex}`,
+        x: Math.round(tpl.width * 0.15),
+        y: Math.round(tpl.height * 0.25),
+        width: Math.round(tpl.width * 0.7),
+        fontFamily: 'Montserrat',
+        fontSize: Math.max(18, Math.round(tpl.width * 0.032)),
+        fontWeight: '700',
+        color: '#1e293b',
+        align: 'left',
+        lineHeight: 1.25,
+        uppercase: false,
+        bgEnabled: true,
+        bgColor: '#facc15',
+        bgPadding: 8,
+        bgRadius: 8
+      };
+      tpl.fields.push(newField);
+      state.selectedFieldId = newField.id;
+      syncStudioUI();
+      showToast(`Campo "${newField.label}" adicionado! Arraste-o sobre a imagem à direita.`);
+    });
+
+    document.getElementById('btn-duplicate-field').addEventListener('click', () => {
+      const tpl = getActiveTemplate();
+      const sel = getSelectedField();
+      if (!tpl || !sel) return;
+      const copy = JSON.parse(JSON.stringify(sel));
+      copy.id = 'field-' + Date.now();
+      copy.label = sel.label + ' (Cópia)';
+      copy.y = Math.min(tpl.height - 40, sel.y + 42);
+      tpl.fields.push(copy);
+      state.selectedFieldId = copy.id;
+      syncStudioUI();
+      showToast(`Campo duplicado como "${copy.label}".`);
+    });
+
+    document.getElementById('btn-delete-field').addEventListener('click', () => {
+      const tpl = getActiveTemplate();
+      if (!tpl || !state.selectedFieldId) return;
+      tpl.fields = tpl.fields.filter(f => f.id !== state.selectedFieldId);
+      state.selectedFieldId = tpl.fields[0]?.id || '';
+      syncStudioUI();
+      showToast('Campo removido do modelo.');
+    });
+
+    // Conta-gotas para capturar cor da imagem
+    document.getElementById('btn-eyedropper-text').addEventListener('click', () => {
+      state.eyedropperMode = 'text';
+      document.getElementById('art-canvas').style.cursor = 'crosshair';
+      showToast('Clique sobre qualquer ponto da imagem à direita para copiar a Cor do Texto.');
+    });
+
+    document.getElementById('btn-eyedropper-bg').addEventListener('click', () => {
+      state.eyedropperMode = 'bg';
+      document.getElementById('art-canvas').style.cursor = 'crosshair';
+      showToast('Clique sobre a imagem à direita para capturar a Cor de Fundo.');
+    });
+
+    document.getElementById('chk-show-guides').addEventListener('change', (e) => {
+      state.showGuides = e.target.checked;
+      renderStudioCanvas(false);
+    });
+
+    // =========================================================================
+    // 7. UPLOAD DE IMAGEM DE FUNDO (BOTÕES, DRAG & DROP E CTRL+V)
+    // =========================================================================
+    function applyUploadedBackgroundFile(file) {
+      if (!file || !file.type.startsWith('image/')) {
+        showToast('Por favor, selecione uma imagem válida (PNG, JPG ou WebP).');
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        const dataUrl = ev.target.result;
+        const img = new Image();
+        img.onload = () => {
+          const w = img.naturalWidth || img.width;
+          const h = img.naturalHeight || img.height;
+
+          if (state.createNewTemplateOnUpload) {
+            state.createNewTemplateOnUpload = false;
+            const baseName = (file.name || 'Novo Modelo').replace(/\.[^/.]+$/, '');
+            const newTpl = {
+              id: 'tpl-' + Date.now(),
+              name: baseName,
+              category: 'Comunicados internos',
+              width: w,
+              height: h,
+              backgroundDataUrl: dataUrl,
+              fields: [
+                {
+                  id: 'f-' + Date.now(),
+                  label: 'Título / Destaque Principal',
+                  type: 'text',
+                  value: 'DIGITE A INFORMAÇÃO AQUI',
+                  x: Math.round(w * 0.12),
+                  y: Math.round(h * 0.18),
+                  width: Math.round(w * 0.76),
+                  fontFamily: 'Montserrat',
+                  fontSize: Math.max(22, Math.round(w * 0.038)),
+                  fontWeight: '800',
+                  color: '#0f172a',
+                  align: 'center',
+                  lineHeight: 1.25,
+                  uppercase: false,
+                  bgEnabled: true,
+                  bgColor: '#facc15',
+                  bgPadding: 10,
+                  bgRadius: 10
+                }
+              ]
+            };
+            state.templates.push(newTpl);
+            state.activeTemplateId = newTpl.id;
+            state.selectedFieldId = newTpl.fields[0].id;
+            state.bgImageCache[newTpl.id] = img;
+            switchStage('stage-1');
+            switchStudioSubTab('configure');
+            syncStudioUI();
+            showToast(`Novo modelo "${baseName}" criado com sua imagem (${w} × ${h} px)!`);
+            return;
+          }
+
+          const tpl = getActiveTemplate();
+          if (!tpl) return;
+          tpl.width = w;
+          tpl.height = h;
+          tpl.backgroundDataUrl = dataUrl;
+          state.bgImageCache[tpl.id] = img;
+          syncStudioUI();
+          showToast(`Imagem de fundo atualizada (${w} × ${h} px)!`);
+        };
+        img.src = dataUrl;
+      };
+      reader.readAsDataURL(file);
+    }
+
+    const globalBgUpload = document.getElementById('global-bg-upload');
+
+    document.getElementById('btn-upload-bg-from-fill').addEventListener('click', () => {
+      state.createNewTemplateOnUpload = false;
+      globalBgUpload.click();
+    });
+
+    document.getElementById('btn-upload-bg-from-config').addEventListener('click', () => {
+      state.createNewTemplateOnUpload = false;
+      globalBgUpload.click();
+    });
+
+    document.getElementById('btn-stage-upload-bg').addEventListener('click', () => {
+      state.createNewTemplateOnUpload = false;
+      globalBgUpload.click();
+    });
+
+    document.getElementById('btn-quick-new-with-image').addEventListener('click', () => {
+      state.createNewTemplateOnUpload = true;
+      globalBgUpload.click();
+    });
+
+    document.getElementById('btn-lib-new-with-image').addEventListener('click', () => {
+      state.createNewTemplateOnUpload = true;
+      globalBgUpload.click();
+    });
+
+    globalBgUpload.addEventListener('change', (e) => {
+      const file = e.target.files?.[0];
+      if (!file) {
+        state.createNewTemplateOnUpload = false;
+        return;
+      }
+      applyUploadedBackgroundFile(file);
+      e.target.value = '';
+    });
+
+    // Drag & Drop de arquivo de imagem direto no palco do Canvas
+    const dropStage = document.getElementById('canvas-drop-stage');
+    const dropOverlay = document.getElementById('stage-drop-overlay');
+
+    dropStage.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      dropOverlay.classList.remove('hidden');
+    });
+
+    dropStage.addEventListener('dragleave', (e) => {
+      if (!dropStage.contains(e.relatedTarget)) {
+        dropOverlay.classList.add('hidden');
+      }
+    });
+
+    dropStage.addEventListener('drop', (e) => {
+      e.preventDefault();
+      dropOverlay.classList.add('hidden');
+      const file = e.dataTransfer?.files?.[0];
+      if (file) {
+        state.createNewTemplateOnUpload = false;
+        applyUploadedBackgroundFile(file);
+      }
+    });
+
+    // Colar imagem com Ctrl+V
+    window.addEventListener('paste', (e) => {
+      const items = e.clipboardData?.items;
+      if (!items) return;
+      for (let i = 0; i < items.length; i++) {
+        if (items[i].type.startsWith('image/')) {
+          const file = items[i].getAsFile();
+          if (file) {
+            state.createNewTemplateOnUpload = false;
+            applyUploadedBackgroundFile(file);
+            e.preventDefault();
+            break;
+          }
+        }
+      }
+    });
+
+    // =========================================================================
+    // 8. INTERAÇÃO COM O MOUSE / TOUCH NO CANVAS (MOVER E REDIMENSIONAR CAMPOS)
+    // =========================================================================
+    const artCanvas = document.getElementById('art-canvas');
+
+    function getLogicalCanvasPoint(evt) {
+      const rect = artCanvas.getBoundingClientRect();
+      const clientX = evt.touches ? evt.touches[0].clientX : evt.clientX;
+      const clientY = evt.touches ? evt.touches[0].clientY : evt.clientY;
+      const scaleX = artCanvas.width / rect.width;
+      const scaleY = artCanvas.height / rect.height;
+      return {
+        x: (clientX - rect.left) * scaleX,
+        y: (clientY - rect.top) * scaleY
+      };
+    }
+
+    function onCanvasPointerDown(evt) {
+      const tpl = getActiveTemplate();
+      if (!tpl) return;
+      const pt = getLogicalCanvasPoint(evt);
+
+      // 1. Modo Conta-gotas ativo
+      if (state.eyedropperMode) {
+        renderStudioCanvas(true);
+        const ctx = artCanvas.getContext('2d');
+        const px = Math.max(0, Math.min(artCanvas.width - 1, Math.round(pt.x)));
+        const py = Math.max(0, Math.min(artCanvas.height - 1, Math.round(pt.y)));
+        const pixel = ctx.getImageData(px, py, 1, 1).data;
+        const hex = '#' + [pixel[0], pixel[1], pixel[2]]
+          .map(v => v.toString(16).padStart(2, '0'))
+          .join('');
+
+        const sel = getSelectedField();
+        if (sel) {
+          if (state.eyedropperMode === 'text') {
+            sel.color = hex;
+          } else {
+            sel.bgEnabled = true;
+            sel.bgColor = hex;
+          }
+        }
+        state.eyedropperMode = null;
+        artCanvas.style.cursor = 'default';
+        renderFieldChipsAndInspector();
+        renderStudioCanvas(false);
+        showToast(`Cor ${hex.toUpperCase()} capturada da imagem!`);
+        evt.preventDefault();
+        return;
+      }
+
+      // 2. Verifica se clicou na alça redonda de redimensionar largura do campo selecionado
+      const selBox = state.fieldHitBoxes[state.selectedFieldId];
+      if (selBox) {
+        const distHandle = Math.hypot(pt.x - (selBox.handleX + 4), pt.y - selBox.handleY);
+        if (distHandle <= 14) {
+          const selField = getSelectedField();
+          state.pointerAction = {
+            type: 'resize',
+            fieldId: selField.id,
+            startX: pt.x,
+            startY: pt.y,
+            origX: selField.x,
+            origY: selField.y,
+            origWidth: selField.width
+          };
+          evt.preventDefault();
+          return;
+        }
+      }
+
+      // 3. Verifica se clicou sobre algum campo (do topo da pilha para baixo)
+      for (let i = tpl.fields.length - 1; i >= 0; i--) {
+        const f = tpl.fields[i];
+        const box = state.fieldHitBoxes[f.id];
+        if (
+          box &&
+          pt.x >= box.x - 6 &&
+          pt.x <= box.x + box.w + 6 &&
+          pt.y >= box.y - 6 &&
+          pt.y <= box.y + box.h + 6
+        ) {
+          state.selectedFieldId = f.id;
+          state.pointerAction = {
+            type: 'drag',
+            fieldId: f.id,
+            startX: pt.x,
+            startY: pt.y,
+            origX: f.x,
+            origY: f.y,
+            origWidth: f.width
+          };
+          renderFieldChipsAndInspector();
+          renderDynamicFormInputs();
+          renderStudioCanvas(false);
+          evt.preventDefault();
+          return;
+        }
+      }
+    }
+
+    function onCanvasPointerMove(evt) {
+      if (state.eyedropperMode) {
+        artCanvas.style.cursor = 'crosshair';
+        return;
+      }
+
+      const tpl = getActiveTemplate();
+      if (!tpl) return;
+      const pt = getLogicalCanvasPoint(evt);
+
+      if (!state.pointerAction.type) {
+        // Muda o cursor ao passar sobre alça ou campo
+        const selBox = state.fieldHitBoxes[state.selectedFieldId];
+        if (selBox && Math.hypot(pt.x - (selBox.handleX + 4), pt.y - selBox.handleY) <= 14) {
+          artCanvas.style.cursor = 'ew-resize';
+          return;
+        }
+        let hoveringField = false;
+        for (let i = tpl.fields.length - 1; i >= 0; i--) {
+          const b = state.fieldHitBoxes[tpl.fields[i].id];
+          if (b && pt.x >= b.x - 6 && pt.x <= b.x + b.w + 6 && pt.y >= b.y - 6 && pt.y <= b.y + b.h + 6) {
+            hoveringField = true;
+            break;
+          }
+        }
+        artCanvas.style.cursor = hoveringField ? 'move' : 'default';
+        return;
+      }
+
+      const activeField = tpl.fields.find(f => f.id === state.pointerAction.fieldId);
+      if (!activeField) return;
+
+      const dx = pt.x - state.pointerAction.startX;
+      const dy = pt.y - state.pointerAction.startY;
+
+      if (state.pointerAction.type === 'drag') {
+        activeField.x = Math.round(Math.max(0, Math.min(tpl.width - 20, state.pointerAction.origX + dx)));
+        activeField.y = Math.round(Math.max(0, Math.min(tpl.height - 20, state.pointerAction.origY + dy)));
+        document.getElementById('insp-x').value = activeField.x;
+        document.getElementById('insp-y').value = activeField.y;
+      } else if (state.pointerAction.type === 'resize') {
+        activeField.width = Math.round(Math.max(40, Math.min(tpl.width - activeField.x, state.pointerAction.origWidth + dx)));
+        document.getElementById('insp-width').value = activeField.width;
+      }
+
+      renderStudioCanvas(false);
+      evt.preventDefault();
+    }
+
+    function onCanvasPointerUp() {
+      if (state.pointerAction.type) {
+        state.pointerAction.type = null;
+        renderDynamicFormInputs();
+      }
+    }
+
+    artCanvas.addEventListener('mousedown', onCanvasPointerDown);
+    window.addEventListener('mousemove', onCanvasPointerMove);
+    window.addEventListener('mouseup', onCanvasPointerUp);
+    artCanvas.addEventListener('touchstart', onCanvasPointerDown, { passive: false });
+    window.addEventListener('touchmove', onCanvasPointerMove, { passive: false });
+    window.addEventListener('touchend', onCanvasPointerUp);
+
+    // =========================================================================
+    // 9. EXPORTAÇÃO DA ARTE FINAL (PNG / JPG) + REGISTRO AUTOMÁTICO NO HISTÓRICO
+    // =========================================================================
+    function slugify(str) {
+      return String(str || 'comunicado')
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/(^-|-$)/g, '') || 'arte';
+    }
+
+    function exportFinalArt(format) {
+      const tpl = getActiveTemplate();
+      if (!tpl) return;
+
+      // 1. Renderiza sem guias tracejadas
+      renderStudioCanvas(true);
+
+      const mime = format === 'jpg' ? 'image/jpeg' : 'image/png';
+      const ext = format === 'jpg' ? 'jpg' : 'png';
+      const dataUrl = artCanvas.toDataURL(mime, 0.96);
+
+      // 2. Restaura as guias de edição na tela
+      renderStudioCanvas(false);
+
+      // 3. Dispara o download do arquivo de imagem
+      const link = document.createElement('a');
+      link.href = dataUrl;
+      link.download = `${slugify(tpl.name)}-${Date.now().toString().slice(-5)}.${ext}`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      // 4. Registra automaticamente no Histórico (Etapa 3)
+      const valuesMap = {};
+      tpl.fields.forEach(f => {
+        valuesMap[f.label] = f.value;
+      });
+
+      const record = {
+        id: 'hist-' + Date.now(),
+        timestamp: new Date().toLocaleString('pt-BR'),
+        templateId: tpl.id,
+        templateName: tpl.name,
+        category: tpl.category,
+        format: ext.toUpperCase(),
+        values: valuesMap
+      };
+      state.historyRecords.unshift(record);
+      updateHeaderBadges();
+
+      // 5. Se o Webhook da Etapa 5 estiver ativo, envia os dados
+      const webhookEnabled = document.getElementById('auto-webhook-enabled')?.checked;
+      const webhookUrl = document.getElementById('auto-webhook-url')?.value?.trim();
+      if (webhookEnabled && webhookUrl) {
+        fetch(webhookUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(record)
+        }).catch(() => {});
+      }
+
+      showToast(`Arte exportada em ${ext.toUpperCase()} e registrada no Histórico (Etapa 3)!`);
+    }
+
+    document.getElementById('btn-export-png').addEventListener('click', () => exportFinalArt('png'));
+    document.getElementById('btn-export-jpg').addEventListener('click', () => exportFinalArt('jpg'));
+
+    // Salvar e Carregar Modelo em Arquivo .JSON
+    function downloadTemplateAsJson(tpl) {
+      const target = tpl || getActiveTemplate();
+      if (!target) return;
+      const jsonStr = JSON.stringify(target, null, 2);
+      const blob = new Blob([jsonStr], { type: 'application/json;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `modelo-${slugify(target.name)}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      showToast(`Configuração do modelo "${target.name}" salva em .JSON!`);
+    }
+
+    document.getElementById('btn-save-template-json').addEventListener('click', () => downloadTemplateAsJson());
+
+    const globalJsonUpload = document.getElementById('global-json-upload');
+    document.getElementById('btn-load-template-json').addEventListener('click', () => globalJsonUpload.click());
+    document.getElementById('btn-lib-import-json').addEventListener('click', () => globalJsonUpload.click());
+
+    globalJsonUpload.addEventListener('change', (e) => {
+      const file = e.target.files?.[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        try {
+          const parsed = JSON.parse(String(ev.target.result));
+          if (!parsed.name || !Array.isArray(parsed.fields)) {
+            showToast('Arquivo JSON inválido: estrutura de campos não encontrada.');
+            return;
+          }
+          parsed.id = 'tpl-' + Date.now();
+          state.templates.push(parsed);
+          state.activeTemplateId = parsed.id;
+          state.selectedFieldId = parsed.fields[0]?.id || '';
+          switchStage('stage-1');
+          syncStudioUI();
+          showToast(`Modelo "${parsed.name}" importado com sucesso!`);
+        } catch (err) {
+          showToast('Erro ao ler o arquivo JSON.');
+        }
+      };
+      reader.readAsText(file, 'utf-8');
+      e.target.value = '';
+    });
+
+    // =========================================================================
+    // 10. ETAPA 2 — BIBLIOTECA DE MODELOS POR CATEGORIA
+    // =========================================================================
+    const CATEGORIES_LIST = [
+      'Todos',
+      'Informativos diversos',
+      'Comunicados internos',
+      'Eventos',
+      'Avisos operacionais',
+      'Datas comemorativas'
+    ];
+
+    function renderLibraryStage() {
+      const filterBar = document.getElementById('library-category-filters');
+      const grid = document.getElementById('library-cards-grid');
+      filterBar.innerHTML = '';
+      grid.innerHTML = '';
+
+      CATEGORIES_LIST.forEach((cat) => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        const isCurrent = state.libraryCategoryFilter === cat;
+        btn.className = isCurrent
+          ? 'px-3.5 py-1.5 rounded-xl text-xs font-extrabold bg-emerald-500 text-slate-950 shadow'
+          : 'px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-slate-900 text-slate-300 hover:text-white border border-slate-800';
+        btn.textContent = cat;
+        btn.addEventListener('click', () => {
+          state.libraryCategoryFilter = cat;
+          renderLibraryStage();
+        });
+        filterBar.appendChild(btn);
+      });
+
+      const filtered = state.libraryCategoryFilter === 'Todos'
+        ? state.templates
+        : state.templates.filter(t => t.category === state.libraryCategoryFilter);
+
+      filtered.forEach((tpl) => {
+        const card = document.createElement('div');
+        card.className = 'bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden flex flex-col justify-between shadow-lg hover:border-emerald-500/40 transition';
+
+        const thumbSrc = tpl.backgroundDataUrl || 'https://placehold.co/400x500/0f172a/10b981?text=Modelo';
+        card.innerHTML = `
+          <div>
+            <div class="h-52 bg-slate-950 flex items-center justify-center p-3 border-b border-slate-800 relative">
+              <img src="${thumbSrc}" alt="${tpl.name}" class="max-h-full max-w-full object-contain rounded shadow" />
+              <span class="absolute top-3 left-3 px-2.5 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-wider bg-slate-900/90 text-emerald-400 border border-emerald-500/30">
+                ${tpl.category}
+              </span>
+              <span class="absolute bottom-3 right-3 px-2 py-0.5 rounded text-[10px] font-mono bg-slate-900/90 text-slate-300 border border-slate-700">
+                ${tpl.width} × ${tpl.height} px
+              </span>
+            </div>
+            <div class="p-4">
+              <h3 class="text-base font-extrabold text-white">${tpl.name}</h3>
+              <p class="text-xs text-slate-400 mt-1">
+                ${tpl.fields.length} campos dinâmicos vinculados ao formulário
+              </p>
+            </div>
+          </div>
+          <div class="p-4 pt-0 space-y-2">
+            <div class="grid grid-cols-2 gap-2">
+              <button data-act="use" class="py-2 px-3 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-xs font-extrabold transition">
+                Preencher Arte
+              </button>
+              <button data-act="edit" class="py-2 px-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold border border-slate-700 transition">
+                Configurar Campos
+              </button>
+            </div>
+            <div class="flex items-center justify-between gap-2 pt-1">
+              <button data-act="dup" class="flex-1 py-1.5 px-2 rounded-lg bg-slate-950 hover:bg-slate-800 text-slate-300 text-[11px] font-semibold border border-slate-800 transition">
+                Criar Cópia
+              </button>
+              <button data-act="json" class="flex-1 py-1.5 px-2 rounded-lg bg-slate-950 hover:bg-slate-800 text-slate-300 text-[11px] font-semibold border border-slate-800 transition">
+                Baixar .JSON
+              </button>
+              <button data-act="del" class="py-1.5 px-2.5 rounded-lg bg-rose-950/60 hover:bg-rose-900 text-rose-300 text-[11px] font-semibold border border-rose-800/40 transition">
+                Excluir
+              </button>
+            </div>
+          </div>
+        `;
+
+        card.querySelector('[data-act="use"]').addEventListener('click', () => {
+          state.activeTemplateId = tpl.id;
+          switchStage('stage-1');
+          switchStudioSubTab('fill');
+        });
+
+        card.querySelector('[data-act="edit"]').addEventListener('click', () => {
+          state.activeTemplateId = tpl.id;
+          switchStage('stage-1');
+          switchStudioSubTab('configure');
+        });
+
+        card.querySelector('[data-act="dup"]').addEventListener('click', () => {
+          const copy = JSON.parse(JSON.stringify(tpl));
+          copy.id = 'tpl-' + Date.now();
+          copy.name = tpl.name + ' (Cópia)';
+          state.templates.push(copy);
+          updateHeaderBadges();
+          renderLibraryStage();
+          showToast(`Cópia criada: "${copy.name}"`);
+        });
+
+        card.querySelector('[data-act="json"]').addEventListener('click', () => {
+          downloadTemplateAsJson(tpl);
+        });
+
+        card.querySelector('[data-act="del"]').addEventListener('click', () => {
+          if (state.templates.length <= 1) {
+            showToast('Mantenha pelo menos 1 modelo na biblioteca.');
+            return;
+          }
+          state.templates = state.templates.filter(item => item.id !== tpl.id);
+          if (state.activeTemplateId === tpl.id) {
+            state.activeTemplateId = state.templates[0].id;
+          }
+          updateHeaderBadges();
+          renderLibraryStage();
+          showToast('Modelo excluído da biblioteca.');
+        });
+
+        grid.appendChild(card);
+      });
+    }
+
+    // =========================================================================
+    // 11. ETAPA 3 — HISTÓRICO E EXPORTAÇÃO EM TABELA CSV (EXCEL / LISTS)
+    // =========================================================================
+    function renderHistoryStage() {
+      const tbody = document.getElementById('history-table-body');
+      tbody.innerHTML = '';
+
+      if (state.historyRecords.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="6" class="py-8 text-center text-slate-400">
+              Nenhuma arte exportada ainda nesta sessão. Exporte uma arte na Etapa 1 para gerar o registro automaticamente.
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      state.historyRecords.forEach((rec) => {
+        const tr = document.createElement('tr');
+        tr.className = 'hover:bg-slate-800/40 transition';
+
+        const summaryPills = Object.entries(rec.values || {})
+          .slice(0, 4)
+          .map(([k, v]) => `<span class="inline-block bg-slate-950 border border-slate-800 rounded px-2 py-0.5 mr-1 mb-1 text-[11px]"><strong class="text-emerald-400">${k}:</strong> ${String(v).slice(0, 38)}</span>`)
+          .join('');
+
+        tr.innerHTML = `
+          <td class="py-3 px-4 font-mono text-slate-300 whitespace-nowrap">${rec.timestamp}</td>
+          <td class="py-3 px-4 font-bold text-white">${rec.templateName}</td>
+          <td class="py-3 px-4 text-slate-400">${rec.category}</td>
+          <td class="py-3 px-4"><span class="px-2 py-0.5 rounded bg-emerald-500/15 text-emerald-300 font-bold text-[10px]">${rec.format}</span></td>
+          <td class="py-3 px-4">${summaryPills}</td>
+          <td class="py-3 px-4 text-right whitespace-nowrap">
+            <button class="btn-reopen-record px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-emerald-400 font-bold text-xs border border-slate-700 transition">
+              Reabrir no Estúdio
+            </button>
+          </td>
+        `;
+
+        tr.querySelector('.btn-reopen-record').addEventListener('click', () => {
+          const tpl = state.templates.find(t => t.id === rec.templateId);
+          if (!tpl) {
+            showToast('O modelo original deste registro não está mais na biblioteca.');
+            return;
+          }
+          tpl.fields.forEach((f) => {
+            if (rec.values[f.label] !== undefined) {
+              f.value = rec.values[f.label];
+            }
+          });
+          state.activeTemplateId = tpl.id;
+          switchStage('stage-1');
+          switchStudioSubTab('fill');
+          showToast('Dados do histórico recarregados no Estúdio!');
+        });
+
+        tbody.appendChild(tr);
+      });
+    }
+
+    document.getElementById('btn-export-history-csv').addEventListener('click', () => {
+      if (state.historyRecords.length === 0) {
+        showToast('Não há registros no histórico para exportar.');
+        return;
+      }
+      const escapeCsv = (val) => {
+        const s = String(val ?? '').replace(/\r?\n/g, ' ');
+        return s.includes(';') || s.includes('"') ? `"${s.replace(/"/g, '""')}"` : s;
+      };
+
+      const rows = [
+        ['ID Registro', 'Data e Hora', 'Modelo Utilizado', 'Categoria', 'Formato', 'Dados Preenchidos (JSON)']
+      ];
+
+      state.historyRecords.forEach((r) => {
+        rows.push([
+          r.id,
+          r.timestamp,
+          r.templateName,
+          r.category,
+          r.format,
+          JSON.stringify(r.values)
+        ]);
+      });
+
+      const csvContent = rows.map(row => row.map(escapeCsv).join(';')).join('\r\n');
+      const blob = new Blob(['\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `historico-comunicados-gerados.csv`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      showToast('Planilha CSV do Histórico exportada com sucesso!');
+    });
+
+    document.getElementById('btn-clear-history').addEventListener('click', () => {
+      state.historyRecords = [];
+      updateHeaderBadges();
+      renderHistoryStage();
+      showToast('Histórico da sessão limpo.');
+    });
+
+    // =========================================================================
+    // 12. ETAPA 4 — SOLICITAÇÕES DE OUTROS SETORES
+    // =========================================================================
+    function renderRequestsStage() {
+      const listEl = document.getElementById('requests-queue-list');
+      const reqSelect = document.getElementById('req-template-select');
+      listEl.innerHTML = '';
+
+      // Popula o seletor de modelos do Simulador de Solicitações
+      const currentReqTplId = reqSelect.value || state.templates[0]?.id;
+      reqSelect.innerHTML = '';
+      state.templates.forEach((tpl) => {
+        const opt = document.createElement('option');
+        opt.value = tpl.id;
+        opt.textContent = `${tpl.name} (${tpl.category})`;
+        if (tpl.id === currentReqTplId) opt.selected = true;
+        reqSelect.appendChild(opt);
+      });
+
+      renderRequesterFormFields(reqSelect.value);
+
+      state.sectorRequests.forEach((req) => {
+        const card = document.createElement('div');
+        card.className = 'bg-slate-900 border border-slate-800 rounded-2xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 hover:border-slate-700 transition';
+
+        const statusBadge = req.status === 'Concluído'
+          ? '<span class="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">Concluído</span>'
+          : '<span class="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-amber-500/20 text-amber-300 border border-amber-500/30">Pendente de Revisão</span>';
+
+        card.innerHTML = `
+          <div class="space-y-1">
+            <div class="flex flex-wrap items-center gap-2">
+              ${statusBadge}
+              <span class="text-xs font-bold text-emerald-400">${req.department}</span>
+              <span class="text-xs text-slate-500">• Solicitado por ${req.requester} em ${req.createdAt}</span>
+            </div>
+            <h4 class="text-sm font-extrabold text-white">${req.templateName}</h4>
+            <p class="text-xs text-slate-400">
+              Clique ao lado para preencher o modelo automaticamente com os dados enviados pelo setor.
+            </p>
+          </div>
+          <div class="flex items-center gap-2 shrink-0">
+            <button class="btn-load-request px-3.5 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-extrabold text-xs shadow transition">
+              Carregar no Estúdio
+            </button>
+          </div>
+        `;
+
+        card.querySelector('.btn-load-request').addEventListener('click', () => {
+          const tpl = state.templates.find(t => t.id === req.templateId);
+          if (!tpl) {
+            showToast('Modelo solicitado não encontrado.');
+            return;
+          }
+          tpl.fields.forEach((f) => {
+            if (req.fieldValues[f.id] !== undefined) {
+              f.value = req.fieldValues[f.id];
+            }
+          });
+          req.status = 'Concluído';
+          state.activeTemplateId = tpl.id;
+          updateHeaderBadges();
+          switchStage('stage-1');
+          switchStudioSubTab('fill');
+          showToast(`Solicitação de "${req.department}" carregada! Confira a arte e clique em Exportar.`);
+        });
+
+        listEl.appendChild(card);
+      });
+    }
+
+    function renderRequesterFormFields(templateId) {
+      const tpl = state.templates.find(t => t.id === templateId) || state.templates[0];
+      const container = document.getElementById('req-dynamic-fields');
+      container.innerHTML = '';
+      if (!tpl) return;
+
+      tpl.fields.forEach((f) => {
+        const div = document.createElement('div');
+        div.innerHTML = `
+          <label class="block text-[11px] font-semibold text-slate-400 mb-0.5">${f.label}</label>
+          <input
+            type="text"
+            data-req-field-id="${f.id}"
+            value="${String(f.value).replace(/"/g, '&quot;')}"
+            class="w-full bg-slate-950 border border-slate-800 rounded-lg px-2.5 py-1.5 text-xs text-white focus:outline-none focus:border-emerald-500"
+          />
+        `;
+        container.appendChild(div);
+      });
+    }
+
+    document.getElementById('req-template-select').addEventListener('change', (e) => {
+      renderRequesterFormFields(e.target.value);
+    });
+
+    document.getElementById('btn-submit-request').addEventListener('click', () => {
+      const dept = document.getElementById('req-department').value.trim() || 'Setor Interno';
+      const requester = document.getElementById('req-requester').value.trim() || 'Colaborador';
+      const tplId = document.getElementById('req-template-select').value;
+      const tpl = state.templates.find(t => t.id === tplId);
+      if (!tpl) return;
+
+      const fieldValues = {};
+      document.querySelectorAll('[data-req-field-id]').forEach((inp) => {
+        fieldValues[inp.dataset.reqFieldId] = inp.value;
+      });
+
+      state.sectorRequests.unshift({
+        id: 'req-' + Date.now(),
+        createdAt: new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
+        department: dept,
+        requester: requester,
+        templateId: tpl.id,
+        templateName: tpl.name,
+        status: 'Pendente',
+        fieldValues
+      });
+
+      updateHeaderBadges();
+      renderRequestsStage();
+      showToast(`Nova solicitação de "${dept}" adicionada à fila!`);
+    });
+
+    // =========================================================================
+    // 13. ETAPA 5 — AUTOMAÇÕES E INTEGRAÇÃO POWER AUTOMATE / LISTS
+    // =========================================================================
+    function renderAutomationStage() {
+      const tpl = getActiveTemplate();
+      if (!tpl) return;
+
+      const samplePayload = {
+        evento: 'COMUNICADO_EXPORTADO',
+        dataGeracao: new Date().toISOString(),
+        modeloId: tpl.id,
+        modeloNome: tpl.name,
+        categoria: tpl.category,
+        camposPreenchidos: {}
+      };
+
+      tpl.fields.forEach((f) => {
+        samplePayload.camposPreenchidos[f.label] = f.value;
+      });
+
+      document.getElementById('automation-json-preview').textContent = JSON.stringify(samplePayload, null, 2);
+    }
+
+    document.getElementById('btn-copy-schema').addEventListener('click', () => {
+      const text = document.getElementById('automation-json-preview').textContent;
+      const tempArea = document.createElement('textarea');
+      tempArea.value = text;
+      document.body.appendChild(tempArea);
+      tempArea.select();
+      document.execCommand('copy');
+      document.body.removeChild(tempArea);
+      showToast('Payload JSON copiado para a área de transferência!');
+    });
+
+    document.getElementById('btn-test-webhook').addEventListener('click', () => {
+      const statusEl = document.getElementById('webhook-test-status');
+      const url = document.getElementById('auto-webhook-url').value.trim();
+      if (!url) {
+        statusEl.textContent = 'Informe uma URL de Webhook acima para testar ou copie o JSON ao lado.';
+        statusEl.className = 'text-xs text-amber-400 font-semibold';
+        showToast('Simulação executada! Configure a URL do Power Automate quando desejar.');
+        return;
+      }
+      statusEl.textContent = 'Enviando payload de teste...';
+      statusEl.className = 'text-xs text-emerald-400 font-semibold';
+      fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: document.getElementById('automation-json-preview').textContent
+      })
+        .then(() => {
+          statusEl.textContent = 'Payload enviado com sucesso!';
+          showToast('Webhook disparado com sucesso!');
+        })
+        .catch(() => {
+          statusEl.textContent = 'Tentativa enviada (verifique CORS do endpoint).';
+        });
+    });
+
+    // =========================================================================
+    // 14. INICIALIZAÇÃO GERAL DA APLICAÇÃO
+    // =========================================================================
+    function initStudioApp() {
+      state.templates = createInitialTemplates();
+      state.activeTemplateId = state.templates[0].id;
+      state.selectedFieldId = state.templates[0].fields[0].id;
+      syncStudioUI();
+
+      if (document.fonts && document.fonts.ready) {
+        document.fonts.ready.then(() => {
+          renderStudioCanvas(false);
+        });
+      }
+    }
+
+    window.addEventListener('DOMContentLoaded', initStudioApp);
+  </script>
+</body>
+</html>
