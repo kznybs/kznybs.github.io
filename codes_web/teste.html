@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Respostas - Algoritmos</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #e9ecef;
+            color: #333;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .container {
+            width: 100%;
+            max-width: 800px;
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        h2 {
+            color: #2c3e50;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+            margin-top: 0;
+        }
+        pre {
+            background-color: #282c34;
+            color: #abb2bf;
+            padding: 20px;
+            border-radius: 6px;
+            overflow-x: auto;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 15px;
+            line-height: 1.5;
+        }
+        .keyword { color: #c678dd; font-weight: bold; }
+        .variable { color: #e06c75; }
+        .number { color: #d19a66; }
+        .string { color: #98c379; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h2>Questão 1: Pódio da Gincana</h2>
+        <pre><code><span class="keyword">algoritmo</span> <span class="string">"Questao1"</span>
+<span class="keyword">var</span>
+   nome, nome1, nome2, nome3: <span class="keyword">caractere</span>
+   n1, n2, n3, media: <span class="keyword">real</span>
+   nota1, nota2, nota3: <span class="keyword">real</span>
+   cont: <span class="keyword">inteiro</span>
+<span class="keyword">inicio</span>
+   nota1 &lt;- <span class="number">0</span>
+   nota2 &lt;- <span class="number">0</span>
+   nota3 &lt;- <span class="number">0</span>
+
+   <span class="keyword">para</span> cont <span class="keyword">de</span> <span class="number">1</span> <span class="keyword">ate</span> <span class="number">5</span> <span class="keyword">faca</span>
+      escreval(<span class="string">"Digite o nome da equipe:"</span>)
+      leia(nome)
+      escreval(<span class="string">"Nota do jurado 1:"</span>)
+      leia(n1)
+      escreval(<span class="string">"Nota do jurado 2:"</span>)
+      leia(n2)
+      escreval(<span class="string">"Nota do jurado 3:"</span>)
+      leia(n3)
+
+      media &lt;- (n1 + n2 + n3) / <span class="number">3</span>
+
+      <span class="keyword">se</span> media &gt; nota1 <span class="keyword">entao</span>
+         nota3 &lt;- nota2
+         nome3 &lt;- nome2
+         nota2 &lt;- nota1
+         nome2 &lt;- nome1
+         nota1 &lt;- media
+         nome1 &lt;- nome
+      <span class="keyword">senao</span>
+         <span class="keyword">se</span> media &gt; nota2 <span class="keyword">entao</span>
+            nota3 &lt;- nota2
+            nome3 &lt;- nome2
+            nota2 &lt;- media
+            nome2 &lt;- nome
+         <span class="keyword">senao</span>
+            <span class="keyword">se</span> media &gt; nota3 <span class="keyword">entao</span>
+               nota3 &lt;- media
+               nome3 &lt;- nome
+            <span class="keyword">fimse</span>
+         <span class="keyword">fimse</span>
+      <span class="keyword">fimse</span>
+   <span class="keyword">fimpara</span>
+
+   escreval(<span class="string">"1o lugar: "</span>, nome1, <span class="string">" com nota "</span>, nota1)
+   escreval(<span class="string">"2o lugar: "</span>, nome2, <span class="string">" com nota "</span>, nota2)
+   escreval(<span class="string">"3o lugar: "</span>, nome3, <span class="string">" com nota "</span>, nota3)
+<span class="keyword">fimalgoritmo</span></code></pre>
+    </div>
+
+    <div class="container">
+        <h2>Questão 2: Análise de Notas da Turma</h2>
+        <pre><code><span class="keyword">algoritmo</span> <span class="string">"Questao2"</span>
+<span class="keyword">var</span>
+   nome, nome_maior: <span class="keyword">caractere</span>
+   nota, soma, media, maior_nota: <span class="keyword">real</span>
+   total, aprovados, recup, reprovados: <span class="keyword">inteiro</span>
+<span class="keyword">inicio</span>
+   soma &lt;- <span class="number">0</span>
+   total &lt;- <span class="number">0</span>
+   aprovados &lt;- <span class="number">0</span>
+   recup &lt;- <span class="number">0</span>
+   reprovados &lt;- <span class="number">0</span>
+   maior_nota &lt;- <span class="number">0</span>
+
+   escreval(<span class="string">"Digite o nome do aluno:"</span>)
+   leia(nome)
+   escreval(<span class="string">"Digite a nota (ou -1 para parar):"</span>)
+   leia(nota)
+
+   <span class="keyword">enquanto</span> nota &lt;&gt; -<span class="number">1</span> <span class="keyword">faca</span>
+      soma &lt;- soma + nota
+      total &lt;- total + <span class="number">1</span>
+
+      <span class="keyword">se</span> nota &gt;= <span class="number">7</span> <span class="keyword">entao</span>
+         aprovados &lt;- aprovados + <span class="number">1</span>
+      <span class="keyword">senao</span>
+         <span class="keyword">se</span> nota &gt;= <span class="number">5</span> <span class="keyword">entao</span>
+            recup &lt;- recup + <span class="number">1</span>
+         <span class="keyword">senao</span>
+            reprovados &lt;- reprovados + <span class="number">1</span>
+         <span class="keyword">fimse</span>
+      <span class="keyword">fimse</span>
+
+      <span class="keyword">se</span> nota &gt; maior_nota <span class="keyword">entao</span>
+         maior_nota &lt;- nota
+         nome_maior &lt;- nome
+      <span class="keyword">fimse</span>
+
+      escreval(<span class="string">"Digite o nome do proximo aluno:"</span>)
+      leia(nome)
+      escreval(<span class="string">"Digite a nota (ou -1 para parar):"</span>)
+      leia(nota)
+   <span class="keyword">fimenquanto</span>
+
+   <span class="keyword">se</span> total &gt; <span class="number">0</span> <span class="keyword">entao</span>
+      media &lt;- soma / total
+      escreval(<span class="string">"Media geral da turma: "</span>, media)
+      escreval(<span class="string">"Quantidade total de alunos: "</span>, total)
+      escreval(<span class="string">"Quantidade de aprovados: "</span>, aprovados)
+      escreval(<span class="string">"Quantidade em recuperacao: "</span>, recup)
+      escreval(<span class="string">"Quantidade de reprovados: "</span>, reprovados)
+      escreval(<span class="string">"Nome do aluno com maior nota: "</span>, nome_maior)
+      escreval(<span class="string">"Maior nota registrada: "</span>, maior_nota)
+   <span class="keyword">fimse</span>
+<span class="keyword">fimalgoritmo</span></code></pre>
+    </div>
+
+</body>
+</html>
