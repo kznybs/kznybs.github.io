@@ -1,0 +1,1396 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ProtoLab - Simulador de Matriz de Contatos (Protoboard)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            user-select: none;
+            background-color: #0f172a;
+            color: #f8fafc;
+        }
+        .mono {
+            font-family: 'JetBrains Mono', monospace;
+        }
+        /* Estilo customizado de barra de rolagem */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #1e293b;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #475569;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #64748b;
+        }
+        /* Efeito de brilho para LEDs acesos */
+        @keyframes pulseGlow {
+            0%, 100% { filter: drop-shadow(0 0 8px var(--glow-color)) drop-shadow(0 0 16px var(--glow-color)); }
+            50% { filter: drop-shadow(0 0 12px var(--glow-color)) drop-shadow(0 0 24px var(--glow-color)); }
+        }
+        .led-glow {
+            animation: pulseGlow 1.5s infinite ease-in-out;
+        }
+        .wood-bg {
+            background-color: #8c6239;
+            background-image: 
+                repeating-linear-gradient(45deg, rgba(45,25,10,0.06) 0px, rgba(45,25,10,0.06) 2px, transparent 2px, transparent 12px),
+                repeating-linear-gradient(0deg, rgba(0,0,0,0.05) 0px, rgba(0,0,0,0.05) 1px, transparent 1px, transparent 6px),
+                linear-gradient(180deg, #9f7952 0%, #845d36 50%, #6f4b27 100%);
+        }
+    </style>
+</head>
+<body class="h-screen flex flex-col overflow-hidden">
+
+    <!-- CABEÇALHO SUPERIOR -->
+    <header class="bg-slate-900 border-b border-slate-800 px-3 py-2 flex flex-wrap items-center justify-between gap-2 z-20 shadow-lg">
+        <div class="flex items-center gap-2.5">
+            <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center shadow-md shadow-orange-500/20">
+                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                </svg>
+            </div>
+            <div>
+                <h1 class="font-bold text-base leading-tight flex items-center gap-2">
+                    ProtoLab 60 Linhas
+                    <span class="text-[11px] bg-slate-800 text-amber-400 border border-amber-500/30 px-2 py-0.5 rounded-full font-medium">Idêntico à sua Foto (1 a 60)</span>
+                </h1>
+                <p class="text-[11px] text-slate-400">Visualize a Protoboard, encaixe os fios/LEDs e ligue na tomada</p>
+            </div>
+        </div>
+
+        <!-- BARRA DE EXEMPLOS E GUIA -->
+        <div class="flex items-center gap-1.5 flex-wrap">
+            <div class="flex items-center bg-slate-800 rounded-lg p-1 border border-slate-700 flex-wrap gap-1">
+                <span class="text-[11px] font-semibold text-slate-400 px-1.5">Exemplos:</span>
+                <button onclick="loadPreset(1)" class="text-xs bg-slate-700 hover:bg-indigo-600 text-white px-2.5 py-1 rounded transition font-medium">
+                    1. Ligar 1 LED
+                </button>
+                <button onclick="loadPreset(2)" class="text-xs bg-slate-700 hover:bg-indigo-600 text-white px-2.5 py-1 rounded transition font-medium">
+                    2. Semáforo (3 LEDs)
+                </button>
+                <button onclick="loadPreset(3)" class="text-xs bg-slate-700 hover:bg-indigo-600 text-white px-2.5 py-1 rounded transition font-medium">
+                    3. Botão + Luz
+                </button>
+                <button onclick="loadPreset(4)" class="text-xs bg-amber-600/30 hover:bg-amber-600 text-amber-300 hover:text-white border border-amber-500/40 px-2.5 py-1 rounded transition font-medium">
+                    ★ 4. Desafio (Preencher)
+                </button>
+            </div>
+
+            <button onclick="toggleInternalView()" id="btn-xray" class="text-xs bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 px-2.5 py-1.5 rounded-lg transition flex items-center gap-1">
+                <span>🔍 Ver Trilhas Internas</span>
+            </button>
+
+            <label class="text-xs bg-slate-800 hover:bg-slate-700 border border-slate-700 text-cyan-300 px-2.5 py-1.5 rounded-lg transition flex items-center gap-1 cursor-pointer" title="Colocar a sua foto real por baixo dos furos">
+                <span>📷 Carregar Sua Foto</span>
+                <input type="file" accept="image/*" onchange="handlePhotoUpload(event)" class="hidden">
+            </label>
+
+            <button onclick="clearBoard()" class="text-xs bg-red-950/60 hover:bg-red-600 text-red-300 hover:text-white border border-red-800/60 px-2.5 py-1.5 rounded-lg transition font-medium">
+                Limpar
+            </button>
+        </div>
+
+        <!-- BOTÃO DA TOMADA PRINCIPAL -->
+        <div class="flex items-center gap-2">
+            <div id="power-status-badge" class="hidden xl:flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-slate-800 border border-slate-700 text-xs">
+                <span id="power-dot" class="w-2.5 h-2.5 rounded-full bg-slate-500"></span>
+                <span id="power-text" class="font-semibold text-slate-400">DESLIGADO (0V)</span>
+            </div>
+
+            <button onclick="togglePower()" id="btn-power" class="flex items-center gap-2 px-3.5 py-2 rounded-xl font-bold text-xs sm:text-sm bg-emerald-600 hover:bg-emerald-500 text-white shadow-lg shadow-emerald-600/30 transition transform active:scale-95">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                </svg>
+                <span id="btn-power-label">LIGAR NA TOMADA</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- CORPO PRINCIPAL -->
+    <div class="flex-1 flex flex-col lg:flex-row overflow-hidden">
+
+        <!-- PAINEL ESQUERDO: CATÁLOGO DE PEÇAS E FIOS -->
+        <aside class="w-full lg:w-80 bg-slate-900 border-b lg:border-b-0 lg:border-r border-slate-800 flex flex-col overflow-y-auto z-10 shrink-0">
+            <div class="p-3.5 border-b border-slate-800">
+                <h2 class="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center justify-between">
+                    <span>Catálogo de Componentes</span>
+                    <span class="text-[11px] text-amber-400 font-normal">Clique em 2 furos p/ inserir</span>
+                </h2>
+            </div>
+
+            <div class="p-3 space-y-4 overflow-y-auto flex-1">
+                <!-- 1. FIOS / JUMPERS -->
+                <div>
+                    <label class="text-xs font-semibold text-slate-300 mb-2 block flex items-center justify-between">
+                        <span>1. Fios (Jumpers)</span>
+                        <span class="text-[11px] text-slate-400">Conecta qualquer furo</span>
+                    </label>
+                    <div class="grid grid-cols-3 gap-1.5" id="wire-catalog">
+                        <button onclick="selectTool('wire', '#ef4444', 'Fio Vermelho (+)') " id="tool-wire-#ef4444" class="tool-btn active-tool flex items-center gap-2 p-2 rounded-lg bg-slate-800 border-2 border-amber-500 text-xs font-medium hover:bg-slate-750 transition">
+                            <span class="w-3.5 h-3.5 rounded-full bg-red-500 shrink-0"></span> Vermelho
+                        </button>
+                        <button onclick="selectTool('wire', '#3b82f6', 'Fio Azul (-)')" id="tool-wire-#3b82f6" class="tool-btn flex items-center gap-2 p-2 rounded-lg bg-slate-800 border-2 border-transparent text-xs font-medium hover:bg-slate-750 transition">
+                            <span class="w-3.5 h-3.5 rounded-full bg-blue-500 shrink-0"></span> Azul
+                        </button>
+                        <button onclick="selectTool('wire', '#1e293b', 'Fio Preto (GND)')" id="tool-wire-#1e293b" class="tool-btn flex items-center gap-2 p-2 rounded-lg bg-slate-800 border-2 border-transparent text-xs font-medium hover:bg-slate-750 transition">
+                            <span class="w-3.5 h-3.5 rounded-full bg-slate-950 border border-slate-500 shrink-0"></span> Preto
+                        </button>
+                        <button onclick="selectTool('wire', '#22c55e', 'Fio Verde')" id="tool-wire-#22c55e" class="tool-btn flex items-center gap-2 p-2 rounded-lg bg-slate-800 border-2 border-transparent text-xs font-medium hover:bg-slate-750 transition">
+                            <span class="w-3.5 h-3.5 rounded-full bg-green-500 shrink-0"></span> Verde
+                        </button>
+                        <button onclick="selectTool('wire', '#eab308', 'Fio Amarelo')" id="tool-wire-#eab308" class="tool-btn flex items-center gap-2 p-2 rounded-lg bg-slate-800 border-2 border-transparent text-xs font-medium hover:bg-slate-750 transition">
+                            <span class="w-3.5 h-3.5 rounded-full bg-yellow-500 shrink-0"></span> Amarelo
+                        </button>
+                        <button onclick="selectTool('wire', '#f97316', 'Fio Laranja')" id="tool-wire-#f97316" class="tool-btn flex items-center gap-2 p-2 rounded-lg bg-slate-800 border-2 border-transparent text-xs font-medium hover:bg-slate-750 transition">
+                            <span class="w-3.5 h-3.5 rounded-full bg-orange-500 shrink-0"></span> Laranja
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 2. LUZES E LEDS -->
+                <div>
+                    <label class="text-xs font-semibold text-slate-300 mb-2 block flex items-center justify-between">
+                        <span>2. Luzes & LEDs</span>
+                        <span class="text-[11px] text-slate-400">1º Clique: (+) | 2º: (-)</span>
+                    </label>
+                    <div class="grid grid-cols-2 gap-1.5">
+                        <button onclick="selectTool('led', '#ef4444', 'LED Vermelho')" id="tool-led-#ef4444" class="tool-btn flex items-center gap-2 p-2 rounded-lg bg-slate-800 border-2 border-transparent text-xs font-medium hover:bg-slate-750 transition">
+                            <span class="w-4 h-4 rounded-full bg-red-500 shadow-sm shadow-red-500 flex items-center justify-center text-[9px] font-bold">💡</span> LED Vermelho
+                        </button>
+                        <button onclick="selectTool('led', '#22c55e', 'LED Verde')" id="tool-led-#22c55e" class="tool-btn flex items-center gap-2 p-2 rounded-lg bg-slate-800 border-2 border-transparent text-xs font-medium hover:bg-slate-750 transition">
+                            <span class="w-4 h-4 rounded-full bg-green-500 shadow-sm shadow-green-500 flex items-center justify-center text-[9px] font-bold">💡</span> LED Verde
+                        </button>
+                        <button onclick="selectTool('led', '#eab308', 'LED Amarelo')" id="tool-led-#eab308" class="tool-btn flex items-center gap-2 p-2 rounded-lg bg-slate-800 border-2 border-transparent text-xs font-medium hover:bg-slate-750 transition">
+                            <span class="w-4 h-4 rounded-full bg-yellow-400 shadow-sm shadow-yellow-400 flex items-center justify-center text-[9px] font-bold">💡</span> LED Amarelo
+                        </button>
+                        <button onclick="selectTool('led', '#3b82f6', 'LED Azul')" id="tool-led-#3b82f6" class="tool-btn flex items-center gap-2 p-2 rounded-lg bg-slate-800 border-2 border-transparent text-xs font-medium hover:bg-slate-750 transition">
+                            <span class="w-4 h-4 rounded-full bg-blue-500 shadow-sm shadow-blue-500 flex items-center justify-center text-[9px] font-bold">💡</span> LED Azul
+                        </button>
+                        <button onclick="selectTool('led', '#f8fafc', 'LED Branco Alto Brilho')" id="tool-led-#f8fafc" class="tool-btn flex items-center gap-2 p-2 rounded-lg bg-slate-800 border-2 border-transparent text-xs font-medium hover:bg-slate-750 transition">
+                            <span class="w-4 h-4 rounded-full bg-white text-slate-900 flex items-center justify-center text-[9px] font-bold">💡</span> LED Branco
+                        </button>
+                        <button onclick="selectTool('lamp', '#fbbf24', 'Mini Lâmpada Incandescente')" id="tool-lamp-#fbbf24" class="tool-btn flex items-center gap-2 p-2 rounded-lg bg-slate-800 border-2 border-transparent text-xs font-medium hover:bg-slate-750 transition">
+                            <span class="w-4 h-4 rounded-full bg-amber-400 text-slate-900 flex items-center justify-center text-[10px] font-bold">☀️</span> Lâmpada 5V
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 3. RESISTORES, BOTÕES E SOM -->
+                <div>
+                    <label class="text-xs font-semibold text-slate-300 mb-2 block">3. Resistores, Chave e Som</label>
+                    <div class="grid grid-cols-1 gap-1.5">
+                        <button onclick="selectTool('resistor', '220', 'Resistor 220Ω (Protege o LED)')" id="tool-resistor-220" class="tool-btn flex items-center justify-between p-2.5 rounded-lg bg-slate-800 border-2 border-transparent text-xs font-medium hover:bg-slate-750 transition">
+                            <div class="flex items-center gap-2.5">
+                                <div class="w-8 h-3 bg-amber-200 rounded-sm flex items-center justify-around px-1 border border-amber-700">
+                                    <span class="w-1 h-full bg-red-600"></span>
+                                    <span class="w-1 h-full bg-red-600"></span>
+                                    <span class="w-1 h-full bg-amber-800"></span>
+                                </div>
+                                <span>Resistor 220 Ω</span>
+                            </div>
+                            <span class="text-[10px] text-slate-400">Padrão p/ LED</span>
+                        </button>
+
+                        <button onclick="selectTool('resistor', '1k', 'Resistor 1kΩ')" id="tool-resistor-1k" class="tool-btn flex items-center justify-between p-2.5 rounded-lg bg-slate-800 border-2 border-transparent text-xs font-medium hover:bg-slate-750 transition">
+                            <div class="flex items-center gap-2.5">
+                                <div class="w-8 h-3 bg-amber-200 rounded-sm flex items-center justify-around px-1 border border-amber-700">
+                                    <span class="w-1 h-full bg-amber-900"></span>
+                                    <span class="w-1 h-full bg-black"></span>
+                                    <span class="w-1 h-full bg-red-600"></span>
+                                </div>
+                                <span>Resistor 1 kΩ</span>
+                            </div>
+                            <span class="text-[10px] text-slate-400">Brilho Suave</span>
+                        </button>
+
+                        <button onclick="selectTool('switch', 'push', 'Botão Interruptor (Liga/Desliga)')" id="tool-switch-push" class="tool-btn flex items-center justify-between p-2.5 rounded-lg bg-slate-800 border-2 border-transparent text-xs font-medium hover:bg-slate-750 transition">
+                            <div class="flex items-center gap-2.5">
+                                <span class="w-5 h-5 rounded bg-slate-700 border border-slate-500 flex items-center justify-center text-red-400 font-bold">⏺</span>
+                                <span>Botão Interruptor (Clique nele)</span>
+                            </div>
+                            <span class="text-[10px] text-emerald-400">Interativo</span>
+                        </button>
+
+                        <button onclick="selectTool('buzzer', '5v', 'Buzzer Sonoro (Apito + LED)')" id="tool-buzzer-5v" class="tool-btn flex items-center justify-between p-2.5 rounded-lg bg-slate-800 border-2 border-transparent text-xs font-medium hover:bg-slate-750 transition">
+                            <div class="flex items-center gap-2.5">
+                                <span class="w-5 h-5 rounded-full bg-slate-950 border border-slate-500 flex items-center justify-center text-[10px]">🔊</span>
+                                <span>Buzzer Sonoro 5V</span>
+                            </div>
+                            <span class="text-[10px] text-amber-400">Emite Som</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 4. FERRAMENTA BORRACHA -->
+                <div>
+                    <button onclick="selectTool('eraser', 'del', 'Remover Peça / Fio')" id="tool-eraser-del" class="tool-btn w-full flex items-center justify-center gap-2 p-2.5 rounded-lg bg-rose-950/40 border-2 border-rose-800/50 text-rose-300 text-xs font-semibold hover:bg-rose-900/50 transition">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                        Borracha (Clique em uma peça p/ remover)
+                    </button>
+                </div>
+
+                <!-- DICA DE COMO FUNCIONA A PROTOBOARD -->
+                <div class="bg-slate-800/90 border border-slate-700 rounded-xl p-3 text-xs space-y-1.5">
+                    <div class="font-bold text-amber-400 flex items-center gap-1.5">
+                        <span>💡 Como esta placa funciona:</span>
+                    </div>
+                    <p class="text-slate-300 leading-relaxed">
+                        • <strong>Laterais (<span class="text-red-400">+</span> e <span class="text-blue-400">-</span>):</strong> Os furos são ligados na <strong>vertical</strong> (de cima até embaixo) para distribuir energia da tomada.
+                    </p>
+                    <p class="text-slate-300 leading-relaxed">
+                        • <strong>Meio (<span class="text-cyan-300">a-b-c-d-e</span> e <span class="text-cyan-300">f-g-h-i-j</span>):</strong> Os 5 furinhos de cada linha (ex: linha 10) são conectados entre si na <strong>horizontal</strong>!
+                    </p>
+                </div>
+            </div>
+        </aside>
+
+        <!-- ÁREA CENTRAL: MESA DE MADEIRA + PROTOBOARD REALISTA -->
+        <main class="flex-1 flex flex-col relative overflow-hidden wood-bg">
+
+            <!-- BARRA FLUTUANTE DE INSTRUÇÃO / DESAFIO + CONTROLE DE ZOOM -->
+            <div class="bg-slate-900/95 backdrop-blur border-b border-slate-700/80 px-4 py-2 flex flex-wrap items-center justify-between gap-2 z-10 shadow-md">
+                <div class="flex items-center gap-2 flex-wrap">
+                    <span class="px-2.5 py-1 rounded bg-amber-500/20 border border-amber-500/40 text-amber-300 text-xs font-bold" id="active-tool-badge">
+                        Ferramenta: Fio Vermelho (+)
+                    </span>
+                    <span class="text-xs text-slate-200 font-medium" id="step-instruction">
+                        Clique no 1º furo da placa para iniciar a conexão.
+                    </span>
+                </div>
+                <div class="flex items-center gap-2 text-xs flex-wrap">
+                    <!-- Controles de Zoom para ver a Protoboard inteira ou de perto -->
+                    <div class="flex items-center bg-slate-800 rounded-lg border border-slate-700 p-0.5">
+                        <button onclick="changeZoom(-0.15)" class="px-2 py-0.5 hover:bg-slate-700 rounded text-slate-200 font-bold" title="Diminuir Zoom">−</button>
+                        <button onclick="resetZoom()" id="zoom-label" class="px-2 py-0.5 hover:bg-slate-700 rounded text-amber-400 font-semibold text-[11px]">100%</button>
+                        <button onclick="changeZoom(0.15)" class="px-2 py-0.5 hover:bg-slate-700 rounded text-slate-200 font-bold" title="Aumentar Zoom">+</button>
+                        <button onclick="fitBoardToScreen()" class="px-2 py-0.5 bg-slate-700 hover:bg-slate-600 rounded text-cyan-300 text-[11px] ml-1">Ver Placa Inteira</button>
+                    </div>
+
+                    <span id="hover-coord" class="mono bg-slate-800 px-2.5 py-1 rounded text-cyan-400 border border-slate-700">
+                        Furo: --
+                    </span>
+                    <label class="flex items-center gap-1.5 text-slate-300 cursor-pointer">
+                        <input type="checkbox" id="chk-protect" checked onchange="runSimulation()" class="rounded bg-slate-800 border-slate-600 text-amber-500">
+                        <span>Proteger c/ Resistor</span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- CONTAINER DE ROLAGEM DA BANCADA COM A PROTOBOARD DE 60 LINHAS VISÍVEL -->
+            <div id="boardScrollContainer" class="flex-1 overflow-auto p-3 sm:p-6 flex justify-center items-start">
+                <div id="boardZoomWrapper" class="relative transition-transform duration-150 origin-top flex flex-col items-center">
+                    <!-- CANVAS INTERATIVO DA PROTOBOARD DE 60 LINHAS -->
+                    <canvas id="boardCanvas" width="600" height="1450" class="rounded-2xl shadow-2xl cursor-crosshair"></canvas>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        /**
+         * PROTOLAB - RÉPLICA FIEL DA PROTOBOARD DE 60 LINHAS DA FOTO DO USUÁRIO
+         * Compatível com todos os navegadores (sem depender de funções experimentais de canvas).
+         */
+
+        const canvas = document.getElementById('boardCanvas');
+        const ctx = canvas.getContext('2d');
+
+        // Função universal para desenhar retângulos arredondados (100% compatível com qualquer celular/PC)
+        function drawRoundRect(context, x, y, width, height, radius) {
+            const r = Math.min(radius, width / 2, height / 2);
+            context.beginPath();
+            context.moveTo(x + r, y);
+            context.lineTo(x + width - r, y);
+            context.quadraticCurveTo(x + width, y, x + width, y + r);
+            context.lineTo(x + width, y + height - r);
+            context.quadraticCurveTo(x + width, y + height, x + width - r, y + height);
+            context.lineTo(x + r, y + height);
+            context.quadraticCurveTo(x, y + height, x, y + height - r);
+            context.lineTo(x, y + r);
+            context.quadraticCurveTo(x, y, x + r, y);
+            context.closePath();
+        }
+
+        // Configurações exatas da Placa da Foto (60 Linhas, colunas a-e e f-j, barramentos + e - em blocos de 5)
+        const TOTAL_ROWS = 60;
+        const START_Y = 165;
+        const ROW_PITCH = 20;
+
+        // Colunas da Protoboard:
+        // 0: Esq(+), 1: Esq(-), 2..6: a..e, 7..11: f..j, 12: Dir(+), 13: Dir(-)
+        const COL_NAMES = ['L+', 'L-', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'R+', 'R-'];
+        const COL_X = [
+            96,  118,                   // Barramento Esquerdo (+ e -)
+            174, 196, 218, 240, 262,    // Colunas a, b, c, d, e
+            338, 360, 382, 404, 426,    // Colunas f, g, h, i, j
+            482, 504                    // Barramento Direito (+ e -)
+        ];
+
+        // Estado do Simulador
+        let isPowered = true;
+        let showXRay = false;
+        let currentZoom = 1.0;
+        let uploadedBoardImg = null; // Caso o usuário carregue a foto real dele
+        let holes = [];
+        let components = [];
+        let ghosts = [];
+
+        // Ferramenta Atual
+        let currentTool = {
+            type: 'wire',
+            subType: '#ef4444',
+            name: 'Fio Vermelho (+)'
+        };
+
+        // Interação do Mouse
+        let selectedHoleA = null;
+        let hoveredHole = null;
+        let mousePos = { x: 0, y: 0 };
+
+        // Áudio Web API para o Buzzer
+        let audioCtx = null;
+        let buzzerOsc = null;
+
+        // Controle de Zoom para ver a Protoboard inteira ou dar zoom nos furos
+        function applyZoom() {
+            const wrapper = document.getElementById('boardZoomWrapper');
+            wrapper.style.transform = `scale(${currentZoom})`;
+            document.getElementById('zoom-label').textContent = `${Math.round(currentZoom * 100)}%`;
+        }
+
+        function changeZoom(delta) {
+            currentZoom = Math.min(1.6, Math.max(0.45, currentZoom + delta));
+            applyZoom();
+        }
+
+        function resetZoom() {
+            currentZoom = 1.0;
+            applyZoom();
+        }
+
+        function fitBoardToScreen() {
+            const container = document.getElementById('boardScrollContainer');
+            const availH = container.clientHeight - 24;
+            currentZoom = Math.max(0.45, Math.min(1.1, availH / canvas.height));
+            applyZoom();
+        }
+
+        // Permite ao usuário carregar a foto real da Protoboard como fundo se desejar
+        function handlePhotoUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(evt) {
+                const img = new Image();
+                img.onload = function() {
+                    uploadedBoardImg = img;
+                    render();
+                };
+                img.src = evt.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // Inicializa todos os furos da Protoboard (60 linhas como na foto!)
+        function initHoles() {
+            holes = [];
+            for (let r = 1; r <= TOTAL_ROWS; r++) {
+                const y = START_Y + (r - 1) * ROW_PITCH;
+                for (let c = 0; c < COL_NAMES.length; c++) {
+                    const colName = COL_NAMES[c];
+                    const isPowerRail = (c === 0 || c === 1 || c === 12 || c === 13);
+
+                    // Igualzinho à sua foto: nas trilhas laterais (+ e -), os furos vêm em bloquinhos de 5
+                    // (a cada 6ª linha há um pequeno espaço plástico entre os blocos de 5 furos)
+                    if (isPowerRail && r % 6 === 0) {
+                        continue;
+                    }
+
+                    const id = `${colName}${r}`;
+                    let netGroup = '';
+                    if (colName === 'L+') netGroup = 'RAIL_L_POS';
+                    else if (colName === 'L-') netGroup = 'RAIL_L_NEG';
+                    else if (colName === 'R+') netGroup = 'RAIL_R_POS';
+                    else if (colName === 'R-') netGroup = 'RAIL_R_NEG';
+                    else if (['a', 'b', 'c', 'd', 'e'].includes(colName)) netGroup = `ROW_${r}_LEFT`;
+                    else netGroup = `ROW_${r}_RIGHT`;
+
+                    holes.push({
+                        id,
+                        row: r,
+                        colIndex: c,
+                        colName,
+                        x: COL_X[c],
+                        y,
+                        netGroup
+                    });
+                }
+            }
+        }
+
+        function getHoleById(id) {
+            return holes.find(h => h.id === id);
+        }
+
+        // Selecionar ferramenta no catálogo
+        function selectTool(type, subType, name) {
+            currentTool = { type, subType, name };
+            selectedHoleA = null;
+
+            // Atualiza botões visuais
+            document.querySelectorAll('.tool-btn').forEach(btn => {
+                btn.classList.remove('border-amber-500', 'bg-slate-700');
+                btn.classList.add('border-transparent');
+            });
+
+            const btnId = `tool-${type}-${subType}`;
+            const activeBtn = document.getElementById(btnId);
+            if (activeBtn) {
+                activeBtn.classList.remove('border-transparent');
+                activeBtn.classList.add('border-amber-500', 'bg-slate-700');
+            }
+
+            document.getElementById('active-tool-badge').textContent = `Ferramenta: ${name}`;
+            if (type === 'eraser') {
+                document.getElementById('step-instruction').textContent = 'Clique em cima de qualquer peça ou fio na placa para removê-lo.';
+            } else if (type === 'led') {
+                document.getElementById('step-instruction').textContent = '1º Clique: Perna Positiva (+) do LED | 2º Clique: Perna Negativa (-).';
+            } else {
+                document.getElementById('step-instruction').textContent = 'Clique no 1º furo de origem e depois no 2º furo de destino.';
+            }
+            render();
+        }
+
+        // Alternar Energia da Tomada
+        function togglePower() {
+            isPowered = !isPowered;
+            updatePowerUI();
+            runSimulation();
+            render();
+        }
+
+        function updatePowerUI() {
+            const btn = document.getElementById('btn-power');
+            const label = document.getElementById('btn-power-label');
+            const dot = document.getElementById('power-dot');
+            const text = document.getElementById('power-text');
+
+            if (isPowered) {
+                btn.className = 'flex items-center gap-2.5 px-4 py-2 rounded-xl font-bold text-sm bg-amber-500 hover:bg-amber-400 text-slate-950 shadow-lg shadow-amber-500/30 transition transform active:scale-95';
+                label.textContent = 'TOMADA LIGADA (DESLIGAR)';
+                dot.className = 'w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping';
+                text.textContent = 'LIGADO NA TOMADA (5V)';
+                text.className = 'font-bold text-emerald-400';
+            } else {
+                btn.className = 'flex items-center gap-2.5 px-4 py-2 rounded-xl font-bold text-sm bg-emerald-600 hover:bg-emerald-500 text-white shadow-lg shadow-emerald-600/30 transition transform active:scale-95';
+                label.textContent = 'LIGAR NA TOMADA';
+                dot.className = 'w-2.5 h-2.5 rounded-full bg-slate-500';
+                text.textContent = 'DESLIGADO (0V)';
+                text.className = 'font-semibold text-slate-400';
+            }
+        }
+
+        function toggleInternalView() {
+            showXRay = !showXRay;
+            const btn = document.getElementById('btn-xray');
+            if (showXRay) {
+                btn.classList.add('bg-cyan-950', 'border-cyan-500', 'text-cyan-300');
+            } else {
+                btn.classList.remove('bg-cyan-950', 'border-cyan-500', 'text-cyan-300');
+            }
+            render();
+        }
+
+        function clearBoard() {
+            components = [];
+            ghosts = [];
+            selectedHoleA = null;
+            stopBuzzer();
+            runSimulation();
+            render();
+        }
+
+        // SIMULADOR ELÉTRICO DE CAMINHOS (NODAL / BFS)
+        function runSimulation() {
+            // Reseta estado de todas as peças
+            components.forEach(c => {
+                c.active = false;
+                c.burned = false;
+                c.hasResistorInPath = false;
+            });
+
+            if (!isPowered) {
+                stopBuzzer();
+                return;
+            }
+
+            const requireResistor = document.getElementById('chk-protect').checked;
+
+            // A fonte de bancada no topo injeta:
+            // POSITIVO (+5V) no barramento 'RAIL_L_POS' (coluna L+)
+            // NEGATIVO (GND) no barramento 'RAIL_L_NEG' (coluna L-)
+            const SOURCE_POS = 'RAIL_L_POS';
+            const SOURCE_NEG = 'RAIL_L_NEG';
+
+            // Monta grafo de conexões condutoras (fios, resistores e chaves fechadas)
+            // Um nó é um netGroup da protoboard
+            const adj = {};
+            function addEdge(net1, net2, type, compId) {
+                if (!adj[net1]) adj[net1] = [];
+                if (!adj[net2]) adj[net2] = [];
+                adj[net1].push({ to: net2, type, compId });
+                adj[net2].push({ to: net1, type, compId });
+            }
+
+            components.forEach(c => {
+                const netA = c.holeA.netGroup;
+                const netB = c.holeB.netGroup;
+                if (c.type === 'wire') {
+                    addEdge(netA, netB, 'wire', c.id);
+                } else if (c.type === 'resistor') {
+                    addEdge(netA, netB, 'resistor', c.id);
+                } else if (c.type === 'switch' && c.closed) {
+                    addEdge(netA, netB, 'switch', c.id);
+                }
+            });
+
+            // Função que busca caminho de um net inicial até um net alvo
+            function findPath(startNet, targetNet) {
+                let queue = [{ net: startNet, usedResistor: false, visited: new Set([startNet]) }];
+                while (queue.length > 0) {
+                    const curr = queue.shift();
+                    if (curr.net === targetNet) {
+                        return { found: true, usedResistor: curr.usedResistor };
+                    }
+                    const neighbors = adj[curr.net] || [];
+                    for (const edge of neighbors) {
+                        if (!curr.visited.has(edge.to)) {
+                            const nextVisited = new Set(curr.visited);
+                            nextVisited.add(edge.to);
+                            queue.push({
+                                net: edge.to,
+                                usedResistor: curr.usedResistor || edge.type === 'resistor',
+                                visited: nextVisited
+                            });
+                        }
+                    }
+                }
+                return { found: false, usedResistor: false };
+            }
+
+            let anyBuzzerActive = false;
+
+            // Verifica cada LED, Lâmpada ou Buzzer
+            components.forEach(c => {
+                if (c.type === 'led' || c.type === 'lamp' || c.type === 'buzzer') {
+                    const netAnode = c.holeA.netGroup;   // Perna +
+                    const netCathode = c.holeB.netGroup; // Perna -
+
+                    const pathToPos = findPath(netAnode, SOURCE_POS);
+                    const pathToNeg = findPath(netCathode, SOURCE_NEG);
+
+                    // Lâmpada incandescente funciona nos dois sentidos (polaridade livre)
+                    let lampReversePos = { found: false, usedResistor: false };
+                    let lampReverseNeg = { found: false, usedResistor: false };
+                    if (c.type === 'lamp') {
+                        lampReversePos = findPath(netCathode, SOURCE_POS);
+                        lampReverseNeg = findPath(netAnode, SOURCE_NEG);
+                    }
+
+                    const connectedForward = pathToPos.found && pathToNeg.found;
+                    const connectedReverse = c.type === 'lamp' && lampReversePos.found && lampReverseNeg.found;
+
+                    if (connectedForward || connectedReverse) {
+                        const hasRes = (pathToPos.usedResistor || pathToNeg.usedResistor || lampReversePos.usedResistor || lampReverseNeg.usedResistor);
+                        c.hasResistorInPath = hasRes;
+
+                        if (c.type === 'led' && requireResistor && !hasRes) {
+                            c.burned = true;
+                            c.active = false;
+                        } else {
+                            c.active = true;
+                            if (c.type === 'buzzer') anyBuzzerActive = true;
+                        }
+                    }
+                }
+            });
+
+            if (anyBuzzerActive) startBuzzer();
+            else stopBuzzer();
+        }
+
+        // Controle de Som do Buzzer
+        function startBuzzer() {
+            try {
+                if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                if (buzzerOsc) return;
+                buzzerOsc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                buzzerOsc.type = 'sawtooth';
+                buzzerOsc.frequency.setValueAtTime(880, audioCtx.currentTime); // Lá 880Hz
+        // DESENHO DA PROTOBOARD IDÊNTICA À FOTO E COMPONENTES NO CANVAS
+        function render() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // 1. DESENHAR TOMADA E FONTE DE ENERGIA NO TOPO
+            drawPowerSupplyHeader();
+
+            // Dimensões exatas da Protoboard de 60 linhas (como na foto)
+            const boardX = 68;
+            const boardY = 122;
+            const boardW = 464;
+            const boardH = TOTAL_ROWS * ROW_PITCH + 65;
+
+            // Sombra realista da peça sobre a bancada de madeira
+            ctx.save();
+            ctx.shadowColor = 'rgba(0, 0, 0, 0.65)';
+            ctx.shadowBlur = 28;
+            ctx.shadowOffsetX = 4;
+            ctx.shadowOffsetY = 12;
+
+            // 3 Encaixes plásticos na lateral esquerda (exatamente nas alturas da foto: linhas 5, 32 e 57)
+            ctx.fillStyle = '#dde3ea';
+            [START_Y + 4 * ROW_PITCH, START_Y + 31 * ROW_PITCH, START_Y + 56 * ROW_PITCH].forEach(tabY => {
+                drawRoundRect(ctx, boardX - 9, tabY - 12, 12, 26, 3);
+                ctx.fill();
+            });
+
+            // Corpo principal branco-pérola da Protoboard
+            const bodyGrad = ctx.createLinearGradient(boardX, boardY, boardX + boardW, boardY);
+            bodyGrad.addColorStop(0, '#eef2f6');
+            bodyGrad.addColorStop(0.5, '#f8fafc');
+            bodyGrad.addColorStop(1, '#e2e8f0');
+            ctx.fillStyle = bodyGrad;
+            drawRoundRect(ctx, boardX, boardY, boardW, boardH, 8);
+            ctx.fill();
+            ctx.restore();
+
+            // Se o usuário carregou a foto real, desenha ela ajustada ao corpo da placa
+            if (uploadedBoardImg) {
+                ctx.save();
+                drawRoundRect(ctx, boardX, boardY, boardW, boardH, 8);
+                ctx.clip();
+                ctx.globalAlpha = 0.85;
+                ctx.drawImage(uploadedBoardImg, boardX, boardY, boardW, boardH);
+                ctx.restore();
+            }
+
+            // Borda externa chanfrada realista da Protoboard
+            ctx.strokeStyle = '#cbd5e1';
+            ctx.lineWidth = 2;
+            drawRoundRect(ctx, boardX, boardY, boardW, boardH, 8);
+            ctx.stroke();
+
+            // Fendas verticais que separam os barramentos laterais (+ -) do bloco central
+            ctx.strokeStyle = '#94a3b8';
+            ctx.lineWidth = 1.5;
+            ctx.beginPath();
+            ctx.moveTo(142, boardY + 4); ctx.lineTo(142, boardY + boardH - 4);
+            ctx.moveTo(458, boardY + 4); ctx.lineTo(458, boardY + boardH - 4);
+            ctx.stroke();
+
+            // Canaleta Central (rebaixo vertical no centro da peça entre as colunas 'e' e 'f')
+            const grooveX = 286;
+            const grooveW = 28;
+            const grooveGrad = ctx.createLinearGradient(grooveX, 0, grooveX + grooveW, 0);
+            grooveGrad.addColorStop(0, '#cbd5e1');
+            grooveGrad.addColorStop(0.25, '#e2e8f0');
+            grooveGrad.addColorStop(0.5, '#f1f5f9');
+            grooveGrad.addColorStop(0.75, '#e2e8f0');
+            grooveGrad.addColorStop(1, '#cbd5e1');
+            ctx.fillStyle = grooveGrad;
+            ctx.fillRect(grooveX, boardY + 2, grooveW, boardH - 4);
+
+            // 3. LINHAS VERMELHAS (+) E AZUIS (-) NAS BORDAS (Idêntico à foto)
+            ctx.font = 'bold 17px Inter, sans-serif';
+            ctx.textAlign = 'center';
+
+            // Lateral Esquerda: Vermelho (+) na esquerda, Azul (-) na direita
+            ctx.fillStyle = '#dc2626';
+            ctx.fillText('+', 82, boardY + 24);
+            ctx.fillText('+', 82, boardY + boardH - 10);
+            ctx.strokeStyle = '#dc2626';
+            ctx.lineWidth = 2.2;
+            ctx.beginPath();
+            ctx.moveTo(81, boardY + 32); ctx.lineTo(81, boardY + boardH - 28);
+            ctx.stroke();
+
+            ctx.fillStyle = '#2563eb';
+            ctx.fillText('−', 131, boardY + 24);
+            ctx.fillText('−', 131, boardY + boardH - 10);
+            ctx.strokeStyle = '#2563eb';
+            ctx.beginPath();
+            ctx.moveTo(132, boardY + 32); ctx.lineTo(132, boardY + boardH - 28);
+            ctx.stroke();
+
+            // Lateral Direita: Vermelho (+) na esquerda, Azul (-) na direita
+            ctx.fillStyle = '#dc2626';
+            ctx.fillText('+', 469, boardY + 24);
+            ctx.fillText('+', 469, boardY + boardH - 10);
+            ctx.strokeStyle = '#dc2626';
+            ctx.beginPath();
+            ctx.moveTo(468, boardY + 32); ctx.lineTo(468, boardY + boardH - 28);
+            ctx.stroke();
+
+            ctx.fillStyle = '#2563eb';
+            ctx.fillText('−', 518, boardY + 24);
+            ctx.fillText('−', 518, boardY + boardH - 10);
+            ctx.strokeStyle = '#2563eb';
+            ctx.beginPath();
+            ctx.moveTo(519, boardY + 32); ctx.lineTo(519, boardY + boardH - 28);
+            ctx.stroke();
+
+            // 4. LETRAS IMPRESSAS (a b c d e   f g h i j) NO TOPO E NA BASE DA PLACA
+            ctx.fillStyle = '#1e293b';
+            ctx.font = 'bold 12px "JetBrains Mono", monospace';
+            for (let c = 2; c <= 11; c++) {
+                const letter = COL_NAMES[c];
+                ctx.fillText(letter, COL_X[c], boardY + 22);
+                ctx.fillText(letter, COL_X[c], boardY + boardH - 12);
+            }
+
+            // 5. MODO RAIO-X (Mostra as chapinhas metálicas internas da protoboard)
+            if (showXRay) {
+                ctx.save();
+                ctx.strokeStyle = 'rgba(239, 68, 68, 0.35)';
+                ctx.lineWidth = 6;
+                ctx.beginPath();
+                ctx.moveTo(COL_X[0], START_Y); ctx.lineTo(COL_X[0], START_Y + (TOTAL_ROWS - 1) * ROW_PITCH);
+                ctx.moveTo(COL_X[12], START_Y); ctx.lineTo(COL_X[12], START_Y + (TOTAL_ROWS - 1) * ROW_PITCH);
+                ctx.stroke();
+
+                ctx.strokeStyle = 'rgba(59, 130, 246, 0.35)';
+                ctx.beginPath();
+                ctx.moveTo(COL_X[1], START_Y); ctx.lineTo(COL_X[1], START_Y + (TOTAL_ROWS - 1) * ROW_PITCH);
+                ctx.moveTo(COL_X[13], START_Y); ctx.lineTo(COL_X[13], START_Y + (TOTAL_ROWS - 1) * ROW_PITCH);
+                ctx.stroke();
+
+                ctx.strokeStyle = 'rgba(14, 165, 233, 0.40)';
+                ctx.lineWidth = 5;
+                for (let r = 1; r <= TOTAL_ROWS; r++) {
+                    const y = START_Y + (r - 1) * ROW_PITCH;
+                    ctx.beginPath();
+                    ctx.moveTo(COL_X[2], y); ctx.lineTo(COL_X[6], y);
+                    ctx.moveTo(COL_X[7], y); ctx.lineTo(COL_X[11], y);
+                    ctx.stroke();
+                }
+                ctx.restore();
+            }
+
+            // Destaca a trilha inteira conectada quando o usuário passa o mouse em um furo
+            if (hoveredHole) {
+                ctx.save();
+                ctx.fillStyle = 'rgba(14, 165, 233, 0.22)';
+                holes.forEach(h => {
+                    if (h.netGroup === hoveredHole.netGroup) {
+                        ctx.beginPath();
+                        ctx.arc(h.x, h.y, 7.5, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
+                });
+                ctx.restore();
+            }
+
+            // 6. NÚMEROS DAS LINHAS (1, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60) IGUAL À FOTO
+            for (let r = 1; r <= TOTAL_ROWS; r++) {
+                const y = START_Y + (r - 1) * ROW_PITCH;
+                if (r === 1 || r % 5 === 0) {
+                    ctx.fillStyle = '#1e293b';
+                    ctx.font = 'bold 10px "JetBrains Mono", monospace';
+                    ctx.textAlign = 'right';
+                    ctx.fillText(r.toString(), 161, y + 3.5);
+                    ctx.textAlign = 'left';
+                    ctx.fillText(r.toString(), 439, y + 3.5);
+                }
+            }
+
+            // Desenha cada furo quadrado chanfrado em 3D (aspecto real da matriz de contatos)
+            holes.forEach(h => {
+                const isSelected = selectedHoleA && selectedHoleA.id === h.id;
+                const isHovered = hoveredHole && hoveredHole.id === h.id;
+
+                // Chanfro plástico externo do furo
+                ctx.fillStyle = '#cbd5e1';
+                ctx.fillRect(h.x - 4.5, h.y - 4.5, 9, 9);
+
+                // Sombra interna superior/esquerda do alvéolo
+                ctx.fillStyle = '#94a3b8';
+                ctx.fillRect(h.x - 4.5, h.y - 4.5, 9, 2);
+                ctx.fillRect(h.x - 4.5, h.y - 4.5, 2, 9);
+
+                // Cavidade metálica escura onde o pino entra
+                ctx.fillStyle = isSelected ? '#f59e0b' : (isHovered ? '#0ea5e9' : '#1e293b');
+                ctx.fillRect(h.x - 2.7, h.y - 2.7, 5.4, 5.4);
+            });
+
+            // 7. DESENHAR GUIAS FANTASMAS (Se estiver no Modo Desafio)
+            ghosts.forEach(g => {
+                drawGhostHint(g);
+            });
+
+            // 8. DESENHAR COMPONENTES E FIOS INSERIDOS
+            components.forEach(c => {
+                drawComponent(c);
+            });
+
+            // 9. DESENHAR FIO/PEÇA EM CONSTRUÇÃO (Enquanto arrasta para o 2º furo)
+            if (selectedHoleA && currentTool.type !== 'eraser') {
+                ctx.save();
+                ctx.strokeStyle = currentTool.subType.startsWith('#') ? currentTool.subType : '#f59e0b';
+                ctx.lineWidth = 3.5;
+                ctx.setLineDash([6, 4]);
+                ctx.beginPath();
+                ctx.moveTo(selectedHoleA.x, selectedHoleA.y);
+                const targetX = hoveredHole ? hoveredHole.x : mousePos.x;
+                const targetY = hoveredHole ? hoveredHole.y : mousePos.y;
+                ctx.lineTo(targetX, targetY);
+                ctx.stroke();
+                ctx.restore();
+            }
+        }
+
+        // Desenha a Tomada e a Fonte de Energia Conectada ao Topo da Placa
+        function drawPowerSupplyHeader() {
+            ctx.save();
+
+            // Caixa da Fonte/Tomada no topo
+            ctx.fillStyle = '#0f172a';
+            ctx.strokeStyle = isPowered ? '#10b981' : '#475569';
+            ctx.lineWidth = 2.5;
+            drawRoundRect(ctx, 130, 12, 340, 78, 12);
+            ctx.fill();
+            ctx.stroke();
+
+            // Ícone da Tomada de Parede à Esquerda
+            ctx.fillStyle = '#1e293b';
+            drawRoundRect(ctx, 144, 23, 54, 54, 10);
+            ctx.fill();
+
+            // Furos da tomada brasileira 3 pinos
+            ctx.fillStyle = isPowered ? '#34d399' : '#64748b';
+            ctx.beginPath();
+            ctx.arc(161, 52, 4, 0, Math.PI * 2);
+            ctx.arc(181, 52, 4, 0, Math.PI * 2);
+            ctx.arc(171, 41, 3.5, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Textos do Módulo de Energia
+            ctx.textAlign = 'left';
+            ctx.fillStyle = '#f8fafc';
+            ctx.font = 'bold 13px Inter, sans-serif';
+            ctx.fillText('TOMADA / FONTE 5V CONECTADA À PLACA', 210, 38);
+
+            ctx.fillStyle = isPowered ? '#34d399' : '#94a3b8';
+            ctx.font = '600 12px "JetBrains Mono", monospace';
+            ctx.fillText(isPowered ? '⚡ LIGADO: +5V no (+) e GND no (-)' : '⭕ TOMADA DESLIGADA (0V)', 210, 58);
+
+            ctx.fillStyle = '#cbd5e1';
+            ctx.font = '10.5px Inter, sans-serif';
+            ctx.fillText('Clique aqui na tomada p/ Ligar ou Desligar a energia', 210, 76);
+
+            // Cabos de força saindo da fonte direto para os 2 primeiros furos da lateral esquerda (L+1 e L-1)
+            const holePos = getHoleById('L+1');
+            const holeNeg = getHoleById('L-1');
+
+            if (holePos && holeNeg) {
+                // Cabo Vermelho (+5V)
+                ctx.strokeStyle = '#ef4444';
+                ctx.lineWidth = 5;
+                ctx.lineCap = 'round';
+                ctx.beginPath();
+                ctx.moveTo(190, 90);
+                ctx.bezierCurveTo(135, 110, 96, 115, holePos.x, holePos.y);
+                ctx.stroke();
+
+                // Cabo Azul (GND -)
+                ctx.strokeStyle = '#3b82f6';
+                ctx.lineWidth = 5;
+                ctx.beginPath();
+                ctx.moveTo(220, 90);
+                ctx.bezierCurveTo(165, 115, 118, 120, holeNeg.x, holeNeg.y);
+                ctx.stroke();
+            }
+
+            ctx.restore();
+        }
+
+        // Desenha dicas tracejadas no Modo Desafio
+        function drawGhostHint(g) {
+            ctx.save();
+            ctx.strokeStyle = 'rgba(245, 158, 11, 0.85)';
+            ctx.lineWidth = 3;
+            ctx.setLineDash([5, 5]);
+            ctx.beginPath();
+            ctx.moveTo(g.holeA.x, g.holeA.y);
+            ctx.lineTo(g.holeB.x, g.holeB.y);
+            ctx.stroke();
+
+            const midX = (g.holeA.x + g.holeB.x) / 2;
+            const midY = (g.holeA.y + g.holeB.y) / 2;
+            ctx.setLineDash([]);
+            ctx.fillStyle = '#0f172a';
+            ctx.strokeStyle = '#f59e0b';
+            ctx.lineWidth = 1.5;
+            drawRoundRect(ctx, midX - 62, midY - 11, 124, 22, 6);
+            ctx.fill();
+            ctx.stroke();
+
+            ctx.fillStyle = '#fbbf24';
+            ctx.font = 'bold 10px Inter, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText(`Encaixe: ${g.label}`, midX, midY + 3.5);
+            ctx.restore();
+        }
+
+        // Desenha um Componente (Fio, LED, Resistor, Botão, Lâmpada, Buzzer)
+        function drawComponent(c) {
+            const x1 = c.holeA.x;
+            const y1 = c.holeA.y;
+            const x2 = c.holeB.x;
+            const y2 = c.holeB.y;
+            const midX = (x1 + x2) / 2;
+            const midY = (y1 + y2) / 2;
+
+            ctx.save();
+
+            // 1. FIO (JUMPER)
+            if (c.type === 'wire') {
+                // Sombra do fio
+                ctx.strokeStyle = 'rgba(0,0,0,0.28)';
+                ctx.lineWidth = 6;
+                ctx.lineCap = 'round';
+                ctx.beginPath();
+                ctx.moveTo(x1, y1 + 3);
+                ctx.lineTo(x2, y2 + 3);
+                ctx.stroke();
+
+                // Pontas metálicas descascadas entrando no furo
+                ctx.fillStyle = '#94a3b8';
+                ctx.beginPath();
+                ctx.arc(x1, y1, 3.5, 0, Math.PI * 2);
+                ctx.arc(x2, y2, 3.5, 0, Math.PI * 2);
+                ctx.fill();
+
+                // Capa colorida do fio
+                ctx.strokeStyle = c.subType;
+                ctx.lineWidth = 4.8;
+                ctx.beginPath();
+                ctx.moveTo(x1, y1);
+                ctx.lineTo(x2, y2);
+                ctx.stroke();
+
+                // Brilho plástico no fio
+                ctx.strokeStyle = 'rgba(255,255,255,0.3)';
+                ctx.lineWidth = 1.4;
+                ctx.beginPath();
+                ctx.moveTo(x1, y1 - 1);
+                ctx.lineTo(x2, y2 - 1);
+                ctx.stroke();
+            }
+
+            // 2. RESISTOR
+            else if (c.type === 'resistor') {
+                // Terminais metálicos
+                ctx.strokeStyle = '#64748b';
+                ctx.lineWidth = 2.5;
+                ctx.beginPath();
+                ctx.moveTo(x1, y1);
+                ctx.lineTo(x2, y2);
+                ctx.stroke();
+
+                // Corpo bege do resistor no meio
+                const angle = Math.atan2(y2 - y1, x2 - x1);
+                ctx.translate(midX, midY);
+                ctx.rotate(angle);
+
+                ctx.fillStyle = '#fde68a';
+                ctx.strokeStyle = '#b45309';
+                ctx.lineWidth = 1.5;
+                drawRoundRect(ctx, -18, -6, 36, 12, 5);
+                ctx.fill();
+                ctx.stroke();
+
+                // Faixas de cores do resistor
+                const bands = c.subType === '220'
+                    ? ['#dc2626', '#dc2626', '#78350f', '#eab308']
+                    : ['#78350f', '#000000', '#dc2626', '#eab308'];
+
+                [-10, -4, 2, 9].forEach((bx, idx) => {
+                    ctx.fillStyle = bands[idx];
+                    ctx.fillRect(bx, -5.5, 3, 11);
+                });
+            }
+
+            // 3. LED
+            else if (c.type === 'led') {
+                // Perninhas metálicas
+                ctx.strokeStyle = '#64748b';
+                ctx.lineWidth = 2.5;
+                ctx.beginPath();
+                ctx.moveTo(x1, y1);
+                ctx.lineTo(midX, midY);
+                ctx.lineTo(x2, y2);
+                ctx.stroke();
+
+                // Marcação + no Anodo
+                ctx.fillStyle = '#dc2626';
+                ctx.font = 'bold 11px Inter, sans-serif';
+                ctx.fillText('+', x1 - 10, y1 - 6);
+
+                // Se estiver aceso, desenha halo luminoso intenso
+                if (c.active) {
+                    const grad = ctx.createRadialGradient(midX, midY, 2, midX, midY, 42);
+                    grad.addColorStop(0, '#ffffff');
+                    grad.addColorStop(0.35, c.subType);
+                    grad.addColorStop(1, 'rgba(255,255,255,0)');
+                    ctx.fillStyle = grad;
+                    ctx.beginPath();
+                    ctx.arc(midX, midY, 42, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+
+                // Cápsula redonda do LED
+                ctx.fillStyle = c.burned ? '#1e293b' : (c.active ? '#ffffff' : c.subType);
+                ctx.strokeStyle = c.burned ? '#ef4444' : '#0f172a';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.arc(midX, midY, 12, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.stroke();
+
+                if (c.active) {
+                    ctx.strokeStyle = c.subType;
+                    ctx.lineWidth = 3.5;
+                    ctx.beginPath();
+                    ctx.arc(midX, midY, 10, 0, Math.PI * 2);
+                    ctx.stroke();
+                }
+
+                if (c.burned) {
+                    ctx.fillStyle = '#ef4444';
+                    ctx.font = 'bold 10px Inter, sans-serif';
+                    ctx.textAlign = 'center';
+                    ctx.fillText('💥 QUEIMOU (SEM RESISTOR)', midX, midY - 16);
+                }
+            }
+
+            // 4. LÂMPADA INCANDESCENTE 5V
+            else if (c.type === 'lamp') {
+                ctx.strokeStyle = '#475569';
+                ctx.lineWidth = 3;
+                ctx.beginPath();
+                ctx.moveTo(x1, y1);
+                ctx.lineTo(x2, y2);
+                ctx.stroke();
+
+                if (c.active) {
+                    const grad = ctx.createRadialGradient(midX, midY, 4, midX, midY, 55);
+                    grad.addColorStop(0, '#fffbeb');
+                    grad.addColorStop(0.4, 'rgba(251, 191, 36, 0.85)');
+                    grad.addColorStop(1, 'rgba(251, 191, 36, 0)');
+                    ctx.fillStyle = grad;
+                    ctx.beginPath();
+                    ctx.arc(midX, midY, 55, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+
+                ctx.fillStyle = c.active ? '#fef08a' : '#cbd5e1';
+                ctx.strokeStyle = '#475569';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.arc(midX, midY, 15, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.stroke();
+
+                // Filamento interno
+                ctx.strokeStyle = c.active ? '#f59e0b' : '#64748b';
+                ctx.lineWidth = 1.8;
+                ctx.beginPath();
+                ctx.arc(midX, midY, 6, 0, Math.PI * 2);
+                ctx.stroke();
+            }
+
+            // 5. BOTÃO INTERRUPTOR (PUSH BUTTON LIGA/DESLIGA)
+            else if (c.type === 'switch') {
+                ctx.strokeStyle = '#475569';
+                ctx.lineWidth = 3.5;
+                ctx.beginPath();
+                ctx.moveTo(x1, y1);
+                ctx.lineTo(x2, y2);
+                ctx.stroke();
+
+                ctx.fillStyle = '#334155';
+                ctx.strokeStyle = '#0f172a';
+                ctx.lineWidth = 2;
+                drawRoundRect(ctx, midX - 16, midY - 14, 32, 28, 6);
+                ctx.fill();
+                ctx.stroke();
+
+                // Pino central clicável
+                ctx.fillStyle = c.closed ? '#22c55e' : '#ef4444';
+                ctx.beginPath();
+                ctx.arc(midX, midY, 8, 0, Math.PI * 2);
+                ctx.fill();
+
+                ctx.fillStyle = '#ffffff';
+                ctx.font = 'bold 9px Inter, sans-serif';
+                ctx.textAlign = 'center';
+                ctx.fillText(c.closed ? 'ON' : 'OFF', midX, midY + 3);
+            }
+
+            // 6. BUZZER SONORO
+            else if (c.type === 'buzzer') {
+                ctx.strokeStyle = '#475569';
+                ctx.lineWidth = 2.5;
+                ctx.beginPath();
+                ctx.moveTo(x1, y1);
+                ctx.lineTo(x2, y2);
+                ctx.stroke();
+
+                ctx.fillStyle = '#0f172a';
+                ctx.strokeStyle = c.active ? '#f59e0b' : '#475569';
+                ctx.lineWidth = 2.5;
+                ctx.beginPath();
+                ctx.arc(midX, midY, 16, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.stroke();
+
+                ctx.fillStyle = '#94a3b8';
+                ctx.beginPath();
+                ctx.arc(midX, midY, 5, 0, Math.PI * 2);
+                ctx.fill();
+
+                if (c.active) {
+                    ctx.fillStyle = '#fbbf24';
+                    ctx.font = 'bold 11px Inter, sans-serif';
+                    ctx.textAlign = 'center';
+                    ctx.fillText('🔊 BEEP!', midX, midY - 20);
+                }
+            }
+
+            ctx.restore();
+        }
+
+        // INTERAÇÃO DO MOUSE NA PROTOBOARD
+        function getCanvasCoords(e) {
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = canvas.width / rect.width;
+            const scaleY = canvas.height / rect.height;
+            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+            return {
+                x: (clientX - rect.left) * scaleX,
+                y: (clientY - rect.top) * scaleY
+            };
+        }
+
+        canvas.addEventListener('mousemove', (e) => {
+            mousePos = getCanvasCoords(e);
+
+            // Verifica se o mouse está sobre algum furo
+            hoveredHole = null;
+            let minDist = 11;
+            for (const h of holes) {
+                const d = Math.hypot(mousePos.x - h.x, mousePos.y - h.y);
+                if (d < minDist) {
+                    minDist = d;
+                    hoveredHole = h;
+                }
+            }
+
+            const coordBadge = document.getElementById('hover-coord');
+            if (hoveredHole) {
+                coordBadge.textContent = `Furo: Coluna ${hoveredHole.colName} | Linha ${hoveredHole.row}`;
+            } else {
+                coordBadge.textContent = 'Furo: --';
+            }
+
+            render();
+        });
+
+        canvas.addEventListener('click', (e) => {
+            const pos = getCanvasCoords(e);
+
+            // 1. Clicou na Fonte / Tomada no topo do Canvas?
+            if (pos.x >= 140 && pos.x <= 480 && pos.y >= 18 && pos.y <= 100) {
+                togglePower();
+                return;
+            }
+
+            // 2. Se clicou em cima de um Botão Interruptor já instalado (para ligar/desligar o botão)
+            for (const c of components) {
+                if (c.type === 'switch') {
+                    const midX = (c.holeA.x + c.holeB.x) / 2;
+                    const midY = (c.holeA.y + c.holeB.y) / 2;
+                    if (Math.hypot(pos.x - midX, pos.y - midY) < 16 && currentTool.type !== 'eraser') {
+                        c.closed = !c.closed;
+                        runSimulation();
+                        render();
+                        return;
+                    }
+                }
+            }
+
+            // 3. Se estiver com a Borracha selecionada, apaga o componente mais próximo do clique
+            if (currentTool.type === 'eraser') {
+                const idx = components.findIndex(c => {
+                    const midX = (c.holeA.x + c.holeB.x) / 2;
+                    const midY = (c.holeA.y + c.holeB.y) / 2;
+                    return Math.hypot(pos.x - midX, pos.y - midY) < 20 ||
+                           Math.hypot(pos.x - c.holeA.x, pos.y - c.holeA.y) < 10 ||
+                           Math.hypot(pos.x - c.holeB.x, pos.y - c.holeB.y) < 10;
+                });
+                if (idx !== -1) {
+                    components.splice(idx, 1);
+                    runSimulation();
+                    render();
+                }
+                return;
+            }
+
+            // 4. Inserir componente entre 2 furos
+            if (!hoveredHole) {
+                selectedHoleA = null;
+                render();
+                return;
+            }
+
+            if (!selectedHoleA) {
+                selectedHoleA = hoveredHole;
+                document.getElementById('step-instruction').textContent = `1º Furo (${selectedHoleA.id}) selecionado! Agora clique no 2º furo para concluir.`;
+            } else {
+                if (selectedHoleA.id === hoveredHole.id) {
+                    selectedHoleA = null;
+                    render();
+                    return;
+                }
+
+                // Adiciona o componente
+                components.push({
+                    id: 'comp_' + Date.now() + Math.random(),
+                    type: currentTool.type,
+                    subType: currentTool.subType,
+                    name: currentTool.name,
+                    holeA: selectedHoleA,
+                    holeB: hoveredHole,
+                    closed: true,
+                    active: false,
+                    burned: false
+                });
+
+                // Se havia um fantasma nesse mesmo lugar, remove o fantasma preenchido
+                ghosts = ghosts.filter(g =>
+                    !((g.holeA.id === selectedHoleA.id && g.holeB.id === hoveredHole.id) ||
+                      (g.holeA.id === hoveredHole.id && g.holeB.id === selectedHoleA.id))
+                );
+
+                selectedHoleA = null;
+                document.getElementById('step-instruction').textContent = 'Peça encaixada! Clique em outro furo para continuar montando.';
+                runSimulation();
+            }
+            render();
+        });
+
+        // EXEMPLOS PRONTOS E MODO DESAFIO GUIADO
+        function addPart(type, subType, idA, idB, closed = true) {
+            const holeA = getHoleById(idA);
+            const holeB = getHoleById(idB);
+            if (!holeA || !holeB) return;
+            components.push({
+                id: 'preset_' + Math.random(),
+                type,
+                subType,
+                name: type,
+                holeA,
+                holeB,
+                closed,
+                active: false,
+                burned: false
+            });
+        }
+
+        function loadPreset(num) {
+            clearBoard();
+            isPowered = true;
+            updatePowerUI();
+
+            if (num === 1) {
+                // Exemplo 1: Circuito Básico de 1 LED com Resistor
+                addPart('wire', '#ef4444', 'L+5', 'a5');       // Fio vermelho do + para linha 5
+                addPart('resistor', '220', 'c5', 'c12');       // Resistor da linha 5 para linha 12
+                addPart('led', '#ef4444', 'e12', 'e16');       // LED Vermelho da linha 12 (+) para linha 16 (-)
+                addPart('wire', '#3b82f6', 'a16', 'L-16');     // Fio azul da linha 16 para o - (GND)
+                document.getElementById('step-instruction').textContent = 'Exemplo 1 carregado: A energia sai do (+), passa pelo resistor, acende o LED e volta ao (-)!';
+            }
+            else if (num === 2) {
+                // Exemplo 2: Semáforo com 3 LEDs (Vermelho, Amarelo e Verde)
+                // LED Vermelho
+                addPart('wire', '#ef4444', 'L+6', 'a6');
+                addPart('resistor', '220', 'c6', 'c10');
+                addPart('led', '#ef4444', 'e10', 'e13');
+                addPart('wire', '#3b82f6', 'a13', 'L-13');
+
+                // LED Amarelo
+                addPart('wire', '#ef4444', 'L+18', 'a18');
+                addPart('resistor', '220', 'c18', 'c22');
+                addPart('led', '#eab308', 'e22', 'e25');
+                addPart('wire', '#3b82f6', 'a25', 'L-25');
+
+                // LED Verde
+                addPart('wire', '#ef4444', 'L+30', 'a30');
+                addPart('resistor', '220', 'c30', 'c34');
+                addPart('led', '#22c55e', 'e34', 'e37');
+                addPart('wire', '#3b82f6', 'a37', 'L-37');
+
+                document.getElementById('step-instruction').textContent = 'Exemplo 2 (Semáforo): 3 circuitos em paralelo usando as trilhas da protoboard!';
+            }
+            else if (num === 3) {
+                // Exemplo 3: Botão Interruptor controlando Lâmpada, LED Azul e Buzzer
+                addPart('wire', '#ef4444', 'L+8', 'a8');
+                addPart('switch', 'push', 'c8', 'c14', false); // Começa OFF para o usuário clicar
+                addPart('resistor', '220', 'd14', 'd20');
+                addPart('led', '#3b82f6', 'e20', 'e25');
+                addPart('lamp', '#fbbf24', 'b14', 'b25');
+                addPart('wire', '#3b82f6', 'a25', 'L-25');
+
+                document.getElementById('step-instruction').textContent = 'Exemplo 3: Clique em cima do botão vermelho "OFF" na placa para fechar o circuito e acender tudo!';
+            }
+            else if (num === 4) {
+                // Desafio Guiado: O usuário preenche as peças que faltam e liga na tomada!
+                isPowered = false;
+                updatePowerUI();
+
+                // Deixa apenas o resistor já na placa e cria 3 espaços tracejados para o usuário preencher
+                addPart('resistor', '220', 'c8', 'c15');
+
+                ghosts = [
+                    { holeA: getHoleById('L+8'), holeB: getHoleById('a8'), label: '1. Fio Vermelho' },
+                    { holeA: getHoleById('e15'), holeB: getHoleById('e20'), label: '2. LED (Qualquer cor)' },
+                    { holeA: getHoleById('a20'), holeB: getHoleById('L-20'), label: '3. Fio Azul (-)' }
+                ];
+
+                document.getElementById('step-instruction').textContent = 'DESAFIO: Encaixe o Fio Vermelho, o LED e o Fio Azul nos locais tracejados e depois clique em "LIGAR NA TOMADA"!';
+            }
+
+            runSimulation();
+            render();
+        }
+
+        // Inicialização ao abrir a página
+        window.onload = () => {
+            initHoles();
+            loadPreset(1); // Já inicia com o Exemplo 1 aceso e pronto para usar
+        };
+    </script>
+</body>
+</html>
